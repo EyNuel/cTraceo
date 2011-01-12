@@ -17,7 +17,7 @@ LINK 		:= $(CC) $(LFLAGS) -o
 COMPLINK 	:= $(CC) $(CFLAGS) $(LFLAGS) -o $@
 
 # A list of all non-source files that are part of the distribution.
-AUXFILES := Makefile
+AUXFILES := Makefile munk.in
 
 # A list of directories that belong to the project
 PROJDIRS := .
@@ -43,12 +43,13 @@ ALLFILES := $(SRCFILES) $(HDRFILES) $(AUXFILES)
 # target:	dependecy
 #			command
 
-all:	cTraceo.exe
+all:	#cTraceo.exe
+		@$(CC) $(CFLAGS) -o cTraceo.exe ctraceo.c
 #		@echo ".c files: " $(SRCFILES)
 #		@echo ".o files: " $(OBJFILES)
 		
-cTraceo.exe:	$(OBJFILES)
-				$(CC) -o cTraceo.exe ctraceo.c
+cTraceo.exe:	#$(OBJFILES)
+				#$(CC) -o cTraceo.exe ctraceo.c
 
 #		@$(CC) $(OBJFILES) -o cTraceo.exe				
 todolist:	#list todos from all files
