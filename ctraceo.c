@@ -13,10 +13,10 @@
 int main(int argc, char **argv)
 {
 	globals_t*	globals = NULL;
-    globals = mallocGlobals();
+	globals = mallocGlobals();
 	
 	readIn(globals, "munk.in");
-    //printf("title in main: %s\n", globals->settings->cTitle);
+	//printf("title in main: %s\n", globals->settings->cTitle);
 	return 0;
 }
 /*
