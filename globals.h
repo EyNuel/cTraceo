@@ -32,13 +32,13 @@
  *******************************************************************************/
  
 typedef struct source{
-	double	ds;				//ray step
-	double	rx,zx;			//source coords
-	double	rbox1, rbox2;	//the box that limits the range of the rays
-	double	freqx;			//source frequency
-	int64_t	nThetas;		//number of launching angles
-	double	theta1, thetaN;	//first and last launching angle
-	double*	thetas;			//the array that will actually contain the launching angles (is allocated in "readin.c")
+	double		ds;				//ray step
+	double		rx,zx;			//source coords
+	double		rbox1, rbox2;	//the box that limits the range of the rays
+	double		freqx;			//source frequency
+	uint64_t	nThetas;		//number of launching angles
+	double		theta1, thetaN;	//first and last launching angle
+	double*		thetas;			//the array that will actually contain the launching angles (is allocated in "readin.c")
 }source_t;
 
 typedef struct surface{
@@ -49,7 +49,7 @@ typedef struct surface{
 	int64_t	surfaceType;			//formerly "atype"
 	int64_t	surfaceProperties;		//formerly "aptype"
 	int64_t	surfaceInterpolation;	//formerly "aitype"
-	int64_t	surfaceAttenUnits;				//formerly "atiu"
+	int64_t	surfaceAttenUnits;		//formerly "atiu"
 	int64_t	numSurfaceCoords;		//formerly "nati"
 	//TODO inlude a structure for the actual surface properties in struct _surface?
 }surface_t;
@@ -58,7 +58,7 @@ typedef struct surface{
 #define SURFACE_TYPE__ABSORVENT	1	//formerly "A"
 #define SURFACE_TYPE__ELASTIC	2	//formerly "E"
 #define	SURFACE_TYPE__RIGID		3	//formerly "R"
-#define SURFACE_TYPE__VACCUM	4	//formerly "V". Vacuum over surface
+#define SURFACE_TYPE__VACUUM	4	//formerly "V". Vacuum over surface
 
 //possible values for surfaceProperties (see page 38, Traceo manual):
 #define	SURFACE_PROPERTIES__HOMOGENEOUS		5	//formerly "H"
@@ -131,7 +131,7 @@ typedef struct settings {
 	soundSpeed_t	soundSpeed;
 //	_object			object;
 	surface_t		bathymetry;
-	output_t			output;
+	output_t		output;
 }settings_t;
 
 
