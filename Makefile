@@ -56,6 +56,9 @@ cTraceo.exe:	#$(OBJFILES)
 #		@$(CC) $(OBJFILES) -o cTraceo.exe				
 todolist:	#list todos from all files
 		@for file in $(ALLFILES); do fgrep -H -e TODO $$file; done; true
+
+discuss:	#list discussion points from all files
+		@for file in $(ALLFILES); do fgrep -H -e DISCUSS $$file; done; true
 		
 #%.o:	%.c Makefile	#Automagically create depencies
 #		@$(CC) $(CFLAGS) -DNDEBUG -MMD -MP -MT "$*.d $*.o" -g -std=c99 -c $< -o $@ #-I./includes -I./internals
