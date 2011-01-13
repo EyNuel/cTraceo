@@ -26,35 +26,54 @@ void	readIn(globals_t* globals, const char* filename){
 
 	//int64_t		i, j, nthetas;
 	FILE*		infile;		//a handle for the input file
-	char *		junt;		//used for reading lines that should be discarded
+	//char*		junkString = NULL;		//used for reading lines that should be discarded
+	
+	//float		junkFloat;
+	//double		junkDouble;
 	
 	infile = openFile(filename, "r");	//open file in "read" mode
 
 	if (VERBOSE)
-		printf("Reading cTraceo input file \"%s\"", filename);
+		printf("Reading cTraceo input file \"%s\"\n", filename);
 
-	/* Read the title */
-	fgets(globals->settings->cTitle, MAX_LINE_LEN+1, infile);
+	/*
+	 * 	NOTE:
+	 * 	When getting an entire line of text, fgets is used.
+	 * 	When reading numbers, they are first read with fscanf as s tring and then converted.
+	 */
+
+	/************************************************************************
+	 *	Read the title
+	 */
+	fgets(globals->settings.cTitle, MAX_LINE_LEN+1, infile);
+
+
+	/************************************************************************
+	 *	skip separation line
+	 */
+	skipLine(infile);
+
+
+	/************************************************************************
+	 *	TODO Read the source info:
+	 */
+	 globals->settings.source.ds		= readDouble(infile);
+	 globals->settings.source.rx		= readDouble(infile);
+	 globals->settings.source.zx		= readDouble(infile);
+	 globals->settings.source.rbox1		= readDouble(infile);
+	 globals->settings.source.rbox2		= readDouble(infile);
+	 globals->settings.source.freqx		= readDouble(infile);
+	 globals->settings.source.nThetas	= readInt(infile);
+
 	if (VERBOSE)
-		printf("cTitle: %s\n", globals->settings->cTitle);
-	
-	//TODO Read the source info:
-	
+		printSettings(globals);
+
 	//TODO Read altimetry info:
 	
 	//TODO Read sound speed info:
+
 }
-
 /*
-       subroutine readin(ctitle,nthtas)
-
-c      Include global (common) variables:
-
-       include 'global.for'
-       
-       character*60 ctitle
-       character*4  cclss
-              
 c***********************************************************************
 c      Read source info:
 c***********************************************************************
