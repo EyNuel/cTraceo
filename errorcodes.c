@@ -5,7 +5,8 @@
 ********************************************************/
 #include <stdio.h>
 #include "errorcodes.h"
-void printMsg(int);
+void 	printMsg(int);
+void	fatal(char*);
 
 void printMsg(int errorCode){
 	/*
@@ -21,4 +22,14 @@ void printMsg(int errorCode){
 			printf("There was an error.\n");
 			break;
 	}
+}
+
+void fatal(char* message){
+	/*
+		Prints a message and exits terminates the program.
+		Closes all open i/o streams befre exiting.
+	*/
+	printf("%s\n", message);
+	fcloseall();
+	exit(EXIT_FAILURE);
 }
