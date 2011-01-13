@@ -14,6 +14,9 @@ char*		mallocChar(int);
 settings_t*	mallocSettings(void);
 globals_t*	mallocGlobals(void);
 double 		readDouble(FILE*);
+int64_t		readInt(FILE*);
+void		skipLine(FILE*);
+void		printSettings(globals_t*);
 
 
 /****************************
@@ -103,16 +106,58 @@ double 		readDouble(FILE* infile){
 	/************************************************
 	 *	Reads a double from a file and returns it	*
 	 ***********************************************/
+	 
 	char*	junkString = NULL;
 	double 	tempDouble;
 	junkString = mallocChar(MAX_LINE_LEN + 1);
 	
 	fscanf(infile, "%s\n", junkString);
-	//globals->settings.source.ds
 	tempDouble = atof(junkString);
-	//printf("String: %s;\t Double:%lf\n",junkString, globals->settings.source.ds);
 	free(junkString);
 	
 	return(tempDouble);
 }
 
+int64_t		readInt(FILE* infile){
+	/************************************************
+	 *	Reads a int from a file and returns it		*
+	 ***********************************************/
+	 
+	char*		junkString = NULL;
+	int64_t 	tempInt;
+	junkString = mallocChar(MAX_LINE_LEN + 1);
+	
+	fscanf(infile, "%s\n", junkString);
+	tempInt = atol(junkString);
+	free(junkString);
+	
+	return(tempInt);
+}
+
+void		skipLine(FILE* infile){
+	/************************************************
+	 *	Reads a int from a file and returns it		*
+	 ***********************************************/
+	char*		junkString = NULL;
+	//int64_t 	tempInt;
+	junkString = mallocChar(MAX_LINE_LEN + 1);
+
+	fgets(junkString, MAX_LINE_LEN+1, infile);
+	//fscanf(infile, "%s\n", junkString);
+	//tempInt = atol(junkString);
+	free(junkString);
+}
+
+void		printSettings(globals_t*	globals){
+	/************************************************
+	 *	Outputs a settings structure to stdout.		*
+	 ***********************************************/
+	 printf("settings.cTitle: \t%s", globals->settings.cTitle);	//assuming a \n at the end of cTitle
+	 printf("settings.source.ds: \t%lf\n", globals->settings.source.ds);
+	 printf("settings.source.rx: \t%lf\n", globals->settings.source.rx);
+	 printf("settings.source.zx: \t%lf\n", globals->settings.source.zx);
+	 printf("settings.source.rbox1: \t%lf\n", globals->settings.source.rbox1);
+	 printf("settings.source.rbox2: \t%lf\n", globals->settings.source.rbox2);
+	 printf("settings.source.freqx: \t%lf\n", globals->settings.source.freqx);
+	 printf("settings.source.nThetas: \t%ld\n", globals->settings.source.nThetas);
+}
