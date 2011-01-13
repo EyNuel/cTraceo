@@ -9,9 +9,17 @@
 	NOTE:	The actual value defined is not important, as it will never be use -only its name will.
 */
 
-//Configuration:
+/********************************************************************************
+ * Configuration:																*
+ *******************************************************************************/
 #define VERBOSE			1	//when set to 1, more information will be shown.
 #define MAX_LINE_LEN	256	//Maximum number of chars to read at once from a file (\n not included)
+//Previuously define in globli.h as:
+//	parameter (inpfil=1,outfil=2,prtfil=3)
+//	parameter (nangle=10000,nc0=5001,nc02d=1001,nbdry=5001)
+//	parameter (nhyd=5001,nhyd2=1001,nmaxo=21,npo=201,np=20001,np2=201)
+#define MAX_NUM_ANGLES	10000
+
 
 //basics:
 #define	TRUE	1
@@ -19,7 +27,10 @@
 
 
 
-//structures that contains the settings that are read from the input file
+/********************************************************************************
+ * Structures that contains the settings that are read from the input file.		*
+ *******************************************************************************/
+ 
 typedef struct source{
 	double	ds;				//ray step
 	double	rx,zx;			//source coords
@@ -91,20 +102,20 @@ typedef struct _object{
 }
 */
 typedef struct output{
-	int64_t	calculationType;	//"catype"
+	int64_t	calcType;	//"catype"
 	int64_t	arrayType;			//"artype"
 }output_t;
 //possible values for calculationType (see page 43)
-#define	CALCULATION_TYPE__RAY_COORDS					27	//"RCO"
-#define	CALCULATION_TYPE__ALL_RAY_INFO				28	//"ARI"
-#define	CALCULATION_TYPE__EIGENRAYS_REG_FALSI		29	//"ERF", write Eigenrays (use Regula Falsi method)
-#define	CALCULATION_TYPE__EIGENRAYS_PROXIMITY		30	//"EPR", write Eigenrays (use Proximity method)
-#define	CALCULATION_TYPE__AMP_DELAY_REG_FALSI		31	//"ADR", write Amplitudes and Delays (use Regula Falsi method)
-#define	CALCULATION_TYPE__AMP_DELAY_PROXIMITY		32	//"ADP", write Amplitudes and Delays (use Proximity method)
-#define	CALCULATION_TYPE__COH_ACOUS_PRESS			33	//"CPR", write Coherent Acoustic Pressure
-#define	CALCULATION_TYPE__COH_TRANS_LOSS			34	//"CTL", write Coherent Transmission loss
-#define	CALCULATION_TYPE__COH_PART_VEL				35	//"PVL", write Coherent Particle Velocity
-#define	CALCULATION_TYPE__COH_ACOUS_PRESS_PART_VEL	36	//"PAV", write Coherent Acoustic Pressure asn Particle Velocity
+#define	CALC_TYPE__RAY_COORDS					27	//"RCO"
+#define	CALC_TYPE__ALL_RAY_INFO				28	//"ARI"
+#define	CALC_TYPE__EIGENRAYS_REG_FALSI		29	//"ERF", write Eigenrays (use Regula Falsi method)
+#define	CALC_TYPE__EIGENRAYS_PROXIMITY		30	//"EPR", write Eigenrays (use Proximity method)
+#define	CALC_TYPE__AMP_DELAY_REG_FALSI		31	//"ADR", write Amplitudes and Delays (use Regula Falsi method)
+#define	CALC_TYPE__AMP_DELAY_PROXIMITY		32	//"ADP", write Amplitudes and Delays (use Proximity method)
+#define	CALC_TYPE__COH_ACOUS_PRESS			33	//"CPR", write Coherent Acoustic Pressure
+#define	CALC_TYPE__COH_TRANS_LOSS			34	//"CTL", write Coherent Transmission loss
+#define	CALC_TYPE__COH_PART_VEL				35	//"PVL", write Coherent Particle Velocity
+#define	CALC_TYPE__COH_ACOUS_PRESS_PART_VEL	36	//"PAV", write Coherent Acoustic Pressure asn Particle Velocity
 
 //possible values for arrayType (Manual page 43)
 #define ARRAY_TYPE__RECTANGULAR		37	//"RRY"
