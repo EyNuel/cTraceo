@@ -38,7 +38,7 @@ ALLFILES := $(SRCFILES) $(HDRFILES) $(AUXFILES)
 
 
 # Disable checking for files with the folowing names:
-.PHONY: all clean dist todolist
+.PHONY: all todo cTraceo.exe discuss
 			
 # Rules are listed top-level first, with this format:
 # target:	dependecy
@@ -54,7 +54,7 @@ cTraceo.exe:	#$(OBJFILES)
 				#$(CC) -o cTraceo.exe ctraceo.c
 
 #		@$(CC) $(OBJFILES) -o cTraceo.exe				
-todolist:	#list todos from all files
+todo:	#list todos from all files
 		@for file in $(ALLFILES); do fgrep -H -e TODO $$file; done; true
 
 discuss:	#list discussion points from all files
