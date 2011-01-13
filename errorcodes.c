@@ -5,8 +5,10 @@
 ********************************************************/
 #include <stdio.h>
 #include "errorcodes.h"
+#include <stdlib.h>
+
 void 	printMsg(int);
-void	fatal(char*);
+void	fatal(const char*);
 
 void printMsg(int errorCode){
 	/*
@@ -24,7 +26,7 @@ void printMsg(int errorCode){
 	}
 }
 
-void fatal(char* message){
+void fatal(const char* message){
 	/*
 		Prints a message and exits terminates the program.
 		Closes all open i/o streams befre exiting.
