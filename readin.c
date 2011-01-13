@@ -9,6 +9,7 @@
 #include "tools.c"			
 #include "globals.h"		//Include global variables
 #include "globals.c"
+#include <math.h>
 
 //prototype:
 void readIn(globals_t*, const char*);
@@ -18,29 +19,25 @@ void	readIn(globals_t* globals, const char* filename){
 	/************************************************************************
 	 *	Read a waveguide input file into global settings structure.			*
 	 *	Input values:														*
+	 * 		globals		A pointer to the "global" variables					*
 	 *		filename	A string containg the file to be opened.			*
 	 *																		*
 	 *	Return value:														*
 	 *		none		Values are read into "globals->settings"			*
 	 ***********************************************************************/
 
-	//int64_t		i, j, nthetas;
-	FILE*		infile;		//a handle for the input file
-	//char*		junkString = NULL;		//used for reading lines that should be discarded
+	int64_t		i;
+	double		dTheta;		//DISCUSS: really necessary?
+	int64_t		nThetas;	//used locally to make code more readable. Value is stored in settings.
+	double		theta0;		//used locally to make code more readable. Value is stored in settings.
+	double		thetaN;		//used locally to make code more readable. Value is stored in settings.
 	
-	//float		junkFloat;
-	//double		junkDouble;
-	
+	FILE*		infile;					//a pointer for the input file
 	infile = openFile(filename, "r");	//open file in "read" mode
 
 	if (VERBOSE)
 		printf("Reading cTraceo input file \"%s\"\n", filename);
 
-	/*
-	 * 	NOTE:
-	 * 	When getting an entire line of text, fgets is used.
-	 * 	When reading numbers, they are first read with fscanf as s tring and then converted.
-	 */
 
 	/************************************************************************
 	 *	Read the title
@@ -49,79 +46,66 @@ void	readIn(globals_t* globals, const char* filename){
 
 
 	/************************************************************************
-	 *	skip separation line
+	 *	Read and validate the source info:
 	 */
-	skipLine(infile);
-
-
-	/************************************************************************
-	 *	TODO Read the source info:
-	 */
+	 skipLine(infile);
 	 globals->settings.source.ds		= readDouble(infile);
 	 globals->settings.source.rx		= readDouble(infile);
 	 globals->settings.source.zx		= readDouble(infile);
 	 globals->settings.source.rbox1		= readDouble(infile);
 	 globals->settings.source.rbox2		= readDouble(infile);
 	 globals->settings.source.freqx		= readDouble(infile);
-	 globals->settings.source.nThetas	= readInt(infile);
+	 nThetas = readInt(infile);
+	 globals->settings.source.nThetas	= nThetas;
 
-	if (VERBOSE)
-		printSettings(globals);
+	/*	Source validation	*/
+	//TODO: Testing equality with 0.0 is considered unsafe.
+	if(globals->settings.source.ds == 0.0 ){
+		globals->settings.source.ds = fabs(	globals->settings.source.rbox2 -
+											globals->settings.source.rbox1)/100;
+	}
+	if(	(globals->settings.source.rx < globals->settings.source.rbox1) ||
+		(globals->settings.source.rx > globals->settings.source.rbox2)){
+		fatal(	"Source initial range is outside the range box!\nAborting...");
+	}
+	if( globals->settings.source.nThetas > MAX_NUM_ANGLES){
+		fatal(	"Input file: NTHETAS > MAX_NUM_ANGLES.\nAborting...");
+	}
+	
+	/*	Allocate memory for the launching angles	*/
+	globals->settings.source.thetas = mallocDouble(nThetas);
+	
+	/*	Read the  thetas from the file	*/
+	if(globals->settings.source.nThetas == 2){
+		globals->settings.source.thetas[0] = readDouble(infile);
+		globals->settings.source.thetas[1] = readDouble(infile);
+		//DISCUSS:	from fortran file: "dtheta = thetas(2)-thetas(1)"
+		//DISCUSS:	is dtheta needed elsewhere in code?
+	}else{
+		theta0 = readDouble(infile);
+		thetaN = readDouble(infile);
+		
+		globals->settings.source.thetas[0] = theta0;
+		globals->settings.source.thetas[nThetas - 1] = thetaN;
+		dTheta =	(thetaN - theta0 ) / ( (double)nThetas - 1 );
+		
+		for(i=1;i <= nThetas-2; i++){
+			globals->settings.source.thetas[i] = theta0 +dTheta *(i);
+			//TODO make sure this can't result in a bug:
+			//original code: thetas(i) = thetas(1) + dtheta*(i-1)
+		}
+	}
+	
 
 	//TODO Read altimetry info:
 	
 	//TODO Read sound speed info:
 
+	if (VERBOSE)
+		printSettings(globals);
 }
 /*
-c***********************************************************************
-c      Read source info:
-c***********************************************************************
 
-       read(inpfil,*) 
-       read(inpfil,*) ds
-       read(inpfil,*) rx,zx
-       read(inpfil,*) rbox(1),rbox(2)
-       read(inpfil,*) freqx
-       read(inpfil,*) nthtas
-
-c-----------------------------------------------------------------------
-	  if (ds.eq.0.0) then
-	      
-          ds = abs(rbox(2)-rbox(1))/100.0
-
-      end if
-c-----------------------------------------------------------------------
-	  if ((rx.lt.rbox(1)).or.(rx.gt.rbox(2))) then
-	      
-	      close(inpfil)
-	      write(6,*) 'Source initial range is outside the range box!'
-	      write(6,*) 'aborting calculations...'
-	      stop
-
-      end if
-c-----------------------------------------------------------------------
-	  if (nthtas.gt.nangle) then
-	      
-	      close(inpfil)
-	      write(6,*) 'inpfil: NTHETAS > ',nangle,'!'
-	      write(6,*) 'aborting calculations...'
-	      stop
-c-----------------------------------------------------------------------
-	  elseif (nthtas.eq.2) then
-
-	      read(inpfil,*) thetas(1),thetas(2)
-	      dtheta = thetas(2)-thetas(1)
-c-----------------------------------------------------------------------	      
-	  else 
-
-	      read(inpfil,*) thetas(1),thetas(nthtas)
-	      dtheta = (thetas(nthtas)-thetas(1))/(nthtas-1)
-	      do i = 2,nthtas-1
-	      thetas(i) = thetas(1) + dtheta*(i-1)
-	      end do
-
-	  end if
 	  
 c***********************************************************************
 c     Read altimetry info:

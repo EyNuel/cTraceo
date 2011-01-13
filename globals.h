@@ -38,6 +38,7 @@ typedef struct source{
 	double	freqx;			//source frequency
 	int64_t	nThetas;		//number of launching angles
 	double	theta1, thetaN;	//first and last launching angle
+	double*	thetas;			//the array that will actually contain the launching angles (is allocated in "readin.c")
 }source_t;
 
 typedef struct surface{
