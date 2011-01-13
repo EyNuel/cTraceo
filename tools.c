@@ -10,8 +10,8 @@
  *	Function prototypes		*
  ***************************/
 FILE*		openFile(const char* , const char[4]);
-char*		mallocChar(int);
-double*		mallocDouble(int);
+char*		mallocChar(int64_t);
+double*		mallocDouble(int64_t);
 settings_t*	mallocSettings(void);
 globals_t*	mallocGlobals(void);
 double 		readDouble(FILE*);
@@ -49,7 +49,7 @@ FILE* 		openFile(const char *filename, const char mode[4]) {
 	}
 }
 
-char*		mallocChar(int numChars){
+char*		mallocChar(int64_t numChars){
 	/*
 		Allocates a char string and returns a pointer to it in case of success,
 		exits with error code otherwise.
@@ -64,14 +64,14 @@ char*		mallocChar(int numChars){
 	return temp;
 }
 
-double*		mallocDouble(int numDoubles){
+double*		mallocDouble(int64_t numDoubles){
 	/*
 		Allocates an array of doubles and returns a pointer to it in case of success,
 		Exits with error code otherwise.
 	*/
 	
 	double*	temp = NULL;	//temporary pointer
-	temp = malloc((unsigned long)numChars*sizeof(double));
+	temp = malloc((unsigned long)numDoubles*sizeof(double));
 	if (temp == NULL){
 		printMsg(ERR__MEMORY_ALOCATION);
 		exit(ERR__MEMORY_ALOCATION);
@@ -169,12 +169,19 @@ void		printSettings(globals_t*	globals){
 	/************************************************
 	 *	Outputs a settings structure to stdout.		*
 	 ***********************************************/
-	 printf("settings.cTitle: \t%s", globals->settings.cTitle);	//assuming a \n at the end of cTitle
-	 printf("settings.source.ds: \t%lf\n", globals->settings.source.ds);
-	 printf("settings.source.rx: \t%lf\n", globals->settings.source.rx);
-	 printf("settings.source.zx: \t%lf\n", globals->settings.source.zx);
-	 printf("settings.source.rbox1: \t%lf\n", globals->settings.source.rbox1);
-	 printf("settings.source.rbox2: \t%lf\n", globals->settings.source.rbox2);
-	 printf("settings.source.freqx: \t%lf\n", globals->settings.source.freqx);
-	 printf("settings.source.nThetas: \t%ld\n", globals->settings.source.nThetas);
+
+	int64_t	i;
+	
+	printf("settings.cTitle: \t%s", globals->settings.cTitle);	//assuming a \n at the end of cTitle
+	printf("settings.source.ds: \t%lf\n", globals->settings.source.ds);
+	printf("settings.source.rx: \t%lf\n", globals->settings.source.rx);
+	printf("settings.source.zx: \t%lf\n", globals->settings.source.zx);
+	printf("settings.source.rbox1: \t%lf\n", globals->settings.source.rbox1);
+	printf("settings.source.rbox2: \t%lf\n", globals->settings.source.rbox2);
+	printf("settings.source.freqx: \t%lf\n", globals->settings.source.freqx);
+	printf("settings.source.nThetas: \t%ld\n", globals->settings.source.nThetas);
+
+	for(i=0; i<globals->settings.source.nThetas; i++){
+		printf("settings.source.thetas[%ld\t]: \t%lf\n", i, globals->settings.source.thetas[i]);
+	}
 }
