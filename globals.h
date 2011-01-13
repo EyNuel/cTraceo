@@ -46,11 +46,11 @@ typedef struct surface{
 		Used for both the "bathymetry" as well as "altimetry" block
 	*/
 	//See #defines following this block for possible values
-	int64_t	surfaceType;			//formerly "atype"
-	int64_t	surfaceProperties;		//formerly "aptype"
-	int64_t	surfaceInterpolation;	//formerly "aitype"
-	int64_t	surfaceAttenUnits;		//formerly "atiu"
-	int64_t	numSurfaceCoords;		//formerly "nati"
+	int64_t		surfaceType;			//formerly "atype"
+	int64_t		surfaceProperties;		//formerly "aptype"
+	int64_t		surfaceInterpolation;	//formerly "aitype"
+	int64_t		surfaceAttenUnits;		//formerly "atiu"
+	int64_t		numSurfaceCoords;		//formerly "nati"
 	//TODO inlude a structure for the actual surface properties in struct _surface?
 }surface_t;
 
@@ -78,11 +78,13 @@ typedef struct surface{
 #define	SURFACE_ATTEN_UNITS__qFactor		15	//"q",	Q factor
 #define	SURFACE_ATTEN_UNITS__dBperLambda	16	//"W",	dB/<lambda>
 
+
 typedef struct soundSpeed{
-	int64_t	cDistribution;			//"cdist", type of sound speed distribution
-	int64_t cClass;					//"cclass", class of sound speed
-	int64_t	nr0, nz0;				//"nr0,nz0", number of point in range and depth
+	int64_t		cDistribution;			//"cdist", type of sound speed distribution
+	int64_t		cClass;					//"cclass", class of sound speed
+	int64_t		nr0, nz0;				//"nr0,nz0", number of point in range and depth
 }soundSpeed_t;
+
 //possible values for cDistribuition (see page 39, Traceo Manual)
 #define	C_DISTRIBUTION__PROFILE		17	//"c(z,z)", sound speed profile c=c(z)
 #define	C_DISTRIBUTION__FIELDS		18	//"c(r,z)", sound speed field c=c(r,z)
@@ -97,6 +99,7 @@ typedef struct soundSpeed{
 #define C_CLASS__MUNK				25	//"MUNK"
 #define C_CLASS__TABULATED			26	//"TBAL"
 
+
 /*
 typedef struct _object{
 	//TODO: define _object structure (see pages 42,43)
@@ -106,8 +109,9 @@ typedef struct output{
 	int64_t	calcType;	//"catype"
 	int64_t	arrayType;			//"artype"
 }output_t;
+
 //possible values for calculationType (see page 43)
-#define	CALC_TYPE__RAY_COORDS					27	//"RCO"
+#define	CALC_TYPE__RAY_COORDS				27	//"RCO"
 #define	CALC_TYPE__ALL_RAY_INFO				28	//"ARI"
 #define	CALC_TYPE__EIGENRAYS_REG_FALSI		29	//"ERF", write Eigenrays (use Regula Falsi method)
 #define	CALC_TYPE__EIGENRAYS_PROXIMITY		30	//"EPR", write Eigenrays (use Proximity method)
@@ -123,6 +127,7 @@ typedef struct output{
 #define ARRAY_TYPE__HORIZONTAL		38	//"HRY"
 #define ARRAY_TYPE__VERTICAL		39	//"VRY"
 #define ARRAY_TYPE__LINEAR			40	//"LRY"
+
 
 typedef struct settings {
 	char*			cTitle;

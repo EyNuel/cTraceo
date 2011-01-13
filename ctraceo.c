@@ -2,7 +2,6 @@
  * ctraceo.c
 * Main ctraceo file
 ***********************************************************************/
-
 #include <stdio.h>
 #include "errorcodes.h"
 #include "globals.h"
@@ -12,190 +11,199 @@
 
 int main(int argc, char **argv)
 {
+	const char*	   infile = NULL;
 	globals_t*	globals = NULL;
 	globals = mallocGlobals();
-	
-	readIn(globals, "munk.in");
+
+	if(argc == 2){
+		infile = argv[1];
+	}else{
+		infile = "munk.in";
+	}
+		
+	if (VERBOSE)
+		printf("Running cTraceo in verbose mode.\n\n");
+	readIn(globals, infile);
 	//printf("title in main: %s\n", globals->settings->cTitle);
 	return 0;
 }
 /*
-	   program traceo
+		 program traceo
 
 c***********************************************************************
 c
-c	  TRACEO Ray tracing program
-c	  Written by Orlando Camargo Rodriguez
-C	  Copyright (C) 2010 Orlando Camargo Rodriguez
-c	  orodrig@ualg.pt
-c	  Universidade do Algarve
-c	  Physics Department
-c	  Signal Processing Laboratory
-c	  Faro, 10/01/2011 at 16:00
+c		TRACEO Ray tracing program
+c		Written by Orlando Camargo Rodriguez
+C		Copyright (C) 2010 Orlando Camargo Rodriguez
+c		orodrig@ualg.pt
+c		Universidade do Algarve
+c		Physics Department
+c		Signal Processing Laboratory
+c		Faro, 10/01/2011 at 16:00
 c
 c***********************************************************************
-c	  Commands should be placed in columns 6-72!
+c		Commands should be placed in columns 6-72!
 c****&******************************************************************
 c
-c	  GNU license: 
+c		GNU license: 
 c
-c	  This program is free software: you can redistribute it and/or modify
-c	  it under the terms of the GNU General Public License as published by
-c	  the Free Software Foundation, either version 3 of the License, or
-c	  (at your option) any later version.
+c		This program is free software: you can redistribute it and/or modify
+c		it under the terms of the GNU General Public License as published by
+c		the Free Software Foundation, either version 3 of the License, or
+c		(at your option) any later version.
 c
-c	  This program is distributed in the hope that it will be useful,
-c	  but WITHOUT ANY WARRANTY; without even the implied warranty of
-c	  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-c	  GNU General Public License for more details.
+c		This program is distributed in the hope that it will be useful,
+c		but WITHOUT ANY WARRANTY; without even the implied warranty of
+c		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
+c		GNU General Public License for more details.
 c
-c	  See <http://www.gnu.org/licenses/> to obtain a copy of the 
-c	  GNU General Public License.
+c		See <http://www.gnu.org/licenses/> to obtain a copy of the 
+c		GNU General Public License.
 
 c***********************************************************************
-c	  Version interfaced with Matlab Engine
+c		Version interfaced with Matlab Engine
 c****&******************************************************************
 c
 c***********************************************************************
-c	  Let's go:
+c		Let's go:
 c****&******************************************************************
 
-c	  Include global (common) variables:
+c		Include global (common) variables:
 
-	   include 'global.for'
-	   
-c	  Define local variables:
-	   
-	   character*60 ctitle
-	   character*47 lnglne
-	   character*8  filnme,lognme
-	   
-	   integer*8 irefl(np)
-	   
-	   integer*8 i,j,nthtas,imax
-	   
-	   real*8 thetai
-	   real*8 timei,timef
-	   
+		 include 'global.for'
+		 
+c		Define local variables:
+		 
+		 character*60 ctitle
+		 character*47 lnglne
+		 character*8	filnme,lognme
+		 
+		 integer*8 irefl(np)
+		 
+		 integer*8 i,j,nthtas,imax
+		 
+		 real*8 thetai
+		 real*8 timei,timef
+		 
 c-----------------------------------------------------------------------
 
-	   call cpu_time(timei)
-	   
-	   lnglne = '-----------------------------------------------'
-	   
-	   lognme = 'LOGFIL'
+		 call cpu_time(timei)
+		 
+		 lnglne = '-----------------------------------------------'
+		 
+		 lognme = 'LOGFIL'
 c-----------------------------------------------------------------------
-	   
-	   omega = 2.0*pi*freqx
+		 
+		 omega = 2.0*pi*freqx
 	
-	   open(unit=prtfil,file=lognme,status='new')
+		 open(unit=prtfil,file=lognme,status='new')
 		
-	   write(prtfil,*) 'TRACEO ray tracing program'
-	   write(prtfil,*) 'Written by Orlando Camargo Rodriguez'
-	   write(prtfil,*) 'SiPLAB laboratory'
-	   write(prtfil,*) lnglne
+		 write(prtfil,*) 'TRACEO ray tracing program'
+		 write(prtfil,*) 'Written by Orlando Camargo Rodriguez'
+		 write(prtfil,*) 'SiPLAB laboratory'
+		 write(prtfil,*) lnglne
 
 c***********************************************************************
-c	  READ the waveguide INput file:
+c		READ the waveguide INput file:
 c***********************************************************************
  
-	   write(prtfil,*) 'INPUT:'
-	   
-	   call readin(ctitle,nthtas)
+		 write(prtfil,*) 'INPUT:'
+		 
+		 call readin(ctitle,nthtas)
 
 c***********************************************************************
-c	  Prepare the output file:
+c		Prepare the output file:
 c***********************************************************************
 
-	   write(prtfil,*) ctitle
-	   write(prtfil,*) lnglne
-	   write(prtfil,*) 'OUTPUT:'
-	   
-	   if (catype.eq.'RCO') then
+		 write(prtfil,*) ctitle
+		 write(prtfil,*) lnglne
+		 write(prtfil,*) 'OUTPUT:'
+		 
+		 if (catype.eq.'RCO') then
 
-		   write(prtfil,*) 'Ray coordinates'
+			 write(prtfil,*) 'Ray coordinates'
 
-		   call calrco(ctitle,nthtas)
+			 call calrco(ctitle,nthtas)
 
-	   else if (catype.eq.'ARI') then
+		 else if (catype.eq.'ARI') then
 
-		   write(prtfil,*) 'Ray information'
+			 write(prtfil,*) 'Ray information'
 
-		   call calari(ctitle,nthtas)
+			 call calari(ctitle,nthtas)
 
-	   else if (catype.eq.'EPR') then
+		 else if (catype.eq.'EPR') then
 
-		   write(prtfil,*) 'Eigenrays (by PRoximity)'
+			 write(prtfil,*) 'Eigenrays (by PRoximity)'
 
-		   call calepr(ctitle,nthtas)
-	   
-	   else if (catype.eq.'ERF') then
+			 call calepr(ctitle,nthtas)
+		 
+		 else if (catype.eq.'ERF') then
 
-		   write(prtfil,*) 'Eigenrays (by Regula Falsi)'
+			 write(prtfil,*) 'Eigenrays (by Regula Falsi)'
 
-		   call calerf(ctitle,nthtas)
+			 call calerf(ctitle,nthtas)
 
-	   else if (catype.eq.'ADP') then
+		 else if (catype.eq.'ADP') then
 
-		   write(prtfil,*) 'Amplitudes and Delays (by Proximity)'
+			 write(prtfil,*) 'Amplitudes and Delays (by Proximity)'
 
-		   call caladp(ctitle,nthtas)
+			 call caladp(ctitle,nthtas)
 
-	   else if (catype.eq.'ADR') then
+		 else if (catype.eq.'ADR') then
 
-		   write(prtfil,*) 'Amplitudes and Delays (by Regula falsi)'
+			 write(prtfil,*) 'Amplitudes and Delays (by Regula falsi)'
 
-		   call caladr(ctitle,nthtas)
+			 call caladr(ctitle,nthtas)
 
-	   else if (catype.eq.'CPR') then
+		 else if (catype.eq.'CPR') then
 
-		   write(prtfil,*) 'Coherent acoustic pressure'
+			 write(prtfil,*) 'Coherent acoustic pressure'
 
-		   call calcpr(ctitle,nthtas)
-		   
-	   else if (catype.eq.'CTL') then
+			 call calcpr(ctitle,nthtas)
+			 
+		 else if (catype.eq.'CTL') then
 
-		   write(prtfil,*) 'Coherent transmission loss'
+			 write(prtfil,*) 'Coherent transmission loss'
 
-		   call calctl(ctitle,nthtas)
+			 call calctl(ctitle,nthtas)
 
-	   else if (catype.eq.'PVL') then
+		 else if (catype.eq.'PVL') then
 
-		   write(prtfil,*) 'Particle velocity'
+			 write(prtfil,*) 'Particle velocity'
 
-		   call calpvl(ctitle,nthtas)
+			 call calpvl(ctitle,nthtas)
 
 		else if (catype.eq.'PAV') then
 
-		   write(prtfil,*) 'Pressure and particle velocity'
+			 write(prtfil,*) 'Pressure and particle velocity'
  
-		   call calpav(ctitle,nthtas)
+			 call calpav(ctitle,nthtas)
 
-	   else
+		 else
 
-		   write(prtfil,*) 'Unknown output option,'
-	   write(prtfil,*) 'aborting calculations...'
-		   stop
+			 write(prtfil,*) 'Unknown output option,'
+		 write(prtfil,*) 'aborting calculations...'
+			 stop
 
-	   end if
-	   
-	   write(prtfil,*) lnglne
-	   
-	   call cpu_time(timef)
-	   
-	   write(prtfil,*) 'done.'
-	   write(prtfil,*) ' '
-	   write(prtfil,*) 'CPU time:', timef-timei, ' seconds'
-	   
-	   close(prtfil)
-	   
+		 end if
+		 
+		 write(prtfil,*) lnglne
+		 
+		 call cpu_time(timef)
+		 
+		 write(prtfil,*) 'done.'
+		 write(prtfil,*) ' '
+		 write(prtfil,*) 'CPU time:', timef-timei, ' seconds'
+		 
+		 close(prtfil)
+		 
 c***********************************************************************
 
-5000   format(i6)
+5000	 format(i6)
 
 c***********************************************************************
-c	  C'est fini!
+c		C'est fini!
 c***********************************************************************
-	  
-	   end
+		
+		 end
 */

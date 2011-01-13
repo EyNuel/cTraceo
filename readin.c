@@ -26,12 +26,12 @@ void	readIn(globals_t* globals, const char* filename){
 	 *		none		Values are read into "globals->settings"			*
 	 ***********************************************************************/
 
-	int64_t		i;
+	uint64_t	i;
 	double		dTheta;		//DISCUSS: really necessary?
-	int64_t		nThetas;	//used locally to make code more readable. Value is stored in settings.
+	uint64_t	nThetas;	//used locally to make code more readable. Value is stored in settings.
 	double		theta0;		//used locally to make code more readable. Value is stored in settings.
 	double		thetaN;		//used locally to make code more readable. Value is stored in settings.
-	
+	char*		tempString;
 	FILE*		infile;					//a pointer for the input file
 	infile = openFile(filename, "r");	//open file in "read" mode
 
@@ -40,14 +40,14 @@ void	readIn(globals_t* globals, const char* filename){
 
 
 	/************************************************************************
-	 *	Read the title
-	 */
+	 *	Read the title:
+	 ***********************************************************************/
 	fgets(globals->settings.cTitle, MAX_LINE_LEN+1, infile);
 
 
 	/************************************************************************
 	 *	Read and validate the source info:
-	 */
+	 ***********************************************************************/
 	 skipLine(infile);
 	 globals->settings.source.ds		= readDouble(infile);
 	 globals->settings.source.rx		= readDouble(infile);
@@ -55,11 +55,10 @@ void	readIn(globals_t* globals, const char* filename){
 	 globals->settings.source.rbox1		= readDouble(infile);
 	 globals->settings.source.rbox2		= readDouble(infile);
 	 globals->settings.source.freqx		= readDouble(infile);
-	 nThetas = readInt(infile);
+	 nThetas = (uint64_t)readInt(infile);
 	 globals->settings.source.nThetas	= nThetas;
 
 	/*	Source validation	*/
-	//TODO: Testing equality with 0.0 is considered unsafe.
 	if(globals->settings.source.ds == 0.0 ){
 		globals->settings.source.ds = fabs(	globals->settings.source.rbox2 -
 											globals->settings.source.rbox1)/100;
@@ -91,44 +90,97 @@ void	readIn(globals_t* globals, const char* filename){
 		
 		for(i=1;i <= nThetas-2; i++){
 			globals->settings.source.thetas[i] = theta0 +dTheta *(i);
-			//TODO make sure this can't result in a bug:
-			//original code: thetas(i) = thetas(1) + dtheta*(i-1)
 		}
 	}
 	
 
-	//TODO Read altimetry info:
+	/************************************************************************
+	 * Read altimetry info:
+	 ***********************************************************************/
+	 
+	skipLine(infile);
+
+	/* surfaceType;	formerly "atype"	*/
+	tempString = readString(infile);
+	if(strcmp(tempString,"A")){
+		globals->settings.altimetry.surfaceType	= SURFACE_TYPE__ABSORVENT;
+	}else if(strcmp(tempString,"E")){
+		globals->settings.altimetry.surfaceType	= SURFACE_TYPE__ELASTIC;
+	}else if(strcmp(tempString,"R")){
+		globals->settings.altimetry.surfaceType	= SURFACE_TYPE__RIGID;
+	}else if(strcmp(tempString,"V")){
+		globals->settings.altimetry.surfaceType	= SURFACE_TYPE__VACUUM;
+	}else{
+		fatal("Input file: unknown surface type.\nAborting...");
+	}
+	free(tempString);
+
+	/* surfaceProperties;		//formerly "aptype"	*/
+	tempString = readString(infile);
+	if(strcmp(tempString,"H")){
+		globals->settings.altimetry.surfaceProperties	= SURFACE_PROPERTIES__HOMOGENEOUS;
+	}else if(strcmp(tempString,"N")){
+		globals->settings.altimetry.surfaceProperties	= SURFACE_PROPERTIES__NON_HOMOGENEOUS;
+	}else{
+		fatal("Input file: unknown surface properties.\nAborting...");
+	}
+	free(tempString);
+
+	/* surfaceInterpolation;	//formerly "aitype"	*/
+	tempString = readString(infile);
+	if(strcmp(tempString,"FL")){
+		globals->settings.altimetry.surfaceInterpolation	= SURFACE_INTERPOLATION__FLAT;
+	}else if(strcmp(tempString,"SL")){
+		globals->settings.altimetry.surfaceInterpolation	= SURFACE_INTERPOLATION__SLOPED;
+	}else if(strcmp(tempString,"2P")){
+		globals->settings.altimetry.surfaceInterpolation	= SURFACE_INTERPOLATION__2P;
+	}else if(strcmp(tempString,"3P")){
+		globals->settings.altimetry.surfaceInterpolation	= SURFACE_INTERPOLATION__3P;
+	}else if(strcmp(tempString,"4P")){
+		globals->settings.altimetry.surfaceInterpolation	= SURFACE_INTERPOLATION__4P;
+	}else{
+		fatal("Input file: unknown surface interpolation type.\nAborting...");
+	}
+	free(tempString);
+
+	/* surfaceAttenUnits;		//formerly "atiu"	*/
+	tempString = readString(infile);
+	if(strcmp(tempString,"F")){
+		globals->settings.altimetry.surfaceAttenUnits	= SURFACE_ATTEN_UNITS__dBperkHz;
+	}else if(strcmp(tempString,"M")){
+		globals->settings.altimetry.surfaceAttenUnits	= SURFACE_ATTEN_UNITS__dBperMeter;
+	}else if(strcmp(tempString,"N")){
+		globals->settings.altimetry.surfaceAttenUnits	= SURFACE_ATTEN_UNITS__dBperNeper;
+	}else if(strcmp(tempString,"Q")){
+		globals->settings.altimetry.surfaceAttenUnits	= SURFACE_ATTEN_UNITS__qFactor;
+	}else if(strcmp(tempString,"W")){
+		globals->settings.altimetry.surfaceAttenUnits	= SURFACE_ATTEN_UNITS__dBperLambda;
+	}else{
+		fatal("Input file: unknown surface attenuation units.\nAborting...");
+	}
+	free(tempString);
+
+	/* numSurfaceCoords;		//formerly "nati" */
+	globals->settings.altimetry.numSurfaceCoords = readInt(infile);
+
 	
-	//TODO Read sound speed info:
+	switch(globals->settings.altimetry.surfaceProperties){
+		case SURFACE_PROPERTIES__HOMOGENEOUS:
+			//Read only one set of interface properties: 
+			//TODO continue here (see page 39 of manual)
+			//Read coordinates of interface points:
+			
+			break;
+		case SURFACE_PROPERTIES__NON_HOMOGENEOUS:
+			//Read coordinates and interface properties for all interface points:
+			
+			break;
+	}
 
 	if (VERBOSE)
 		printSettings(globals);
 }
 /*
-
-	  
-c***********************************************************************
-c     Read altimetry info:
-c***********************************************************************
-
-       read(inpfil,*)
-       read(inpfil,*)  atype
-       read(inpfil,*) aptype
-       read(inpfil,*) aitype
-       read(inpfil,*) atiu
-       read(inpfil,*) nati
-       
-c-----------------------------------------------------------------------
-       if ((aitype.ne.'2P').and.(aitype.ne.'3P').and.(aitype.ne.'4P').
-     & and.(aitype.ne.'FL').and.(aitype.ne.'SL')) then
-      
-          write(6,*) 'Surface interpolation:'
-          write(6,*) 'unknown interpolation type,'
-          write(6,*) 'aborting calculations...'
-          stop
-      
-       end if
-c-----------------------------------------------------------------------
        if (nati.gt.nbdry) then
 
            write(6,*) 'altimetry points  > ',nbdry,'!'
