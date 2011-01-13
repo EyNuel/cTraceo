@@ -129,7 +129,7 @@ typedef struct settings {
  * The structure "global" shall contain all non-local variables and be passed by pointer.
  */
 typedef struct globals{
-	settings_t*		settings;
+	settings_t		settings;
 }globals_t;
 
 

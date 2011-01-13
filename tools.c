@@ -2,8 +2,8 @@
 #include	"globals.h"
 #include	"errorcodes.c"
 #include	"errorcodes.h"
-//#include	"tools.h"
-#include	"stdlib.h"
+#include	<stdlib.h>
+
 
 
 /****************************
@@ -13,12 +13,13 @@ FILE*		openFile(const char* , const char[4]);
 char*		mallocChar(int);
 settings_t*	mallocSettings(void);
 globals_t*	mallocGlobals(void);
+double 		readDouble(FILE*);
 
 
 /****************************
  *	Actual Functions		*
  ***************************/
-FILE* openFile(const char *filename, const char mode[4]) {
+FILE* 		openFile(const char *filename, const char mode[4]) {
 	/* 
 		Opens a file and returns a filepointer in case of success, exits with error code otherwise.
 		Input values:
@@ -44,7 +45,7 @@ FILE* openFile(const char *filename, const char mode[4]) {
 	}
 }
 
-char*	mallocChar(int numChars){
+char*		mallocChar(int numChars){
 	/*
 		Allocates a char string and returns a pointer to it in case of success,
 		exits with error code otherwise.
@@ -80,7 +81,7 @@ settings_t*	mallocSettings(void){
 	return settings;
 }
 
-globals_t* mallocGlobals(void){
+globals_t* 	mallocGlobals(void){
 	/*
 		Allocate memory for a globals structure.
 		Return pointer in case o success, exit with error code otherwise.
@@ -92,11 +93,26 @@ globals_t* mallocGlobals(void){
 		exit(ERR__MEMORY_ALOCATION);
 	}
 
-	globals->settings = mallocSettings();
+	//globals->settings = mallocSettings();
+	globals->settings.cTitle = mallocChar(MAX_LINE_LEN + 1);
 
 	return(globals);
 }
 
-
-
+double 		readDouble(FILE* infile){
+	/************************************************
+	 *	Reads a double from a file and returns it	*
+	 ***********************************************/
+	char*	junkString = NULL;
+	double 	tempDouble;
+	junkString = mallocChar(MAX_LINE_LEN + 1);
 	
+	fscanf(infile, "%s\n", junkString);
+	//globals->settings.source.ds
+	tempDouble = atof(junkString);
+	//printf("String: %s;\t Double:%lf\n",junkString, globals->settings.source.ds);
+	free(junkString);
+	
+	return(tempDouble);
+}
+
