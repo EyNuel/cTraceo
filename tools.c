@@ -11,6 +11,7 @@
  ***************************/
 FILE*		openFile(const char* , const char[4]);
 char*		mallocChar(int);
+double*		mallocDouble(int);
 settings_t*	mallocSettings(void);
 globals_t*	mallocGlobals(void);
 double 		readDouble(FILE*);
@@ -62,7 +63,23 @@ char*		mallocChar(int numChars){
 	}
 	return temp;
 }
-		
+
+double*		mallocDouble(int numDoubles){
+	/*
+		Allocates an array of doubles and returns a pointer to it in case of success,
+		Exits with error code otherwise.
+	*/
+	
+	double*	temp = NULL;	//temporary pointer
+	temp = malloc((unsigned long)numChars*sizeof(double));
+	if (temp == NULL){
+		printMsg(ERR__MEMORY_ALOCATION);
+		exit(ERR__MEMORY_ALOCATION);
+	}
+	return temp;
+}
+
+//TODO_ can mallocSettings() be removed safely?
 settings_t*	mallocSettings(void){
 	/*
 		Allocate memory for a settings structure.
@@ -96,8 +113,8 @@ globals_t* 	mallocGlobals(void){
 		exit(ERR__MEMORY_ALOCATION);
 	}
 
-	//globals->settings = mallocSettings();
 	globals->settings.cTitle = mallocChar(MAX_LINE_LEN + 1);
+	globals->settings.source.thetas = NULL; //memory wil lbe properly allocated in "readin.c"
 
 	return(globals);
 }
