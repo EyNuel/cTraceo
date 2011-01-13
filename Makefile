@@ -45,6 +45,7 @@ ALLFILES := $(SRCFILES) $(HDRFILES) $(AUXFILES)
 
 all:	#cTraceo.exe
 		@$(CC) $(CFLAGS) -o cTraceo.exe ctraceo.c
+#		@rm *.o
 #		@echo ".c files: " $(SRCFILES)
 #		@echo ".o files: " $(OBJFILES)
 		
