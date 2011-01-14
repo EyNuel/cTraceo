@@ -12,6 +12,7 @@
 FILE*		openFile(const char* , const char[4]);
 char*		mallocChar(uint64_t);
 double*		mallocDouble(uint64_t);
+double**	mallocDouble2D(uint64_t, uint64_t);
 settings_t*	mallocSettings(void);
 globals_t*	mallocGlobals(void);
 double 		readDouble(FILE*);
@@ -78,6 +79,27 @@ double*		mallocDouble(uint64_t numDoubles){
 		exit(ERR__MEMORY_ALOCATION);
 	}
 	return temp;
+}
+
+double**	mallocDouble2D(uint64_t numRows, uint64_t numCols){
+	/*
+	 * Returns a pointer to an array of pointer do doubles.
+	 * Or:
+	 * Return a 2D Array.
+	 */
+
+	uint64_t	i;
+	double**	array = NULL;
+	array = malloc(numRows * sizeof(uint64_t*));	//malloc an array of pointers
+	
+	if(array == NULL)
+		fatal("Memory allocation error.\n");
+
+	for(i = 0; i < numRows; i++){
+		array[i] = mallocDouble(numCols);	//Nota that mallocDouble() already checks for allocation errors
+	}
+
+	return array;
 }
 
 	//TODO can mallocSettings() be removed safely?
