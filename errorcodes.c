@@ -32,6 +32,6 @@ void fatal(const char* message){
 		Closes all open i/o streams befre exiting.
 	*/
 	printf("%s\n", message);
-	fcloseall();
+	fflush(NULL);			//flushes all i/o streams.
 	exit(EXIT_FAILURE);
 }
