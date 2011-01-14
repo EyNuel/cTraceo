@@ -41,17 +41,31 @@ typedef struct source{
 	double*		thetas;			//the array that will actually contain the launching angles (is allocated in "readin.c")
 }source_t;
 
+typedef struct interfaceProperties{
+	/*
+	 * Contains the properties of the surface or bottom interfaces. used in "surface" structs
+	 * See page 39 of "Traceo" manual.
+	 */
+	double		cp;		//"cpati",	compressional speed
+	double		cs;		//"csati",	shear speed
+	double		rho;	//"rhoati",	density
+	double		ap;		//"apati",	compressional attenuation
+	double		as;		//"asati"	shear attenuation
+}interfaceProperties_t;
+
 typedef struct surface{
 	/*
 		Used for both the "bathymetry" as well as "altimetry" block
 	*/
 	//See #defines following this block for possible values
-	int64_t		surfaceType;			//formerly "atype"
-	int64_t		surfaceProperties;		//formerly "aptype"
-	int64_t		surfaceInterpolation;	//formerly "aitype"
-	int64_t		surfaceAttenUnits;		//formerly "atiu"
-	int64_t		numSurfaceCoords;		//formerly "nati"
-	//TODO inlude a structure for the actual surface properties in struct _surface?
+	int64_t					surfaceType;			//formerly "atype"
+	int64_t					surfacePropertyType;	//formerly "aptype"
+	double*					r;						//"rati(n)"				|
+	double*					z;						//"zati(n)"				 }	these pointers are mallocced in "readin.c"
+	interfaceProperties_t*	surfaceProperties;		//contains the actual 	|
+	int64_t					surfaceInterpolation;	//formerly "aitype"
+	int64_t					surfaceAttenUnits;		//formerly "atiu"
+	uint64_t				numSurfaceCoords;		//formerly "nati"
 }surface_t;
 
 //possible values for surfaceType (see page 38, TraceO manual):
@@ -60,9 +74,9 @@ typedef struct surface{
 #define	SURFACE_TYPE__RIGID		3	//formerly "R"
 #define SURFACE_TYPE__VACUUM	4	//formerly "V". Vacuum over surface
 
-//possible values for surfaceProperties (see page 38, Traceo manual):
-#define	SURFACE_PROPERTIES__HOMOGENEOUS		5	//formerly "H"
-#define SURFACE_PROPERTIES__NON_HOMOGENEOUS	6	//formerly "N"
+//possible values for surfacePropertyType (see page 38, Traceo manual):
+#define	SURFACE_PROPERTY_TYPE__HOMOGENEOUS		5	//formerly "H"
+#define SURFACE_PROPERTY_TYPE__NON_HOMOGENEOUS	6	//formerly "N"
 
 //possible values for surfaceInterpolation (see page 38, Traceo manual):
 #define SURFACE_INTERPOLATION__FLAT		7	//"FL", flat surface
