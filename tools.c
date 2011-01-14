@@ -80,7 +80,7 @@ double*		mallocDouble(uint64_t numDoubles){
 	return temp;
 }
 
-//TODO_ can mallocSettings() be removed safely?
+	//TODO can mallocSettings() be removed safely?
 settings_t*	mallocSettings(void){
 	/*
 		Allocate memory for a settings structure.
@@ -115,7 +115,15 @@ globals_t* 	mallocGlobals(void){
 	}
 
 	globals->settings.cTitle = mallocChar(MAX_LINE_LEN + 1);
-	globals->settings.source.thetas = NULL; //memory wil lbe properly allocated in "readin.c"
+	globals->settings.source.thetas = NULL; //memory will be properly allocated in "readin.c"
+
+	globals->settings.altimetry.r = NULL;
+	globals->settings.altimetry.z = NULL;
+	globals->settings.altimetry.surfaceProperties = NULL;
+
+	globals->settings.bathymetry.r = NULL;
+	globals->settings.bathymetry.z = NULL;
+	globals->settings.bathymetry.surfaceProperties = NULL;
 
 	return(globals);
 }
@@ -189,7 +197,7 @@ void		printSettings(globals_t*	globals){
 	 *	Outputs a settings structure to stdout.		*
 	 ***********************************************/
 
-	//	uint64_t	i;
+		uint64_t	i;
 	
 	printf("settings.cTitle: \t%s", globals->settings.cTitle);	//assuming a \n at the end of cTitle
 	printf("settings.source.ds: \t%12.5lf\t[m]\n", globals->settings.source.ds);
@@ -221,12 +229,12 @@ void		printSettings(globals_t*	globals){
 			break;
 	}
 
-	printf("settings.altimetry.surfaceProperties: \t");
-	switch(globals->settings.altimetry.surfaceProperties){
-		case SURFACE_PROPERTIES__HOMOGENEOUS:
+	printf("settings.altimetry.surfacePropertyType: ");
+	switch(globals->settings.altimetry.surfacePropertyType){
+		case SURFACE_PROPERTY_TYPE__HOMOGENEOUS:
 			printf("Homogeneous\n");
 			break;
-		case SURFACE_PROPERTIES__NON_HOMOGENEOUS:
+		case SURFACE_PROPERTY_TYPE__NON_HOMOGENEOUS:
 			printf("Non-Homogeneous\n");
 			break;
 	}
@@ -240,13 +248,13 @@ void		printSettings(globals_t*	globals){
 			printf("Sloped\n");
 			break;
 		case SURFACE_INTERPOLATION__2P:
-			printf("2P: Piecewise Linear Interpolation\n");
+			printf("2P -Piecewise Linear Interpolation\n");
 			break;
 		case SURFACE_INTERPOLATION__3P:
-			printf("3P: Piecewise Parabolic Interpolation\n");
+			printf("3P -Piecewise Parabolic Interpolation\n");
 			break;
 		case SURFACE_INTERPOLATION__4P:
-			printf("4P: Piecewise Cubic Interpolation\n");
+			printf("4P -Piecewise Cubic Interpolation\n");
 			break;
 	}
 
@@ -266,6 +274,28 @@ void		printSettings(globals_t*	globals){
 			break;
 		case SURFACE_ATTEN_UNITS__dBperLambda:
 			printf("dB/<lambda>\n");
+			break;
+	}
+
+	printf("settings.altimetry.numSurfaceCoords:\t%ld\n", globals->settings.altimetry.numSurfaceCoords);
+
+	printf("settings.altimetry.surfaceProperties:	");
+	switch(globals->settings.altimetry.surfacePropertyType){
+		case SURFACE_PROPERTY_TYPE__HOMOGENEOUS:
+			printf("cp:%lf; ",	globals->settings.altimetry.surfaceProperties[0].cp);
+			printf("cs:%lf; ",	globals->settings.altimetry.surfaceProperties[0].cs);
+			printf("rho:%lf; ",	globals->settings.altimetry.surfaceProperties[0].rho);
+			printf("ap:%lf; ",	globals->settings.altimetry.surfaceProperties[0].ap);
+			printf("as:%lf;\n",	globals->settings.altimetry.surfaceProperties[0].as);
+			break;
+		case SURFACE_PROPERTY_TYPE__NON_HOMOGENEOUS:
+			for(i=0; i<globals->settings.altimetry.numSurfaceCoords; i++){
+				printf("cp:%lf; ",	globals->settings.altimetry.surfaceProperties[i].cp);
+				printf("cs:%lf; ",	globals->settings.altimetry.surfaceProperties[i].cs);
+				printf("rho:%lf; ",	globals->settings.altimetry.surfaceProperties[i].rho);
+				printf("ap:%lf; ",	globals->settings.altimetry.surfaceProperties[i].ap);
+				printf("as:%lf;\n",	globals->settings.altimetry.surfaceProperties[i].as);
+			}
 			break;
 	}
 
