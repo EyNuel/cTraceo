@@ -14,18 +14,19 @@
  *******************************************************************************/
 #define VERBOSE			1	//when set to 1, more information will be shown.
 #define MAX_LINE_LEN	256	//Maximum number of chars to read at once from a file (\n not included)
+
 //Previuously define in globli.h as:
 //	parameter (inpfil=1,outfil=2,prtfil=3)
 //	parameter (nangle=10000,nc0=5001,nc02d=1001,nbdry=5001)
 //	parameter (nhyd=5001,nhyd2=1001,nmaxo=21,npo=201,np=20001,np2=201)
-#define MAX_NUM_ANGLES	10000
-
+#define MAX_NUM_ANGLES	10000	//"nangle"
+#define NBDRY			5001	//"nbdry"	DISCUSS: what does this stand for?
+#define NC0				5001	//"nc0"		DISCUSS: what does this stand for? (max number of points for sound speed profile (1 dimemsion))
+#define	NC02D			1001	//"nc02d"	(max number of points for sound speed field (2 dimemsions))
 
 //basics:
 #define	TRUE	1
 #define FALSE	0
-
-
 
 /********************************************************************************
  * Structures that contains the settings that are read from the input file.		*
@@ -94,14 +95,18 @@ typedef struct surface{
 
 
 typedef struct soundSpeed{
-	int64_t		cDistribution;			//"cdist", type of sound speed distribution
-	int64_t		cClass;					//"cclass", class of sound speed
-	int64_t		nr0, nz0;				//"nr0,nz0", number of point in range and depth
+	uint64_t		cDist;			//"cdist", type of sound speed distribution
+	uint64_t		cClass;			//"cclass", class of sound speed
+	uint64_t		nr0, nz0;		//"nr0,nz0", number of points in range and depth
+	double*		z0;				//"z0",	depth
+	double*		r0;				//"r0", range
+	double*		c01d;			//"c0", sound speed at (z0)
+	double**	c02d;			//"c02d", sound speed at (r0,z0)
 }soundSpeed_t;
 
 //possible values for cDistribuition (see page 39, Traceo Manual)
-#define	C_DISTRIBUTION__PROFILE		17	//"c(z,z)", sound speed profile c=c(z)
-#define	C_DISTRIBUTION__FIELDS		18	//"c(r,z)", sound speed field c=c(r,z)
+#define	C_DIST__PROFILE		17	//"c(z,z)", sound speed profile c=c(z)
+#define	C_DIST__FIELD		18	//"c(r,z)", sound speed field c=c(r,z)
 
 //possible values for cClass	(pages 39,40, Traceo Manual)
 #define	C_CLASS__ISOVELOCITY		19	//"ISOV"
