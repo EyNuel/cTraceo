@@ -8,7 +8,6 @@
 #include <inttypes.h>		//contains definitions of integer data types that are inequivocal.
 #include "tools.c"			
 #include "globals.h"		//Include global variables
-#include "globals.c"
 #include <math.h>
 
 //prototype:
@@ -27,10 +26,11 @@ void	readIn(globals_t* globals, const char* filename){
 	 ***********************************************************************/
 
 	uint64_t	i;
-	double		dTheta;		//DISCUSS: really necessary?
-	uint64_t	nThetas;	//used locally to make code more readable. Value is stored in settings.
-	double		theta0;		//used locally to make code more readable. Value is stored in settings.
-	double		thetaN;		//used locally to make code more readable. Value is stored in settings.
+	double		dTheta;				//DISCUSS: really necessary?
+	uint64_t	nThetas;			//used locally to make code more readable. Value is stored in settings.
+	double		theta0;				//used locally to make code more readable. Value is stored in settings.
+	double		thetaN;				//used locally to make code more readable. Value is stored in settings.
+	uint64_t	numSurfaceCoords;	//used locally to make code more readable. Value is stored in settings.
 	char*		tempString;
 	FILE*		infile;					//a pointer for the input file
 	infile = openFile(filename, "r");	//open file in "read" mode
@@ -102,25 +102,25 @@ void	readIn(globals_t* globals, const char* filename){
 
 	/* surfaceType;	formerly "atype"	*/
 	tempString = readString(infile);
-	if(strcmp(tempString,"A")){
+	if(strcmp(tempString,"A") == 0){
 		globals->settings.altimetry.surfaceType	= SURFACE_TYPE__ABSORVENT;
-	}else if(strcmp(tempString,"E")){
+	}else if(strcmp(tempString,"E") == 0){
 		globals->settings.altimetry.surfaceType	= SURFACE_TYPE__ELASTIC;
-	}else if(strcmp(tempString,"R")){
+	}else if(strcmp(tempString,"R") == 0){
 		globals->settings.altimetry.surfaceType	= SURFACE_TYPE__RIGID;
-	}else if(strcmp(tempString,"V")){
+	}else if(strcmp(tempString,"V") == 0){
 		globals->settings.altimetry.surfaceType	= SURFACE_TYPE__VACUUM;
 	}else{
 		fatal("Input file: unknown surface type.\nAborting...");
 	}
 	free(tempString);
 
-	/* surfaceProperties;		//formerly "aptype"	*/
+	/* surfacePropertyType;		//formerly "aptype"	*/
 	tempString = readString(infile);
-	if(strcmp(tempString,"H")){
-		globals->settings.altimetry.surfaceProperties	= SURFACE_PROPERTIES__HOMOGENEOUS;
-	}else if(strcmp(tempString,"N")){
-		globals->settings.altimetry.surfaceProperties	= SURFACE_PROPERTIES__NON_HOMOGENEOUS;
+	if(strcmp(tempString,"H") == 0){
+		globals->settings.altimetry.surfacePropertyType	= SURFACE_PROPERTY_TYPE__HOMOGENEOUS;
+	}else if(strcmp(tempString,"N") == 0){
+		globals->settings.altimetry.surfacePropertyType	= SURFACE_PROPERTY_TYPE__NON_HOMOGENEOUS;
 	}else{
 		fatal("Input file: unknown surface properties.\nAborting...");
 	}
@@ -128,15 +128,15 @@ void	readIn(globals_t* globals, const char* filename){
 
 	/* surfaceInterpolation;	//formerly "aitype"	*/
 	tempString = readString(infile);
-	if(strcmp(tempString,"FL")){
+	if(strcmp(tempString,"FL") == 0){
 		globals->settings.altimetry.surfaceInterpolation	= SURFACE_INTERPOLATION__FLAT;
-	}else if(strcmp(tempString,"SL")){
+	}else if(strcmp(tempString,"SL") == 0){
 		globals->settings.altimetry.surfaceInterpolation	= SURFACE_INTERPOLATION__SLOPED;
-	}else if(strcmp(tempString,"2P")){
+	}else if(strcmp(tempString,"2P") == 0){
 		globals->settings.altimetry.surfaceInterpolation	= SURFACE_INTERPOLATION__2P;
-	}else if(strcmp(tempString,"3P")){
+	}else if(strcmp(tempString,"3P") == 0){
 		globals->settings.altimetry.surfaceInterpolation	= SURFACE_INTERPOLATION__3P;
-	}else if(strcmp(tempString,"4P")){
+	}else if(strcmp(tempString,"4P") == 0){
 		globals->settings.altimetry.surfaceInterpolation	= SURFACE_INTERPOLATION__4P;
 	}else{
 		fatal("Input file: unknown surface interpolation type.\nAborting...");
@@ -145,15 +145,15 @@ void	readIn(globals_t* globals, const char* filename){
 
 	/* surfaceAttenUnits;		//formerly "atiu"	*/
 	tempString = readString(infile);
-	if(strcmp(tempString,"F")){
+	if(strcmp(tempString,"F") == 0){
 		globals->settings.altimetry.surfaceAttenUnits	= SURFACE_ATTEN_UNITS__dBperkHz;
-	}else if(strcmp(tempString,"M")){
+	}else if(strcmp(tempString,"M") == 0){
 		globals->settings.altimetry.surfaceAttenUnits	= SURFACE_ATTEN_UNITS__dBperMeter;
-	}else if(strcmp(tempString,"N")){
+	}else if(strcmp(tempString,"N") == 0){
 		globals->settings.altimetry.surfaceAttenUnits	= SURFACE_ATTEN_UNITS__dBperNeper;
-	}else if(strcmp(tempString,"Q")){
+	}else if(strcmp(tempString,"Q") == 0){
 		globals->settings.altimetry.surfaceAttenUnits	= SURFACE_ATTEN_UNITS__qFactor;
-	}else if(strcmp(tempString,"W")){
+	}else if(strcmp(tempString,"W") == 0){
 		globals->settings.altimetry.surfaceAttenUnits	= SURFACE_ATTEN_UNITS__dBperLambda;
 	}else{
 		fatal("Input file: unknown surface attenuation units.\nAborting...");
@@ -161,19 +161,52 @@ void	readIn(globals_t* globals, const char* filename){
 	free(tempString);
 
 	/* numSurfaceCoords;		//formerly "nati" */
-	globals->settings.altimetry.numSurfaceCoords = readInt(infile);
+	numSurfaceCoords = (uint64_t)readInt(infile);
+	globals->settings.altimetry.numSurfaceCoords = numSurfaceCoords;
 
+	//malloc interface coords
+	globals->settings.altimetry.r = mallocDouble(numSurfaceCoords);
+	if(globals->settings.altimetry.r == NULL)
+		fatal("Memory allocation error.");
 	
-	switch(globals->settings.altimetry.surfaceProperties){
-		case SURFACE_PROPERTIES__HOMOGENEOUS:
-			//Read only one set of interface properties: 
-			//TODO continue here (see page 39 of manual)
-			//Read coordinates of interface points:
+	globals->settings.altimetry.z = mallocDouble(numSurfaceCoords);
+	if(globals->settings.altimetry.z == NULL)
+		fatal("Memory allocation error.");
+	
+	//read the surface properties and coordinates
+	switch(globals->settings.altimetry.surfacePropertyType){
+		case SURFACE_PROPERTY_TYPE__HOMOGENEOUS:
+			//malloc and read only one set of interface properties:
+			globals->settings.altimetry.surfaceProperties = malloc(sizeof(interfaceProperties_t));
+			if( globals->settings.altimetry.surfaceProperties == NULL)
+				fatal("Memory allocation error.");
+			globals->settings.altimetry.surfaceProperties[0].cp	= readDouble(infile);
+			globals->settings.altimetry.surfaceProperties[0].cs	= readDouble(infile);
+			globals->settings.altimetry.surfaceProperties[0].rho= readDouble(infile);
+			globals->settings.altimetry.surfaceProperties[0].ap	= readDouble(infile);
+			globals->settings.altimetry.surfaceProperties[0].as	= readDouble(infile);
 			
+			//read coordinates of interface points:
+			for(i=0; i<numSurfaceCoords; i++){
+				globals->settings.altimetry.r[i] = readDouble(infile);
+				globals->settings.altimetry.z[i] = readDouble(infile);
+			}
 			break;
-		case SURFACE_PROPERTIES__NON_HOMOGENEOUS:
+		
+		case SURFACE_PROPERTY_TYPE__NON_HOMOGENEOUS:
 			//Read coordinates and interface properties for all interface points:
-			
+			globals->settings.altimetry.surfaceProperties = malloc(numSurfaceCoords*sizeof(interfaceProperties_t));
+			if( globals->settings.altimetry.surfaceProperties == NULL)
+				fatal("Memory allocation error.");
+			for(i=0; i<numSurfaceCoords; i++){
+				globals->settings.altimetry.r[i] = readDouble(infile);
+				globals->settings.altimetry.z[i] = readDouble(infile);
+				globals->settings.altimetry.surfaceProperties[i].cp	= readDouble(infile);
+				globals->settings.altimetry.surfaceProperties[i].cs	= readDouble(infile);
+				globals->settings.altimetry.surfaceProperties[i].rho= readDouble(infile);
+				globals->settings.altimetry.surfaceProperties[i].ap	= readDouble(infile);
+				globals->settings.altimetry.surfaceProperties[i].as	= readDouble(infile);
+			}
 			break;
 	}
 
