@@ -1,7 +1,21 @@
-/***********************************************************************
- * ctraceo.c
- * Main ctraceo file
- ***********************************************************************/
+/************************************************************************
+ * ctraceo.c															*
+ * Main ctraceo file													*
+ *	readIn.c															*
+ *	read the waveguide input file.										*
+ *	originally written by: 	Orlando Camargo Rodriguez:					*
+ *							Copyright (C) 2010							*
+ * 							Orlando Camargo Rodriguez					*
+ * 							orodrig@ualg.pt								*
+ *							Universidade do Algarve						*
+ *							Physics Department							*
+ *							Signal Processing Laboratory				*
+ *																		*
+ *	Ported to C by:		Emanuel Ey										*
+ *						emanuel.ey@gmail.com							*
+ *						Signal Processing Laboratory					*
+ *						Universidade do Algarve							*
+ ************************************************************************/
 #include <stdio.h>
 #include "globals.h"
 #include "readin.c"
@@ -13,12 +27,12 @@ int main(int argc, char **argv)
 	globals_t*	globals = NULL;
 	globals = mallocGlobals();
 
-    // check if a command line argument was passed:
+	// check if a command line argument was passed:
 	if(argc == 2){
-        //if so, try to use it as an inout file
+		//if so, try to use it as an inout file
 		infile = argv[1];
 	}else{
-        //otherwise, open the standard file.
+		//otherwise, open the standard file.
 		infile = "munk.in";
 	}
 		
@@ -26,7 +40,7 @@ int main(int argc, char **argv)
 		printf("Running cTraceo in verbose mode.\n\n");
 	readIn(globals, infile);
 
-    if (VERBOSE)
+	if (VERBOSE)
 		printSettings(globals);
 	return 0;
 }
