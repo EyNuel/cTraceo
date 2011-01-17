@@ -3,7 +3,6 @@
  * Main ctraceo file
  ***********************************************************************/
 #include <stdio.h>
-#include "errorcodes.h"
 #include "globals.h"
 #include "readin.c"
 

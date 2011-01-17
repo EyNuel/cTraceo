@@ -1,7 +1,5 @@
 //#pragma once
 #include	"globals.h"
-#include	"errorcodes.c"
-#include	"errorcodes.h"
 #include	<stdlib.h>
 #include	<string.h>
 
@@ -9,6 +7,7 @@
 /****************************
  *	Function prototypes		*
  ***************************/
+void fatal(const char*);
 FILE*		openFile(const char* , const char[4]);
 char*		mallocChar(uint64_t);
 double*		mallocDouble(uint64_t);
@@ -26,6 +25,16 @@ void		printSettings(globals_t*);
 /****************************
  *	Actual Functions		*
  ***************************/
+void fatal(const char* message){
+	/*
+		Prints a message and exits terminates the program.
+		Closes all open i/o streams befre exiting.
+	*/
+	printf("%s\n", message);
+	fflush(NULL);				//flushes all i/o streams.
+	exit(EXIT_FAILURE);
+}
+
 FILE* 		openFile(const char *filename, const char mode[4]) {
 	/* 
 		Opens a file and returns a filepointer in case of success, exits with error code otherwise.
@@ -43,8 +52,8 @@ FILE* 		openFile(const char *filename, const char mode[4]) {
 		
 	temp=fopen(filename, mode);
 	if(temp==NULL) {
-		printMsg(ERR__FILE_OPEN);
-		exit(ERR__FILE_OPEN);
+		fatal("Error while opening file.\n");
+		exit(EXIT_FAILURE);		//this is redundant but avoids "control may reach end of non-void function" warning
 	} else {
 		if (VERBOSE)
 			printf("Ok.\n");
@@ -61,8 +70,7 @@ char*		mallocChar(uint64_t numChars){
 	char*	temp = NULL;	//temporary pointer
 	temp = malloc((unsigned long)numChars*sizeof(char));
 	if (temp == NULL){
-		printMsg(ERR__MEMORY_ALOCATION);
-		exit(ERR__MEMORY_ALOCATION);
+		fatal("Memory allocation error.\n");
 	}
 	return temp;
 }
@@ -76,8 +84,7 @@ double*		mallocDouble(uint64_t numDoubles){
 	double*	temp = NULL;	//temporary pointer
 	temp = malloc((unsigned long)numDoubles*sizeof(double));
 	if (temp == NULL){
-		printMsg(ERR__MEMORY_ALOCATION);
-		exit(ERR__MEMORY_ALOCATION);
+		fatal("Memory allocation error.\n");
 	}
 	return temp;
 }
@@ -113,14 +120,12 @@ settings_t*	mallocSettings(void){
 	settings_t*	settings = NULL;
 	settings = malloc(sizeof(settings_t));
 	if (settings == NULL){
-		printMsg(ERR__MEMORY_ALOCATION);
-		exit(ERR__MEMORY_ALOCATION);
+		fatal("Memory allocation error.\n");
 	}
 	settings->cTitle = NULL;
 	settings->cTitle = malloc( (MAX_LINE_LEN + 1) * sizeof(char));
 	if (settings->cTitle == NULL){
-		printMsg(ERR__MEMORY_ALOCATION);
-		exit(ERR__MEMORY_ALOCATION);
+		fatal("Memory allocation error.\n");
 	}
 	return settings;
 }
@@ -133,8 +138,7 @@ globals_t* 	mallocGlobals(void){
 	globals_t*	globals = NULL;
 	globals = malloc(sizeof(globals_t));
 	if(globals == NULL){
-		printMsg(ERR__MEMORY_ALOCATION);
-		exit(ERR__MEMORY_ALOCATION);
+		fatal("Memory allocation error.\n");
 	}
 
 	globals->settings.cTitle = mallocChar(MAX_LINE_LEN + 1);
