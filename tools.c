@@ -9,15 +9,15 @@
  ***************************/
 void fatal(const char*);
 FILE*		openFile(const char* , const char[4]);
-char*		mallocChar(uint64_t);
-double*		mallocDouble(uint64_t);
-double**	mallocDouble2D(uint64_t, uint64_t);
+char*		mallocChar(uintptr_t);
+double*		mallocDouble(uintptr_t);
+double**	mallocDouble2D(uintptr_t, uintptr_t);
 settings_t*	mallocSettings(void);
 globals_t*	mallocGlobals(void);
 double 		readDouble(FILE*);
-int64_t		readInt(FILE*);
+int32_t		readInt(FILE*);
 char*		readString(FILE*);
-char*		readStringN(FILE*, uint64_t);
+char*		readStringN(FILE*, uint32_t);
 void		skipLine(FILE*);
 void		printSettings(globals_t*);
 
@@ -61,7 +61,7 @@ FILE* 		openFile(const char *filename, const char mode[4]) {
 	}
 }
 
-char*		mallocChar(uint64_t numChars){
+char*		mallocChar(uintptr_t numChars){
 	/*
 		Allocates a char string and returns a pointer to it in case of success,
 		exits with error code otherwise.
@@ -75,7 +75,7 @@ char*		mallocChar(uint64_t numChars){
 	return temp;
 }
 
-double*		mallocDouble(uint64_t numDoubles){
+double*		mallocDouble(uintptr_t numDoubles){
 	/*
 		Allocates an array of doubles and returns a pointer to it in case of success,
 		Exits with error code otherwise.
@@ -89,16 +89,16 @@ double*		mallocDouble(uint64_t numDoubles){
 	return temp;
 }
 
-double**	mallocDouble2D(uint64_t numRows, uint64_t numCols){
+double**	mallocDouble2D(uintptr_t numRows, uintptr_t numCols){
 	/*
 	 * Returns a pointer to an array of pointer do doubles.
 	 * Or:
 	 * Return a 2D Array.
 	 */
 
-	uint64_t	i;
+	uint32_t	i;
 	double**	array = NULL;
-	array = malloc(numRows * sizeof(uint64_t*));	//malloc an array of pointers
+	array = malloc(numRows * sizeof(uintptr_t*));	//malloc an array of pointers
 	
 	if(array == NULL)
 		fatal("Memory allocation error.\n");
@@ -141,7 +141,7 @@ globals_t* 	mallocGlobals(void){
 		fatal("Memory allocation error.\n");
 	}
 
-	globals->settings.cTitle = mallocChar(MAX_LINE_LEN + 1);
+	globals->settings.cTitle = mallocChar((uintptr_t)(MAX_LINE_LEN + 1));
 	globals->settings.source.thetas = NULL; //memory will be properly allocated in "readin.c"
 
 	globals->settings.altimetry.r = NULL;
@@ -165,7 +165,7 @@ double 		readDouble(FILE* infile){
 	 
 	char*	junkString = NULL;
 	double 	tempDouble;
-	junkString = mallocChar(MAX_LINE_LEN + 1);
+	junkString = mallocChar((uintptr_t)(MAX_LINE_LEN + 1));
 	
 	fscanf(infile, "%s\n", junkString);
 	tempDouble = atof(junkString);
@@ -174,17 +174,17 @@ double 		readDouble(FILE* infile){
 	return(tempDouble);
 }
 
-int64_t		readInt(FILE* infile){
+int32_t		readInt(FILE* infile){
 	/************************************************
 	 *	Reads a int from a file and returns it		*
 	 ***********************************************/
 	 
 	char*		junkString = NULL;
-	int64_t 	tempInt;
-	junkString = mallocChar(MAX_LINE_LEN + 1);
+	int32_t 	tempInt;
+	junkString = mallocChar((uintptr_t)(MAX_LINE_LEN + 1));
 	
 	fscanf(infile, "%s\n", junkString);
-	tempInt = atol(junkString);
+	tempInt = (int32_t)atol(junkString);
 	free(junkString);
 	
 	return(tempInt);
@@ -197,14 +197,14 @@ char*		readString(FILE* infile){
 	 
 	char*		inputString = NULL;
 	char*		outputString = NULL;
-	inputString = mallocChar(MAX_LINE_LEN + 1);
+	inputString = mallocChar((uintptr_t)(MAX_LINE_LEN + 1));
 
 	//if we assume that the file is correctly formatted,
 	//there will be a single quote at the beginning and at the end of a line.
 	//So we copy the string for position 1 utill 2 positions from end (thus stripping ' and \n ):
 	fgets(inputString, MAX_LINE_LEN+1, infile);
 
-	outputString = mallocChar(strlen(inputString)-2);
+	outputString = mallocChar((uintptr_t)(strlen(inputString)-2));
 	strncpy(outputString, inputString + 1, strlen(inputString)-3);
 	//outputString[strlen(inputString)-3] = "^@";	//set last element of string to be "NULL"
 	free(inputString);
@@ -212,13 +212,13 @@ char*		readString(FILE* infile){
 	return(outputString);
 }
 
-char*		readStringN(FILE* infile, uint64_t length){
+char*		readStringN(FILE* infile, uint32_t length){
 	/********************************************************************
 	 *	Reads a <lenght> chars from a filestream.						*
 	 *******************************************************************/
 	//TODO: replace readString() by readStringN()
 	char*		outputString = NULL;
-	outputString = mallocChar(MAX_LINE_LEN + 1);
+	outputString = mallocChar((uintptr_t)(MAX_LINE_LEN + 1));
 
 	fgets(outputString, (int32_t)length, infile);
 	return(outputString);
@@ -229,7 +229,7 @@ void		skipLine(FILE* infile){
 	 *	Reads a int from a file and returns it		*
 	 ***********************************************/
 	char*		junkString = NULL;
-	junkString = mallocChar(MAX_LINE_LEN + 1);
+	junkString = mallocChar((uintptr_t)(MAX_LINE_LEN + 1));
 	fgets(junkString, MAX_LINE_LEN+1, infile);
 
 	free(junkString);
@@ -240,7 +240,7 @@ void		printSettings(globals_t*	globals){
 	 *	Outputs a settings structure to stdout.		*
 	 ***********************************************/
 
-		uint64_t	i;
+		uint32_t	i;
 	
 	printf("settings.cTitle: \t%s", globals->settings.cTitle);	//assuming a \n at the end of cTitle
 	printf("settings.source.ds: \t%12.5lf\t[m]\n", globals->settings.source.ds);
@@ -249,7 +249,7 @@ void		printSettings(globals_t*	globals){
 	printf("settings.source.rbox1: \t%12.5lf\t[m]\n", globals->settings.source.rbox1);
 	printf("settings.source.rbox2: \t%12.5lf\t[m]\n", globals->settings.source.rbox2);
 	printf("settings.source.freqx: \t%12.5lf\t[m]\n", globals->settings.source.freqx);
-	printf("settings.source.nThetas: %6.0ld\n", globals->settings.source.nThetas);
+	printf("settings.source.nThetas: %6.0lu\n", (long unsigned int)globals->settings.source.nThetas);
 
 	/* uncoment the following block to output all launching angles */
 	/*
@@ -321,7 +321,7 @@ void		printSettings(globals_t*	globals){
 			break;
 	}
 
-	printf("settings.altimetry.numSurfaceCoords:\t%ld\n", globals->settings.altimetry.numSurfaceCoords);
+	printf("settings.altimetry.numSurfaceCoords:\t%lu\n", (long unsigned int)globals->settings.altimetry.numSurfaceCoords);
 
 	printf("settings.altimetry.surfaceProperties:	");
 	switch(globals->settings.altimetry.surfacePropertyType){
@@ -342,9 +342,12 @@ void		printSettings(globals_t*	globals){
 			}
 			break;
 	}
+	printf("settings.altimetry.r[0]:\t%lf\n", globals->settings.altimetry.r[0]);
+	printf("settings.altimetry.r[N]:\t%lf\n", globals->settings.altimetry.r[globals->settings.altimetry.numSurfaceCoords-1]);
+	
 
 	/* sound speed block */
-	printf("settings.object.numObjects:\t%ld\n",globals->settings.object.numObjects);
+	printf("settings.object.numObjects:\t%lu\n",(long unsigned int)globals->settings.object.numObjects);
 	/*	object block	*/
 	
 	/* batimetry block	*/
@@ -412,7 +415,7 @@ void		printSettings(globals_t*	globals){
 			break;
 	}
 
-	printf("settings.batimetry.numSurfaceCoords:\t%ld\n", globals->settings.batimetry.numSurfaceCoords);
+	printf("settings.batimetry.numSurfaceCoords:\t%lu\n", (long unsigned int)globals->settings.batimetry.numSurfaceCoords);
 
 	printf("settings.batimetry.surfaceProperties:	");
 	switch(globals->settings.batimetry.surfacePropertyType){
@@ -449,8 +452,8 @@ void		printSettings(globals_t*	globals){
 			printf("Linear\n");
 			break;
 	}
-	printf("settings.output.nArrayR: \t%ld\n",globals->settings.output.nArrayR);
-	printf("settings.output.nArrayZ: \t%ld\n",globals->settings.output.nArrayZ);
+	printf("settings.output.nArrayR: \t%lu\n",(long unsigned int)globals->settings.output.nArrayR);
+	printf("settings.output.nArrayZ: \t%lu\n",(long unsigned int)globals->settings.output.nArrayZ);
 
 	printf("settings.output.calcType: \t");
 	switch(globals->settings.output.calcType){

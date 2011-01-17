@@ -31,13 +31,13 @@ void	readIn(globals_t* globals, const char* filename){
 	 *		none		Values are read into "globals->settings"			*
 	 ***********************************************************************/
 
-	uint64_t	i,j;
+	uint32_t	i,j;
 	double		dTheta;				//DISCUSS: really necessary?
-	uint64_t	nThetas;			//used locally to make code more readable. Value is stored in settings.
+	uint32_t	nThetas;			//used locally to make code more readable. Value is stored in settings.
 	double		theta0;				//used locally to make code more readable. Value is stored in settings.
 	double		thetaN;				//used locally to make code more readable. Value is stored in settings.
-	uint64_t	numSurfaceCoords;	//used locally to make code more readable. Value is stored in settings.
-	uint64_t	nr0, nz0;			//used locally to make code more readable. Value is stored in settings.
+	uint32_t	numSurfaceCoords;	//used locally to make code more readable. Value is stored in settings.
+	uint32_t	nr0, nz0;			//used locally to make code more readable. Value is stored in settings.
 	char*		tempString;
 	FILE*		infile;					//a pointer for the input file
 	infile = openFile(filename, "r");	//open file in "read" mode
@@ -62,7 +62,7 @@ void	readIn(globals_t* globals, const char* filename){
 	 globals->settings.source.rbox1		= readDouble(infile);
 	 globals->settings.source.rbox2		= readDouble(infile);
 	 globals->settings.source.freqx		= readDouble(infile);
-	 nThetas = (uint64_t)readInt(infile);
+	 nThetas = (uint32_t)readInt(infile);
 	 globals->settings.source.nThetas	= nThetas;
 
 	/*	Source validation	*/
@@ -103,83 +103,87 @@ void	readIn(globals_t* globals, const char* filename){
 	skipLine(infile);
 
 	/* surfaceType;	formerly "atype"	*/
-	tempString = readString(infile);
-	if(strcmp(tempString,"A") == 0){
+	tempString = readStringN(infile,5);
+	if(strcmp(tempString,"'A'\n") == 0){
 		globals->settings.altimetry.surfaceType	= SURFACE_TYPE__ABSORVENT;
 		
-	}else if(strcmp(tempString,"E") == 0){
+	}else if(strcmp(tempString,"'E'\n") == 0){
 		globals->settings.altimetry.surfaceType	= SURFACE_TYPE__ELASTIC;
 		
-	}else if(strcmp(tempString,"R") == 0){
+	}else if(strcmp(tempString,"'R'\n") == 0){
 		globals->settings.altimetry.surfaceType	= SURFACE_TYPE__RIGID;
 		
-	}else if(strcmp(tempString,"V") == 0){
+	}else if(strcmp(tempString,"'V'\n") == 0){
 		globals->settings.altimetry.surfaceType	= SURFACE_TYPE__VACUUM;
 		
 	}else{
-		fatal("Input file: altimetry: unknown surface type.\nAborting...");
+		printf("Input file: batimetry: unknown surface type %s\n", tempString);
+		fatal("Aborting...");
 	}
 	free(tempString);
 
 	/* surfacePropertyType;		//formerly "aptype"	*/
-	tempString = readString(infile);
-	if(strcmp(tempString,"H") == 0){
+	tempString = readStringN(infile,5);
+	if(strcmp(tempString,"'H'\n") == 0){
 		globals->settings.altimetry.surfacePropertyType	= SURFACE_PROPERTY_TYPE__HOMOGENEOUS;
 		
-	}else if(strcmp(tempString,"N") == 0){
+	}else if(strcmp(tempString,"'N'\n") == 0){
 		globals->settings.altimetry.surfacePropertyType	= SURFACE_PROPERTY_TYPE__NON_HOMOGENEOUS;
 		
 	}else{
-		fatal("Input file: altimetry: unknown surface property type.\nAborting...");
+		printf("Input file: altimetry: surface property type: '%s'\n",tempString);
+		fatal("Aborting...");
 	}
 	free(tempString);
 
 	/* surfaceInterpolation;	//formerly "aitype"	*/
-	tempString = readString(infile);
-	if(strcmp(tempString,"FL") == 0){
+	tempString = readStringN(infile,6);
+	if(strcmp(tempString,"'FL'\n") == 0){
 		globals->settings.altimetry.surfaceInterpolation	= SURFACE_INTERPOLATION__FLAT;
 		
-	}else if(strcmp(tempString,"SL") == 0){
+	}else if(strcmp(tempString,"'SL'\n") == 0){
 		globals->settings.altimetry.surfaceInterpolation	= SURFACE_INTERPOLATION__SLOPED;
 		
-	}else if(strcmp(tempString,"2P") == 0){
+	}else if(strcmp(tempString,"'2P'\n") == 0){
 		globals->settings.altimetry.surfaceInterpolation	= SURFACE_INTERPOLATION__2P;
 		
-	}else if(strcmp(tempString,"3P") == 0){
+	}else if(strcmp(tempString,"'3P'\n") == 0){
 		globals->settings.altimetry.surfaceInterpolation	= SURFACE_INTERPOLATION__3P;
 		
-	}else if(strcmp(tempString,"4P") == 0){
+	}else if(strcmp(tempString,"'4P'\n") == 0){
 		globals->settings.altimetry.surfaceInterpolation	= SURFACE_INTERPOLATION__4P;
 		
 	}else{
-		fatal("Input file: altimetry: unknown surface interpolation type.\nAborting...");
+		printf("Input file: altimetry: unknown surface interpolation type: '%s'\n",tempString);
+		fatal("Aborting...");
 	}
 	free(tempString);
 
 	/* surfaceAttenUnits;		//formerly "atiu"	*/
-	tempString = readString(infile);
-	if(strcmp(tempString,"F") == 0){
+	tempString = readStringN(infile,5);
+	if(strcmp(tempString,"'F'\n") == 0){
 		globals->settings.altimetry.surfaceAttenUnits	= SURFACE_ATTEN_UNITS__dBperkHz;
 		
-	}else if(strcmp(tempString,"M") == 0){
+	}else if(strcmp(tempString,"'M'\n") == 0){
 		globals->settings.altimetry.surfaceAttenUnits	= SURFACE_ATTEN_UNITS__dBperMeter;
 		
-	}else if(strcmp(tempString,"N") == 0){
+	}else if(strcmp(tempString,"'N'\n") == 0){
 		globals->settings.altimetry.surfaceAttenUnits	= SURFACE_ATTEN_UNITS__dBperNeper;
 		
-	}else if(strcmp(tempString,"Q") == 0){
+	}else if(strcmp(tempString,"'Q'\n") == 0){
 		globals->settings.altimetry.surfaceAttenUnits	= SURFACE_ATTEN_UNITS__qFactor;
 		
-	}else if(strcmp(tempString,"W") == 0){
+	}else if(strcmp(tempString,"'W'\n") == 0){
 		globals->settings.altimetry.surfaceAttenUnits	= SURFACE_ATTEN_UNITS__dBperLambda;
 		
 	}else{
-		fatal("Input file: altimetry: unknown surface attenuation units.\nAborting...");
+		printf("Input file: altimetry: unknown surface attenuation units: '%s'\n",tempString);
+		fatal("Aborting...");
 	}
 	free(tempString);
 
 	/* numSurfaceCoords;		//formerly "nati" */
-	numSurfaceCoords = (uint64_t)readInt(infile);
+	numSurfaceCoords = (uint32_t)readInt(infile);
 	globals->settings.altimetry.numSurfaceCoords = numSurfaceCoords;
 
 	//malloc interface coords
@@ -230,50 +234,52 @@ void	readIn(globals_t* globals, const char* filename){
 	 ***********************************************************************/
 	/*	sound speed distribution	"cdist"		*/
 	skipLine(infile);
-	tempString = readString(infile);
-	if(strcmp(tempString,"c(z,z)") == 0){
+	tempString = readStringN(infile,10);
+	if(strcmp(tempString,"'c(z,z)'\n") == 0){
 		globals->settings.soundSpeed.cDist	= C_DIST__PROFILE;
-	}else if(strcmp(tempString,"c(r,z)") == 0){
+	}else if(strcmp(tempString,"'c(r,z)'\n") == 0){
 		globals->settings.soundSpeed.cDist	= C_DIST__FIELD;
 	}else{
-		fatal("Input file: Sound Speed: unknown sound speed distribution type.\nAborting...");
+		printf("Input file: Sound Speed: unknown sound speed distribution type: '%s'\n",tempString);
+		fatal("Aborting...");
 	}
 	free(tempString);
 
 	/*	sound speed class	"cclass"		*/
-	tempString = readString(infile);
-	if(strcmp(tempString,"ISOV") == 0){
+	tempString = readStringN(infile,7);
+	if(strcmp(tempString,"'ISOV'") == 0){
 		globals->settings.soundSpeed.cClass	= C_CLASS__ISOVELOCITY;
 		
-	}else if(strcmp(tempString,"LINP") == 0){
+	}else if(strcmp(tempString,"'LINP'") == 0){
 		globals->settings.soundSpeed.cClass	= C_CLASS__LINEAR;
 		
-	}else if(strcmp(tempString,"PARP") == 0){
+	}else if(strcmp(tempString,"'PARP'") == 0){
 		globals->settings.soundSpeed.cClass	= C_CLASS__PARABOLIC;
 		
-	}else if(strcmp(tempString,"EXPP") == 0){
+	}else if(strcmp(tempString,"'EXPP'") == 0){
 		globals->settings.soundSpeed.cClass	= C_CLASS__EXPONENTIAL;
 		
-	}else if(strcmp(tempString,"N2LP") == 0){
+	}else if(strcmp(tempString,"'N2LP'") == 0){
 		globals->settings.soundSpeed.cClass	= C_CLASS__N2_LINEAR;
 		
-	}else if(strcmp(tempString,"ISQP") == 0){
+	}else if(strcmp(tempString,"'ISQP'") == 0){
 		globals->settings.soundSpeed.cClass	= C_CLASS__INV_SQUARE;
 		
-	}else if(strcmp(tempString,"MUNK") == 0){
+	}else if(strcmp(tempString,"'MUNK'") == 0){
 		globals->settings.soundSpeed.cClass	= C_CLASS__MUNK;
 		
-	}else if(strcmp(tempString,"TABL") == 0){
+	}else if(strcmp(tempString,"'TABL'") == 0){
 		globals->settings.soundSpeed.cClass	= C_CLASS__TABULATED;
 		
 	}else{
-		fatal("Input file: Sound Speed: unknown sound class type.\nAborting...");
+		printf("Input file: Sound Speed: unknown sound class type: '%s'\n",tempString);
+		fatal("Aborting...");
 	}
 	free(tempString);
 
 	/* number of points in range and depth, "nr0,nz0" */
-	nr0 = (uint64_t)readInt(infile);
-	nz0 = (uint64_t)readInt(infile);
+	nr0 = (uint32_t)readInt(infile);
+	nz0 = (uint32_t)readInt(infile);
 	globals->settings.soundSpeed.nr0 = nr0;
 	globals->settings.soundSpeed.nz0 = nz0;
 
@@ -349,92 +355,99 @@ void	readIn(globals_t* globals, const char* filename){
 	//TODO complete object info section
 
 	skipLine(infile);
-	globals->settings.object.numObjects = (uint64_t)readInt(infile);
-	 
-	
+	globals->settings.object.numObjects = (uint32_t)readInt(infile);
+
+	/* only attempt to read object info if at least one object exists:	*/
+	if(globals->settings.object.numObjects > 0){
+		
+	}
 	/************************************************************************
 	 * Read and validate batimetry info:									*
 	 ***********************************************************************/
 	skipLine(infile);
 
 	/* surfaceType;	formerly "atype"	*/
-	tempString = readString(infile);
-	if(strcmp(tempString,"A") == 0){
+	tempString = readStringN(infile,5);
+	if(strcmp(tempString,"'A'\n") == 0){
 		globals->settings.batimetry.surfaceType	= SURFACE_TYPE__ABSORVENT;
 		
-	}else if(strcmp(tempString,"E") == 0){
+	}else if(strcmp(tempString,"'E'\n") == 0){
 		globals->settings.batimetry.surfaceType	= SURFACE_TYPE__ELASTIC;
 		
-	}else if(strcmp(tempString,"R") == 0){
+	}else if(strcmp(tempString,"'R'\n") == 0){
 		globals->settings.batimetry.surfaceType	= SURFACE_TYPE__RIGID;
 		
-	}else if(strcmp(tempString,"V") == 0){
+	}else if(strcmp(tempString,"'V'\n") == 0){
 		globals->settings.batimetry.surfaceType	= SURFACE_TYPE__VACUUM;
 		
 	}else{
-		fatal("Input file: batimetry: unknown surface type.\nAborting...");
+		printf("Input file: batimetry: unknown surface type: %s\n", tempString);
+		fatal("Aborting...");
 	}
 	free(tempString);
 
 	/* surfacePropertyType;		//formerly "aptype"	*/
-	tempString = readString(infile);
-	if(strcmp(tempString,"H") == 0){
+	tempString = readStringN(infile,5);
+	if(strcmp(tempString,"'H'\n") == 0){
 		globals->settings.batimetry.surfacePropertyType	= SURFACE_PROPERTY_TYPE__HOMOGENEOUS;
 		
-	}else if(strcmp(tempString,"N") == 0){
+	}else if(strcmp(tempString,"'N'\n") == 0){
 		globals->settings.batimetry.surfacePropertyType	= SURFACE_PROPERTY_TYPE__NON_HOMOGENEOUS;
 		
 	}else{
-		fatal("Input file: batimetry: unknown surface property type.\nAborting...");
+		printf("Input file: batimetry: unknown surface property type: %s\n", tempString);
+		fatal("Aborting...");
 	}
 	free(tempString);
 
 	/* surfaceInterpolation;	//formerly "aitype"	*/
-	tempString = readString(infile);
-	if(strcmp(tempString,"FL") == 0){
+	tempString = readStringN(infile,6);
+	if(strcmp(tempString,"'FL'\n") == 0){
 		globals->settings.batimetry.surfaceInterpolation	= SURFACE_INTERPOLATION__FLAT;
 		
-	}else if(strcmp(tempString,"SL") == 0){
+	}else if(strcmp(tempString,"'SL'\n") == 0){
 		globals->settings.batimetry.surfaceInterpolation	= SURFACE_INTERPOLATION__SLOPED;
 		
-	}else if(strcmp(tempString,"2P") == 0){
+	}else if(strcmp(tempString,"'2P'\n") == 0){
 		globals->settings.batimetry.surfaceInterpolation	= SURFACE_INTERPOLATION__2P;
 		
-	}else if(strcmp(tempString,"3P") == 0){
+	}else if(strcmp(tempString,"'3P'\n") == 0){
 		globals->settings.batimetry.surfaceInterpolation	= SURFACE_INTERPOLATION__3P;
 		
-	}else if(strcmp(tempString,"4P") == 0){
+	}else if(strcmp(tempString,"'4P'\n") == 0){
 		globals->settings.batimetry.surfaceInterpolation	= SURFACE_INTERPOLATION__4P;
 		
 	}else{
-		fatal("Input file: batimetry: unknown surface interpolation type.\nAborting...");
+		printf("Input file: batimetry: unknown surface interpolation type: %s\n", tempString);
+		fatal("Aborting...");
 	}
 	free(tempString);
 
 	/* surfaceAttenUnits;		//formerly "atiu"	*/
-	tempString = readString(infile);
-	if(strcmp(tempString,"F") == 0){
+	tempString = readStringN(infile,5);
+	if(strcmp(tempString,"'F'\n") == 0){
 		globals->settings.batimetry.surfaceAttenUnits	= SURFACE_ATTEN_UNITS__dBperkHz;
 		
-	}else if(strcmp(tempString,"M") == 0){
+	}else if(strcmp(tempString,"'M'\n") == 0){
 		globals->settings.batimetry.surfaceAttenUnits	= SURFACE_ATTEN_UNITS__dBperMeter;
 		
-	}else if(strcmp(tempString,"N") == 0){
+	}else if(strcmp(tempString,"'N'\n") == 0){
 		globals->settings.batimetry.surfaceAttenUnits	= SURFACE_ATTEN_UNITS__dBperNeper;
 		
-	}else if(strcmp(tempString,"Q") == 0){
+	}else if(strcmp(tempString,"'Q'\n") == 0){
 		globals->settings.batimetry.surfaceAttenUnits	= SURFACE_ATTEN_UNITS__qFactor;
 		
-	}else if(strcmp(tempString,"W") == 0){
+	}else if(strcmp(tempString,"'W'\n") == 0){
 		globals->settings.batimetry.surfaceAttenUnits	= SURFACE_ATTEN_UNITS__dBperLambda;
 		
 	}else{
-		fatal("Input file: batimetry: unknown surface attenuation units.\nAborting...");
+		printf("Input file: batimetry: unknown surface attenuation units: %s\n", tempString);
+		fatal("Aborting...");
 	}
 	free(tempString);
 
 	/* numSurfaceCoords;		//formerly "nati" */
-	numSurfaceCoords = (uint64_t)readInt(infile);
+	numSurfaceCoords = (uint32_t)readInt(infile);
 	globals->settings.batimetry.numSurfaceCoords = numSurfaceCoords;
 
 	//malloc interface coords
@@ -485,17 +498,17 @@ void	readIn(globals_t* globals, const char* filename){
 	 ***********************************************************************/
 	skipLine(infile);
 	/*	output array type "artype"	*/
-	tempString = readString(infile);
-	if(strcmp(tempString,"RRY") == 0){
+	tempString = readStringN(infile,6);
+	if(strcmp(tempString,"'RRY'") == 0){
 		globals->settings.output.arrayType	= ARRAY_TYPE__RECTANGULAR;
 		
-	}else if(strcmp(tempString,"HRY") == 0){
+	}else if(strcmp(tempString,"'HRY'") == 0){
 		globals->settings.output.arrayType	= ARRAY_TYPE__HORIZONTAL;
 		
-	}else if(strcmp(tempString,"VRY") == 0){
+	}else if(strcmp(tempString,"'VRY'") == 0){
 		globals->settings.output.arrayType	= ARRAY_TYPE__VERTICAL;
 		
-	}else if(strcmp(tempString,"LRY") == 0){
+	}else if(strcmp(tempString,"'LRY'") == 0){
 		globals->settings.output.arrayType	= ARRAY_TYPE__LINEAR;
 		
 	}else{
@@ -504,8 +517,8 @@ void	readIn(globals_t* globals, const char* filename){
 	free(tempString);
 	
 	/*	output array dimensions "nra, nrz"		*/
-	globals->settings.output.nArrayR = (uint64_t)readInt(infile);
-	globals->settings.output.nArrayZ = (uint64_t)readInt(infile);
+	globals->settings.output.nArrayR = (uint32_t)readInt(infile);
+	globals->settings.output.nArrayZ = (uint32_t)readInt(infile);
 
 	globals->settings.output.arrayR = mallocDouble(globals->settings.output.nArrayR);
 	globals->settings.output.arrayZ = mallocDouble(globals->settings.output.nArrayZ);
@@ -567,11 +580,11 @@ void	readIn(globals_t* globals, const char* filename){
 	globals->settings.output.miss = readDouble(infile);
 
 	/* Check batimetry/altimetry	*/
-	if(globals->settings.altimetry.r[0] < globals->settings.source.rbox1)
+	if(globals->settings.altimetry.r[0] > globals->settings.source.rbox1)
 		fatal("Minimum altimetry range > minimum rbox range.\nAborting...");
 	if(globals->settings.altimetry.r[globals->settings.altimetry.numSurfaceCoords-1] < globals->settings.source.rbox2)
 		fatal("Maximum altimetry range < maximum rbox range.\nAborting...");
-	if(globals->settings.batimetry.r[0] < globals->settings.source.rbox1)
+	if(globals->settings.batimetry.r[0] > globals->settings.source.rbox1)
 		fatal("Minimum batimetry range > minimum rbox range.\nAborting...");
 	if(globals->settings.batimetry.r[globals->settings.batimetry.numSurfaceCoords-1] < globals->settings.source.rbox2)
 		fatal("Maximum batimetry range < maximum rbox range.\nAborting...");

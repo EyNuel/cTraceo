@@ -19,10 +19,6 @@
 //	parameter (inpfil=1,outfil=2,prtfil=3)
 //	parameter (nangle=10000,nc0=5001,nc02d=1001,nbdry=5001)
 //	parameter (nhyd=5001,nhyd2=1001,nmaxo=21,npo=201,np=20001,np2=201)
-#define MAX_NUM_ANGLES	10000	//"nangle"
-#define NBDRY			5001	//"nbdry"	DISCUSS: what does this stand for?
-#define NC0				5001	//"nc0"		DISCUSS: what does this stand for? (max number of points for sound speed profile (1 dimemsion))
-#define	NC02D			1001	//"nc02d"	(max number of points for sound speed field (2 dimemsions))
 
 //basics:
 #define	TRUE	1
@@ -37,7 +33,7 @@ typedef struct source{
 	double		rx,zx;			//source coords
 	double		rbox1, rbox2;	//the box that limits the range of the rays
 	double		freqx;			//source frequency
-	uint64_t	nThetas;		//number of launching angles
+	uint32_t	nThetas;		//number of launching angles
 	double		theta1, thetaN;	//first and last launching angle
 	double		dTheta;			//the increment between launching angles
 	double*		thetas;			//the array that will actually contain the launching angles (is allocated in "readin.c")
@@ -60,14 +56,14 @@ typedef struct interface{
 		Used for both the "bathymetry" as well as "altimetry" block
 	*/
 	//See #defines following this block for possible values
-	int64_t					surfaceType;			//formerly "atype"
-	int64_t					surfacePropertyType;	//formerly "aptype"
+	uint32_t				surfaceType;			//formerly "atype"
+	uint32_t				surfacePropertyType;	//formerly "aptype"
 	double*					r;						//"rati(n)"				|
 	double*					z;						//"zati(n)"				 }	these pointers are mallocced in "readin.c"
 	interfaceProperties_t*	surfaceProperties;		//contains the actual 	|
-	int64_t					surfaceInterpolation;	//formerly "aitype"
-	int64_t					surfaceAttenUnits;		//formerly "atiu"
-	uint64_t				numSurfaceCoords;		//formerly "nati"
+	uint32_t				surfaceInterpolation;	//formerly "aitype"
+	uint32_t				surfaceAttenUnits;		//formerly "atiu"
+	uint32_t				numSurfaceCoords;		//formerly "nati"
 }interface_t;
 
 //possible values for surfaceType (see page 38, TraceO manual):
@@ -96,9 +92,9 @@ typedef struct interface{
 
 
 typedef struct soundSpeed{
-	uint64_t	cDist;			//"cdist", type of sound speed distribution
-	uint64_t	cClass;			//"cclass", class of sound speed
-	uint64_t	nr0, nz0;		//"nr0,nz0", number of points in range and depth
+	uint32_t	cDist;			//"cdist", type of sound speed distribution
+	uint32_t	cClass;			//"cclass", class of sound speed
+	uint32_t	nr0, nz0;		//"nr0,nz0", number of points in range and depth
 	double*		z0;				//"z0",	depth
 	double*		r0;				//"r0", range
 	double*		c01d;			//"c0", sound speed at (z0)
@@ -123,13 +119,18 @@ typedef struct soundSpeed{
 
 typedef struct object{
 	//TODO: define _object structure (see pages 42,43)
-	uint64_t	numObjects;
+	uint32_t				numObjects;				//"nobj"
+	uint32_t				surfaceInterpolation;	//"oitype", Object interpolation type
+	uint32_t				surfaceType;			//"otype",	Object surface type (rigid, aboservent, etc), as defined for interface_t
+	uint32_t				surfaceAttenUnits;		//"obju",	attenuation units, as define for interface_t
+	interfaceProperties_t*	surfaceProperties;		//"ocp(n)", cp, cs, rho, ap, as for each object
+	
 }object_t;
 
 typedef struct output{
-	uint64_t	calcType;			//"catype"
-	uint64_t	arrayType;			//"artype"
-	uint64_t	nArrayR, nArrayZ;	//"nra", "nrz"
+	uint32_t	calcType;			//"catype"
+	uint32_t	arrayType;			//"artype"
+	uint32_t	nArrayR, nArrayZ;	//"nra", "nrz"
 	double*		arrayR;				//"nra"			Array size in R
 	double*		arrayZ;				//"nrz"			Array size in Z
 	double		miss;				//"miss"		threshold for finding eigenrays

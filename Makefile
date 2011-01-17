@@ -13,7 +13,7 @@ CFLAGS := -Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align \
 # -L /usr/local/matlabr14/bin/glnxa64 -leng -lmat -lmex -lut -Wl,-rpath,/usr/local/matlabr14/bin/glnxa64
 
 # Define the compiler and linker comands to use:
-CC 			:= clang
+CC 			:= gcc
 LINK 		:= $(CC) $(LFLAGS) -o 
 COMPLINK 	:= $(CC) $(CFLAGS) $(LFLAGS) -o $@
 
@@ -46,7 +46,9 @@ ALLFILES := $(SRCFILES) $(HDRFILES) $(AUXFILES)
 
 all:	#cTraceo.exe
 		@$(CC) $(CFLAGS) -o cTraceo.exe ctraceo.c
-		
+
+32b:	#cTraceo.exe
+		@$(CC) $(CFLAGS) -march=i686 -m32 -o cTraceo.exe ctraceo.c
 
 todo:	#list todos from all files
 		@for file in $(ALLFILES); do fgrep -H -e TODO $$file; done; true
@@ -54,4 +56,7 @@ todo:	#list todos from all files
 discuss:	#list discussion points from all files
 		@for file in $(ALLFILES); do fgrep -H -e DISCUSS $$file; done; true
 		
-		
+dist:	all
+		@tar -czf cTraceo.tgz Makefile ctraceo.c globals.h readin.c tools.c
+
+dist32:	32b dist
