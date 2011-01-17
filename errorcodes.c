@@ -1,5 +1,6 @@
 /********************************************************
 *	"errorcodes.c"										*
+* 	TODO replace occurrences of printMsg() with fatal()	*
 *	Provides a helper function to print error messages.	*
 *	See "errocodes.h" for the actual error codes.		*
 ********************************************************/
