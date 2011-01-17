@@ -6,7 +6,7 @@
 CFLAGS := -Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align \
 			-Wwrite-strings -Wmissing-prototypes -Wmissing-declarations \
 			-Wredundant-decls -Wnested-externs -Winline -Wno-long-long \
-			-Wconversion -Wstrict-prototypes \
+			-Wconversion -Wstrict-prototypes -std=gnu99\
 			-I /usr/local/matlabr14/extern/include \
 #			-D_GNU_SOURCE
 # LFLAGS := 	
@@ -46,32 +46,12 @@ ALLFILES := $(SRCFILES) $(HDRFILES) $(AUXFILES)
 
 all:	#cTraceo.exe
 		@$(CC) $(CFLAGS) -o cTraceo.exe ctraceo.c
-#		@rm *.o
-#		@echo ".c files: " $(SRCFILES)
-#		@echo ".o files: " $(OBJFILES)
 		
-cTraceo.exe:	#$(OBJFILES)
-				#$(CC) -o cTraceo.exe ctraceo.c
 
-#		@$(CC) $(OBJFILES) -o cTraceo.exe				
 todo:	#list todos from all files
 		@for file in $(ALLFILES); do fgrep -H -e TODO $$file; done; true
 
 discuss:	#list discussion points from all files
 		@for file in $(ALLFILES); do fgrep -H -e DISCUSS $$file; done; true
 		
-#%.o:	%.c Makefile	#Automagically create depencies
-#		@$(CC) $(CFLAGS) -DNDEBUG -MMD -MP -MT "$*.d $*.o" -g -std=c99 -c $< -o $@ #-I./includes -I./internals
-
-#%:		%.o
-#		$(LINK)
-
-#%:		%.c
-#		$(COMPLINK)
-
-
-
-
-
-
 		
