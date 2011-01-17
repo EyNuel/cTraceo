@@ -565,6 +565,17 @@ void	readIn(globals_t* globals, const char* filename){
 
 	/*	output calculation type "catype"	*/
 	globals->settings.output.miss = readDouble(infile);
+
+	/* Check batimetry/altimetry	*/
+	if(globals->settings.altimetry.r[0] < globals->settings.source.rbox1)
+		fatal("Minimum altimetry range > minimum rbox range.\nAborting...");
+	if(globals->settings.altimetry.r[globals->settings.altimetry.numSurfaceCoords-1] < globals->settings.source.rbox2)
+		fatal("Maximum altimetry range < maximum rbox range.\nAborting...");
+	if(globals->settings.batimetry.r[0] < globals->settings.source.rbox1)
+		fatal("Minimum batimetry range > minimum rbox range.\nAborting...");
+	if(globals->settings.batimetry.r[globals->settings.batimetry.numSurfaceCoords-1] < globals->settings.source.rbox2)
+		fatal("Maximum batimetry range < maximum rbox range.\nAborting...");
+	
 }
 /*
 c***********************************************************************
@@ -607,216 +618,5 @@ c***********************************************************************
        end do
        
        end if
-
-c***********************************************************************
-c     Read bathymetry info:
-c***********************************************************************
-
-       read(inpfil,*)
-       read(inpfil,*)  btype
-       read(inpfil,*) bptype
-       read(inpfil,*) bitype
-       read(inpfil,*) btyu
-       read(inpfil,*) nbty
-       
-c-----------------------------------------------------------------------
-       if ((bitype.ne.'2P').and.(bitype.ne.'3P').and.(bitype.ne.'4P').
-     & and.(bitype.ne.'FL').and.(bitype.ne.'SL')) then
-      
-          write(6,*) 'Bottom interpolation:'
-          write(6,*) 'unknown interpolation type,'
-          write(6,*) 'aborting calculations...'
-          stop
-      
-       end if
-c-----------------------------------------------------------------------
-       if (nbty.gt.nbdry) then
-
-           write(6,*) 'bathymetry points  > ',nbdry,'!'
-	       write(6,*) 'aborting calculations...'
-           stop
-           
-       end if
-c-----------------------------------------------------------------------
-       if ((btyu.ne.'F').and.(btyu.ne.'M').and.(btyu.ne.'N').
-     & and.(btyu.ne.'Q').and.(btyu.ne.'W')) then
-      
-          write(6,*) 'Bottom attenuation: unknown units,'
-          write(6,*) 'aborting calculations...'
-          stop
-      
-       end if
-c-----------------------------------------------------------------------
-       if (bptype.eq.'H') then
-	  
-	   read(inpfil,*) cpbty(1), csbty(1), rhobty(1), 
-     &                apbty(1), asbty(1)
-	   
-       do i = 1,nbty
-          
-	      read(inpfil,*) rbty(i), zbty(i)
-          
-       end do
-       
-       else if (bptype.eq.'N') then
-	        
-       do i = 1,nbty
-          
-	   read(inpfil,*) rbty(i),  zbty(i), cpbty(i), csbty(i),
-     &                  rhobty(i), apbty(i), asbty(i)
-          
-       end do
-       
-       else
-       
-           write(6,*) 'inpfil: Unknown bottom properties,'
-           write(6,*) 'aborting calculations...'
-           stop
-
-       end if
-
-c***********************************************************************
-c     Read array info:
-c***********************************************************************
-
-       read(inpfil,*)
-       read(inpfil,*) artype
-       read(inpfil,*) nra,nza
-
-c-----------------------------------------------------------------------
-
-c      Horizontal, Linear, Vertical or Rectangular Array:
-
-       if (artype.eq.'HRY') then
-
-	     if (nra.gt.nhyd) then
-
- 	       close(inpfil)
- 	       write(6,*) 'inpfil: horizontal array NHYD > ',nhyd,'!'
- 	       write(6,*) 'aborting calculations...'
- 	       stop 
-         
-         else
-	     
-	       read(inpfil,*) (rarray(i),i=1,nra)
-	       read(inpfil,*)  zarray(1)
-
-         end if
-         
-       elseif (artype.eq.'VRY') then
-
-	     if (nza.gt.nhyd) then
-
- 	       close(inpfil)
- 	       write(6,*) 'inpfil: vertical array NHYD > ',nhyd,'!'
- 	       write(6,*) 'aborting calculations...'
- 	       stop
-         
-         else
-	     
-	       read(inpfil,*)  rarray(1)
-	       read(inpfil,*) (zarray(i),i=1,nza)
-         
-         end if
-
-       elseif (artype.eq.'LRY') then
-         
-         nra = max(nra,nza)
-         nza = nra  
-         
-	     if (nra.gt.nhyd) then
-
- 	       close(inpfil)
- 	       write(6,*) 'inpfil: linear array NHYD > ',nhyd,'!'
- 	       write(6,*) 'aborting calculations...'
- 	       stop
-         
-         else
-         
-           read(inpfil,*) (rarray(i),i=1,nra)
-           read(inpfil,*) (zarray(i),i=1,nra)          
-         
-         end if
-         
-       elseif (artype.eq.'RRY') then
-         
-         if (nra.gt.nhyd2) then
-
- 	       close(inpfil)
- 	       write(6,*) 'inpfil, rectangular array:'
- 	       write(6,*) 'horizontal NHYD > ',nhyd2,'!'
- 	       write(6,*) 'aborting calculations...'
- 	       stop
-         
-         end if
-	     
-	 if (nza.gt.nhyd2) then
-
- 	       close(inpfil)
- 	       write(6,*) 'inpfil, rectangular array:'
- 	       write(6,*) 'vertical NHYD > ',nhyd2,'!'
- 	       write(6,*) 'aborting calculations...'
- 	       stop
-         
-         else
-         
-           read(inpfil,*) (rarray(i),i=1,nra)
-	   read(inpfil,*) (zarray(i),i=1,nza)
-         
-         end if
-       
-       else 
-       
-           write(6,*) 'inpfil: unknown array type,'
- 	   write(6,*) 'aborting calculations...'
-       end if 
-
-c***********************************************************************
-c     Read output info:
-c***********************************************************************
-       
-       read(inpfil,*)
-       read(inpfil,*) catype
-       read(inpfil,*) miss
-       
-c***********************************************************************
-c     Bathymetry/altimetry check:
-c***********************************************************************
-
-       if (rati(1).gt.rbox(1)) then
-        write(6,*) 'inpfil: minimal altimetry range >'
-        write(6,*) 'inpfil: minimal box       range!'
-        write(6,*) 'aborting calculations...'
-        stop
-       end if 
-       
-       if (rati(nati).lt.rbox(2)) then
-        write(6,*) 'inpfil: maximal altimetry range <'
-        write(6,*) 'inpfil: maximal box       range!'
-        write(6,*) 'aborting calculations...'
-        stop
-       end if 
-     
-       if (rbty(1).gt.rbox(1)) then
-        write(6,*) 'inpfil: minimal bathymetry range >'
-        write(6,*) 'inpfil: minimal box        range!'
-        write(6,*) 'aborting calculations...'
-        stop
-       end if
-       
-       if (rbty(nbty).lt.rbox(2)) then
-        write(6,*) 'inpfil: maximal bathymetry range <'
-        write(6,*) 'inpfil: maximal box        range!'
-        write(6,*) 'aborting calculations...'
-        stop
-       end if
-       
-c***********************************************************************
-c     Back to main:
-c***********************************************************************
-
-      return
-      
-      end
 */
 
