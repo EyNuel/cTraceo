@@ -39,6 +39,7 @@ typedef struct source{
 	double		freqx;			//source frequency
 	uint64_t	nThetas;		//number of launching angles
 	double		theta1, thetaN;	//first and last launching angle
+	double		dTheta;			//the increment between launching angles
 	double*		thetas;			//the array that will actually contain the launching angles (is allocated in "readin.c")
 }source_t;
 
@@ -54,7 +55,7 @@ typedef struct interfaceProperties{
 	double		as;		//"asati"	shear attenuation
 }interfaceProperties_t;
 
-typedef struct surface{
+typedef struct interface{
 	/*
 		Used for both the "bathymetry" as well as "altimetry" block
 	*/
@@ -67,7 +68,7 @@ typedef struct surface{
 	int64_t					surfaceInterpolation;	//formerly "aitype"
 	int64_t					surfaceAttenUnits;		//formerly "atiu"
 	uint64_t				numSurfaceCoords;		//formerly "nati"
-}surface_t;
+}interface_t;
 
 //possible values for surfaceType (see page 38, TraceO manual):
 #define SURFACE_TYPE__ABSORVENT	1	//formerly "A"
@@ -82,22 +83,22 @@ typedef struct surface{
 //possible values for surfaceInterpolation (see page 38, Traceo manual):
 #define SURFACE_INTERPOLATION__FLAT		7	//"FL", flat surface
 #define SURFACE_INTERPOLATION__SLOPED	8	//"SL", sloped surface
-#define SURFACE_INTERPOLATION__2P		9	//"SL", piecewise linear interpolation
-#define SURFACE_INTERPOLATION__3P		10	//"SL", piecewise parabolic interpolation
-#define SURFACE_INTERPOLATION__4P		11	//"SL", piecewise cubic interpolation
+#define SURFACE_INTERPOLATION__2P		9	//"2P", piecewise linear interpolation
+#define SURFACE_INTERPOLATION__3P		10	//"3P", piecewise parabolic interpolation
+#define SURFACE_INTERPOLATION__4P		11	//"4P", piecewise cubic interpolation
 
 //possible values for attenUnits (see page 39, Traceo manual):
 #define	SURFACE_ATTEN_UNITS__dBperkHz		12	//"F",	dB/kHz
 #define	SURFACE_ATTEN_UNITS__dBperMeter		13	//"M",	dB/meter
 #define	SURFACE_ATTEN_UNITS__dBperNeper		14	//"N",	dB/neper
-#define	SURFACE_ATTEN_UNITS__qFactor		15	//"q",	Q factor
+#define	SURFACE_ATTEN_UNITS__qFactor		15	//"Q",	Q factor
 #define	SURFACE_ATTEN_UNITS__dBperLambda	16	//"W",	dB/<lambda>
 
 
 typedef struct soundSpeed{
-	uint64_t		cDist;			//"cdist", type of sound speed distribution
-	uint64_t		cClass;			//"cclass", class of sound speed
-	uint64_t		nr0, nz0;		//"nr0,nz0", number of points in range and depth
+	uint64_t	cDist;			//"cdist", type of sound speed distribution
+	uint64_t	cClass;			//"cclass", class of sound speed
+	uint64_t	nr0, nz0;		//"nr0,nz0", number of points in range and depth
 	double*		z0;				//"z0",	depth
 	double*		r0;				//"r0", range
 	double*		c01d;			//"c0", sound speed at (z0)
@@ -119,14 +120,19 @@ typedef struct soundSpeed{
 #define C_CLASS__TABULATED			26	//"TBAL"
 
 
-/*
-typedef struct _object{
+
+typedef struct object{
 	//TODO: define _object structure (see pages 42,43)
-}
-*/
+	uint64_t	numObjects;
+}object_t;
+
 typedef struct output{
-	int64_t	calcType;	//"catype"
-	int64_t	arrayType;			//"artype"
+	uint64_t	calcType;			//"catype"
+	uint64_t	arrayType;			//"artype"
+	uint64_t	nArrayR, nArrayZ;	//"nra", "nrz"
+	double*		arrayR;				//"nra"			Array size in R
+	double*		arrayZ;				//"nrz"			Array size in Z
+	double		miss;				//"miss"		threshold for finding eigenrays
 }output_t;
 
 //possible values for calculationType (see page 43)
@@ -151,10 +157,10 @@ typedef struct output{
 typedef struct settings {
 	char*			cTitle;
 	source_t		source;
-	surface_t		altimetry;
+	interface_t		altimetry;
 	soundSpeed_t	soundSpeed;
-//	_object			object;
-	surface_t		bathymetry;
+	object_t		object;
+	interface_t		batimetry;
 	output_t		output;
 }settings_t;
 

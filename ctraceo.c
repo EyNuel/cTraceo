@@ -1,11 +1,10 @@
 /***********************************************************************
  * ctraceo.c
-* Main ctraceo file
-***********************************************************************/
+ * Main ctraceo file
+ ***********************************************************************/
 #include <stdio.h>
 #include "errorcodes.h"
 #include "globals.h"
-#include "globals.c"
 #include "readin.c"
 
 
@@ -15,16 +14,21 @@ int main(int argc, char **argv)
 	globals_t*	globals = NULL;
 	globals = mallocGlobals();
 
+    // check if a command line argument was passed:
 	if(argc == 2){
+        //if so, try to use it as an inout file
 		infile = argv[1];
 	}else{
+        //otherwise, open the standard file.
 		infile = "munk.in";
 	}
 		
 	if (VERBOSE)
 		printf("Running cTraceo in verbose mode.\n\n");
 	readIn(globals, infile);
-	//printf("title in main: %s\n", globals->settings->cTitle);
+
+    if (VERBOSE)
+		printSettings(globals);
 	return 0;
 }
 /*

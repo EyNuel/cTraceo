@@ -18,6 +18,7 @@ globals_t*	mallocGlobals(void);
 double 		readDouble(FILE*);
 int64_t		readInt(FILE*);
 char*		readString(FILE*);
+char*		readStringN(FILE*, uint64_t);
 void		skipLine(FILE*);
 void		printSettings(globals_t*);
 
@@ -143,9 +144,12 @@ globals_t* 	mallocGlobals(void){
 	globals->settings.altimetry.z = NULL;
 	globals->settings.altimetry.surfaceProperties = NULL;
 
-	globals->settings.bathymetry.r = NULL;
-	globals->settings.bathymetry.z = NULL;
-	globals->settings.bathymetry.surfaceProperties = NULL;
+	globals->settings.batimetry.r = NULL;
+	globals->settings.batimetry.z = NULL;
+	globals->settings.batimetry.surfaceProperties = NULL;
+
+	globals->settings.output.arrayR = NULL;
+	globals->settings.output.arrayZ = NULL;
 
 	return(globals);
 }
@@ -193,13 +197,26 @@ char*		readString(FILE* infile){
 
 	//if we assume that the file is correctly formatted,
 	//there will be a single quote at the beginning and at the end of a line.
-	//So we copy the string for position 1 till 2 positions from end (thus stripping ' and \n ):
+	//So we copy the string for position 1 utill 2 positions from end (thus stripping ' and \n ):
 	fgets(inputString, MAX_LINE_LEN+1, infile);
 
 	outputString = mallocChar(strlen(inputString)-2);
 	strncpy(outputString, inputString + 1, strlen(inputString)-3);
+	//outputString[strlen(inputString)-3] = "^@";	//set last element of string to be "NULL"
 	free(inputString);
 	
+	return(outputString);
+}
+
+char*		readStringN(FILE* infile, uint64_t length){
+	/********************************************************************
+	 *	Reads a <lenght> chars from a filestream.						*
+	 *******************************************************************/
+	//TODO: replace readString() by readStringN()
+	char*		outputString = NULL;
+	outputString = mallocChar(MAX_LINE_LEN + 1);
+
+	fgets(outputString, (int32_t)length, infile);
 	return(outputString);
 }
 
@@ -246,6 +263,7 @@ void		printSettings(globals_t*	globals){
 			break;
 		case SURFACE_TYPE__RIGID:
 			printf("Rigid\n");
+			break;
 		case SURFACE_TYPE__VACUUM:
 			printf("Vacuum\n");
 			break;
@@ -321,5 +339,147 @@ void		printSettings(globals_t*	globals){
 			break;
 	}
 
+	/* sound speed block */
+	printf("settings.object.numObjects:\t%ld\n",globals->settings.object.numObjects);
+	/*	object block	*/
 	
+	/* batimetry block	*/
+	printf("settings.batimetry.surfaceType: \t");
+	switch(globals->settings.batimetry.surfaceType){
+		case SURFACE_TYPE__ABSORVENT:
+			printf("Absorvent\n");
+			break;
+		case SURFACE_TYPE__ELASTIC:
+			printf("Elastic\n");
+			break;
+		case SURFACE_TYPE__RIGID:
+			printf("Rigid\n");
+			break;
+		case SURFACE_TYPE__VACUUM:
+			printf("Vacuum\n");
+			break;
+	}
+
+	printf("settings.batimetry.surfacePropertyType: ");
+	switch(globals->settings.batimetry.surfacePropertyType){
+		case SURFACE_PROPERTY_TYPE__HOMOGENEOUS:
+			printf("Homogeneous\n");
+			break;
+		case SURFACE_PROPERTY_TYPE__NON_HOMOGENEOUS:
+			printf("Non-Homogeneous\n");
+			break;
+	}
+
+	printf("settings.batimetry.surfaceInterpolation:");
+	switch(globals->settings.batimetry.surfaceInterpolation){
+		case SURFACE_INTERPOLATION__FLAT:
+			printf("Flat\n");
+			break;
+		case SURFACE_INTERPOLATION__SLOPED:
+			printf("Sloped\n");
+			break;
+		case SURFACE_INTERPOLATION__2P:
+			printf("2P -Piecewise Linear Interpolation\n");
+			break;
+		case SURFACE_INTERPOLATION__3P:
+			printf("3P -Piecewise Parabolic Interpolation\n");
+			break;
+		case SURFACE_INTERPOLATION__4P:
+			printf("4P -Piecewise Cubic Interpolation\n");
+			break;
+	}
+
+	printf("settings.batimetry.surfaceAttenUnits: \t");
+	switch(globals->settings.batimetry.surfaceAttenUnits){
+		case SURFACE_ATTEN_UNITS__dBperkHz:
+			printf("dB/kHz\n");
+			break;
+		case SURFACE_ATTEN_UNITS__dBperMeter:
+			printf("dB/meter\n");
+			break;
+		case SURFACE_ATTEN_UNITS__dBperNeper:
+			printf("dB/neper\n");
+			break;
+		case SURFACE_ATTEN_UNITS__qFactor:
+			printf("Q factor\n");
+			break;
+		case SURFACE_ATTEN_UNITS__dBperLambda:
+			printf("dB/<lambda>\n");
+			break;
+	}
+
+	printf("settings.batimetry.numSurfaceCoords:\t%ld\n", globals->settings.batimetry.numSurfaceCoords);
+
+	printf("settings.batimetry.surfaceProperties:	");
+	switch(globals->settings.batimetry.surfacePropertyType){
+		case SURFACE_PROPERTY_TYPE__HOMOGENEOUS:
+			printf("cp:%lf; ",	globals->settings.batimetry.surfaceProperties[0].cp);
+			printf("cs:%lf; ",	globals->settings.batimetry.surfaceProperties[0].cs);
+			printf("rho:%lf; ",	globals->settings.batimetry.surfaceProperties[0].rho);
+			printf("ap:%lf; ",	globals->settings.batimetry.surfaceProperties[0].ap);
+			printf("as:%lf;\n",	globals->settings.batimetry.surfaceProperties[0].as);
+			break;
+		case SURFACE_PROPERTY_TYPE__NON_HOMOGENEOUS:
+			for(i=0; i<globals->settings.batimetry.numSurfaceCoords; i++){
+				printf("cp:%lf; ",	globals->settings.batimetry.surfaceProperties[i].cp);
+				printf("cs:%lf; ",	globals->settings.batimetry.surfaceProperties[i].cs);
+				printf("rho:%lf; ",	globals->settings.batimetry.surfaceProperties[i].rho);
+				printf("ap:%lf; ",	globals->settings.batimetry.surfaceProperties[i].ap);
+				printf("as:%lf;\n",	globals->settings.batimetry.surfaceProperties[i].as);
+			}
+			break;
+	}
+
+	printf("settings.output.arrayType: \t");
+	switch(globals->settings.output.arrayType){
+		case ARRAY_TYPE__RECTANGULAR:
+			printf("Rectangular\n");
+			break;
+		case ARRAY_TYPE__HORIZONTAL:
+			printf("Horizontal\n");
+			break;
+		case ARRAY_TYPE__VERTICAL:
+			printf("Vertical\n");
+			break;
+		case ARRAY_TYPE__LINEAR:
+			printf("Linear\n");
+			break;
+	}
+	printf("settings.output.nArrayR: \t%ld\n",globals->settings.output.nArrayR);
+	printf("settings.output.nArrayZ: \t%ld\n",globals->settings.output.nArrayZ);
+
+	printf("settings.output.calcType: \t");
+	switch(globals->settings.output.calcType){
+		case CALC_TYPE__RAY_COORDS:
+			printf("Ray Coordinates\n");
+			break;
+		case CALC_TYPE__ALL_RAY_INFO:
+			printf("All ray information\n");
+			break;
+		case CALC_TYPE__EIGENRAYS_REG_FALSI:
+			printf("Eigenrays using Regula Falsi\n");
+			break;
+		case CALC_TYPE__EIGENRAYS_PROXIMITY:
+			printf("Eigenrays using Proximity method\n");
+			break;
+		case CALC_TYPE__AMP_DELAY_REG_FALSI:
+			printf("Amplitudes and Delays using Regula Falsi\n");
+			break;
+		case CALC_TYPE__AMP_DELAY_PROXIMITY:
+			printf("Amplitudes and Delays using Proximity method\n");
+			break;
+		case CALC_TYPE__COH_ACOUS_PRESS:
+			printf("Coherent Acoustic Pressure\n");
+			break;
+		case CALC_TYPE__COH_TRANS_LOSS:
+			printf("Coherent Transmission loss\n");
+			break;
+		case CALC_TYPE__COH_PART_VEL:
+			printf("Coherent Particle Velocity\n");
+			break;
+		case CALC_TYPE__COH_ACOUS_PRESS_PART_VEL:
+			printf("Coherent Acoustic Pressure and Particle Velocity\n");
+			break;
+	}
+	printf("settings.output.miss: \t%12.5lf\n",globals->settings.output.miss);
 }
