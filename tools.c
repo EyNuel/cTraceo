@@ -12,11 +12,9 @@ FILE*		openFile(const char* , const char[4]);
 char*		mallocChar(uintptr_t);
 double*		mallocDouble(uintptr_t);
 double**	mallocDouble2D(uintptr_t, uintptr_t);
-settings_t*	mallocSettings(void);
 globals_t*	mallocGlobals(void);
 double 		readDouble(FILE*);
 int32_t		readInt(FILE*);
-char*		readString(FILE*);
 char*		readStringN(FILE*, uint32_t);
 void		skipLine(FILE*);
 void		printSettings(globals_t*);
@@ -110,26 +108,6 @@ double**	mallocDouble2D(uintptr_t numRows, uintptr_t numCols){
 	return array;
 }
 
-	//TODO can mallocSettings() be removed safely?
-settings_t*	mallocSettings(void){
-	/*
-		Allocate memory for a settings structure.
-		Return pointer in case o success, exit with error code otherwise.
-	*/
-	
-	settings_t*	settings = NULL;
-	settings = malloc(sizeof(settings_t));
-	if (settings == NULL){
-		fatal("Memory allocation error.\n");
-	}
-	settings->cTitle = NULL;
-	settings->cTitle = malloc( (MAX_LINE_LEN + 1) * sizeof(char));
-	if (settings->cTitle == NULL){
-		fatal("Memory allocation error.\n");
-	}
-	return settings;
-}
-
 globals_t* 	mallocGlobals(void){
 	/*
 		Allocate memory for a globals structure.
@@ -188,28 +166,6 @@ int32_t		readInt(FILE* infile){
 	free(junkString);
 	
 	return(tempInt);
-}
-
-char*		readString(FILE* infile){
-	/********************************************************************
-	 *	Reads a line from a file, strips quotes and return it content.	*
-	 *******************************************************************/
-	 
-	char*		inputString = NULL;
-	char*		outputString = NULL;
-	inputString = mallocChar((uintptr_t)(MAX_LINE_LEN + 1));
-
-	//if we assume that the file is correctly formatted,
-	//there will be a single quote at the beginning and at the end of a line.
-	//So we copy the string for position 1 utill 2 positions from end (thus stripping ' and \n ):
-	fgets(inputString, MAX_LINE_LEN+1, infile);
-
-	outputString = mallocChar((uintptr_t)(strlen(inputString)-2));
-	strncpy(outputString, inputString + 1, strlen(inputString)-3);
-	//outputString[strlen(inputString)-3] = "^@";	//set last element of string to be "NULL"
-	free(inputString);
-	
-	return(outputString);
 }
 
 char*		readStringN(FILE* infile, uint32_t length){
