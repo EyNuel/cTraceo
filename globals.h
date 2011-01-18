@@ -116,16 +116,31 @@ typedef struct soundSpeed{
 #define C_CLASS__TABULATED			26	//"TBAL"
 
 
-
 typedef struct object{
-	//TODO: define _object structure (see pages 42,43)
-	uint32_t				numObjects;				//"nobj"
-	uint32_t				surfaceInterpolation;	//"oitype", Object interpolation type
-	uint32_t				surfaceType;			//"otype",	Object surface type (rigid, aboservent, etc), as defined for interface_t
-	uint32_t				surfaceAttenUnits;		//"obju",	attenuation units, as define for interface_t
-	interfaceProperties_t*	surfaceProperties;		//"ocp(n)", cp, cs, rho, ap, as for each object
-	
+	/*
+	 * contains all information regarding a specific object.
+	 */
+	uint32_t				surfaceType;			//"otype",		Object surface type (rigid, aboservent, etc), as defined for interface_t
+	uint32_t				surfaceAttenUnits;		//"obju",		attenuation units, as define for interface_t
+	double					cp;						//"cpati",		compressional speed
+	double					cs;						//"csati",		shear speed
+	double					rho;					//"rhoati",		density
+	double					ap;						//"apati",		compressional attenuation
+	double					as;						//"asati",		shear attenuation
+	uint32_t				nCoords;				//"no",			number of coordinates
+	double*					r;						//"ro"		|
+	double*					zDown;					//"zdn"		 >	actual coordinates that define the object geometry
+	double*					zUp;					//"zup"		|
 }object_t;
+
+typedef struct objects{
+	/*
+	 * contains common object information as well as a pointer to an array with the actual object information.
+	 */
+	uint32_t	numObjects;				//"nobj"
+	uint32_t	surfaceInterpolation;	//"oitype", Object interpolation type
+	object_t*	object;
+}objects_t;
 
 typedef struct output{
 	uint32_t	calcType;			//"catype"
@@ -160,7 +175,7 @@ typedef struct settings {
 	source_t		source;
 	interface_t		altimetry;
 	soundSpeed_t	soundSpeed;
-	object_t		object;
+	objects_t		objects;
 	interface_t		batimetry;
 	output_t		output;
 }settings_t;

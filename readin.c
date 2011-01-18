@@ -355,12 +355,85 @@ void	readIn(globals_t* globals, const char* filename){
 	//TODO complete object info section
 
 	skipLine(infile);
-	globals->settings.object.numObjects = (uint32_t)readInt(infile);
+	globals->settings.objects.numObjects = (uint32_t)readInt(infile);
 
 	/* only attempt to read object info if at least one object exists:	*/
-	if(globals->settings.object.numObjects > 0){
-		
+	if(globals->settings.objects.numObjects > 0){
+		//malloc memory for the objects:
+		globals->settings.objects.object = malloc((uintptr_t)globals->settings.objects.numObjects * sizeof(object_t));
+		if (globals->settings.objects.object == NULL)
+			fatal("Memory allocation error.");
+			
+		for(i=0; i<globals->settings.objects.numObjects; i++){
+			/*	surfaceType		*/
+			tempString = readStringN(infile,5);
+			if(strcmp(tempString,"'A'\n") == 0){
+				globals->settings.objects.object[i].surfaceType	= SURFACE_TYPE__ABSORVENT;
+				
+			}else if(strcmp(tempString,"'E'\n") == 0){
+				globals->settings.objects.object[i].surfaceType	= SURFACE_TYPE__ELASTIC;
+				
+			}else if(strcmp(tempString,"'R'\n") == 0){
+				globals->settings.objects.object[i].surfaceType	= SURFACE_TYPE__RIGID;
+				
+			}else if(strcmp(tempString,"'V'\n") == 0){
+				globals->settings.objects.object[i].surfaceType	= SURFACE_TYPE__VACUUM;
+				
+			}else{
+				printf("Input file: Object %u: unknown surface type: %s\n", i, tempString);
+				fatal("Aborting...");
+			}
+			free(tempString);
+			
+			/* surfaceAttenUnits	*/
+			tempString = readStringN(infile,5);
+			if(strcmp(tempString,"'F'\n") == 0){
+				globals->settings.batimetry.surfaceAttenUnits	= SURFACE_ATTEN_UNITS__dBperkHz;
+				
+			}else if(strcmp(tempString,"'M'\n") == 0){
+				globals->settings.batimetry.surfaceAttenUnits	= SURFACE_ATTEN_UNITS__dBperMeter;
+				
+			}else if(strcmp(tempString,"'N'\n") == 0){
+				globals->settings.batimetry.surfaceAttenUnits	= SURFACE_ATTEN_UNITS__dBperNeper;
+				
+			}else if(strcmp(tempString,"'Q'\n") == 0){
+				globals->settings.batimetry.surfaceAttenUnits	= SURFACE_ATTEN_UNITS__qFactor;
+				
+			}else if(strcmp(tempString,"'W'\n") == 0){
+				globals->settings.batimetry.surfaceAttenUnits	= SURFACE_ATTEN_UNITS__dBperLambda;
+				
+			}else{
+				printf("Input file: Object %u: unknown surface attenuation units: %s\n", i, tempString);
+				fatal("Aborting...");
+			}
+			free(tempString);
+			
+			globals->settings.objects.object[i].nCoords	= (uint32_t)readInt(infile);
+			globals->settings.objects.object[i].cp		= readDouble(infile);				//compressional speed
+			globals->settings.objects.object[i].cs 		= readDouble(infile);				//shear speed
+			globals->settings.objects.object[i].rho 	= readDouble(infile);				//density
+			globals->settings.objects.object[i].ap 		= readDouble(infile);				//compressional attenuation
+			globals->settings.objects.object[i].as 		= readDouble(infile);				//shear attenuation
+
+			//malloc memory for the object coordinates:
+			globals->settings.objects.object[i].r 		= mallocDouble((uintptr_t)globals->settings.objects.object[i].nCoords);
+			globals->settings.objects.object[i].zDown	= mallocDouble((uintptr_t)globals->settings.objects.object[i].nCoords);
+			globals->settings.objects.object[i].zUp		= mallocDouble((uintptr_t)globals->settings.objects.object[i].nCoords);
+			//verify succesfull allocation of memory:
+			if(	(globals->settings.objects.object[i].r 		==	NULL)	||
+				(globals->settings.objects.object[i].zDown 	==	NULL)	||
+				(globals->settings.objects.object[i].zUp 	==	NULL))
+				fatal("Memory allocation error.");
+			
+			//read the coords of the object:
+			for(j=0; j<globals->settings.objects.object[i].nCoords; j++){
+				globals->settings.objects.object[i].r[j] 		= readDouble(infile);
+				globals->settings.objects.object[i].zDown[j]	= readDouble(infile);
+				globals->settings.objects.object[i].zUp[j] 		= readDouble(infile);
+			}
+		}
 	}
+	
 	/************************************************************************
 	 * Read and validate batimetry info:									*
 	 ***********************************************************************/

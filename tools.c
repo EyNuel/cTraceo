@@ -198,22 +198,22 @@ void		printSettings(globals_t*	globals){
 
 		uint32_t	i;
 	
-	printf("settings.cTitle: \t%s", globals->settings.cTitle);	//assuming a \n at the end of cTitle
-	printf("settings.source.ds: \t%12.5lf\t[m]\n", globals->settings.source.ds);
-	printf("settings.source.rx: \t%12.5lf\t[m]\n", globals->settings.source.rx);
-	printf("settings.source.zx: \t%12.5lf\t[m]\n", globals->settings.source.zx);
-	printf("settings.source.rbox1: \t%12.5lf\t[m]\n", globals->settings.source.rbox1);
-	printf("settings.source.rbox2: \t%12.5lf\t[m]\n", globals->settings.source.rbox2);
-	printf("settings.source.freqx: \t%12.5lf\t[m]\n", globals->settings.source.freqx);
-	printf("settings.source.nThetas: %6.0lu\n", (long unsigned int)globals->settings.source.nThetas);
+	printf("cTitle: \t\t\t%s", globals->settings.cTitle);	//assuming a \n at the end of cTitle
+	printf("source.ds: \t\t\t%12.5lf\t[m]\n", globals->settings.source.ds);
+	printf("source.rx: \t\t\t%12.5lf\t[m]\n", globals->settings.source.rx);
+	printf("source.zx: \t\t\t%12.5lf\t[m]\n", globals->settings.source.zx);
+	printf("source.rbox1: \t\t\t%12.5lf\t[m]\n", globals->settings.source.rbox1);
+	printf("source.rbox2: \t\t\t%12.5lf\t[m]\n", globals->settings.source.rbox2);
+	printf("source.freqx: \t\t\t%12.5lf\t[m]\n", globals->settings.source.freqx);
+	printf("source.nThetas: \t\t%6.0lu\n", (long unsigned int)globals->settings.source.nThetas);
 
 	/* uncoment the following block to output all launching angles */
 	/*
 	for(i=0; i<globals->settings.source.nThetas; i++){
-		printf("settings.source.thetas[%ld\t]: \t%lf\n", i, globals->settings.source.thetas[i]);
+		printf("source.thetas[%ld\t]: \t%lf\n", i, globals->settings.source.thetas[i]);
 	}
 	*/
-	printf("settings.altimetry.surfaceType: \t");
+	printf("altimetry.surfaceType: \t\t");
 	switch(globals->settings.altimetry.surfaceType){
 		case SURFACE_TYPE__ABSORVENT:
 			printf("Absorvent\n");
@@ -229,7 +229,7 @@ void		printSettings(globals_t*	globals){
 			break;
 	}
 
-	printf("settings.altimetry.surfacePropertyType: ");
+	printf("altimetry.surfacePropertyType:\t");
 	switch(globals->settings.altimetry.surfacePropertyType){
 		case SURFACE_PROPERTY_TYPE__HOMOGENEOUS:
 			printf("Homogeneous\n");
@@ -239,7 +239,7 @@ void		printSettings(globals_t*	globals){
 			break;
 	}
 
-	printf("settings.altimetry.surfaceInterpolation:");
+	printf("altimetry.surfaceInterpolation: ");
 	switch(globals->settings.altimetry.surfaceInterpolation){
 		case SURFACE_INTERPOLATION__FLAT:
 			printf("Flat\n");
@@ -258,7 +258,7 @@ void		printSettings(globals_t*	globals){
 			break;
 	}
 
-	printf("settings.altimetry.surfaceAttenUnits: \t");
+	printf("altimetry.surfaceAttenUnits: \t");
 	switch(globals->settings.altimetry.surfaceAttenUnits){
 		case SURFACE_ATTEN_UNITS__dBperkHz:
 			printf("dB/kHz\n");
@@ -277,16 +277,16 @@ void		printSettings(globals_t*	globals){
 			break;
 	}
 
-	printf("settings.altimetry.numSurfaceCoords:\t%lu\n", (long unsigned int)globals->settings.altimetry.numSurfaceCoords);
+	printf("altimetry.numSurfaceCoords:\t%lu\n", (long unsigned int)globals->settings.altimetry.numSurfaceCoords);
 
-	printf("settings.altimetry.surfaceProperties:	");
+	printf("altimetry.surfaceProperties:	");
 	switch(globals->settings.altimetry.surfacePropertyType){
 		case SURFACE_PROPERTY_TYPE__HOMOGENEOUS:
-			printf("cp:%lf; ",	globals->settings.altimetry.surfaceProperties[0].cp);
-			printf("cs:%lf; ",	globals->settings.altimetry.surfaceProperties[0].cs);
-			printf("rho:%lf; ",	globals->settings.altimetry.surfaceProperties[0].rho);
-			printf("ap:%lf; ",	globals->settings.altimetry.surfaceProperties[0].ap);
-			printf("as:%lf;\n",	globals->settings.altimetry.surfaceProperties[0].as);
+			printf("cp:%lf\n ",	globals->settings.altimetry.surfaceProperties[0].cp);
+			printf("\t\t\t\tcs:%lf\n ",	globals->settings.altimetry.surfaceProperties[0].cs);
+			printf("\t\t\t\trho:%lf\n ",	globals->settings.altimetry.surfaceProperties[0].rho);
+			printf("\t\t\t\tap:%lf\n ",	globals->settings.altimetry.surfaceProperties[0].ap);
+			printf("\t\t\t\tas:%lf\n",	globals->settings.altimetry.surfaceProperties[0].as);
 			break;
 		case SURFACE_PROPERTY_TYPE__NON_HOMOGENEOUS:
 			for(i=0; i<globals->settings.altimetry.numSurfaceCoords; i++){
@@ -298,16 +298,54 @@ void		printSettings(globals_t*	globals){
 			}
 			break;
 	}
-	printf("settings.altimetry.r[0]:\t%lf\n", globals->settings.altimetry.r[0]);
-	printf("settings.altimetry.r[N]:\t%lf\n", globals->settings.altimetry.r[globals->settings.altimetry.numSurfaceCoords-1]);
+	printf("altimetry.r[0]:\t\t\t%lf\n", globals->settings.altimetry.r[0]);
+	printf("altimetry.r[N]:\t\t\t%lf\n", globals->settings.altimetry.r[globals->settings.altimetry.numSurfaceCoords-1]);
 	
 
 	/* sound speed block */
-	printf("settings.object.numObjects:\t%lu\n",(long unsigned int)globals->settings.object.numObjects);
+	
 	/*	object block	*/
+	printf("objects.numObjects:\t\t%u\n",globals->settings.objects.numObjects);
+	if(globals->settings.objects.numObjects > 0){
+		for(i=0; i<globals->settings.objects.numObjects; i++){
+			printf("object[%u].surfaceType: \t", i);
+			switch(globals->settings.objects.object[i].surfaceType){
+				case SURFACE_TYPE__ABSORVENT:
+					printf("Absorvent\n");
+					break;
+				case SURFACE_TYPE__ELASTIC:
+					printf("Elastic\n");
+					break;
+				case SURFACE_TYPE__RIGID:
+					printf("Rigid\n");
+					break;
+				case SURFACE_TYPE__VACUUM:
+					printf("Vacuum\n");
+					break;
+			}
+			printf("object[%u].surfaceAttenUnits: \t", i);
+			switch(globals->settings.objects.object[i].surfaceAttenUnits){
+				case SURFACE_ATTEN_UNITS__dBperkHz:
+					printf("dB/kHz\n");
+					break;
+				case SURFACE_ATTEN_UNITS__dBperMeter:
+					printf("dB/meter\n");
+					break;
+				case SURFACE_ATTEN_UNITS__dBperNeper:
+					printf("dB/neper\n");
+					break;
+				case SURFACE_ATTEN_UNITS__qFactor:
+					printf("Q factor\n");
+					break;
+				case SURFACE_ATTEN_UNITS__dBperLambda:
+					printf("dB/<lambda>\n");
+					break;
+			}
+		}
+	}
 	
 	/* batimetry block	*/
-	printf("settings.batimetry.surfaceType: \t");
+	printf("batimetry.surfaceType: \t");
 	switch(globals->settings.batimetry.surfaceType){
 		case SURFACE_TYPE__ABSORVENT:
 			printf("Absorvent\n");
@@ -323,7 +361,7 @@ void		printSettings(globals_t*	globals){
 			break;
 	}
 
-	printf("settings.batimetry.surfacePropertyType: ");
+	printf("batimetry.surfacePropertyType:\t");
 	switch(globals->settings.batimetry.surfacePropertyType){
 		case SURFACE_PROPERTY_TYPE__HOMOGENEOUS:
 			printf("Homogeneous\n");
@@ -333,7 +371,7 @@ void		printSettings(globals_t*	globals){
 			break;
 	}
 
-	printf("settings.batimetry.surfaceInterpolation:");
+	printf("batimetry.surfaceInterpolation:");
 	switch(globals->settings.batimetry.surfaceInterpolation){
 		case SURFACE_INTERPOLATION__FLAT:
 			printf("Flat\n");
@@ -352,7 +390,7 @@ void		printSettings(globals_t*	globals){
 			break;
 	}
 
-	printf("settings.batimetry.surfaceAttenUnits: \t");
+	printf("batimetry.surfaceAttenUnits: \t");
 	switch(globals->settings.batimetry.surfaceAttenUnits){
 		case SURFACE_ATTEN_UNITS__dBperkHz:
 			printf("dB/kHz\n");
@@ -371,16 +409,16 @@ void		printSettings(globals_t*	globals){
 			break;
 	}
 
-	printf("settings.batimetry.numSurfaceCoords:\t%lu\n", (long unsigned int)globals->settings.batimetry.numSurfaceCoords);
+	printf("batimetry.numSurfaceCoords:\t%lu\n", (long unsigned int)globals->settings.batimetry.numSurfaceCoords);
 
-	printf("settings.batimetry.surfaceProperties:	");
+	printf("batimetry.surfaceProperties:	");
 	switch(globals->settings.batimetry.surfacePropertyType){
 		case SURFACE_PROPERTY_TYPE__HOMOGENEOUS:
-			printf("cp:%lf; ",	globals->settings.batimetry.surfaceProperties[0].cp);
-			printf("cs:%lf; ",	globals->settings.batimetry.surfaceProperties[0].cs);
-			printf("rho:%lf; ",	globals->settings.batimetry.surfaceProperties[0].rho);
-			printf("ap:%lf; ",	globals->settings.batimetry.surfaceProperties[0].ap);
-			printf("as:%lf;\n",	globals->settings.batimetry.surfaceProperties[0].as);
+			printf("cp:%lf\n",	globals->settings.batimetry.surfaceProperties[0].cp);
+			printf("\t\t\t\tcs:%lf\n",	globals->settings.batimetry.surfaceProperties[0].cs);
+			printf("\t\t\t\trho:%lf\n",	globals->settings.batimetry.surfaceProperties[0].rho);
+			printf("\t\t\t\tap:%lf\n",	globals->settings.batimetry.surfaceProperties[0].ap);
+			printf("\t\t\t\tas:%lf\n",	globals->settings.batimetry.surfaceProperties[0].as);
 			break;
 		case SURFACE_PROPERTY_TYPE__NON_HOMOGENEOUS:
 			for(i=0; i<globals->settings.batimetry.numSurfaceCoords; i++){
@@ -393,7 +431,7 @@ void		printSettings(globals_t*	globals){
 			break;
 	}
 
-	printf("settings.output.arrayType: \t");
+	printf("output.arrayType: \t\t");
 	switch(globals->settings.output.arrayType){
 		case ARRAY_TYPE__RECTANGULAR:
 			printf("Rectangular\n");
@@ -408,10 +446,10 @@ void		printSettings(globals_t*	globals){
 			printf("Linear\n");
 			break;
 	}
-	printf("settings.output.nArrayR: \t%lu\n",(long unsigned int)globals->settings.output.nArrayR);
-	printf("settings.output.nArrayZ: \t%lu\n",(long unsigned int)globals->settings.output.nArrayZ);
+	printf("output.nArrayR: \t\t%lu\n",(long unsigned int)globals->settings.output.nArrayR);
+	printf("output.nArrayZ: \t\t%lu\n",(long unsigned int)globals->settings.output.nArrayZ);
 
-	printf("settings.output.calcType: \t");
+	printf("output.calcType: \t\t");
 	switch(globals->settings.output.calcType){
 		case CALC_TYPE__RAY_COORDS:
 			printf("Ray Coordinates\n");
@@ -444,5 +482,5 @@ void		printSettings(globals_t*	globals){
 			printf("Coherent Acoustic Pressure and Particle Velocity\n");
 			break;
 	}
-	printf("settings.output.miss: \t%12.5lf\n",globals->settings.output.miss);
+	printf("output.miss: \t\t\t%12.5lf\n",globals->settings.output.miss);
 }

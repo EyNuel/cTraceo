@@ -3,18 +3,20 @@
  * Main ctraceo file													*
  *	readIn.c															*
  *	read the waveguide input file.										*
- *	originally written by: 	Orlando Camargo Rodriguez:					*
- *							Copyright (C) 2010							*
- * 							Orlando Camargo Rodriguez					*
- * 							orodrig@ualg.pt								*
- *							Universidade do Algarve						*
- *							Physics Department							*
- *							Signal Processing Laboratory				*
+ *	originally written in FORTRAN by:									*
+ *  									Orlando Camargo Rodriguez:		*
+ *										Copyright (C) 2010				*
+ * 										Orlando Camargo Rodriguez		*
+ *										orodrig@ualg.pt					*
+ *										Universidade do Algarve			*
+ *										Physics Department				*
+ *										Signal Processing Laboratory	*
  *																		*
  *	Ported to C by:		Emanuel Ey										*
  *						emanuel.ey@gmail.com							*
  *						Signal Processing Laboratory					*
  *						Universidade do Algarve							*
+ *																		*
  ************************************************************************/
 #include <stdio.h>
 #include "globals.h"
