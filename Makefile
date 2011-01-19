@@ -6,7 +6,7 @@
 CFLAGS := -Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align \
 			-Wwrite-strings -Wmissing-prototypes -Wmissing-declarations \
 			-Wredundant-decls -Wnested-externs -Winline -Wno-long-long \
-			-Wconversion -Wstrict-prototypes -std=gnu99\
+			-Wconversion -Wstrict-prototypes -std=gnu99 -lm\
 			-I /usr/local/matlabr14/extern/include \
 #			-D_GNU_SOURCE
 # LFLAGS := 	

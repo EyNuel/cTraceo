@@ -1,6 +1,8 @@
 /************************************************************************
- *  Linear Interpolation 1D												*
- * 	Perform linear interpolation.										*
+ *	intBarycParab1D.c		 											*
+ * 	(formerly "bpai1d.for")												*
+ * 	Perform Barycentric Parabolic interpolation at 1D.					*
+ * 																		*
  *	originally written in FORTRAN by:									*
  *  					Orlando Camargo Rodriguez:						*
  *						Copyright (C) 2010								*
@@ -15,27 +17,40 @@
  *						Signal Processing Laboratory					*
  *						Universidade do Algarve							*
  *																		*
+ *	Inputs:																*
+ * 				x:		vector containing x0, x1, x2					*
+ * 				f:		vector containing f0, f1, f2					*
+ * 				xi:		scalar (the interpolation point)				*
+ * 	Outputs:															*
+ * 				fi:		interpolated value of f at xi					*
+ * 				fxi:	1st derivative of f at xi						*
+ * 				fxxi:	2nd derivative of f at xi						*
+ * 																		*
  ************************************************************************/
+
+void intBarycParab1D(double*, double*, double, double*, double*, double*);
+
+void intBarycParab1D(double* x, double* f, double xi, double* fi, double* fxi, double* fxxi){
+	double		a1,a2,px1,px2,sx1,sx2;
+
+	px1 = (x[1] -x[0]) * (x[1] -x[2]);
+	px2 = (x[2] -x[0]) * (x[2] -x[1]);
+
+	a1 = ( f[1] - f[0] )/px1;
+	a2 = ( f[2] - f[0] )/px2;
+
+	px1 = (xi - x[0]) * (xi - x[2]);
+	px2 = (xi - x[0]) * (xi - x[1]);
+
+	sx1 = 2*xi - x[0] - x[2];
+	sx2 = 2*xi - x[0] - x[1];
+
+	*fi 	= f[0]	+	a1*px1	+a2*px2;
+	*fxi	= 			a1*sx1	+a2*sx2;
+	*fxxi=			a1*2	+a2*2;
+}
+ 
 /*
-        subroutine bpai1d(x,f,xi,fi,fxi,fxxi)
-	  
-c***********************************************************************
-c      Barycentric Parabolic Interpolation 1D 
-c      Written by Orlando Camargo Rodriguez
-c      orodrig@ualg.pt
-c      Universidade do Algarve
-c      Physics Department
-c      Signal Processing Laboratory
-c      Faro, 13/04/2009 at 14:30
-c****&******************************************************************
-       
-       integer*8 i
-       real*8 x(3),f(3)
-       real*8 a(2),px(2),sx(2)
-       real*8 xi,fi,fxi,fxxi
-       real*8 x1,x2,x3
-       
-c***********************************************************************
        
        x1 = x(1)
        x2 = x(2)
@@ -57,11 +72,4 @@ c***********************************************************************
         fxi =        a(1)*sx(1) +   a(2)*sx(2)
        fxxi =      2*a(1)       + 2*a(2)
        
-c***********************************************************************
-c     Back to main:
-c***********************************************************************        
-       
-       return 
-       
-       end
 */
