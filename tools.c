@@ -1,3 +1,14 @@
+/********************************************************************************
+ *  tools.c																		*
+ * 	Collection of utility functions												*
+ *																				*
+ *	Written by:		Emanuel Ey													*
+ *					emanuel.ey@gmail.com										*
+ *					Signal Processing Laboratory								*
+ *					Universidade do Algarve										*
+ *																				*
+ *******************************************************************************/
+
 //#pragma once
 #include	"globals.h"
 #include	<stdlib.h>
@@ -7,6 +18,7 @@
 /****************************
  *	Function prototypes		*
  ***************************/
+double*	subVector(double*, uintptr_t);
 void fatal(const char*);
 FILE*		openFile(const char* , const char[4]);
 char*		mallocChar(uintptr_t);
@@ -23,6 +35,16 @@ void		printSettings(globals_t*);
 /****************************
  *	Actual Functions		*
  ***************************/
+
+double*	subVector(double* vector, uintptr_t iniPos){
+	/*
+	 * Returns the address of a subposition of a vector.
+	 * Bounds are left unchecked, so be carefull or segfault will occur.
+	 * 
+	 */
+	return( &vector[iniPos]);
+}
+
 void fatal(const char* message){
 	/*
 		Prints a message and exits terminates the program.
