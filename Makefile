@@ -13,7 +13,7 @@ CFLAGS := -Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align \
 # -L /usr/local/matlabr14/bin/glnxa64 -leng -lmat -lmex -lut -Wl,-rpath,/usr/local/matlabr14/bin/glnxa64
 
 # Define the compiler and linker comands to use:
-CC 			:= gcc
+CC 			:= clang
 LINK 		:= $(CC) $(LFLAGS) -o 
 COMPLINK 	:= $(CC) $(CFLAGS) $(LFLAGS) -o $@
 
