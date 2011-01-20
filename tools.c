@@ -40,7 +40,7 @@ double*	subVector(double* vector, uintptr_t iniPos){
 	/*
 	 * Returns the address of a subposition of a vector.
 	 * Bounds are left unchecked, so be carefull or segfault will occur.
-	 * 
+	 * TODO: this function is rather redundant, but it may make code more readable (?)
 	 */
 	return( &vector[iniPos]);
 }

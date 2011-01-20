@@ -28,9 +28,9 @@
  * 																		*
  ************************************************************************/
 
-void intBarycParab1D(double*, double*, double, double*, double*, double*);
+void intBarycParab1D(double*, double*, double*, double*, double*, double*);
 
-void intBarycParab1D(double* x, double* f, double xi, double* fi, double* fxi, double* fxxi){
+void intBarycParab1D(double* x, double* f, double* xi, double* fi, double* fxi, double* fxxi){
 	double		a1,a2,px1,px2,sx1,sx2;
 
 	px1 = (x[1] -x[0]) * (x[1] -x[2]);
@@ -49,27 +49,4 @@ void intBarycParab1D(double* x, double* f, double xi, double* fi, double* fxi, d
 	*fxi	= 			a1*sx1	+a2*sx2;
 	*fxxi=			a1*2	+a2*2;
 }
- 
-/*
-       
-       x1 = x(1)
-       x2 = x(2)
-       x3 = x(3)
 
-       px(1) = ( x2 - x1 )*( x2 - x3 )
-       px(2) = ( x3 - x1 )*( x3 - x2 )
-       
-       a(1) = ( f(2) - f(1) )/px(1)
-       a(2) = ( f(3) - f(1) )/px(2)
-
-       px(1) = ( xi - x1 )*( xi - x3 )
-       px(2) = ( xi - x1 )*( xi - x2 )
-       
-       sx(1) = 2*xi - x1 - x3
-       sx(2) = 2*xi - x1 - x2
-       
-         fi = f(1) + a(1)*px(1) +   a(2)*px(2)
-        fxi =        a(1)*sx(1) +   a(2)*sx(2)
-       fxxi =      2*a(1)       + 2*a(2)
-       
-*/

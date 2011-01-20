@@ -32,7 +32,7 @@ void	readIn(globals_t* globals, const char* filename){
 	 ***********************************************************************/
 
 	uint32_t	i,j;
-	double		dTheta;				//DISCUSS: really necessary?
+	double		dTheta;
 	uint32_t	nThetas;			//used locally to make code more readable. Value is stored in settings.
 	double		theta0;				//used locally to make code more readable. Value is stored in settings.
 	double		thetaN;				//used locally to make code more readable. Value is stored in settings.

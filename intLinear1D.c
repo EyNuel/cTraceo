@@ -27,9 +27,9 @@
  * 																		*
  ************************************************************************/
 
-void intLinear1D(double*, double*, double, double*, double*);
+void intLinear1D(double*, double*, double*, double*, double*);
 
-void intLinear1D(double* x, double* f, double xi, double* fi, double* fxi){
+void intLinear1D(double* x, double* f, double* xi, double* fi, double* fxi){
 	*fxi	= 	( f[1] -f[0]) / ( x[1] -x[0]);
 	*fi		=	f[0] +(xi -x[0]) *(*fxi);
 }
