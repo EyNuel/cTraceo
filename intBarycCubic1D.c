@@ -32,8 +32,8 @@
 void intBarycCubic1D(double*, double*, double, double*, double*, double*);
 
 void intBarycCubic1D(double* x, double* f, double xi, double* fi, double* fxi, double* fxxi){
-	double		a[3],px[3],sx[3], qx[3];
-	uint32_t	i;
+	double		a[3],px[3],sx[3],qx[3];
+	uintptr_t	i;
 	
 	px[0] = ( x[1] - x[0] )*( x[1] - x[2] )*( x[1] - x[3] );
 	px[1] = ( x[2] - x[0] )*( x[2] - x[1] )*( x[2] - x[3] );

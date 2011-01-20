@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "intLinear1D.c"
-#include "intBarycParab1D.c"
-#include "intBarycCubic1D.c"
-#include "tools.c"
+#include "../intLinear1D.c"
+#include "../intBarycParab1D.c"
+#include "../intBarycCubic1D.c"
+#include "../tools.c"
 #include <math.h>
 
 int main(void){
@@ -30,9 +30,9 @@ int main(void){
 	yVector = mallocDouble(10);
 	for(i=0; i<10; i++){
 		xVector[i] = (double)i;
-		//yVector[i] = sin((0.5*M_PI*(double)i));	//a sine
-		//yVector[i] = (double)(i*i);					//a parabola
-		yVector[i] = 0.5*pow((double)i,3) +1.76*pow((double)i,2) -2*(double)i +1;		//a 3rd degree polyn.
+		yVector[i] = sin(0.3*M_PI*(double)i);	//a sine
+		//yVector[i] = (double)(i*i);				//a parabola
+		//yVector[i] = 0.5*pow((double)i,3) +1.76*pow((double)i,2) -2*(double)i +1;		//a 3rd degree polyn.
 		
 	}
 	printf("\nx:");
@@ -72,8 +72,8 @@ int main(void){
 	printf("\n1D barycentric cubic interpolation:\n");
 	for(j=1.1; j<8; j+=1.5){
 		
-		intBarycCubic1D(	subVector(xVector,(uintptr_t)j),
-							subVector(yVector,(uintptr_t)j),
+		intBarycCubic1D(	subVector(xVector,(uintptr_t)j-1),
+							subVector(yVector,(uintptr_t)j-1),
 							j, &fi, &fxi, &fxxi);
 		
 		printf("xi:%8.4lf => fi:%8.4lf; \tfxi:%8.4lf; \tfxxi:%8.4lf;\n",j, fi, fxi, fxxi);
