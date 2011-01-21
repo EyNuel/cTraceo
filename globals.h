@@ -25,6 +25,16 @@
 #define FALSE	0
 
 /********************************************************************************
+ * Minor datad structures.														*
+ *******************************************************************************/
+
+typedef struct	vector{
+	double	r;	//range component of vector
+	double	z;	//depth component of vector
+}vector_t;
+
+
+/********************************************************************************
  * Structures that contains the settings that are read from the input file.		*
  *******************************************************************************/
  
