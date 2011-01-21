@@ -20,7 +20,7 @@
  ************************************************************************/
 #include <stdio.h>
 #include "globals.h"
-#include "readin.c"
+#include "readIn.c"
 
 
 int main(int argc, char **argv)
