@@ -29,39 +29,51 @@
  * 																				*
  *******************************************************************************/
 
-void	cValues(uintptr_t, double*, double*, double*, double*, double*, double*);
+#include "interpolation.h"
+#include "bracket.c"
 
-void	cValues(uintptr_t n, double* xTable, double* cTable, double* xi, double* ci, double* cxi, double* cxxi){
+void	cValues1D(uintptr_t, double*, double*, double*, double*, double*, double*);
+
+void	cValues1D(uintptr_t n, double* xTable, double* cTable, double* xi, double* ci, double* cxi, double* cxxi){
+	if (VERBOSE)
+		printf("Entering cValues1D().\n");
 	uintptr_t	i;
 	
-	if( xi < xTable[1]){
+	if( *xi < xTable[1]){
 		//if xi is in first interval of xTable, do linear interpolation
-		intLinear1D(	&xTable[0]),
-						&cTable[0]),
+		intLinear1D(	&xTable[0],
+						&cTable[0],
 						xi, ci, cxi);
-		cxxi = 0.0;
-	}else if( xi >= xTable[n-2]){
+		*cxxi = 0.0;
+		
+	}else if( *xi >= xTable[n-2]){
 		//if xi is in last interval of xTable, do linear interpolation
-		intLinear1D(	&xTable[n-2]),
-						&cTable[n-2]),
+		intLinear1D(	&xTable[n-2],
+						&cTable[n-2],
 						xi, ci, cxi);
-		cxxi = 0.0;
-	}else if(( xi >= xTable[1] ) && ( xi < xTable[2])){
+		*cxxi = 0.0;
+		
+	}else if(( *xi >= xTable[1] ) && ( *xi < xTable[2])){
 		//if xi is in second interval of xTable, do barycentric parabolic interpolation
-		intBarycParab1D(	&xTable[0]),
-							&cTable[0]),
+		intBarycParab1D(	&xTable[0],
+							&cTable[0],
 							xi, ci, cxi, cxxi);
-	}else if(( xi >= xTable[n-3] ) && ( xi < xTable[n-2] )){
+		
+	}else if(( *xi >= xTable[n-3] ) && ( *xi < xTable[n-2] )){
 		//if xi is in second to last interval of xTable, do barycentric parabolic interpolation
-		intBarycParab1D(	&xTable[n-3]),
-							&cTable[n-3]),
+		intBarycParab1D(	&xTable[n-3],
+							&cTable[n-3],
 							xi, ci, cxi, cxxi);
+		
 	}else{
 		//for all other cases do barycentric cubic interpolation
 		bracket(n, xTable, xi, &i);
-		intBarycCubic1D(	&xTable[i-1]),
-							&cTable[i-1]),
+		intBarycCubic1D(	&xTable[i-1],
+							&cTable[i-1],
 							xi, ci, cxi, cxxi);
+
 	}
+	if (VERBOSE)
+		printf("Leaving cValues1D.\n");
 }
 

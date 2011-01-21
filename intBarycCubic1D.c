@@ -45,17 +45,17 @@ void intBarycCubic1D(double* x, double* f, double* xi, double* fi, double* fxi, 
 		a[i] = ( f[i+1] - f[0] )/px[i];
 	}
 
-	px[0] = ( xi - x[0] )*( xi - x[2] )*( xi - x[3] );
-	px[1] = ( xi - x[0] )*( xi - x[1] )*( xi - x[3] );
-	px[2] = ( xi - x[0] )*( xi - x[1] )*( xi - x[2] );
+	px[0] = ( *xi - x[0] )*( *xi - x[2] )*( *xi - x[3] );
+	px[1] = ( *xi - x[0] )*( *xi - x[1] )*( *xi - x[3] );
+	px[2] = ( *xi - x[0] )*( *xi - x[1] )*( *xi - x[2] );
 	
-	sx[0] = (xi-x[0])*(xi-x[2]) + (xi-x[0])*(xi-x[3]) + (xi-x[2])*(xi-x[3]);
-	sx[1] = (xi-x[0])*(xi-x[1]) + (xi-x[0])*(xi-x[3]) + (xi-x[1])*(xi-x[3]);
-	sx[2] = (xi-x[0])*(xi-x[1]) + (xi-x[0])*(xi-x[2]) + (xi-x[1])*(xi-x[2]);
+	sx[0] = (*xi-x[0])*(*xi-x[2]) + (*xi-x[0])*(*xi-x[3]) + (*xi-x[2])*(*xi-x[3]);
+	sx[1] = (*xi-x[0])*(*xi-x[1]) + (*xi-x[0])*(*xi-x[3]) + (*xi-x[1])*(*xi-x[3]);
+	sx[2] = (*xi-x[0])*(*xi-x[1]) + (*xi-x[0])*(*xi-x[2]) + (*xi-x[1])*(*xi-x[2]);
 	
-	qx[0] = 2*( 3*xi -x[0] -x[2] -x[3] );
-	qx[1] = 2*( 3*xi -x[0] -x[1] -x[3] );
-	qx[2] = 2*( 3*xi -x[0] -x[1] -x[2] );
+	qx[0] = 2*( 3*(*xi) -x[0] -x[2] -x[3] );
+	qx[1] = 2*( 3*(*xi) -x[0] -x[1] -x[3] );
+	qx[2] = 2*( 3*(*xi) -x[0] -x[1] -x[2] );
 	
 	*fi   = f[0];
 	*fxi  = 0.0;
