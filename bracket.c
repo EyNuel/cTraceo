@@ -51,37 +51,8 @@ void	bracket(uintptr_t n, double* x, double xi, uintptr_t* i){
 			}else{
 				ia = im;
 			}
-			//printf("ia: %u; ib: %u\n",ia, ib);
+			printf("ia:%u; im:%u; ib:%u\n",ia, im, ib);
 		}
-		*i = im;
-		//for even numbers, the returned index has to be adjusted
-		if( (n & 0x01) == 0 ){
-			*i-=1;
-		}
+		*i = ia;
 	}
 }
-
-/*
-
-500	im = (ia+ib)/2
-
-	   if ((ib-ia).gt.1) then
-	   
-		  if ((xi.ge.x(ia)).and.(xi.lt.x(im))) then
-		   ib = im
-		  else
-		   ia = im
-		  end if
-	   
-		  goto 500
-	   
-	   end if
-
-	   i = im
-
-	   return
-
-c=======================================================================
-
-	   end
-*/
