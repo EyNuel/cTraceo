@@ -1,15 +1,31 @@
-/************************************************************************
-*	readIn.c															*
-*	read the waveguide input file.										*
-*	originally written by 	Orlando Camargo Rodriguez:					*
-*							Copyright (C) 2010							*
-* 							Orlando Camargo Rodriguez					*
-* 							orodrig@ualg.pt								*
-*							Universidade do Algarve						*
-*							Physics Department							*
-*							Signal Processing Laboratory				*
-*	Ported from FORTRAN by Emanuel Ey									*
-************************************************************************/
+/********************************************************************************
+ *	readIn.c																	*
+ * 	(formerly "readin.for")														*
+ *	read the waveguide input file.												*
+ * 																				*
+ *	originally written in FORTRAN by:											*
+ *  					Orlando Camargo Rodriguez:								*
+ *						Copyright (C) 2010										*
+ * 						Orlando Camargo Rodriguez								*
+ *						orodrig@ualg.pt											*
+ *						Universidade do Algarve									*
+ *						Physics Department										*
+ *						Signal Processing Laboratory							*
+ *																				*
+ *	Ported to C for project SENSOCEAN by:										*
+ * 						Emanuel Ey												*
+ *						emanuel.ey@gmail.com									*
+ *						Signal Processing Laboratory							*
+ *						Universidade do Algarve									*
+ *																				*
+ *	Inputs:																		*
+ * 			globals		A pointer to the "global" variables						*
+ *			filename	A string containg the path to the file to be opened.	*
+ * 	Outputs:																	*
+ * 			All values are stored in "globals"									*
+ * 																				*
+ *******************************************************************************/
+
 #include <stdio.h>
 #include <inttypes.h>		//contains definitions of integer data types that are inequivocal.
 #include "tools.c"			
@@ -21,15 +37,6 @@ void readIn(globals_t*, const char*);
 
 //actual function declaration:
 void	readIn(globals_t* globals, const char* filename){
-	/************************************************************************
-	 *	Read a waveguide input file into global settings structure.			*
-	 *	Input values:														*
-	 * 		globals		A pointer to the "global" variables					*
-	 *		filename	A string containg the file to be opened.			*
-	 *																		*
-	 *	Return value:														*
-	 *		none		Values are read into "globals->settings"			*
-	 ***********************************************************************/
 
 	uint32_t	i,j;
 	double		dTheta;
