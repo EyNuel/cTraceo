@@ -28,8 +28,8 @@
  * 	Outputs:																		*
  * 				yNew:	Vector containing new values of of y.						*
  * 				fNew:	Vector containing new values of of F.						*
- * 				ds4:	Step size derived of RK4.								*
- * 				ds5:	Step size derived of RK5.								*
+ * 				ds4:	Step size derived of RK4.									*
+ * 				ds5:	Step size derived of RK5.									*
  * 						ds4 and ds5 are checked in the calling function to verify	*
  * 						that the precision corresponds to requirements.				*
  * 																					*
@@ -41,7 +41,7 @@
 
 void rkf45(double*, double*, double*, double*, double*, double*, double*){
 
-void rkf45(double* dsi, double* yOld, double* fOld, double* yNew, double* fNew, double* ds4, double*ds5){
+void rkf45(double* dsi, double* yOld, double* fOld, double* yNew, double* fNew, double* ds4, double* ds5){
 	uintptr_t	j;
 	double		dr,dz;
 	double		a1,a2,a3,a5;
@@ -99,8 +99,8 @@ void rkf45(double* dsi, double* yOld, double* fOld, double* yNew, double* fNew, 
 	*sigmaR	= yk[2];
 	*sigmaZ	= yk[3];
 	sigmaI = sqrt( pow(*sigmaR,2) + pow(*sigmaZ,2) );
-	es->r = sigmaR/sigmaI;
-	es->z = sigmaZ/sigmaI;
+	es->r = (*sigmaR)/(*sigmaI);
+	es->z = (*sigmaZ)/(*sigmaI);
 	csValues(ri,zi,ci,cc,sigmaI,cri,czi,slowness,crri,czzi,crzi);	//interpolate slowness vector at 
 	k2[0] = es->r;
 	k2[1] = es->z;
@@ -116,8 +116,8 @@ void rkf45(double* dsi, double* yOld, double* fOld, double* yNew, double* fNew, 
 	*sigmaR = yk[2];
 	*sigmaZ = yk[3];
 	*sigmaI = sqrt( pow(sigmaR,2) + pow(sigmaZ,2) );
-	es->r = sigmaR/sigmaI;
-	es->z = sigmaZ/sigmaI;
+	es->r = (*sigmaR)/(*sigmaI);
+	es->z = (*sigmaZ)/(*sigmaI);
 	csValues(ri,zi,ci,cc,sigmaI,cri,czi,slowness,crri,czzi,crzi);
 	k3[0] = es->r;
 	k3[1] = es->z;
@@ -133,8 +133,8 @@ void rkf45(double* dsi, double* yOld, double* fOld, double* yNew, double* fNew, 
 	*sigmaR = yk[2];
 	*sigmaZ = yk[3];
 	*sigmaI = sqrt( pow(sigmaR,2) + pow(sigmaZ,2) );
-	es->r = sigmaR/sigmaI;
-	es->z = sigmaZ/sigmaI;
+	es->r = (*sigmaR)/(*sigmaI);
+	es->z = (*sigmaZ)/(*sigmaI);
 	csValues(ri,zi,ci,cc,sigmaI,cri,czi,slowness,crri,czzi,crzi);
 	k4[0] = es->r;
 	k4[1] = es->z;
@@ -150,8 +150,8 @@ void rkf45(double* dsi, double* yOld, double* fOld, double* yNew, double* fNew, 
 	*sigmaR = yk[2];
 	*sigmaZ = yk[3];
 	*sigmaI = sqrt( pow(sigmaR,2) + pow(sigmaZ,2) );
-	es->r = sigmaR/sigmaI;
-	es->z = sigmaZ/sigmaI;
+	es->r = (*sigmaR)/(*sigmaI);
+	es->z = (*sigmaZ)/(*sigmaI);
 	csValues(ri,zi,ci,cc,sigmaI,cri,czi,slowness,crri,czzi,crzi);
 	k5[0] = es->r;
 	k5[1] = es->z;
@@ -167,8 +167,8 @@ void rkf45(double* dsi, double* yOld, double* fOld, double* yNew, double* fNew, 
 	*sigmaR = yk[2];
 	*sigmaZ = yk[3];
 	*sigmaI = sqrt( pow(sigmaR,2) + pow(sigmaZ,2) );
-	es->r = sigmaR/sigmaI;
-	es->z = sigmaZ/sigmaI;
+	es->r = (*sigmaR)/(*sigmaI);
+	es->z = (*sigmaZ)/(*sigmaI);
 	csValues(ri,zi,ci,cc,sigmaI,cri,czi,slowness,crri,czzi,crzi);
 	k6[0] = es->r;
 	k6[1] = es->z;
@@ -195,8 +195,8 @@ void rkf45(double* dsi, double* yOld, double* fOld, double* yNew, double* fNew, 
 
 	/* Calculate the actual output value:		*/
 	*sigmaI = sqrt( pow(sigmaR,2) + pow(sigmaZ,2) );
-	es->r = sigmaR/sigmaI;
-	es->z = sigmaZ/sigmaI;
+	es->r = (*sigmaR)/(*sigmaI);
+	es->z = (*sigmaZ)/(*sigmaI);
 	csValues(ri,zi,ci,cc,sigmaI,cri,czi,slowness,crri,czzi,crzi);
 	fNew[0] = es->r;
 	fNew[1] = es->z;
