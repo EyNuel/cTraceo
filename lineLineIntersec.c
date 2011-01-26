@@ -23,31 +23,32 @@
  *						Universidade do Algarve										*
  *																					*
  *	Inputs:																			*
- * 				p1:		Vector containing coords to first point of line p.			*
- * 				p2:		Vector containing coords to second point of line p.			*
- * 				q1:		Vector containing coords to first point of line q.			*
- * 				q2:		Vector containing coords to second point of line q.			*
+ * 				p1:		Coords to first point of line p.							*
+ * 				p2:		Coords to second point of line p.							*
+ * 				q1:		Coords to first point of line q.							*
+ * 				q2:		Coords to second point of line q.							*
  *																					*
  * 	Outputs:																		*
  * 				i:		Indicates wether the lines intersect.						*
- * 				xi:		x coordinate of intersection.								*
- * 				yi:		y coordinate of intersection.								*
+ * 				isect:	Coordc of intersection point.								*
  * 																					*
  ***********************************************************************************/
 
-void	lineLineIntersec(double*, double*, double*, double*, uint32_t, double*, double*);
+#include "globals.h"
 
-void	lineLineIntersec(double* p1, double* p2, double* q1, double* q2, uint32_t i, double* xi, double* yi){
+void	lineLineIntersec(point_t*, point_t*, point_t*, point_t*, uint32_t, point_t*);
+
+void	lineLineIntersec(point_t* p1, point_t* p2, point_t* q1, point_t* q2, uint32_t i, point_t* isect){
 	double		d;
 
 	*i = 0;
-	d = (p1[0] - p2[0]) * (q1[1] - q2[1]) - (p1[1] - p2[1]) * (q1[0] - q2[0]);
+	d = (p1->r - p2->r) * (q1->z - q2->z) - (p1->z - p2->z) * (q1->r - q2->r);
 
 	if( abs(d) > 1e-16){
-		i = 1
+		*i = 1
 
-		xi = ( (p1[0]*p2[1]-p1[1]*p2[0])*(q1[0]-q2[0])-(p1[0]-p2[0])*(q1[0]*q2[1]-q1[1]*q2[0]) )/d
-		yi = ( (p1[0]*p2[1]-p1[1]*p2[0])*(q1[1]-q2[1])-(p1[1]-p2[1])*(q1[0]*q2[1]-q1[1]*q2[0]) )/d
+		isect->x = ( (p1->r * p2->z - p1->z * p2->r) * (q1->r - q2->r) - (p1->r - p2->r) * (q1->r * q2->z - q1->z * q2->r) )/d;
+		isect->z = ( (p1->r * p2->z - p1->z * p2->r) * (q1->z - q2->z) - (p1->z - p2->z) * (q1->r * q2->z - q1->z * q2->r) )/d;
 	}
 }
 /*****************
