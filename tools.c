@@ -9,7 +9,7 @@
  *																				*
  *******************************************************************************/
 
-//#pragma once
+#pragma once
 #include	"globals.h"
 #include	<stdlib.h>
 #include	<string.h>
@@ -18,13 +18,15 @@
 /****************************
  *	Function prototypes		*
  ***************************/
-double*	subVector(double*, uintptr_t);
-void fatal(const char*);
+double*		subVector(double*, uintptr_t);
+void 		fatal(const char*);
 FILE*		openFile(const char* , const char[4]);
 char*		mallocChar(uintptr_t);
 double*		mallocDouble(uintptr_t);
 double**	mallocDouble2D(uintptr_t, uintptr_t);
 globals_t*	mallocGlobals(void);
+vector_t*	mallocVector(uintptr_t);
+point_t*	mallocPoint(uintptr_t);
 double 		readDouble(FILE*);
 int32_t		readInt(FILE*);
 char*		readStringN(FILE*, uint32_t);
@@ -156,6 +158,24 @@ globals_t* 	mallocGlobals(void){
 	globals->settings.output.arrayZ = NULL;
 
 	return(globals);
+}
+
+vector_t*	mallocVector(uintptr_t	numVectors){
+	vector_t*	temp = NULL;
+	temp = malloc(numVectors * sizeof(vector_t));
+	if (temp == NULL){
+		fatal("Memory allocation error.\n");
+	}
+	return temp;
+}
+
+point_t*	mallocPoint(uintptr_t	numPoints){
+	point_t*	temp = NULL;
+	temp = malloc(numPoints * sizeof(point_t));
+	if (temp == NULL){
+		fatal("Memory allocation error.\n");
+	}
+	return temp;
 }
 
 double 		readDouble(FILE* infile){
