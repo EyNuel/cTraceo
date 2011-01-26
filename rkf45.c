@@ -174,6 +174,8 @@ void rkf45(double* dsi, double* yOld, double* fOld, double* yNew, double* fNew, 
 	k6[1] = es->z;
 	k6[2] = slowness->r;
 	k6[3] = slowness->z;
+
+	
 	for(j=0; j<4; j++){
 		yrk4[j] = yOld[j] + (*dsi) * ( a1 * k1[j] + a3 * k3[j] + a4 * k4[j] + a5 * k5[j]);
 		yrk5[j] = yOld[j] + (*dsi) * ( b1 * k1[j] + b3 * k3[j] + b4 * k4[j] + b5 * k5[j] + b6 * k6[j]);
@@ -204,20 +206,19 @@ void rkf45(double* dsi, double* yOld, double* fOld, double* yNew, double* fNew, 
 	fNew[3] = slowness->z;
 
 	// Free all alocated memory:
-	if(1){
-		free(	es 		);
-		free(	slowness);
-		free(	ri 		);
-		free(	zi 		);
-		free(	ci 		);
-		free(	cc 		);
-		free(	sigmaI 	);
-		free(	cri 	);
-		free(	czi 	);
-		free(	crri 	);
-		free(	czzi 	);
-		free(	crzi 	);
-		free(	sigmaR	);
-		free(	sigmaZ	);
-	}
+	free(	es 		);
+	free(	slowness);
+	free(	ri 		);
+	free(	zi 		);
+	free(	ci 		);
+	free(	cc 		);
+	free(	sigmaI 	);
+	free(	cri 	);
+	free(	czi 	);
+	free(	crri 	);
+	free(	czzi 	);
+	free(	crzi 	);
+	free(	sigmaR	);
+	free(	sigmaZ	);
+
 }

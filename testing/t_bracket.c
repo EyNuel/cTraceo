@@ -32,7 +32,7 @@ int main(void){
 	}
 	printf("\nxi: %5.4lf\tindex: ",xi);
 	
-	bracket(n, xVector, xi, &j);
+	bracket(n, xVector, &xi, &j);
 	printf("%u\n",j);
 	free(xVector);
 	
@@ -54,7 +54,7 @@ int main(void){
 	}
 	printf("\nxi: %5.4lf\tindex: ",xi);
 	
-	bracket(n, xVector, xi, &j);
+	bracket(n, xVector, &xi, &j);
 	printf("%u\n",j);
 	
 	/* a case in wich xi belongs to the sequence	*/
@@ -65,7 +65,7 @@ int main(void){
 	}
 	printf("\nxi: %5.4lf\tindex: ",xi);
 	
-	bracket(n, xVector, xi, &j);
+	bracket(n, xVector, &xi, &j);
 	printf("%u\n",j);
 	free(xVector);
 

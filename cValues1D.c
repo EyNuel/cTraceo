@@ -38,6 +38,8 @@ void	cValues1D(uintptr_t n, double* xTable, double* cTable, double* xi, double* 
 	if (VERBOSE)
 		printf("Entering cValues1D().\n");
 	uintptr_t	i;
+
+	//TODO invert order if clauses:
 	
 	if( *xi < xTable[1]){
 		//if xi is in first interval of xTable, do linear interpolation

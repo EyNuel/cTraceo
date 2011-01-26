@@ -24,6 +24,8 @@
   *																					*
  * 	Outputs:																		*
  * 				x:		a pointer to the generated vector							*
+ * 						Note that this pointer has the previously allocated to the	*
+ * 						correct size.												*
  * 																					*
  ***********************************************************************************/
 

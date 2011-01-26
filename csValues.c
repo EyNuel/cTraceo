@@ -41,7 +41,7 @@
 void	csValues(globals_t*, double*, double*, double*, double*, double*, double*, double*,
 				vector_t*, double*, double*, double*);
 
-void	csValues(globals_t* globals, double* ri, double* zi, double* ci, double* cc, double* si,	double* cri, double* czi,
+void	csValues(globals_t* globals, double* ri, double* zi, double* ci, double* cc, double* si, double* cri, double* czi,
 				vector_t* slowness, double* crri, double* czzi, double* crzi){
 	if (VERBOSE)
 		printf("Entering csValues().\n");
