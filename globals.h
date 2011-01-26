@@ -33,7 +33,11 @@ typedef struct	vector{
 	double	z;	//depth component of vector
 }vector_t;
 
-
+typedef struct	point{
+	double	r;	//range component of point
+	double	z;	//depth component of point
+}point_t;
+	
 /********************************************************************************
  * Structures that contains the settings that are read from the input file.		*
  *******************************************************************************/
