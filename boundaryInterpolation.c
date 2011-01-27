@@ -34,9 +34,12 @@
 #include "globals.h"
 #include "interpolation.h"
 
-void boundaryInterpolation(double*, double*, double*, uint32_t*, double*, double*, vector_t*, vector_t*);
 
-void boundaryInterpolation(double* numSurfaceCoords, double* r, double* z, uint32_t* surfaceInterpolation, double* ri, double* zi, vector_t* taub, vector_t* normal){
+
+void boundaryInterpolationExplicit(double*, double*, double*, uint32_t*, double*, double*, vector_t*, vector_t*);
+void boundaryInterpolation(interface_t*, double*, double*, vector_t*, vector_t*);
+
+void boundaryInterpolationExplicit(double* numSurfaceCoords, double* r, double* z, uint32_t* surfaceInterpolation, double* ri, double* zi, vector_t* taub, vector_t* normal){
 
 	double*		zri =	mallocDouble(1);	//1st derivative of z at ri
 	double*		zrri =	mallocDouble(1);	//2nd derivative of z at ri
@@ -94,4 +97,10 @@ void boundaryInterpolation(double* numSurfaceCoords, double* r, double* z, uint3
 	normal->z =  taub->r;
 }
 
-
+void boundaryInterpolation(interface_t* interface, double* ri, double* zi, vector_t* taub, vector_t* normal){
+	boundaryInterpolationExplicit( 	&(interface->numSurfaceCoords),
+									&(interface->r),
+									&(interface->z),
+									&(interface->surfaceInterpolation),
+									ri, zi, taub, normal);
+}
