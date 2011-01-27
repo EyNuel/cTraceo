@@ -94,9 +94,9 @@ void boundaryInterpolation(interface_t* interface, double* ri, double* zi, vecto
 	taub->z = sin( atan(zri));
 
 	//Avoid rounding errors:
-	if ( abs(taub->r) == 1.0 ){
+	if ( abs(taub->r) == 1 ){
 		taub->z = 0;
-	}else if ( abs(taub->z) == 1.0 ){
+	}else if ( abs(taub->z) == 1 ){
 	   taub->r = 0;
 	}
 	
