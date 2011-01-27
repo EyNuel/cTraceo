@@ -34,60 +34,50 @@
 #include "globals.h"
 #include "interpolation.h"
 
-void boundaryInterpolation(interface_t*, double*, double*, vector_t*, vector_t*);
+void boundaryInterpolation(double*, double*, double*, uint32_t*, double*, double*, vector_t*, vector_t*);
 
-/*
-	   subroutine bdryi(n,tabr,tabz,itype,ri,zi,taub,normal)
- 	   real*8 tabr(n),tabz(n)
-	   real*8 xc(4),yc(4)
-	   real*8 xp(3),yp(3)
-	   real*8 xl(2),yl(2)
-	   real*8 taub(2),normal(2)
-	   real*8 ri,zi,zr,zrr
- */
-
-void boundaryInterpolation(interface_t* interface, double* ri, double* zi, vector_t* taub, vector_t* normal){
+void boundaryInterpolation(double* numSurfaceCoords, double* r, double* z, uint32_t* surfaceInterpolation, double* ri, double* zi, vector_t* taub, vector_t* normal){
 
 	double*		zri =	mallocDouble(1);	//1st derivative of z at ri
 	double*		zrri =	mallocDouble(1);	//2nd derivative of z at ri
 	uintptr_t	i;
 	
-	switch(interface->surfaceInterpolation){
+	switch(surfaceInterpolation){
 		case SURFACE_INTERPOLATION__FLAT:
 			//lini1d(xl,yl,ri,zi,zri)
-			intLinear1D(&(interface->r[0]), &(interface->z[0]),ri,zi,zri);
+			intLinear1D( &(r[0]), &(z[0]),ri,zi,zri);
 			break;
 			
 		case SURFACE_INTERPOLATION__SLOPED:
 			//lini1d(xl,yl,ri,zi,zri)
-			intLinear1D(&(interface->r[0]), &(interface->z[0]),ri,zi,zri);
+			intLinear1D( &(r[0]), &(z[0]),ri,zi,zri);
 			break;
 			
 		case SURFACE_INTERPOLATION__2P:
-			bracket(interface->numSurfaceCoords, &(interface->r[0]), ri, &i);
-			intLinear1D(&(interface->r[i]), &(interface->z[i]),ri,zi,zri);
+			bracket(numSurfaceCoords, &(y[0]), ri, &i);
+			intLinear1D( &(r[i]), &(z[i]),ri,zi,zri);
 			break;
 			
 		case SURFACE_INTERPOLATION__3P:
-			if (*ri <= interface->r[1]){
+			if (*ri <= r[1]){
 				i = 0;
-			}else if( ri >= interface->r[interface->numSurfaceCoords - 2]){
-				i = interface->numSurfaceCoords-3;
+			}else if( ri >= r[numSurfaceCoords - 2]){
+				i = numSurfaceCoords-3;
 			}else{
-				bracket(interface->numSurfaceCoords, &(interface->r[0]), ri, &i);
+				bracket(numSurfaceCoords, &(r[0]), ri, &i);
 			}
-			intBarycParab1D(&(interface->r[i]), &(interface->z[i]), ri, zi, zri, zrri);
+			intBarycParab1D( &(r[i]), &(z[i]), ri, zi, zri, zrri);
 			break;
 			
 		case SURFACE_INTERPOLATION__4P:
-			if (*ri <= interface->r[1]){
+			if (*ri <= r[1]){
 				i = 1;
-			}else if(*ri >= interface->r[interface->numSurfaceCoords - 2]){
-				i = interface->numSurfaceCoords - 3;
+			}else if(*ri >= r[numSurfaceCoords - 2]){
+				i = numSurfaceCoords - 3;
 			}else{
-				bracket(interface->numSurfaceCoords, &(interface->r[0]), ri, &i);
+				bracket( numSurfaceCoords, &(r[0]), ri, &i);
 			}
-			intBarycCubic1D(&(interface->r[i-1]), &(interface->z[i-1]), ri, zi, zri, zrri);
+			intBarycCubic1D( &(r[i-1]), &(z[i-1]), ri, zi, zri, zrri);
 	}
 
 	taub->r = cos( atan(zri));
