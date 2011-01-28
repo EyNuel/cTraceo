@@ -4,7 +4,7 @@
 */
 #pragma once
 #include <inttypes.h>	//needed for inequivocal type qualifiers
-
+#include <complex.h>
 /*
 	NOTE:	The actual value defined is not important, as it will never be use -only its name will.
 */
@@ -25,21 +25,45 @@
 #define FALSE	0
 
 /********************************************************************************
- * Minor datad structures.														*
+ * Minor data structures.														*
  *******************************************************************************/
 
 typedef struct	vector{
 	double	r;	//range component of vector
 	double	z;	//depth component of vector
-}vector_t;
+}vector_t;		//TODO add position components
 
 typedef struct	point{
 	double	r;	//range component of point
 	double	z;	//depth component of point
 }point_t;
-	
+
+
 /********************************************************************************
- * Structures that contains the settings that are read from the input file.		*
+ * Output data structures.														*
+ *******************************************************************************/
+
+typedef struct	ray{
+	uintptr_t		numCoords;
+	double			theta;		//launching angle of the ray
+	double			rMin, rMax;	//used to determine if a ray "turns back"
+	double*			r;			//range of ray at index
+	double*			z;			//depth of ray at index
+	double*			c;			//speed of sound at index
+	double*			iRefl;		//indicates if there is a reflection at a certain index of the ray coordinates.
+	complex double*	decay;		//decay of ray
+	complex double*	phase;		//ray phase
+	double*			tau;		//acumulated travel time
+	double*			s;			//acumulated distance travelled by the ray
+	double*			Ic;			//see Chapter 3 of Traceo Manual
+	vector*			boundaryTg;	//""a boundary's tangent vector
+	uint32_t*		boundaryJ;	//"jbdry",	TODO indicates at what boundary a ray is (-1 => above surface; 1 => below bottom)
+}ray_t;
+
+
+
+/********************************************************************************
+ * Structures that contain the settings that are read from the input file.		*
  *******************************************************************************/
  
 typedef struct source{
