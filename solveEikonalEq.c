@@ -34,6 +34,8 @@
 #include "csValues.h"
 #include "rkf45.c"
 #include "boundaryInterpolation.c"
+#include "boundaryReflectionCoeff.c"
+#include "convertUnits.c"
 
 void	solveEikonalEq(globals_t*, ray_t*);
 
@@ -71,19 +73,19 @@ void	solveEikonalEq(globals_t*, ray_t*);
 //TODO: free the memory
 
 void	solveEikonalEq(globals_t* globals, ray_t* ray){
-	double*			rho1 = mallocDouble(1);
 	double			cx,	cc,	sigmaI,	cri, czi, crri,	czzi, crzi, ;
 	uint32_t		iKill, iUp, iDown, iReturn;
 	uint32_t		sRefl, bRefl, oRefl, jRefl;		//counters for number of reflections at _s_urface, _s_ottom, _o_bject and total (j)
 	uint32_t		numRungeKutta;					//counts the number o RKF45 iterations
 	uint32_t		i;
-	complex double	reflDecay;
+	complex double	refl, reflDecay;
 	vector_t		es;				//ray's tangent vector
 	vector_t		e1;				//ray's normal vector
 	vector_t		slowness;
 	vector_t		junkVector;
 	vector_t		normal;
 	vector_t		tauB;
+	vector_t		tauR;
 	double*			yOld			= mallocDouble(4);
 	double*			fOld 			= mallocDouble(4);
 	double*			yNew 			= mallocDouble(4);
@@ -96,10 +98,12 @@ void	solveEikonalEq(globals_t* globals, ray_t* ray){
 	double*			zi				= mallocDouble(1);
 	double*			altInterpolatedZ= mallocDouble(1);
 	double*			batInterpolatedZ= mallocDouble(1);
+	double_t		thetaRefl;
 	point			pointA, pointB, pointIsect;
+	double			rho1, rho2, cp2, cs2, ap, as, lambda, tempDouble;
 	
 	//set parameters:
-	*rho1 = 1.0;			//density of water.
+	rho1 = 1.0;			//density of water.
 
 	//define initial conditions:
 	iKill	= FALSE;
@@ -217,69 +221,117 @@ void	solveEikonalEq(globals_t* globals, ray_t* ray){
 				ri = pointIsect.r;
 				zi = pointIsect.z;
 				
-				boundaryInterpolation(	&(globals->settings.batimetry), ri, batInterpolatedZ, &tauB, &normal);
-				ibdry = -1
-				sRefl = sRefl + 1
-				jRefl = 1
+				boundaryInterpolation(	&(globals->settings.altimetry), ri, altInterpolatedZ, &tauB, &normal);
+				ibdry = -1;
+				sRefl = sRefl + 1;
+				jRefl = 1;
 				
-				c            Calculate surface reflection:
+				//Calculate surface reflection:
+				specularReflection(&normal, &es, &tauR, &thetaRefl);
 				
-				call reflct( normal, es, taur, theta )
-				
-				c            Surface reflection => get the reflection coefficient
-				c            (kill the ray is the surface is an absorver):
+				//get the reflection coefficient (kill the ray is the surface is an absorver):
+				switch(globals->settings.altimetry.surfaceType){
+					
+					case SURFACE_TYPE__ABSORVENT:	//"A"
+						refl = 0 +0*I;
+						iKill = TRUE;
+						break;
+						
+					case SURFACE_TYPE__RIGID:		//"R"
+						refl = 1 +0*I;
+						break;
+						
+					case SURFACE_TYPE__VACUUM:		//"V"
+						refl = -1 +0*I;
+						break;
+						
+					case SURFACE_TYPE__ELASTIC:		//"E"
+						switch(globals->settings.altimetry.surfacePropertyType){
+							
+							case SURFACE_PROPERTY_TYPE__HOMOGENEOUS:		//"H"
+								rho2= globals->settings.altimetry.surfaceProperties[0].rho;
+								cp2	= globals->settings.altimetry.surfaceProperties[0].cp;
+								cs2	= globals->settings.altimetry.surfaceProperties[0].cs;
+								ap	= globals->settings.altimetry.surfaceProperties[0].ap;
+								as	= globals->settings.altimetry.surfaceProperties[0].as;
+								lambda = cp2 / globals->settings.source.freqx;
+								convertUnits(	&ap,
+												&lambda,
+												&(globals->settings.source.freqx),
+												&(globals->settings.altimetry.surfaceAttenUnits),
+												&tempDouble
+											);
+								ap		= tempDouble;
+								lambda	= cs2 / globals->settings.source.freqx;
+								convertUnits(	&as,
+												&lambda,
+												&(globals->settings.source.freqx),
+												&(globals->settings.altimetry.surfaceAttenUnits),
+												&tempDouble
+											);
+								as		= tempDouble;
+								boundaryReflectionCoeff(&rho1, &rho2, &ci, &cp2, &cs2, &ap, &as, &thetaRefl, &refl);
+								break;
+							
+							case SURFACE_PROPERTY_TYPE__NON_HOMOGENEOUS:	//"N"
+								fatal("Non-homogeneous surface properties are WIP.");	//TODO restructure interfaceProperties to contain pointers to cp, cs, etc;
+								/*
+								//Non-Homogeneous interface =>rho, cp, cs, ap, as are variant with range, and thus have to be interpolated
+								boundaryInterpolationExplicit(	&(globals->settings.altimetry.numSurfaceCoords),
+																globals->settings.altimetry.r,
+																&(globals->settings.altimetry.surfaceProperties.rho),
+																&(globals->settings.altimetry.surfaceInterpolation),
+																&ri,
+																&rho2,
+																&junkVector,
+																&junkVector
+															);
+								boundaryInterpolationExplicit(	&(globals->settings.altimetry.numSurfaceCoords),
+																globals->settings.altimetry.r,
+																&(globals->settings.altimetry.surfaceProperties.cp),
+																&(globals->settings.altimetry.surfaceInterpolation),
+																&ri,
+																&cp2,
+																&junkVector,
+																&junkVector
+															);
+								boundaryInterpolationExplicit(	&(globals->settings.altimetry.numSurfaceCoords),
+																globals->settings.altimetry.r,
+																&(globals->settings.altimetry.surfaceProperties.cs),
+																&(globals->settings.altimetry.surfaceInterpolation),
+																&ri,
+																&rho2,
+																&junkVector,
+																&junkVector
+															);
+								call bdryi(nati,rati, csati,aitype,ri, cs2,v,v)
+								call bdryi(nati,rati, apati,aitype,ri,  ap,v,v)
+								call bdryi(nati,rati, asati,aitype,ri,  as,v,v)
+								lambda = cp2/freqx
+								call cnvnts(ap,lambda,freqx,atiu,tempDouble)
+								ap = tempDouble
+								lambda = cs2/freqx
+								call cnvnts(as,lambda,freqx,atiu,tempDouble)
+								as = tempDouble
+								call bdryr(rho1,rho2,ci,cp2,cs2,ap,as,theta,refl)
+								break;
+								*/
+							default:
+								fatal("Unknown surface properties (neither H or N).\nAborting...");
+								break;
+							}
+						break;
+					default:
+						fatal("Unknown surface type (neither A,E,R or V).\nAborting...");
+						break;
+				}
+				reflDecay = reflDecay * refl;
 
-				if (atype.eq.'A') then
-					refl = (0.0,0.0)
-					ikill = 1
-				elseif (atype.eq.'R') then
-					refl = (1.0,0.0)
-				elseif (atype.eq.'V') then
-					refl = (-1.0,0.0)
-				elseif (atype.eq.'E') then
-					if (aptype.eq.'H') then
-						rho2 = rhoati(1)
-						cp2 =  cpati(1)
-						cs2 =  csati(1)
-						ap  =  apati(1)
-						as  =  asati(1)
-						lambda = cp2/freqx
-						call cnvnts(ap,lambda,freqx,atiu,adBoW)
-						ap  = adBoW
-						lambda = cs2/freqx
-						call cnvnts(as,lambda,freqx,atiu,adBoW)
-						as  = adBoW
-						call bdryr(rho1,rho2,ci,cp2,cs2,ap,as,theta,refl)
-					elseif (aptype.eq.'N') then
-						//Non-Homogeneous interface =>rho, cp, cs, ap, as are variant with range, and thus have to be interpolated
-						call bdryi(nati,rati,rhoati,aitype,ri,rho2,v,v)
-						call bdryi(nati,rati, cpati,aitype,ri, cp2,v,v)
-						call bdryi(nati,rati, csati,aitype,ri, cs2,v,v)
-						call bdryi(nati,rati, apati,aitype,ri,  ap,v,v)
-						call bdryi(nati,rati, asati,aitype,ri,  as,v,v)
-						lambda = cp2/freqx
-						call cnvnts(ap,lambda,freqx,atiu,adBoW)
-						ap = adBoW
-						lambda = cs2/freqx
-						call cnvnts(as,lambda,freqx,atiu,adBoW)
-						as = adBoW
-						call bdryr(rho1,rho2,ci,cp2,cs2,ap,as,theta,refl)
-					else
-						write(6,*) 'Unknown surface properties'
-						write(6,*) '(neither H or N),'
-						write(6,*) 'aborting calculations...'
-						stop
-					end if 
-				else
-					write(6,*) 'Unknown surface type (neither A,E,R or V),'
-					write(6,*) 'aborting calculations...'
-					stop
-					end if
-				reflDecay = reflDecay*refl
-
-c					Kill the ray if the reflection coefficient is too small: 
-				if ( abs(refl) .lt. 1.0e-5 ) ikill = 1 
-			end if
+				//Kill the ray if the reflection coefficient is too small: 
+				if ( abs(refl) < 1.0e-5 ){
+					iKill = TRUE;
+				}
+			}		//end of "ray above surface?"
 c======================================================================
 c				Ray below bottom?
 			if (zi.gt.batInterpolatedZ) then
