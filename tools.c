@@ -611,7 +611,7 @@ void		printSettings(globals_t*	globals){
 }
 
 void		reallocRay(ray_t* ray, uintptr_t numRayCoords){
-	ray->numCoords	= numRayCoords;
+	ray->nCoords	= numRayCoords;
 	ray->r			= reallocDouble(	&(ray->r),			numRayCoords);
 	ray->z			= reallocDouble(	&(ray->z),			numRayCoords);
 	ray->c			= reallocDouble(	&(ray->c),			numRayCoords);
@@ -623,7 +623,8 @@ void		reallocRay(ray_t* ray, uintptr_t numRayCoords){
 	ray->Ic			= reallocDouble(	&(ray->Ic),			numRayCoords);
 	ray->boundaryTg	= reallocVector(	&(ray->boundaryTg),	numRayCoords);
 	ray->boundaryJ	= reallocUint(		&(ray->boundaryJ),	numRayCoords);
-	ray->refr		= reallocPoint(		&(ray->refr),		numRayCoords);
+	ray->numRefrac	= numRayCoords;
+	ray->refrac		= reallocPoint(		&(ray->refr),		numRayCoords);
 }
 
 

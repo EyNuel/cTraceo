@@ -44,20 +44,27 @@ typedef struct	point{
  *******************************************************************************/
 
 typedef struct	ray{
-	uintptr_t		numCoords;
+	/*
+	 * NOTE: memory ocupied is 44B overhead + 96B per ray coordinate
+	 */
+	uintptr_t		nCoords;
+	uintptr_t		iKill;		//indicates if ray has been "killed"
 	double			theta;		//launching angle of the ray
 	double			rMin, rMax;	//used to determine if a ray "turns back"
+	uintptr_t		iReturn;	//indicates if a ray "turns back"
 	double*			r;			//range of ray at index
 	double*			z;			//depth of ray at index
 	double*			c;			//speed of sound at index
-	double*			iRefl;		//indicates if there is a reflection at a certain index of the ray coordinates.
+	uint32_t*		iRefl;		//indicates if there is a reflection at a certain index of the ray coordinates.
 	complex double*	decay;		//decay of ray
-	complex double*	phase;		//ray phase
+	double*			phase;		//ray phase
 	double*			tau;		//acumulated travel time
 	double*			s;			//acumulated distance travelled by the ray
 	double*			Ic;			//see Chapter 3 of Traceo Manual
-	vector*			boundaryTg;	//""a boundary's tangent vector
-	uint32_t*		boundaryJ;	//"jbdry",	TODO indicates at what boundary a ray is (-1 => above surface; 1 => below bottom)
+	vector_t*		boundaryTg;	//"tbdry" a boundary's tangent vector
+	uint32_t*		boundaryJ;	//"jbdry",	indicates at what boundary a ray is (-1 => above surface; 1 => below bottom)
+	uintptr_t		nRefrac		//"nrefr", number of refraction points
+	point_t*		refrac;		//"rrefr, zrefr", coordinates of refraction points. used in "solveEikonalEq.c"
 }ray_t;
 
 
@@ -79,7 +86,7 @@ typedef struct source{
 
 typedef struct interfaceProperties{
 	/*
-	 * Contains the properties of the surface or bottom interfaces. used in "surface" structs
+	 * Contains the properties of the surface or bottom interfaces. used in "interface" structs
 	 * See page 39 of "Traceo" manual.
 	 */
 	double		cp;		//"cpati",	compressional speed

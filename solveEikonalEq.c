@@ -69,14 +69,93 @@ void	solveEikonalEq(globals_t*, ray_t*);
 	complex*8 refl,refldc
 */
 
-//TODO:	check memory size, and realloc if necessary
-//TODO: free the memory
+/*
+void calcReflDecay(globals_t* globals, ray_t* ray, uintptr_t boundaryId, point_t* pointA, point_t* pointB, complex double* reflDecay){
+	
+	rayBoundaryIntersection(&(globals->settings.altimetry), &pointA, &pointB, &pointIsect);
+	ri = pointIsect.r;
+	zi = pointIsect.z;
+	
+	boundaryInterpolation(	&(globals->settings.altimetry), ri, altInterpolatedZ, &tauB, &normal);
+	ibdry = -1;
+	sRefl = sRefl + 1;
+	jRefl = 1;
+	
+	//Calculate surface reflection:
+	specularReflection(&normal, &es, &tauR, &thetaRefl);
+	
+	//get the reflection coefficient (kill the ray is the surface is an absorver):
+	switch(globals->settings.altimetry.surfaceType){
+		
+		case SURFACE_TYPE__ABSORVENT:	//"A"
+			refl = 0 +0*I;
+			ray->iKill = TRUE;
+			break;
+			
+		case SURFACE_TYPE__RIGID:		//"R"
+			refl = 1 +0*I;
+			break;
+			
+		case SURFACE_TYPE__VACUUM:		//"V"
+			refl = -1 +0*I;
+			break;
+			
+		case SURFACE_TYPE__ELASTIC:		//"E"
+			switch(globals->settings.altimetry.surfacePropertyType){
+				
+				case SURFACE_PROPERTY_TYPE__HOMOGENEOUS:		//"H"
+					rho2= globals->settings.altimetry.surfaceProperties[0].rho;
+					cp2	= globals->settings.altimetry.surfaceProperties[0].cp;
+					cs2	= globals->settings.altimetry.surfaceProperties[0].cs;
+					ap	= globals->settings.altimetry.surfaceProperties[0].ap;
+					as	= globals->settings.altimetry.surfaceProperties[0].as;
+					lambda = cp2 / globals->settings.source.freqx;
+					convertUnits(	&ap,
+									&lambda,
+									&(globals->settings.source.freqx),
+									&(globals->settings.altimetry.surfaceAttenUnits),
+									&tempDouble
+								);
+					ap		= tempDouble;
+					lambda	= cs2 / globals->settings.source.freqx;
+					convertUnits(	&as,
+									&lambda,
+									&(globals->settings.source.freqx),
+									&(globals->settings.altimetry.surfaceAttenUnits),
+									&tempDouble
+								);
+					as		= tempDouble;
+					boundaryReflectionCoeff(&rho1, &rho2, &ci, &cp2, &cs2, &ap, &as, &thetaRefl, &refl);
+					break;
+				
+				case SURFACE_PROPERTY_TYPE__NON_HOMOGENEOUS:	//"N"
+					fatal("Non-homogeneous surface properties are WIP.");	//TODO restructure interfaceProperties to contain pointers to cp, cs, etc;
+
+				default:
+					fatal("Unknown surface properties (neither H or N).\nAborting...");
+					break;
+				}
+			break;
+		default:
+			fatal("Unknown surface type (neither A,E,R or V).\nAborting...");
+			break;
+	}
+	reflDecay = reflDecay * refl;
+	
+	//Kill the ray if the reflection coefficient is too small: 
+	if ( abs(refl) < 1.0e-5 ){
+		ray->iKill = TRUE;
+	}
+}
+*/
 
 void	solveEikonalEq(globals_t* globals, ray_t* ray){
-	double			cx,	cc,	sigmaI,	cri, czi, crri,	czzi, crzi, ;
-	uint32_t		iKill, iUp, iDown, iReturn;
-	uint32_t		sRefl, bRefl, oRefl, jRefl;		//counters for number of reflections at _s_urface, _s_ottom, _o_bject and total (j)
-	uint32_t		numRungeKutta;					//counts the number o RKF45 iterations
+	//TODO	uniformize pointer use. i.e.: pointers should only be used for arrays and single double sized variables should not be pointers.
+	double			cx, ci,	cc,	sigmaI,	cri, czi, crri,	czzi, crzi, ;
+	uint32_t		iUp, iDown;
+	uint32_t		sRefl, bRefl, oRefl, nRefl;	//counters for number of reflections at _s_urface, _s_ottom, _o_bject and total (n)
+	uint32_t		jRefl;						//TODO huh?!
+	uint32_t		numRungeKutta;				//counts the number o RKF45 iterations
 	uint32_t		i;
 	complex double	refl, reflDecay;
 	vector_t		es;				//ray's tangent vector
@@ -90,32 +169,36 @@ void	solveEikonalEq(globals_t* globals, ray_t* ray){
 	double*			fOld 			= mallocDouble(4);
 	double*			yNew 			= mallocDouble(4);
 	double*			fNew 			= mallocDouble(4);
-	double*			dsi				= mallocDouble(1);
-	double*			ds4				= mallocDouble(1);
-	double*			ds5				= mallocDouble(1);
+	double			dsi, ds4, ds5;
 	double			stepError;
-	double*			ri				= mallocDouble(1);
-	double*			zi				= mallocDouble(1);
-	double*			altInterpolatedZ= mallocDouble(1);
-	double*			batInterpolatedZ= mallocDouble(1);
+	double			ri, zi;
+	double			altInterpolatedZ, batInterpolatedZ;
 	double_t		thetaRefl;
 	point			pointA, pointB, pointIsect;
 	double			rho1, rho2, cp2, cs2, ap, as, lambda, tempDouble;
+	double			dr, dz, dIc;
+	double 			prod;
+	uintptr_t		initialMemorySize;
+	
+	//allocate memory for ray components:
+	//Note that memory limits will be checked and resized if necessary.
+	initialMemorySize = (uintptr_t)((globals->settings.source.rbox2 - globals->settings.source.rbox1)/globals->settings.source.ds);
+	ray = reallocRay(ray, initialMemorySize);
 	
 	//set parameters:
 	rho1 = 1.0;			//density of water.
 
 	//define initial conditions:
-	iKill	= FALSE;
-	iUp		= FALSE;
-	iDown	= FALSE;
-	sRefl	= 0;
-	bRefl	= 0;
-	oRefl	= 0;
-	jRefl	= 0;
+	ray->iKill	= FALSE;
+	iUp			= FALSE;
+	iDown		= FALSE;
+	sRefl		= 0;
+	bRefl		= 0;
+	oRefl		= 0;
+	jRefl		= 0;
 	ray->iRefl[0] = jRefl;
 
-	iReturn = FALSE;
+	ray->iReturn = FALSE;
 	numRungeKutta = 0;
 	reflDecay = 1 + 0*I;
 	ray->decay[0] = reflDecay;
@@ -170,13 +253,13 @@ void	solveEikonalEq(globals_t* globals, ray_t* ray){
 	 ***********************************************************************/
 //1000	if (( ray->r[i).lt.rbox(2) ).and.( ray->r[i).gt.rbox(1) ).and.( ikill.eq.0 )) then
 	i = 0:
-	while(	(iKill == FALSE )	&&
+	while(	(ray->iKill == FALSE )	&&
 			(ray->r[i] < globals->settings.source.rbox2 ) &&
 			(ray->r[i] > globals->settings.source.rbox1 )){
 			//repeat while the ray is whithin the range box (rbox), and hasn't been killed by any other condition.
 
 		//Runge-Kutta integration:
- 		*dsi = globals->settings.source.ds;
+ 		dsi = globals->settings.source.ds;
  		stepError = 1;
  		numRungeKutta = 0;
  		
@@ -184,32 +267,32 @@ void	solveEikonalEq(globals_t* globals, ray_t* ray){
 			if(numRungeKutta > 100){
 				fatal("Runge-Kutta integration: failure in step convergence.\nAborting...");
 			}
-			rkf45(dsi, yOld, fOld, yNew, fNew, ds4, ds5);
+			rkf45(&dsi, yOld, fOld, yNew, fNew, &ds4, &ds5);
 			numRungeKutta++;
-			stepError = abs( *ds4 - *ds5) / (0.5 * (*ds4 + *ds5));
-			*dsi *= 0.5;
+			stepError = abs( ds4 - ds5) / (0.5 * (ds4 + ds5));
+			dsi *= 0.5;
 		}
 		
 		es.r = fNew[0];
 		es.z = fNew[1];
-		*ri = yNew[0];
-		*zi = yNew[1];
+		ri = yNew[0];
+		zi = yNew[1];
 
 		/**		Check for boundary intersections:	**/
 		//verify that the ray is still within the defined coordinates of the surface and the bottom:
 		if (	(ri > globals->settings.altimetry.r[0]) &&
-				(ri < globals->settings.altimetry.r[globals->settings.altimetry.numSurfaceCoords]) &&
+				(ri < globals->settings.altimetry.r[globals->settings.altimetry.numSurfaceCoords] -1) &&
 				(ri > globals->settings.batimetry.r[0]) &&
-				(ri < globals->settings.batimetry.r[globals->settings.batimetry.numSurfaceCoords]) ){
+				(ri < globals->settings.batimetry.r[globals->settings.batimetry.numSurfaceCoords] -1) ){
 			//calculate surface and bottom z at current ray position:
-			boundaryInterpolation(	&(globals->settings.altimetry), ri, altInterpolatedZ, &junkVector, &normal);
-			boundaryInterpolation(	&(globals->settings.batimetry), ri, batInterpolatedZ, &junkVector, &normal);
+			boundaryInterpolation(	&(globals->settings.altimetry), &ri, &altInterpolatedZ, &junkVector, &normal);
+			boundaryInterpolation(	&(globals->settings.batimetry), &ri, &batInterpolatedZ, &junkVector, &normal);
 		}else{
-			iKill = TRUE;
+			ray->iKill = TRUE;
 		}
 		
 		//Check if the ray is still between the boundaries; if not, find the intersection point and calculate the reflection:
-		if ((iKill == FALSE ) && (zi < altInterpolatedZ || zi > batInterpolatedZ)){
+		if ((ray->iKill == FALSE ) && (zi < altInterpolatedZ || zi > batInterpolatedZ)){
 			pointA.r = yOld[0];
 			pointA.z = yOld[1];
 			pointB.r = yNew[0];
@@ -217,11 +300,13 @@ void	solveEikonalEq(globals_t* globals, ray_t* ray){
 			
 			//	Ray above surface?
 			if (zi < altInterpolatedZ){
+				//TODO: replace with a call to calcReflDecay()
+				//		(globals_t* globals, ray_t* ray, uintptr_t boundaryId, point_t* pointA, point_t* pointB, complex double* reflDecay)
 				rayBoundaryIntersection(&(globals->settings.altimetry), &pointA, &pointB, &pointIsect);
 				ri = pointIsect.r;
 				zi = pointIsect.z;
 				
-				boundaryInterpolation(	&(globals->settings.altimetry), ri, altInterpolatedZ, &tauB, &normal);
+				boundaryInterpolation(	&(globals->settings.altimetry), &ri, &altInterpolatedZ, &tauB, &normal);
 				ibdry = -1;
 				sRefl = sRefl + 1;
 				jRefl = 1;
@@ -234,7 +319,7 @@ void	solveEikonalEq(globals_t* globals, ray_t* ray){
 					
 					case SURFACE_TYPE__ABSORVENT:	//"A"
 						refl = 0 +0*I;
-						iKill = TRUE;
+						ray->iKill = TRUE;
 						break;
 						
 					case SURFACE_TYPE__RIGID:		//"R"
@@ -275,6 +360,7 @@ void	solveEikonalEq(globals_t* globals, ray_t* ray){
 							
 							case SURFACE_PROPERTY_TYPE__NON_HOMOGENEOUS:	//"N"
 								fatal("Non-homogeneous surface properties are WIP.");	//TODO restructure interfaceProperties to contain pointers to cp, cs, etc;
+								if(1){
 								/*
 								//Non-Homogeneous interface =>rho, cp, cs, ap, as are variant with range, and thus have to be interpolated
 								boundaryInterpolationExplicit(	&(globals->settings.altimetry.numSurfaceCoords),
@@ -316,6 +402,7 @@ void	solveEikonalEq(globals_t* globals, ray_t* ray){
 								call bdryr(rho1,rho2,ci,cp2,cs2,ap,as,theta,refl)
 								break;
 								*/
+								}
 							default:
 								fatal("Unknown surface properties (neither H or N).\nAborting...");
 								break;
@@ -329,102 +416,155 @@ void	solveEikonalEq(globals_t* globals, ray_t* ray){
 
 				//Kill the ray if the reflection coefficient is too small: 
 				if ( abs(refl) < 1.0e-5 ){
-					iKill = TRUE;
+					ray->iKill = TRUE;
 				}
-			}		//end of "ray above surface?"
-c======================================================================
-c				Ray below bottom?
-			if (zi.gt.batInterpolatedZ) then
-				call raybi(nbty,rbty,zbty,bitype,la,lb,li)
-				ri = li(1)
-				zi = li(2)
-				call bdryi(nbty,rbty,zbty,bitype,ri,batInterpolatedZ,taub,normal)
+												//	end of "ray above surface?"
+			}else if (zi > batInterpolatedZ){	//	Ray below bottom?
+				//TODO: replace with a call to calcReflDecay()
+				//		(globals_t* globals, ray_t* ray, uintptr_t boundaryId, point_t* pointA, point_t* pointB, complex double* reflDecay)
+				rayBoundaryIntersection(&(globals->settings.batimetry), &pointA, &pointB, &pointIsect);
+				ri = pointIsect.r;
+				zi = pointIsect.z;
+				
+				boundaryInterpolation(	&(globals->settings.batimetry), &ri, &batInterpolatedZ, &tauB, &normal);
+				Invert the normal at the bottom for reflection:
+				normal.r = -normal.r;	//NOTE: differs from altimetry
+				normal-z = -normal.z;	//NOTE: differs from altimetry
+				
+				ibdry = 1;			
+				sRefl = sRefl + 1;
+				jRefl = 1;
+				
+				//Calculate surface reflection:
+				specularReflection(&normal, &es, &tauR, &thetaRefl);
+				
+				//get the reflection coefficient (kill the ray is the surface is an absorver):
+				switch(globals->settings.batimetry.surfaceType){
+					
+					case SURFACE_TYPE__ABSORVENT:	//"A"
+						refl = 0 +0*I;
+						ray->iKill = TRUE;
+						break;
+						
+					case SURFACE_TYPE__RIGID:		//"R"
+						refl = 1 +0*I;
+						break;
+						
+					case SURFACE_TYPE__VACUUM:		//"V"
+						refl = -1 +0*I;
+						break;
+						
+					case SURFACE_TYPE__ELASTIC:		//"E"
+						switch(globals->settings.batimetry.surfacePropertyType){
+							
+							case SURFACE_PROPERTY_TYPE__HOMOGENEOUS:		//"H"
+								rho2= globals->settings.batimetry.surfaceProperties[0].rho;
+								cp2	= globals->settings.batimetry.surfaceProperties[0].cp;
+								cs2	= globals->settings.batimetry.surfaceProperties[0].cs;
+								ap	= globals->settings.batimetry.surfaceProperties[0].ap;
+								as	= globals->settings.batimetry.surfaceProperties[0].as;
+								lambda = cp2 / globals->settings.source.freqx;
+								convertUnits(	&ap,
+												&lambda,
+												&(globals->settings.source.freqx),
+												&(globals->settings.batimetry.surfaceAttenUnits),
+												&tempDouble
+											);
+								ap		= tempDouble;
+								lambda	= cs2 / globals->settings.source.freqx;
+								convertUnits(	&as,
+												&lambda,
+												&(globals->settings.source.freqx),
+												&(globals->settings.batimetry.surfaceAttenUnits),
+												&tempDouble
+											);
+								as		= tempDouble;
+								boundaryReflectionCoeff(&rho1, &rho2, &ci, &cp2, &cs2, &ap, &as, &thetaRefl, &refl);
+								break;
+							
+							case SURFACE_PROPERTY_TYPE__NON_HOMOGENEOUS:	//"N"
+								fatal("Non-homogeneous surface properties are WIP.");	//TODO restructure interfaceProperties to contain pointers to cp, cs, etc;
+								if(1){
+								/*
+								//Non-Homogeneous interface =>rho, cp, cs, ap, as are variant with range, and thus have to be interpolated
+								boundaryInterpolationExplicit(	&(globals->settings.altimetry.numSurfaceCoords),
+																globals->settings.altimetry.r,
+																&(globals->settings.altimetry.surfaceProperties.rho),
+																&(globals->settings.altimetry.surfaceInterpolation),
+																&ri,
+																&rho2,
+																&junkVector,
+																&junkVector
+															);
+								boundaryInterpolationExplicit(	&(globals->settings.altimetry.numSurfaceCoords),
+																globals->settings.altimetry.r,
+																&(globals->settings.altimetry.surfaceProperties.cp),
+																&(globals->settings.altimetry.surfaceInterpolation),
+																&ri,
+																&cp2,
+																&junkVector,
+																&junkVector
+															);
+								boundaryInterpolationExplicit(	&(globals->settings.altimetry.numSurfaceCoords),
+																globals->settings.altimetry.r,
+																&(globals->settings.altimetry.surfaceProperties.cs),
+																&(globals->settings.altimetry.surfaceInterpolation),
+																&ri,
+																&rho2,
+																&junkVector,
+																&junkVector
+															);
+								call bdryi(nati,rati, csati,aitype,ri, cs2,v,v)
+								call bdryi(nati,rati, apati,aitype,ri,  ap,v,v)
+								call bdryi(nati,rati, asati,aitype,ri,  as,v,v)
+								lambda = cp2/freqx
+								call cnvnts(ap,lambda,freqx,atiu,tempDouble)
+								ap = tempDouble
+								lambda = cs2/freqx
+								call cnvnts(as,lambda,freqx,atiu,tempDouble)
+								as = tempDouble
+								call bdryr(rho1,rho2,ci,cp2,cs2,ap,as,theta,refl)
+								break;
+								*/
+								}
+							default:
+								fatal("Unknown surface properties (neither H or N).\nAborting...");
+								break;
+							}
+						break;
+					default:
+						fatal("Unknown surface type (neither A,E,R or V).\nAborting...");
+						break;
+				}
+				reflDecay = reflDecay * refl;
 
-c					Invert the normal at the bottom for reflection:
-				normal(1) = -normal(1)
-				normal(2) = -normal(2)
-				ibdry = 1
+				//Kill the ray if the reflection coefficient is too small: 
+				if ( abs(refl) < 1.0e-5 ){
+					ray->iKill = TRUE;
+				}
+			}
 
-				bRefl = bRefl + 1
-				jRefl = 1
+			/*	Update marching solution and function:	*/
+			//TODO: replace ri, li with pointIsect.r, pointIsect.z
+			ri = pointIsect.r;
+			zi = pointIsect.z;
+			csValues( 	globals, &ri, &zi, &ci, &cc, &sigmaI, &cri, &czi, &slowness, &crri, &czzi, &crzi);
 
-c            		Calculate bottom reflection:
-				call reflct( normal, es, taur, theta )
-c           		Bottom reflection => get the reflection coefficient  
+			yNew[0] = ri;
+			yNew[1] = zi;
+			yNew[2] = sigmaI*taur(1)
+			yNew[3] = sigmaI*taur(2)
 
-c		            (kill the ray if the bottom is an absorver):
-				if (btype.eq.'A') then
-					refl = (0.0,0.0)
-					ikill = 1
-					refl = (0.0,0.0)
-				elseif (btype.eq.'R') then
-					refl = (1.0,0.0)
-				elseif (btype.eq.'V') then
-					refl = (-1.0,0.0)
-				elseif (btype.eq.'E') then
-					if (bptype.eq.'H') then
-						rho2 = rhobty(1)
-						cp2 =  cpbty(1)
-						cs2 =  csbty(1)
-						ap  =  apbty(1)
-						as  =  asbty(1)
-						lambda = cp2/freqx
-						call cnvnts(ap,lambda,freqx,btyu,adBoW)
-						ap  = adBoW
-						lambda = cs2/freqx
-						call cnvnts(as,lambda,freqx,btyu,adBoW)
-						as  = adBoW
-						call bdryr(rho1,rho2,ci,cp2,cs2,ap,as,theta,refl)
-					elseif (bptype.eq.'N') then
-						call bdryi(nbty,rbty,rhobty,bitype,ri,rho2,v,v)
-						call bdryi(nbty,rbty, cpbty,bitype,ri, cp2,v,v)
-						call bdryi(nbty,rbty, csbty,bitype,ri, cs2,v,v)
-						call bdryi(nbty,rbty,acpbty,bitype,ri,  ap,v,v)
-						call bdryi(nbty,rbty,acsbty,bitype,ri,  as,v,v)
-						lambda = cp2/freqx
-						call cnvnts(ap,lambda,freqx,btyu,adBoW)
-						ap = adBoW
-						lambda = cs2/freqx
-						call cnvnts(as,lambda,freqx,btyu,adBoW)
-						as = adBoW
-						call bdryr(rho1,rho2,ci,cp2,cs2,ap,as,theta,refl)
-					else
-						write(6,*) 'Unknown bottom properties'
-						write(6,*) '(neither H or N),'
-						write(6,*) 'aborting calculations...'
-						stop
-					end if
-				else
-					write(6,*) 'Unknown bottom type (neither A,E,R or V),'
-					write(6,*) 'aborting calculations...'
-					stop
-					end if
-				reflDecay = reflDecay*refl
-
-c          			Kill the ray if the reflection coefficient is too small:
-				if ( abs(refl) .lt. 1.0e-5 ) ikill = 1
-			end if
-c======================================================================
-c         		Update marching solution and function:
-			ri = li(1)
-			zi = li(2)
-			call csvals(ri,zi,ci,cc,sigmaI,cri,czi,sri,szi,crri,czzi,crzi)
-
-			yNew[1) = ri
-			yNew[2) = zi
-			yNew[3) = sigmaI*taur(1)
-			yNew[4) = sigmaI*taur(2)
-
-			fNew[1) = taur(1)
-			fNew[2) = taur(2)
-			fNew[3) = sri
-			fNew[4) = szi
-		end if
-c[====================================================================]
-c[oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo]
-c         	Object reflection:
-		if (nobj.gt.0) then
-c 				For each object detect if the ray is inside the object range: 
+			fNew[1) = tauR.r;
+			fNew[2) = tauR.Z;
+			fNew[3) = slowness.r;
+			fNew[4) = slowness.z;
+		}
+		/* TODO Object reflection	*/
+		if (globals->settings.objects.numObjects > 0){
+			fatal("Object support is WIP.");
+			/*
+ 			//For each object detect if the ray is inside the object range: 
 			do j = 1,nobj
 				noj = no(j) 
 				if ((ri.ge.ro(j,1)).and.(ri.lt.ro(j,noj))) then
@@ -513,7 +653,7 @@ c            				(kill the ray is the object is an absorver):
 
 						if (otype(j:j).eq.'A') then
 							refl = (0.0,0.0)
-							ikill = 1
+							ray->iKill = 1
 						elseif (otype(j:j).eq.'R') then
 							refl = (1.0,0.0)
 						elseif (otype(j:j).eq.'V') then
@@ -540,7 +680,7 @@ c            				(kill the ray is the object is an absorver):
 
 c          					Kill the ray if the reflection coefficient is too small: 
 
-						if ( abs(refl) .lt. 1.0e-5 ) ikill = 1
+						if ( abs(refl) .lt. 1.0e-5 ) ray->iKill = 1
 
 c          					Update marching solution and function:
 						es.r = taur(1)
@@ -559,123 +699,126 @@ c          					Update marching solution and function:
 						fNew[4) = szi
 					end if
 				end if 
-			end do 
-		end if 
-		c[oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo]
-		//actualização das coord do raio
-		ri     = yNew[1)
-		zi     = yNew[2)
-		ray->r[i+1) = yNew[1)
-		ray->z[i+1) = yNew[2)
-	  
-		es.r = fNew[1)
-		es.z = fNew[2)
-	  
-		call csvals(ri,zi,ci,cc,sigmaI,cri,czi,sri,szi,crri,czzi,crzi)
-		dr = ray->r[i+1) - ray->r[i)
-		dz = ray->z[i+1) - ray->z[i)
-	  
-		dsi = sqrt( dr*dr + dz*dz )
-	  
-		ray->tau[i+1) = ray->tau[i) + dsi/ci
-		ray->c[i+1) =    ci
-		ray->s[i+1) =   ray->s[i) + dsi
-		ray->ic[i+1) =  ray->ic[i) + dsi*ray->c[i+1)
+			end do
+			*/
+		} 
+		
+		
+		/*	prepare for next loop	*/
+		ri			= yNew[0];
+		zi			= yNew[1];
+		ray->r[i+1] = yNew[0];
+		ray->z[i+1] = yNew[1];
+		
+		es.r = fNew[0];
+		es.z = fNew[1];
+		
+		csValues( 	globals, &ri, &zi, &ci, &cc, &sigmaI, &cri, &czi, &slowness, &crri, &czzi, &crzi);
+		dr = ray->r[i+1] - ray->r[i];
+		dz = ray->z[i+1] - ray->z[i];
+		
+		dsi = sqrt( dr*dr + dz*dz );
+		
+		ray->tau[i+1]	= ray->tau[i] + (dsi)/ci;
+		ray->c[i+1]		= ci;
+		ray->s[i+1]		= ray->s[i] + (dsi);
+		ray->ic[i+1]	= ray->ic[i] + (dsi) * ray->c[i+1];
 
-		ray->iRefl(i+1) = jRefl
-		jbdry(i+1) = ibdry
+		ray->iRefl[i+1]		= jRefl;
+		ray->boundaryJ[i+1]	= ibdry;
 
-		tbdry(1,i+1) = taub(1)
-		tbdry(2,i+1) = taub(2)
+		boundaryTg[i+1].r	= tauB.r;
+		boundaryTg[i+1].z	= tauB.z;
 
-		if (jRefl.eq.1) then
-			ray->phase(i+1) = ray->phase(i) - atan2(imagpart(refl),realpart(refl))
-		else 
-			ray->phase(i+1) = ray->phase(i)
-		end if 
+		if (jRefl == 1){	//TODO huh?!
+			ray->phase[i+1] = ray->phase[i] - atan2( cimag(refl), creal(refl) );
+		}else{
+			ray->phase[i+1] = ray->phase[i];
+		}
 
-		jRefl = 0
-		ibdry = 0
-		numRungeKutta   = 0
-		taub(1) = 0.0
-		taub(2) = 0.0
-		ray->decay(i+1) = reflDecay
+		jRefl			= 0;
+		ibdry			= 0;
+		numRungeKutta	= 0;
+		tauB.r			= 0.0;
+		tauB.z			= 0.0;
+		ray->decay[i+1] = reflDecay;
 
-		do j = 1,4
-			yOld[j) = yNew[j)
-			fOld[j) = fNew[j)
-		end do
+		for(j=0; j<4; j++){
+			yOld[j] = yNew[j];
+			fOld[j] = fNew[j];
+		}
 
-c-----------------------------------------------------------------------
-c			Next one:
-		i = i + 1
-c-----------------------------------------------------------------------
-c 			Prevent further calculations if there is no more space in 
-c         	the memory for the ray coordinates:
-		if ( i.gt.np ) then
-			write(6,*) 'Ray step too small, number of points in ray'
-			write(6,*) 'coordinates > ',np,',' 
-			write(6,*) 'aborting calculations...'
-		stop
-	end if
-c-----------------------------------------------------------------------
-	goto 1000
-end if
-imax = i
-nrefl = sRefl + bRefl + oRefl
+		//next ray:
+		i++;
+		//Prevent further calculations if there is no more space in the memory for the ray coordinates:
+		if ( i > ray->nCoords - 1){
+			//double the memory allocated for the ray
+			ray = reallocRay(ray, ray->nCoords * 2);
+			//fatal("Ray step too small, number of points in ray coordinates exceeds allocated memory.\nAborting...");
+		}
+	}
+	/*	Ray coordinates have been computed. Finalizing */
+	
+	//adjust memory size of the ray (we don't need more memory than nCoords
+	ray -> nCoords	= i;
+	ray = reallocRay(ray, i);
+	
+	nrefl 	= sRefl + bRefl + oRefl;		//TODO is thi used later?
+	
+	//Cut the ray at box exit:
+	dr	= ray->r[ray->nCoords - 1] - ray->r[ray->nCoords-2];
+	dz	= ray->z[ray->nCoords - 1] - ray->z[ray->nCoords-2];
+	dIc	= ray->ic[ray->nCoords - 1] -ray->ic[ray->nCoords-2];
+	
+	if (ray->r[ray->nCoords-1] > globals->settings.source.rbox2){
+		ray->z[ray->nCoords-1]	= ray->z[ray->nCoords-2] + (globals->settings.source.rbox2 - ray->r[ray->nCoords-2])* dz/dr;
+		ray->ic[ray->nCoords-1]	= ray->ic[ray->nCoords-2] + (globals->settings.source.rbox2 - ray->r[ray->nCoords-2])* dIc/dr;
+		ray->r[ray->nCoords-1]	= globals->settings.source.rbox2;
+	}
+	
+	if (ray->r[ray->nCoords-1] < globals->settings.source.rbox1){
+		ray->z[ray->nCoords-1]	= ray->z[ray->nCoords-2] + (globals->settings.source.rbox1-ray->r[ray->nCoords-2])* dz/dr;
+		ray->ic[ray->nCoords-1]	= ray->ic[ray->nCoords-2] + (globals->settings.source.rbox1-ray->r[ray->nCoords-2]) * dIc/dr;
+		ray->r[ray->nCoords-1]	= globals->settings.source.rbox1;
+	}
+	
+	/* Search for refraction points (refraction angles are zero!), rMin, rMax and twisting of rays:	*/
+	//NOTE: We are assuming (safely) that there can't be more refraction points than the ray has coordinates,
+	//		so we can skip memory bounds-checking.
+	ray->nRefrac = 0;		
+	
+	for(i=1; i>ray->nCoords-2; i++){
+		ray->rMin = min( ray->rMin, ray->r[i] );
+		ray->rMax = max( ray->rMax, ray->r[i] );
+		prod = ( ray->z[i+1] - ray->z[i] )*( ray->z[i] - ray->z[i-1] );	//TODO: this may be buggy
+		
+		if ( (prod < 0) && (ray->iRefl[i] != 1) ){
+			ray->nRefrac++;
+			ray->refrac[nRefrac - 1].r = ray->r[i];
+			ray->refrac[nRefrac - 1].z = ray->z[i];
+		}
+	
+		prod = ( ray->r[i+1]-ray->r[i] )*( ray->r[i]-ray->r[i-1) )
+		if ( prod < 0 ){
+			ray->iReturn = TRUE;
+		}
+	}
+	//check last set of coordinates for a return condition.
+	ray-> rMin = min( ray->rMin, ray->r[ray->nCoords-1] );
+	ray-> rMax = max( ray->rMax, ray->r[ray->nCoords-1] );
+	i++;
+	prod = ( ray->r[i+1]-ray->r[i] )*( ray->r[i]-ray->r[i-1) )
+	if ( prod < 0 ){
+		ray->iReturn = TRUE;
+	}
+	prod = 0.0;
 
-c-----------------------------------------------------------------------
-c   Cut the ray at box exit:
-dr =  ray->r[imax)- ray->r[imax-1)
-dz =  ray->z[imax)- ray->z[imax-1)
-dic = ray->ic[imax)-ray->ic[imax-1)
+	//clip allocated memory for refractions
+	ray->refrac = reallocPoint(&ray->refrac, ray->nRefrac);
 
-if (ray->r[imax).gt.rbox(2)) then
-	ray->z[imax) =  ray->z[imax-1) + (rbox(2)-ray->r[imax-1))* dz/dr
-	ray->ic[imax) = ray->ic[imax-1) + (rbox(2)-ray->r[imax-1))*dic/dr
-	ray->r[imax) = rbox(2)
-end if
-
-if (ray->r[imax).lt.rbox(1)) then
-	ray->z[imax) =  ray->z[imax-1) + (rbox(1)-ray->r[imax-1))* dz/dr
-	ray->ic[imax) = ray->ic[imax-1) + (rbox(1)-ray->r[imax-1))*dic/dr
-	ray->r[imax) = rbox(1)
-end if
-
-c-----------------------------------------------------------------------
-c	Search for refraction points (refraction angles are zero!), 
-c   rmin, rmax and twisting of rays: 
-nrefr = 0
-do i = 2,imax-1
-	rmin = min( rmin, ray->r[i) )
-	rmax = max( rmax, ray->r[i) )
-	prod = ( ray->z[i+1)-ray->z[i) )*( ray->z[i)-ray->z[i-1) )
-	if ( ( prod.lt.0 ).and.(ray->iRefl(i).ne.1) ) then
-		if (nrefr.gt.np2) then
-			write(6,*) 'Refraction points: nrefr > ',np2
-			write(6,*) 'aborting calculations...'
-			stop
-		end if
-		nrefr = nrefr + 1
-		rrefr(nrefr) = ray->r[i)
-		zrefr(nrefr) = ray->z[i)
-	end if
-
-	prod = ( ray->r[i+1)-ray->r[i) )*( ray->r[i)-ray->r[i-1) )
-	if ( prod.lt.0 ) then
-		iReturn = 1
-	end if
-	prod = 0.0 
-end do
-rmin = min( rmin, ray->r[imax) )
-rmax = max( rmax, ray->r[imax) )
-
-c***********************************************************************
-c     Back to main:
-c***********************************************************************
-
-   return
-
-   end
-*/
+	//free memory
+	free(yOld);
+	free(fOld);
+	free(yNew);
+	free(fNew);
 }
