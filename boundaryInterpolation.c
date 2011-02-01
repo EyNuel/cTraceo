@@ -95,6 +95,9 @@ void boundaryInterpolationExplicit(double* numSurfaceCoords, double* r, double* 
 	
 	normal->r = -taub->z; 
 	normal->z =  taub->r;
+
+	free(zri);
+	free(zrri);
 }
 
 void boundaryInterpolation(interface_t* interface, double* ri, double* zi, vector_t* taub, vector_t* normal){

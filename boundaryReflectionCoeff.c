@@ -23,6 +23,7 @@
  *						Universidade do Algarve										*
  *																					*
  *	Inputs:																			*
+ * 				TODO: correct this:
  * 				aIn:	Atenuation value to be converted.							*
  * 				lambda:	Wavelength.													*
  * 				freq:	Frequency.													*
