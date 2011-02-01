@@ -1,6 +1,7 @@
 /********************************************************************************
  *  tools.c																		*
- * 	Collection of utility functions												*
+ * 	Collection of utility functions.											*
+ *	All memory allocation functions in this file check for allocation errors.	*
  *																				*
  *	Written by:		Emanuel Ey													*
  *					emanuel.ey@gmail.com										*
@@ -18,20 +19,25 @@
 /****************************
  *	Function prototypes		*
  ***************************/
-double*		subVector(double*, uintptr_t);
-void 		fatal(const char*);
-FILE*		openFile(const char* , const char[4]);
-char*		mallocChar(uintptr_t);
-double*		mallocDouble(uintptr_t);
-double**	mallocDouble2D(uintptr_t, uintptr_t);
-globals_t*	mallocGlobals(void);
-vector_t*	mallocVector(uintptr_t);
-point_t*	mallocPoint(uintptr_t);
-double 		readDouble(FILE*);
-int32_t		readInt(FILE*);
-char*		readStringN(FILE*, uint32_t);
-void		skipLine(FILE*);
-void		printSettings(globals_t*);
+double*			subVector(double*, uintptr_t);
+double			min(double, double);
+double			max(double, double);
+void 			fatal(const char*);
+FILE*			openFile(const char* , const char[4]);
+char*			mallocChar(uintptr_t);
+uint32_t*		mallocUint(uintptr_t);
+double*			mallocDouble(uintptr_t);
+double**		mallocDouble2D(uintptr_t, uintptr_t);
+complex double*	mallocComplex(uintptr_t);
+globals_t*		mallocGlobals(void);
+vector_t*		mallocVector(uintptr_t);
+point_t*		mallocPoint(uintptr_t);
+double 			readDouble(FILE*);
+int32_t			readInt(FILE*);
+char*			readStringN(FILE*, uint32_t);
+void			skipLine(FILE*);
+void			printSettings(globals_t*);
+void			reallocRay(ray_t*, uintptr_t);
 
 
 /****************************
@@ -45,6 +51,22 @@ double*	subVector(double* vector, uintptr_t iniPos){
 	 * TODO: this function is rather redundant, but it may make code more readable (?)
 	 */
 	return( &vector[iniPos]);
+}
+
+double	min(double a, double b){
+	if( a <= b){
+		return a;
+	}else{
+		return b;
+	}
+}
+
+double max(double a, double b){
+	if( a > b){
+		return a;
+	}else{
+		return b;
+	}
 }
 
 void fatal(const char* message){
@@ -97,6 +119,20 @@ char*		mallocChar(uintptr_t numChars){
 	return temp;
 }
 
+uint32_t*	mallocUint(uintptr_t numUints){
+	/*
+		Allocates a char string and returns a pointer to it in case of success,
+		exits with error code otherwise.
+	*/
+	
+	uint32_t*	temp = NULL;	//temporary pointer
+	temp = malloc((unsigned long)numUints*sizeof(uint32_t));
+	if (temp == NULL){
+		fatal("Memory allocation error.\n");
+	}
+	return temp;
+}
+
 double*		mallocDouble(uintptr_t numDoubles){
 	/*
 		Allocates an array of doubles and returns a pointer to it in case of success,
@@ -130,6 +166,20 @@ double**	mallocDouble2D(uintptr_t numRows, uintptr_t numCols){
 	}
 
 	return array;
+}
+
+complex double*		mallocComplex(uintptr_t numComplex){
+	/*
+		Allocates an array of doubles and returns a pointer to it in case of success,
+		Exits with error code otherwise.
+	*/
+	
+	complex double*	temp = NULL;	//temporary pointer
+	temp = malloc((unsigned long)numComplex*sizeof(complex double));
+	if (temp == NULL){
+		fatal("Memory allocation error.\n");
+	}
+	return temp;
 }
 
 globals_t* 	mallocGlobals(void){
@@ -526,3 +576,22 @@ void		printSettings(globals_t*	globals){
 	}
 	printf("output.miss: \t\t\t%12.5lf\n",globals->settings.output.miss);
 }
+
+void		reallocRay(ray_t* ray, uintptr_t numRayCoords){
+	ray->numCoords	= numRayCoords;
+	ray->r			= mallocDouble(numRayCoords);
+	ray->z			= mallocDouble(numRayCoords);
+	ray->c			= mallocDouble(numRayCoords);
+	ray->iRefl		= mallocUint(numRayCoords);
+	ray->decay		= mallocComplex(numRayCoords);
+	ray->phase		= mallocDouble(numRayCoords);
+	ray->tau		= mallocDouble(numRayCoords);
+	ray->s			= mallocDouble(numRayCoords);
+	ray->Ic			= mallocDouble(numRayCoords);
+	ray->boundaryTg	= mallocVector(numRayCoords);
+	ray->boundaryJ	= mallocUint(numRayCoords);
+	ray->refr		= mallocPoint(numRayCoords);
+}
+
+
+
