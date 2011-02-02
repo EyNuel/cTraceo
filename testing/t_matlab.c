@@ -5,7 +5,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-//#include "../tools.c"
+#include "../tools.c"
 //#include "../globals.h"
 #include <math.h>
 #include <complex.h>
@@ -17,34 +17,43 @@ int main(void);
 
 int main(void){
 	
-	MATFile*	mp;
-	mxArray*	pthtas;
+	MATFile*	matfile;
 	double*		thetas = NULL;
 	double* 	ptr;
-	uint32_t	i;
+	uint32_t	i,j;
 	
-	double		x[5];
-	double*		data;
+	double*		x = mallocDouble(5);
+	double**	y = mallocDouble2D(5,5);
 	mxArray*	mtlbDataArray;
+	mxArray*	mtlbDataArray2D;
 
-	// code to fill in values of x
+	//fill in values of x an y
 	for(i=0; i<5; i++){
 		x[i] = i*i;
+		for(j=0; j<5; j++){
+			y[i][j] = i*j;
+		}
 	}
-	// code to open engine
-	mp 		= matOpen("t_matlab.mat", "w");
+	//open matlab file
+	matfile 		= matOpen("t_matlab.mat", "w");
 
-	
 	mtlbDataArray = mxCreateDoubleMatrix(1, 5, mxREAL);
 	if( mtlbDataArray == NULL ) {
-		//fatal("Memory Alocation error.");
+		fatal("Memory Alocation error.");
 	}
-	data = mxGetPr(mtlbDataArray);
-	for( i=0; i<5; i++ ){
-	   data[i] = x[i];
-	}
-	matPutVariable(mp, "myArray", mtlbDataArray);
+
+	copyDoubleToPtr(x, mxGetPr(mtlbDataArray), 5);
+	matPutVariable(matfile, "x", mtlbDataArray);
 	mxDestroyArray(mtlbDataArray);
+	
+	mtlbDataArray2D = mxCreateDoubleMatrix(5, 5, mxREAL);
+	if( mtlbDataArray2D == NULL ) {
+		fatal("Memory Alocation error.");
+	}
+	copyDoubleToPtr2D(y, mxGetPr(mtlbDataArray2D), 5, 5);
+	matPutVariable(matfile, "y", mtlbDataArray2D);
+	mxDestroyArray(mtlbDataArray2D);
+	
 
 	exit(EXIT_SUCCESS);
 }

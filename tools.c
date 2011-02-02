@@ -26,19 +26,25 @@ void 			fatal(const char*);
 FILE*			openFile(const char* , const char[4]);
 char*			mallocChar(uintptr_t);
 uint32_t*		mallocUint(uintptr_t);
+uint32_t*		reallocUint(uint32_t*, uintptr_t);
 double*			mallocDouble(uintptr_t);
+double*			reallocDouble(double*, uintptr_t);
 double**		mallocDouble2D(uintptr_t, uintptr_t);
 complex double*	mallocComplex(uintptr_t);
+complex double*	reallocComplex(complex double*, uintptr_t);
 globals_t*		mallocGlobals(void);
 vector_t*		mallocVector(uintptr_t);
+vector_t*		reallocVector(vector_t*, uintptr_t);
 point_t*		mallocPoint(uintptr_t);
+point_t*		reallocPoint(point_t*, uintptr_t);
 double 			readDouble(FILE*);
 int32_t			readInt(FILE*);
 char*			readStringN(FILE*, uint32_t);
 void			skipLine(FILE*);
 void			printSettings(globals_t*);
 void			reallocRay(ray_t*, uintptr_t);
-
+void			copyDoubleToPtr(double*, double*, uintptr_t);
+void			copyDoubleToPtr2D(double**, double*, uintptr_t, uintptr_t);
 
 /****************************
  *	Actual Functions		*
@@ -130,7 +136,7 @@ uint32_t*	mallocUint(uintptr_t numUints){
 	return reallocUint(temp, numUints);
 }
 
-uint32_t*	reallocUint(uint32_t* temp,uintptr_t numUints){
+uint32_t*	reallocUint(uint32_t* temp, uintptr_t numUints){
 	/*
 		Allocates a char string and returns a pointer to it in case of success,
 		exits with error code otherwise.
@@ -152,7 +158,7 @@ double*		mallocDouble(uintptr_t numDoubles){
 	return	reallocDouble(temp, numDoubles);
 }
 
-char*		reallocDouble(double* temp, uintptr_t numDoubles){
+double*		reallocDouble(double* temp, uintptr_t numDoubles){
 	/*
 		Reallocates a pointer to doubles and returns its pointer in case of success,
 		exits with error code otherwise.
@@ -612,20 +618,35 @@ void		printSettings(globals_t*	globals){
 
 void		reallocRay(ray_t* ray, uintptr_t numRayCoords){
 	ray->nCoords	= numRayCoords;
-	ray->r			= reallocDouble(	&(ray->r),			numRayCoords);
-	ray->z			= reallocDouble(	&(ray->z),			numRayCoords);
-	ray->c			= reallocDouble(	&(ray->c),			numRayCoords);
-	ray->iRefl		= reallocUint(		&(ray->iRefl),		numRayCoords);
-	ray->decay		= reallocComplex(	&(ray->decay),		numRayCoords);
-	ray->phase		= reallocDouble(	&(ray->phase),		numRayCoords);
-	ray->tau		= reallocDouble(	&(ray->tau),		numRayCoords);
-	ray->s			= reallocDouble(	&(ray->s), 			numRayCoords);
-	ray->Ic			= reallocDouble(	&(ray->Ic),			numRayCoords);
-	ray->boundaryTg	= reallocVector(	&(ray->boundaryTg),	numRayCoords);
-	ray->boundaryJ	= reallocUint(		&(ray->boundaryJ),	numRayCoords);
-	ray->numRefrac	= numRayCoords;
-	ray->refrac		= reallocPoint(		&(ray->refr),		numRayCoords);
+	ray->r			= reallocDouble(	ray->r,			numRayCoords);
+	ray->z			= reallocDouble(	ray->z,			numRayCoords);
+	ray->c			= reallocDouble(	ray->c,			numRayCoords);
+	ray->iRefl		= reallocUint(		ray->iRefl,		numRayCoords);
+	ray->decay		= reallocComplex(	ray->decay,		numRayCoords);
+	ray->phase		= reallocDouble(	ray->phase,		numRayCoords);
+	ray->tau		= reallocDouble(	ray->tau,		numRayCoords);
+	ray->s			= reallocDouble(	ray->s, 		numRayCoords);
+	ray->Ic			= reallocDouble(	ray->Ic,		numRayCoords);
+	ray->boundaryTg	= reallocVector(	ray->boundaryTg,numRayCoords);
+	ray->boundaryJ	= reallocUint(		ray->boundaryJ,	numRayCoords);
+	ray->nRefrac	= numRayCoords;
+	ray->refrac		= reallocPoint(		ray->refrac,		numRayCoords);
 }
 
+void		copyDoubleToPtr(double* origin, double* dest, uintptr_t nItems){
+	uintptr_t	i;
 
+	for( i=0; i<nItems; i++ ){
+		dest[i] = origin[i];
+	}
+}
 
+void		copyDoubleToPtr2D(double** origin, double* dest, uintptr_t rowSize, uintptr_t colSize){
+	uintptr_t	i,j;
+
+	for( j=0; j<colSize; j++ ){
+		for(i=0; i<rowSize; i++){
+			dest[j*rowSize +i] = origin[j][i];
+		}
+	}
+}
