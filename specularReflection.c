@@ -28,16 +28,21 @@
  * 						vector														*
  * 																					*
  ***********************************************************************************/
-
+#pragma once
 #include "globals.h"
 #include "math.h"
+#include "dotProduct.c"
 
 void specularReflection(vector_t*, vector_t*, vector_t*, double*);
 void specularReflection(vector_t* normal, vector_t* tauI, vector_t* tauR, double* theta){
+	if (VERBOSE)
+		printf("Entering\t specularReflection()\n ");
 	double	c = dotProduct(normal, tauI);
 
 	tauR->r = tauI->r - 2*c * normal->r;
 	tauR->z = tauI->z - 2*c * normal->z;
 
 	*theta = acos( dotProduct(normal, tauR));
+	if (VERBOSE)
+		printf("Leaving\t specularReflection()\n ");
 }

@@ -36,74 +36,75 @@
 
 
 
-void boundaryInterpolationExplicit(double*, double*, double*, uint32_t*, double*, double*, vector_t*, vector_t*);
+void boundaryInterpolationExplicit(uint32_t*, double*, double*, uint32_t*, double*, double*, vector_t*, vector_t*);
 void boundaryInterpolation(interface_t*, double*, double*, vector_t*, vector_t*);
 
-void boundaryInterpolationExplicit(double* numSurfaceCoords, double* r, double* z, uint32_t* surfaceInterpolation, double* ri, double* zi, vector_t* taub, vector_t* normal){
-
-	double*		zri =	mallocDouble(1);	//1st derivative of z at ri
-	double*		zrri =	mallocDouble(1);	//2nd derivative of z at ri
+void boundaryInterpolationExplicit(uint32_t* numSurfaceCoords, double* r, double* z, uint32_t* surfaceInterpolation, double* ri, double* zi, vector_t* taub, vector_t* normal){
+	if (VERBOSE)
+		printf("Entering\t boundaryInterpolationExplicit()\n");
+		
+	double		zri;	//1st derivative of z at ri
+	double		zrri;	//2nd derivative of z at ri
 	uintptr_t	i;
 	
-	switch(surfaceInterpolation){
+	switch(*surfaceInterpolation){
 		case SURFACE_INTERPOLATION__FLAT:
 			//lini1d(xl,yl,ri,zi,zri)
-			intLinear1D( &(r[0]), &(z[0]),ri,zi,zri);
+			intLinear1D( &(r[0]), &(z[0]),ri,zi,&zri);
 			break;
 			
 		case SURFACE_INTERPOLATION__SLOPED:
 			//lini1d(xl,yl,ri,zi,zri)
-			intLinear1D( &(r[0]), &(z[0]),ri,zi,zri);
+			intLinear1D( &(r[0]), &(z[0]),ri,zi,&zri);
 			break;
 			
 		case SURFACE_INTERPOLATION__2P:
-			bracket(numSurfaceCoords, &(y[0]), ri, &i);
-			intLinear1D( &(r[i]), &(z[i]),ri,zi,zri);
+			bracket(*numSurfaceCoords, &(z[0]), ri, &i);
+			intLinear1D( &(r[i]), &(z[i]),ri,zi,&zri);
 			break;
 			
 		case SURFACE_INTERPOLATION__3P:
 			if (*ri <= r[1]){
 				i = 0;
-			}else if( ri >= r[numSurfaceCoords - 2]){
-				i = numSurfaceCoords-3;
+			}else if( *ri >= r[*numSurfaceCoords - 2]){
+				i = *numSurfaceCoords-3;
 			}else{
-				bracket(numSurfaceCoords, &(r[0]), ri, &i);
+				bracket(*numSurfaceCoords, &(r[0]), ri, &i);
 			}
-			intBarycParab1D( &(r[i]), &(z[i]), ri, zi, zri, zrri);
+			intBarycParab1D( &(r[i]), &(z[i]), ri, zi, &zri, &zrri);
 			break;
 			
 		case SURFACE_INTERPOLATION__4P:
 			if (*ri <= r[1]){
 				i = 1;
-			}else if(*ri >= r[numSurfaceCoords - 2]){
-				i = numSurfaceCoords - 3;
+			}else if(*ri >= r[*numSurfaceCoords - 2]){
+				i = *numSurfaceCoords - 3;
 			}else{
-				bracket( numSurfaceCoords, &(r[0]), ri, &i);
+				bracket( *numSurfaceCoords, &(r[0]), ri, &i);
 			}
-			intBarycCubic1D( &(r[i-1]), &(z[i-1]), ri, zi, zri, zrri);
+			intBarycCubic1D( &(r[i-1]), &(z[i-1]), ri, zi, &zri, &zrri);
 	}
 
 	taub->r = cos( atan(zri));
 	taub->z = sin( atan(zri));
 
 	//Avoid rounding errors:
-	if ( abs(taub->r) == 1 ){
+	if ( fabs(taub->r) == 1.0 ){
 		taub->z = 0;
-	}else if ( abs(taub->z) == 1 ){
+	}else if ( fabs(taub->z) == 1.0 ){
 	   taub->r = 0;
 	}
 	
 	normal->r = -taub->z; 
 	normal->z =  taub->r;
-
-	free(zri);
-	free(zrri);
+	if (VERBOSE)
+		printf("Leaving \t boundaryInterpolationExplicit()\n");
 }
 
 void boundaryInterpolation(interface_t* interface, double* ri, double* zi, vector_t* taub, vector_t* normal){
 	boundaryInterpolationExplicit( 	&(interface->numSurfaceCoords),
-									&(interface->r),
-									&(interface->z),
+									interface->r,
+									interface->z,
 									&(interface->surfaceInterpolation),
 									ri, zi, taub, normal);
 }

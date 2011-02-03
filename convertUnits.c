@@ -31,17 +31,16 @@
  ***********************************************************************************/
 
 #include "globals.h"
-#include "tools.h"
+#include "tools.c"
 #include <math.h>
 
-void convertUnits(double*, double*, double*, uint32_t, double*);
+void convertUnits(double*, double*, double*, uint32_t*, double*);
 	
-void convertUnits(double* aIn, double* lambda, double* freq, uint32_t units, double* aOut){
+void convertUnits(double* aIn, double* lambda, double* freq, uint32_t* units, double* aOut){
 	
 	double c1 = 8.68588963806504;
-	//TODO double c2 = 8685.88963806504;
 	
-	switch(units){
+	switch(*units){
 		case	SURFACE_ATTEN_UNITS__dBperkHz:		//"F",	dB/kHz
 			*aOut = *aIn * (*lambda) * (*freq) * 1.0e-3;
 			break;

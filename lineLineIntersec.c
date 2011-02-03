@@ -33,21 +33,21 @@
  * 				isect:	Coordc of intersection point.								*
  * 																					*
  ***********************************************************************************/
-
+#pragma once
 #include "globals.h"
 
-void	lineLineIntersec(point_t*, point_t*, point_t*, point_t*, uint32_t, point_t*);
+void	lineLineIntersec(point_t*, point_t*, point_t*, point_t*, uint32_t*, point_t*);
 
-void	lineLineIntersec(point_t* p1, point_t* p2, point_t* q1, point_t* q2, uint32_t i, point_t* isect){
+void	lineLineIntersec(point_t* p1, point_t* p2, point_t* q1, point_t* q2, uint32_t* i, point_t* isect){
 	double		d;
 
 	*i = 0;
 	d = (p1->r - p2->r) * (q1->z - q2->z) - (p1->z - p2->z) * (q1->r - q2->r);
 
-	if( abs(d) > 1e-16){
-		*i = 1
+	if( fabs(d) > 1e-16){
+		*i = 1;
 
-		isect->x = ( (p1->r * p2->z - p1->z * p2->r) * (q1->r - q2->r) - (p1->r - p2->r) * (q1->r * q2->z - q1->z * q2->r) )/d;
+		isect->r = ( (p1->r * p2->z - p1->z * p2->r) * (q1->r - q2->r) - (p1->r - p2->r) * (q1->r * q2->z - q1->z * q2->r) )/d;
 		isect->z = ( (p1->r * p2->z - p1->z * p2->r) * (q1->z - q2->z) - (p1->z - p2->z) * (q1->r * q2->z - q1->z * q2->r) )/d;
 	}
 }

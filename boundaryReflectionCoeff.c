@@ -38,31 +38,32 @@
 #include <complex.h>
 #include <math.h>
 
-void	boundaryReflectionCoeff(double*, double*, double*, double*, double*, double*, double*, double*, complex*);
+void	boundaryReflectionCoeff(double*, double*, double*, double*, double*, double*, double*, double*, complex double*);
 
 void	boundaryReflectionCoeff(double* rho1, double* rho2, double* cp1, double* cp2, double* cs2, double* ap,
-								double* as, double* theta, complex* refl){
+								double* as, double* theta, complex double* refl){
 
-	double		tilap, tilas;
-	double		a1, a2, a3, a4, a5, a6, d;
-	complex		tilcp2, tilcs2;
+	double			tilap, tilas;
+	double			a1;
+	complex double	a2, a3, a4, a5, a6, a7, d;
+	complex	double	tilcp2, tilcs2;
 	
-	tilap = ap/( 40.0 * M_PI * M_LOG10E );
-	tilas = as/( 40.0 * M_PI * M_LOG10E );
+	tilap = *ap/( 40.0 * M_PI * M_LOG10E );
+	tilas = *as/( 40.0 * M_PI * M_LOG10E );
 	
-	tilcp2 = cp2 * (1 - I * tilap) / (1 + tilap * tilap);
-	tilcs2 = cs2 * (1 - I * tilas) / (1 + tilas * tilas);
+	tilcp2 = *cp2 * (1 - I * tilap) / (1 + tilap * tilap);
+	tilcs2 = *cs2 * (1 - I * tilas) / (1 + tilas * tilas);
 	
-	a1	= rho2 / rho1;
-	a2	= tilcp2 / cp1;
-	a3	= tilcs2 / cp1;
+	a1	= *rho2 / *rho1;
+	a2	= tilcp2 / *cp1;
+	a3	= tilcs2 / *cp1;
 	a4	= a3 * sin( *theta );
 	a5	= 2*a4 * a4;
 	a6	= a2 * sin( *theta );
 	a7	= 2*a5 - a5*a5;
 	
-	d	= a1 * ( a2 * (1 - a7 ) / sqrt( 1 - a6 * a6 ) + a3 * a7 / sqrt(1 - 0.5*a5) );
+	d	= a1 * ( a2 * (1 - a7 ) / csqrt( 1 - a6 * a6 ) + a3 * a7 / csqrt(1 - 0.5*a5) );
 	
-	*refl = ( d * cos( *theta ) -1) / ( d * cos( *theta ) + 1);
+	*refl = ( d * ccos( *theta ) -1) / ( d * ccos( *theta ) + 1);
 }
 

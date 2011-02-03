@@ -32,11 +32,11 @@
  * 				crzi:		partial derivative of c with respect to z and r			*
  * 																					*
  ***********************************************************************************/
-
+#pragma once
 #include	"globals.h"
 #include	"math.h"
 #include	"cValues1D.c"
-#include	"cValues2D.c"
+//#include	"cValues2D.c"
 
 void	csValues(globals_t*, double*, double*, double*, double*, double*, double*, double*,
 				vector_t*, double*, double*, double*);
@@ -44,7 +44,7 @@ void	csValues(globals_t*, double*, double*, double*, double*, double*, double*, 
 void	csValues(globals_t* globals, double* ri, double* zi, double* ci, double* cc, double* si, double* cri, double* czi,
 				vector_t* slowness, double* crri, double* czzi, double* crzi){
 	if (VERBOSE)
-		printf("Entering csValues().\n");
+		printf("Entering\t csValues().\n");
 	
 	double 		k,a,eta, root, root32, root52;
 	double*		c01d;	//used locally to make code more readable
@@ -67,8 +67,7 @@ void	csValues(globals_t* globals, double* ri, double* zi, double* ci, double* cc
 			*crri = 0;
 			*crzi = 0;
 			switch(globals->settings.soundSpeed.cClass){
-				// ===============================
-				// analytical sound speed profiles
+				///	*****	analytical sound speed profiles		*****
 				case C_CLASS__ISOVELOCITY:			//"ISOV"
 					*ci = c01d[0];
 					*czi = 0;
@@ -148,6 +147,6 @@ void	csValues(globals_t* globals, double* ri, double* zi, double* ci, double* cc
 	slowness->z = -(*czi) / (*cc);
 	
 	if (VERBOSE)
-		printf("Leaving csValues().\n");
+		printf("Leaving \t csValues().\n");
 }
 

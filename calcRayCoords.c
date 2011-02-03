@@ -33,6 +33,9 @@
 void	calcRayCoords(globals_t*);
 
 void	calcRayCoords(globals_t* globals){
+	if (VERBOSE)
+		printf("Entering\t calcRayCoords()\n");
+
 	MATFile*	matfile	= NULL;
 	mxArray*	pThetas	= NULL;
 	mxArray*	pTitle	= NULL;
@@ -41,21 +44,24 @@ void	calcRayCoords(globals_t* globals){
 	double		thetai, ctheta;
 	ray_t*		ray		= NULL;
 	double**	temp2D 	= NULL;
-	uintptr_t	i,k;
+	uintptr_t	i;
 	char* 		string	= mallocChar(10);
-	
+for(i=0; i<2; i++){		//TODO remove this
+	printf("globals->settings.altimetry.r[%lu]: %lf\n", i, globals->settings.altimetry.r[i]);
+	printf("globals->settings.altimetry.z[%lu]: %lf\n", i, globals->settings.altimetry.z[i]);
+}
 	matfile		= matOpen("rco.mat", "w");
-	pThetas		= mxCreateDoubleMatrix(1, globals->settings.source.nThetas, mxREAL);
+	pThetas		= mxCreateDoubleMatrix(1, (int32_t)globals->settings.source.nThetas, mxREAL);
 	if(matfile == NULL || pThetas == NULL)
 		fatal("Memory alocation error.");
 	
 	//data		= mxGetPtr(thetas);
 	//copy cArray to mxArray:
 	copyDoubleToPtr(	globals->settings.source.thetas,
-						mxGetPtr(thetas),
+						mxGetPr(pThetas),
 						globals->settings.source.nThetas);
 	//move mxArray to file:
-	status = matPutVariable(matfile, 'thetas', pThetas);
+	matPutVariable(matfile, "thetas", pThetas);
 
 	//write title to matfile:
 	pTitle = mxCreateString("TRACEO: Ray COordinates");
@@ -69,13 +75,14 @@ void	calcRayCoords(globals_t* globals){
 		fatal("Memory alocation error.");
 
 	/* Trace the rays:	*/
-	for(i=0; i<globals->settings.source.nThetas); i++){
+	for(i=0; i<globals->settings.source.nThetas; i++){
 		thetai = -globals->settings.source.thetas[i] * M_PI/180.0;
-		ctheta = abs( cos(thetai));
+		ray[i].theta = thetai;
+		ctheta = fabs( cos(thetai));
 		
 		//Trace a ray as long as it is neither 90 or -90:
 		if (ctheta > 1.0e-7){
-			solveEikonalEq(globals, ray[i]);
+			solveEikonalEq(globals, &ray[i]);
 			//call seikeq(thetai,imax,irefl,decay,jbdry,tbdry)
 			/*
 			for k = 1,imax
@@ -83,20 +90,28 @@ void	calcRayCoords(globals_t* globals){
 				raydat(2,k) = z(k)
 			end do
 			*/
-			temp2D[0]	= ray[i].r;
-			temp2D[1]	= ray[i].z;
-			pRay		= mxCreateDoubleMatrix(2, ray[i]->nCoords, mxReal);
+printf(">6\t********\n");	//TODO remove
+///			temp2D[0]	= ray[i].r;
+///			temp2D[1]	= ray[i].z;
+printf(">7\t********\n");	//TODO remove
+			pRay		= mxCreateDoubleMatrix(1, (int32_t)ray[i].nCoords, mxREAL);
 			if(pRay == NULL)
 				fatal("Memory alocation error.");
-				
-			copyDoubleToPtr2D(temp2D, mxGetPtr(pRay), 2, ray[i].nCoords);
+printf(">8\t********\n");	//TODO remove
+///			copyDoubleToPtr2D(temp2D, mxGetPr(pRay), 2, ray[i].nCoords);
+copyDoubleToPtr(ray[i].r, mxGetPr(pRay), ray[i].nCoords);
+printf(">9\t********\n");	//TODO remove
 			//mxCopyReal8ToPtr(raydat,mxGetPr(pRay),2*imax)
-			sprintf(string, "ray%d", i);
-			matPutVariable(matfile, (const char*)buffer, pRay)
-			mxDestroyArray(pRay)
+			sprintf(string, "ray%lu", i+1);
+			matPutVariable(matfile, (const char*)string, pRay);
+			mxDestroyArray(pRay);
 		}
+matClose(matfile);		//TODO remove
+exit(EXIT_SUCCESS);		//TODO remove
 	}
-	mxDestroyArray(thetas);
-	mxDestroyArray(title);
-	matClose(matfile)
+	mxDestroyArray(pThetas);
+	mxDestroyArray(pTitle);
+	matClose(matfile);
+	if (VERBOSE)
+		printf("Leaving \t calcRayCoords");
 }

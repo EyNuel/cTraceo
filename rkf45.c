@@ -39,35 +39,35 @@
 #include	"math.h"
 
 
-void rkf45(double*, double*, double*, double*, double*, double*, double*){
+void rkf45(globals_t*, double*, double*, double*, double*, double*, double*, double*);
 
-void rkf45(double* dsi, double* yOld, double* fOld, double* yNew, double* fNew, double* ds4, double* ds5){
+void rkf45(globals_t* globals, double* dsi, double* yOld, double* fOld, double* yNew, double* fNew, double* ds4, double* ds5){
+	if (VERBOSE)
+		printf("Entering\t rkf45()\n");
 	uintptr_t	j;
 	double		dr,dz;
-	double		a1,a2,a3,a5;
-	double		b1,b2,b3,b4,b5,b6;
+	//TODO what happened to a2? double		a1,a2,a3,a4,a5;
+	double		a1,a3,a4,a5;
+	//TODO what happened to b2? double		b1,b2,b3,b4,b5,b6;
+	double		b1,b3,b4,b5,b6;
 	double 		k1[4],k2[4],k3[4],k4[4],k5[4],k6[4];
-	double		yk[4],yrk[4],yrk5[4];
+	double		yk[4],yrk4[4],yrk5[4];
 
-	double*		ri 		= mallocDouble(1);
-	double*		zi 		= mallocDouble(1);
-	double*		ci 		= mallocDouble(1);
-	double*		cc 		= mallocDouble(1);
-	double*		sigmaI 	= mallocDouble(1);
-	double*		cri 	= mallocDouble(1);
-	double*		czi 	= mallocDouble(1);
-	double*		crri 	= mallocDouble(1);
-	double*		czzi 	= mallocDouble(1);
-	double*		crzi 	= mallocDouble(1);
-	double*		sigmaR	= mallocDouble(1);
-	double*		sigmaZ	= mallocDouble(1);
+	double		ri;
+	double		zi;
+	double		ci;
+	double		cc;
+	double		sigmaI;
+	double		cri;
+	double		czi;
+	double		crri;
+	double		czzi;
+	double		crzi;
+	double		sigmaR;
+	double		sigmaZ;
 	
-	vector_t*	es 			= NULL;
-	vector_t* 	slowness 	= NULL;
-	es 			= malloc(sizeof(vector_t));
-	slowness 	= malloc(sizeof(vector_t));
-	if( slowness == NULL || es == NULL)
-		fatal("Memory allocation error.");
+	vector_t	es;
+	vector_t 	slowness;
 	
 	//define coeficients required for Runge-Kutta-Fehlberg method:
 	//RK4:
@@ -80,100 +80,101 @@ void rkf45(double* dsi, double* yOld, double* fOld, double* yNew, double* fNew, 
 	b3 =  6656.0/12825.0;
 	b4 = 28561.0/56430.0;
 	b5 =    -9.0/50.0;
-	b6 =     2.0/55.0:
+	b6 =     2.0/55.0;
 
 	//TODO make sure that this pointer juggling goes well:
-	*ri = yOld[0];
-	*zi = yOld[1];
-
+	ri = yOld[0];
+	zi = yOld[1];
+///	printf("dsi: %lf\n", *dsi);		//TODO
+///	printf("fOld:%lf, yOld:%lf, yk:%lf\n",fOld[0], yOld[0], yk[0]);
 	/* determine k1:											*/
-	csValues(ri,zi,ci,cc,sigmaI,cri,czi,slowness,crri,czzi,crzi);
+	csValues(globals, &ri, &zi, &ci, &cc, &sigmaI, &cri, &czi, &slowness, &crri, &czzi, &crzi);
 	for(j=0; j<4; j++){
 		k1[j] = fOld[j];
 		yk[j] = yOld[j] + 0.25 * (*dsi) * k1[j];
+///		printf("j=%lu: k1:%lf, fOld:%lf, yOld:%lf, yk:%lf\n", j, k1[j], fOld[j], yOld[j], yk[j]);		//TODO
 	}
-
 	/* determine k2:											*/
-	*ri 	= yk[0];
-	*zi		= yk[1];
-	*sigmaR	= yk[2];
-	*sigmaZ	= yk[3];
-	sigmaI = sqrt( pow(*sigmaR,2) + pow(*sigmaZ,2) );
-	es->r = (*sigmaR)/(*sigmaI);
-	es->z = (*sigmaZ)/(*sigmaI);
-	csValues(ri,zi,ci,cc,sigmaI,cri,czi,slowness,crri,czzi,crzi);	//interpolate slowness vector at 
-	k2[0] = es->r;
-	k2[1] = es->z;
-	k2[2] = slowness->r;
-	k2[3] = slowness->z;
+	ri 	= yk[0];
+	zi		= yk[1];
+	sigmaR	= yk[2];
+	sigmaZ	= yk[3];
+	sigmaI = sqrt( pow(sigmaR,2) + pow(sigmaZ,2) );
+	es.r = (sigmaR)/(sigmaI);
+	es.z = (sigmaZ)/(sigmaI);
+	csValues(globals, &ri, &zi, &ci, &cc, &sigmaI, &cri, &czi, &slowness, &crri, &czzi, &crzi);	//interpolate slowness vector
+	k2[0] = es.r;
+	k2[1] = es.z;
+	k2[2] = slowness.r;
+	k2[3] = slowness.z;
 	for(j=0; j<4; j++){
 		yk[j] = yOld[j] + (*dsi) *(3.0/32.0 * k1[j] + 9.0/32.0 * k2[j]);
 	}
 
 	/* determine k3:											*/
-	*ri = yk[0];
-	*zi = yk[1];
-	*sigmaR = yk[2];
-	*sigmaZ = yk[3];
-	*sigmaI = sqrt( pow(sigmaR,2) + pow(sigmaZ,2) );
-	es->r = (*sigmaR)/(*sigmaI);
-	es->z = (*sigmaZ)/(*sigmaI);
-	csValues(ri,zi,ci,cc,sigmaI,cri,czi,slowness,crri,czzi,crzi);
-	k3[0] = es->r;
-	k3[1] = es->z;
-	k3[2] = slowness->r;
-	k3[3] = slowness->z;
+	ri = yk[0];
+	zi = yk[1];
+	sigmaR = yk[2];
+	sigmaZ = yk[3];
+	sigmaI = sqrt( pow(sigmaR,2) + pow(sigmaZ,2) );
+	es.r = (sigmaR)/(sigmaI);
+	es.z = (sigmaZ)/(sigmaI);
+	csValues(globals, &ri, &zi, &ci, &cc, &sigmaI, &cri, &czi, &slowness, &crri, &czzi, &crzi);
+	k3[0] = es.r;
+	k3[1] = es.z;
+	k3[2] = slowness.r;
+	k3[3] = slowness.z;
 	for(j=0; j<4; j++){
 		yk[j] = yOld[j] + (*dsi) * ( 1932.0/2197.0*k1[j] -7200.0/2197.0*k2[j] + 7296.0/2197.0*k3[j]);
 	}
 
 	/* determine k4:											*/
-	*ri = yk[0];
-	*zi = yk[1];
-	*sigmaR = yk[2];
-	*sigmaZ = yk[3];
-	*sigmaI = sqrt( pow(sigmaR,2) + pow(sigmaZ,2) );
-	es->r = (*sigmaR)/(*sigmaI);
-	es->z = (*sigmaZ)/(*sigmaI);
-	csValues(ri,zi,ci,cc,sigmaI,cri,czi,slowness,crri,czzi,crzi);
-	k4[0] = es->r;
-	k4[1] = es->z;
-	k4[2] = slowness->r;
-	k4[3] = slowness->z;
+	ri = yk[0];
+	zi = yk[1];
+	sigmaR = yk[2];
+	sigmaZ = yk[3];
+	sigmaI = sqrt( pow(sigmaR,2) + pow(sigmaZ,2) );
+	es.r = (sigmaR)/(sigmaI);
+	es.z = (sigmaZ)/(sigmaI);
+	csValues(globals, &ri, &zi, &ci, &cc, &sigmaI, &cri, &czi, &slowness, &crri, &czzi, &crzi);
+	k4[0] = es.r;
+	k4[1] = es.z;
+	k4[2] = slowness.r;
+	k4[3] = slowness.z;
 	for(j=0; j<4; j++){
 		yk[j] = yOld[j] + (*dsi) * (439.0/216.0*k1[j] - 8.0*k2[j] + 3680.0/513.0*k3[j] - 845.0/4104*k4[j]);
 	}
 
 	/* determine k5:		 (last RK4 step)				*/
-	*ri = yk[0];
-	*zi = yk[1];
-	*sigmaR = yk[2];
-	*sigmaZ = yk[3];
-	*sigmaI = sqrt( pow(sigmaR,2) + pow(sigmaZ,2) );
-	es->r = (*sigmaR)/(*sigmaI);
-	es->z = (*sigmaZ)/(*sigmaI);
-	csValues(ri,zi,ci,cc,sigmaI,cri,czi,slowness,crri,czzi,crzi);
-	k5[0] = es->r;
-	k5[1] = es->z;
-	k5[2] = slowness->r;
-	k5[3] = slowness->z;
+	ri = yk[0];
+	zi = yk[1];
+	sigmaR = yk[2];
+	sigmaZ = yk[3];
+	sigmaI = sqrt( pow(sigmaR,2) + pow(sigmaZ,2) );
+	es.r = (sigmaR)/(sigmaI);
+	es.z = (sigmaZ)/(sigmaI);
+	csValues(globals, &ri, &zi, &ci, &cc, &sigmaI, &cri, &czi, &slowness, &crri, &czzi, &crzi);
+	k5[0] = es.r;
+	k5[1] = es.z;
+	k5[2] = slowness.r;
+	k5[3] = slowness.z;
 	for(j=0; j<4; j++){
 		yk[j] = yOld[j] + (*dsi) * (2.0*k2[j] - 8.0/27.0*k1[j] + 3544.0/2565.0*k3[j] + 1859.0/4104*k4[j] - 11.0/40.0*k5[j]);
 	}
 	
 	/* determine k6:		(last RK5 step)					*/
-	*ri = yk[0];
-	*zi = yk[1];
-	*sigmaR = yk[2];
-	*sigmaZ = yk[3];
-	*sigmaI = sqrt( pow(sigmaR,2) + pow(sigmaZ,2) );
-	es->r = (*sigmaR)/(*sigmaI);
-	es->z = (*sigmaZ)/(*sigmaI);
-	csValues(ri,zi,ci,cc,sigmaI,cri,czi,slowness,crri,czzi,crzi);
-	k6[0] = es->r;
-	k6[1] = es->z;
-	k6[2] = slowness->r;
-	k6[3] = slowness->z;
+	ri = yk[0];
+	zi = yk[1];
+	sigmaR = yk[2];
+	sigmaZ = yk[3];
+	sigmaI = sqrt( pow(sigmaR,2) + pow(sigmaZ,2) );
+	es.r = (sigmaR)/(sigmaI);
+	es.z = (sigmaZ)/(sigmaI);
+	csValues(globals, &ri, &zi, &ci, &cc, &sigmaI, &cri, &czi, &slowness, &crri, &czzi, &crzi);
+	k6[0] = es.r;
+	k6[1] = es.z;
+	k6[2] = slowness.r;
+	k6[3] = slowness.z;
 
 	
 	for(j=0; j<4; j++){
@@ -183,10 +184,10 @@ void rkf45(double* dsi, double* yOld, double* fOld, double* yNew, double* fNew, 
 	}
 
 	/* Determine ds4 and ds5:		*/
-	*ri = yew[0];
-	*zi = yNew[1];
-	*sigmaR = yNew[2];
-	*sigmaZ = yNew[3];
+	ri = yNew[0];
+	zi = yNew[1];
+	sigmaR = yNew[2];
+	sigmaZ = yNew[3];
 	dr = yrk4[0] - yOld[0];
 	dz = yrk4[1] - yOld[1];
 	*ds4 = sqrt(dr*dr + dz*dz);
@@ -196,29 +197,14 @@ void rkf45(double* dsi, double* yOld, double* fOld, double* yNew, double* fNew, 
 	*ds5 = sqrt(dr*dr + dz*dz);
 
 	/* Calculate the actual output value:		*/
-	*sigmaI = sqrt( pow(sigmaR,2) + pow(sigmaZ,2) );
-	es->r = (*sigmaR)/(*sigmaI);
-	es->z = (*sigmaZ)/(*sigmaI);
-	csValues(ri,zi,ci,cc,sigmaI,cri,czi,slowness,crri,czzi,crzi);
-	fNew[0] = es->r;
-	fNew[1] = es->z;
-	fNew[2] = slowness->r;
-	fNew[3] = slowness->z;
-
-	// Free all alocated memory:
-	free(	es 		);
-	free(	slowness);
-	free(	ri 		);
-	free(	zi 		);
-	free(	ci 		);
-	free(	cc 		);
-	free(	sigmaI 	);
-	free(	cri 	);
-	free(	czi 	);
-	free(	crri 	);
-	free(	czzi 	);
-	free(	crzi 	);
-	free(	sigmaR	);
-	free(	sigmaZ	);
-
+	sigmaI = sqrt( pow(sigmaR,2) + pow(sigmaZ,2) );
+	es.r = (sigmaR)/(sigmaI);
+	es.z = (sigmaZ)/(sigmaI);
+	csValues(globals, &ri, &zi, &ci, &cc, &sigmaI, &cri, &czi, &slowness, &crri, &czzi, &crzi);
+	fNew[0] = es.r;
+	fNew[1] = es.z;
+	fNew[2] = slowness.r;
+	fNew[3] = slowness.z;
+	if (VERBOSE)
+		printf("Leaving \t rkf45()\n");
 }

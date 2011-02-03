@@ -38,6 +38,7 @@ int main(int argc, char **argv)
 	const char*		logFilename = "flat.log";
 	const char*		line = "-----------------------------------------------";
 	FILE*			logFile = NULL;
+	uintptr_t		i;
 
 	// check if a command line argument was passed:
 	if(argc == 2){
@@ -52,8 +53,13 @@ int main(int argc, char **argv)
 		printf("Running cTraceo in verbose mode.\n\n");
 	readIn(globals, infile);
 
-	if (VERBOSE)
-		printSettings(globals);
+for(i=0; i<2; i++){		//TODO remove this
+	printf("globals->settings.altimetry.r[%lu]: %lf\n", i, globals->settings.altimetry.r[i]);
+	printf("globals->settings.altimetry.z[%lu]: %lf\n", i, globals->settings.altimetry.z[i]);
+}
+
+//	if (VERBOSE)
+//		printSettings(globals);
 
 //	TODO	call cpu_time(timei)
 
@@ -71,7 +77,7 @@ int main(int argc, char **argv)
 
 	fprintf(logFile, "OUTPUT:\n");
 	// if (catype.eq.'RCO'){
-		fprintf(logFile, "Ray coordinates\n", line);
+		fprintf(logFile, "Ray coordinates\n");
 		calcRayCoords(globals);
 /*
 	 else if (catype.eq.'ARI') then

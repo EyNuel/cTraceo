@@ -30,5 +30,5 @@
 double	dotProduct(vector_t*, vector_t*);
 
 double	dotProduct(vector_t* u, vector_t* v){
-	return( u->r * v->r + u->z * v->z)
+	return( u->r * v->r + u->z * v->z);
 }

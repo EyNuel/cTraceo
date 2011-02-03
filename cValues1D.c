@@ -28,7 +28,7 @@
  * 				cxxi:	2nd derivative of c at xi.								*
  * 																				*
  *******************************************************************************/
-
+#pragma once
 #include "interpolation.h"
 #include "bracket.c"
 

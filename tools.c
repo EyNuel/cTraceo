@@ -27,6 +27,8 @@ FILE*			openFile(const char* , const char[4]);
 char*			mallocChar(uintptr_t);
 uint32_t*		mallocUint(uintptr_t);
 uint32_t*		reallocUint(uint32_t*, uintptr_t);
+int32_t*		mallocInt(uintptr_t);
+int32_t*		reallocInt(int32_t*, uintptr_t);
 double*			mallocDouble(uintptr_t);
 double*			reallocDouble(double*, uintptr_t);
 double**		mallocDouble2D(uintptr_t, uintptr_t);
@@ -132,7 +134,7 @@ uint32_t*	mallocUint(uintptr_t numUints){
 	*/
 	uint32_t*	temp = NULL;	//temporary pointer
 
-	temp = malloc((unsigned long)numUints*sizeof(uint32_t));
+	temp = malloc(numUints*sizeof(uint32_t));
 	return reallocUint(temp, numUints);
 }
 
@@ -142,6 +144,29 @@ uint32_t*	reallocUint(uint32_t* temp, uintptr_t numUints){
 		exits with error code otherwise.
 	*/
 	temp = realloc(temp, numUints*sizeof(uint32_t));
+	if (temp == NULL){
+		fatal("Memory allocation error.\n");
+	}
+	return temp;
+}
+
+int32_t*	mallocInt(uintptr_t numInts){
+	/*
+		Allocates a char string and returns a pointer to it in case of success,
+		exits with error code otherwise.
+	*/
+	int32_t*	temp = NULL;	//temporary pointer
+
+	temp = malloc(numInts*sizeof(int32_t));
+	return reallocInt(temp, numInts);
+}
+
+int32_t*	reallocInt(int32_t* temp, uintptr_t numInts){
+	/*
+		Allocates a char string and returns a pointer to it in case of success,
+		exits with error code otherwise.
+	*/
+	temp = realloc(temp, numInts*sizeof(int32_t));
 	if (temp == NULL){
 		fatal("Memory allocation error.\n");
 	}
@@ -260,9 +285,11 @@ point_t*	mallocPoint(uintptr_t	numPoints){
 }
 
 point_t*	reallocPoint(point_t* temp, uintptr_t	numPoints){
+	printf("numPoints: %lu\n", numPoints);	//TODO remove
 	temp = realloc(temp, numPoints * sizeof(point_t));
-	if (temp == NULL){
-		fatal("Memory allocation error.\n");
+	if (numPoints > 0 && temp == NULL){
+		//NOTE when freeing memory (setting it to size 0) a null pointer is not an error.
+		fatal("reallocPoint(): Memory allocation error.\n");
 	}
 	return temp;
 }
@@ -626,9 +653,9 @@ void		reallocRay(ray_t* ray, uintptr_t numRayCoords){
 	ray->phase		= reallocDouble(	ray->phase,		numRayCoords);
 	ray->tau		= reallocDouble(	ray->tau,		numRayCoords);
 	ray->s			= reallocDouble(	ray->s, 		numRayCoords);
-	ray->Ic			= reallocDouble(	ray->Ic,		numRayCoords);
+	ray->ic			= reallocDouble(	ray->ic,		numRayCoords);
 	ray->boundaryTg	= reallocVector(	ray->boundaryTg,numRayCoords);
-	ray->boundaryJ	= reallocUint(		ray->boundaryJ,	numRayCoords);
+	ray->boundaryJ	= reallocInt(		ray->boundaryJ,	numRayCoords);
 	ray->nRefrac	= numRayCoords;
 	ray->refrac		= reallocPoint(		ray->refrac,		numRayCoords);
 }

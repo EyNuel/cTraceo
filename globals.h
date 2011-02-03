@@ -60,10 +60,10 @@ typedef struct	ray{
 	double*			phase;		//ray phase
 	double*			tau;		//acumulated travel time
 	double*			s;			//acumulated distance travelled by the ray
-	double*			Ic;			//see Chapter 3 of Traceo Manual
+	double*			ic;			//see Chapter 3 of Traceo Manual
 	vector_t*		boundaryTg;	//"tbdry" a boundary's tangent vector
-	uint32_t*		boundaryJ;	//"jbdry",	indicates at what boundary a ray is (-1 => above surface; 1 => below bottom)
-	uintptr_t		nRefrac		//"nrefr", number of refraction points
+	int32_t*		boundaryJ;	//"jbdry",	indicates at what boundary a ray is (-1 => above surface; 1 => below bottom)
+	uintptr_t		nRefrac;		//"nrefr", number of refraction points
 	point_t*		refrac;		//"rrefr, zrefr", coordinates of refraction points. used in "solveEikonalEq.c"
 }ray_t;
 
