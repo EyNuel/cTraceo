@@ -673,7 +673,7 @@ void		copyDoubleToPtr2D(double** origin, double* dest, uintptr_t rowSize, uintpt
 
 	for( j=0; j<colSize; j++ ){
 		for(i=0; i<rowSize; i++){
-			dest[j*rowSize +i] = origin[j][i];
+			dest[i*colSize +j] = origin[j][i];
 		}
 	}
 }

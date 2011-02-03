@@ -43,8 +43,8 @@ void	calcRayCoords(globals_t* globals){
 	
 	double		thetai, ctheta;
 	ray_t*		ray		= NULL;
-	double**	temp2D 	= NULL;
-	uintptr_t	i;
+	double**	temp2D 	= malloc(2*sizeof(uintptr_t));
+	uintptr_t	i, j;
 	char* 		string	= mallocChar(10);
 for(i=0; i<2; i++){		//TODO remove this
 	printf("globals->settings.altimetry.r[%lu]: %lf\n", i, globals->settings.altimetry.r[i]);
@@ -91,15 +91,20 @@ for(i=0; i<2; i++){		//TODO remove this
 			end do
 			*/
 printf(">6\t********\n");	//TODO remove
-///			temp2D[0]	= ray[i].r;
-///			temp2D[1]	= ray[i].z;
+			temp2D[0]	= ray[i].r;
+			temp2D[1]	= ray[i].z;
+for(j=0; j<ray[i].nCoords; j++){
+	printf("temp2D[0][%lu]: %lf\n", j, temp2D[0][j]);
+	printf("temp2D[1][%lu]: %lf\n", j, temp2D[1][j]);
+}
 printf(">7\t********\n");	//TODO remove
-			pRay		= mxCreateDoubleMatrix(1, (int32_t)ray[i].nCoords, mxREAL);
+			pRay		= mxCreateDoubleMatrix(2, (int32_t)ray[i].nCoords, mxREAL);
 			if(pRay == NULL)
 				fatal("Memory alocation error.");
 printf(">8\t********\n");	//TODO remove
-///			copyDoubleToPtr2D(temp2D, mxGetPr(pRay), 2, ray[i].nCoords);
-copyDoubleToPtr(ray[i].r, mxGetPr(pRay), ray[i].nCoords);
+			copyDoubleToPtr2D(temp2D, mxGetPr(pRay), ray[i].nCoords,2);
+///copyDoubleToPtr(ray[i].r, mxGetPr(pRay), ray[i].nCoords);
+///copyDoubleToPtr(ray[i].z, mxGetPr(pRay), ray[i].nCoords);
 printf(">9\t********\n");	//TODO remove
 			//mxCopyReal8ToPtr(raydat,mxGetPr(pRay),2*imax)
 			sprintf(string, "ray%lu", i+1);
