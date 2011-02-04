@@ -122,8 +122,7 @@ void calcReflDecay(globals_t* globals, ray_t* ray, uintptr_t boundaryId, point_t
 */
 
 void	solveEikonalEq(globals_t* globals, ray_t* ray){
-	if (VERBOSE)
-		printf("Entering\t solveEikonalEq(): theta: %lf\n", ray->theta);
+	DEBUG(1,"in. theta: %lf\n", ray->theta);
 	
 	double			cx, ci,	cc,	sigmaI, sigmaR, sigmaZ,	cri, czi, crri,	czzi, crzi;
 	uint32_t		iUp, iDown;
@@ -154,20 +153,21 @@ void	solveEikonalEq(globals_t* globals, ray_t* ray){
 	double			dr, dz, dIc;
 	double 			prod;
 	uintptr_t		initialMemorySize;
-
+/**
 for(i=0; i<2; i++){		//TODO remove this
 	printf("globals->settings.altimetry.r[%u]: %lf\n", i, globals->settings.altimetry.r[i]);
 	printf("globals->settings.altimetry.z[%u]: %lf\n", i, globals->settings.altimetry.z[i]);
 }
-
+*/
 	//allocate memory for ray components:
 	//Note that memory limits will be checked and resized if necessary.
-	initialMemorySize = (uintptr_t)((globals->settings.source.rbox2 - globals->settings.source.rbox1)/globals->settings.source.ds);
+	initialMemorySize = (uintptr_t)((globals->settings.source.rbox2 - globals->settings.source.rbox1)/globals->settings.source.ds)*2;	//TODO find good setting for this.
+	//TODO find bus error thta happens on realloc.
 	reallocRay(ray, initialMemorySize);
 	
 	//set parameters:
 	rho1 = 1.0;			//density of water.
-
+DEBUG(10,"\n");
 	//define initial conditions:
 	ray->iKill	= FALSE;
 	iUp			= FALSE;
@@ -177,23 +177,23 @@ for(i=0; i<2; i++){		//TODO remove this
 	oRefl		= 0;
 	jRefl		= 0;
 	ray->iRefl[0] = jRefl;
-
+DEBUG(10,":");
 	ray->iReturn = FALSE;
 	numRungeKutta = 0;
 	reflDecay = 1 + 0*I;
 	ray->decay[0] = reflDecay;
 	ray->phase[0] = 0.0;
-
+DEBUG(10,"\n");
 	ray->r[0]	= globals->settings.source.rx;
 	ray->rMin	= ray->r[0];
 	ray->rMax	= ray->r[0];
 	ray->z[0]	= globals->settings.source.zx;
-
+DEBUG(10,"\n");
 	es.r = cos( ray->theta );
 	es.z = sin( ray->theta );
 	e1.r = -es.z;
 	e1.z =  es.r;
-
+DEBUG(10,"\n");
 	//Calculate initial sound speed and its derivatives:
 	csValues( 	globals,
 				&(globals->settings.source.rx),
@@ -207,7 +207,7 @@ for(i=0; i<2; i++){		//TODO remove this
 				&crri,
 				&czzi,
 				&crzi);
-
+DEBUG(10,":");
 	sigmaR	= sigmaI * es.r;	//TODO isn't this the slowness vector (which is already calculated in csValues)?
 	sigmaZ	= sigmaI * es.z;
 	
@@ -231,7 +231,6 @@ for(i=0; i<2; i++){		//TODO remove this
 	/************************************************************************
 	 *	Start tracing the ray:												*
 	 ***********************************************************************/
-//1000	if (( ray->r[i).lt.rbox(2) ).and.( ray->r[i).gt.rbox(1) ).and.( ikill.eq.0 )) then
 	i = 0;
 	while(	(ray->iKill == FALSE )	&&
 			(ray->r[i] < globals->settings.source.rbox2 ) &&
@@ -247,20 +246,20 @@ for(i=0; i<2; i++){		//TODO remove this
 			if(numRungeKutta > 100){
 				fatal("Runge-Kutta integration: failure in step convergence.\nAborting...");
 			}
-			printf("yOld[0]: %lf\n", yOld[0]);	//TODO remove this
+/**			printf("yOld[0]: %lf\n", yOld[0]);	//TODO remove this
 			printf("yOld[1]: %lf\n", yOld[1]);	//TODO remove this
 			printf("yNew[0]: %lf\n", yNew[0]);	//TODO remove this
 			printf("yNew[1]: %lf\n", yNew[1]);	//TODO remove this
-			rkf45(globals, &dsi, yOld, fOld, yNew, fNew, &ds4, &ds5);
+*/			rkf45(globals, &dsi, yOld, fOld, yNew, fNew, &ds4, &ds5);
 
-			printf("yOld[0]: %lf\n", yOld[0]);	//TODO remove this
+/**			printf("yOld[0]: %lf\n", yOld[0]);	//TODO remove this
 			printf("yOld[1]: %lf\n", yOld[1]);	//TODO remove this
 			printf("yNew[0]: %lf\n", yNew[0]);	//TODO remove this
 			printf("yNew[1]: %lf\n", yNew[1]);	//TODO remove this
-
+*/
 			numRungeKutta++;
 			stepError = fabs( ds4 - ds5) / (0.5 * (ds4 + ds5));
-			printf("stepError: %lf\n", stepError);	//TODO remove this
+///			printf("stepError: %lf\n", stepError);	//TODO remove this
 			dsi *= 0.5;
 		}
 		
@@ -268,15 +267,15 @@ for(i=0; i<2; i++){		//TODO remove this
 		es.z = fNew[1];
 		ri = yNew[0];
 		zi = yNew[1];
-		
-		printf("ri: %lf, zi:%lf\n", ri, zi);	//TODO remove this
-		printf("r[0]: %lf, r[%u]: %lf\n", 	globals->settings.altimetry.r[0],
+
+///		printf("ri: %lf, zi:%lf\n", ri, zi);	//TODO remove this
+/**		printf("r[0]: %lf, r[%u]: %lf\n", 	globals->settings.altimetry.r[0],
 											globals->settings.altimetry.numSurfaceCoords -1,
 											globals->settings.altimetry.r[globals->settings.altimetry.numSurfaceCoords -1] );	//TODO remove this
 		printf("r[0]: %lf, r[%u]: %lf\n", 	globals->settings.batimetry.r[0],
 											globals->settings.batimetry.numSurfaceCoords -1,
 											globals->settings.batimetry.r[globals->settings.batimetry.numSurfaceCoords -1] );	//TODO remove this
-		
+*/		
 		/**		Check for boundary intersections:	**/
 		//verify that the ray is still within the defined coordinates of the surface and the bottom:
 		if (	(ri > globals->settings.altimetry.r[0]) &&
@@ -287,13 +286,14 @@ for(i=0; i<2; i++){		//TODO remove this
 			boundaryInterpolation(	&(globals->settings.altimetry), &ri, &altInterpolatedZ, &junkVector, &normal);
 			boundaryInterpolation(	&(globals->settings.batimetry), &ri, &batInterpolatedZ, &junkVector, &normal);
 		}else{
-			printf("ray killed\n");		//TODO remove
+///			printf("ray killed\n");		//TODO remove
 			ray->iKill = TRUE;
 		}
-		printf("altInterpolatedZ: %lf\n", altInterpolatedZ);	//TODO remove
-		printf("batInterpolatedZ: %lf\n", batInterpolatedZ);	//TODO remove
+///		printf("altInterpolatedZ: %lf\n", altInterpolatedZ);	//TODO remove
+///		printf("batInterpolatedZ: %lf\n", batInterpolatedZ);	//TODO remove
 		//Check if the ray is still between the boundaries; if not, find the intersection point and calculate the reflection:
 		if ((ray->iKill == FALSE ) && (zi < altInterpolatedZ || zi > batInterpolatedZ)){
+///printf(">A2\t********\n");	//TODO remove
 			pointA.r = yOld[0];
 			pointA.z = yOld[1];
 			pointB.r = yNew[0];
@@ -301,7 +301,7 @@ for(i=0; i<2; i++){		//TODO remove this
 			
 			//	Ray above surface?
 			if (zi < altInterpolatedZ){
-				printf("ray above surface.\n");		//TODO remove
+DEBUG(3,"ray above surface.\n");		//TODO remove
 				//TODO: replace with a call to calcReflDecay()
 				//		(globals_t* globals, ray_t* ray, uintptr_t boundaryId, point_t* pointA, point_t* pointB, complex double* reflDecay)
 				rayBoundaryIntersection(&(globals->settings.altimetry), &pointA, &pointB, &pointIsect);
@@ -422,7 +422,7 @@ for(i=0; i<2; i++){		//TODO remove this
 				}
 												//	end of "ray above surface?"
 			}else if (zi > batInterpolatedZ){	//	Ray below bottom?
-				printf("ray below bottom.\n");		//TODO remove
+				DEBUG(3,"ray below bottom.\n");		//TODO remove
 				//TODO: replace with a call to calcReflDecay()
 				//		(globals_t* globals, ray_t* ray, uintptr_t boundaryId, point_t* pointA, point_t* pointB, complex double* reflDecay)
 				rayBoundaryIntersection(&(globals->settings.batimetry), &pointA, &pointB, &pointIsect);
@@ -552,7 +552,7 @@ for(i=0; i<2; i++){		//TODO remove this
 			ri = pointIsect.r;
 			zi = pointIsect.z;
 			csValues( 	globals, &ri, &zi, &ci, &cc, &sigmaI, &cri, &czi, &slowness, &crri, &czzi, &crzi);
-
+///printf(">A1\t********\n");	//TODO remove
 			yNew[0] = ri;
 			yNew[1] = zi;
 			yNew[2] = sigmaI*tauR.r;
@@ -715,7 +715,7 @@ c          					Update marching solution and function:
 		
 		es.r = fNew[0];
 		es.z = fNew[1];
-		
+///printf(">A3\t********\n");	//TODO remove
 		csValues( 	globals, &ri, &zi, &ci, &cc, &sigmaI, &cri, &czi, &slowness, &crri, &czzi, &crzi);
 		
 		dr = ray->r[i+1] - ray->r[i];
@@ -751,8 +751,7 @@ c          					Update marching solution and function:
 			yOld[j] = yNew[j];
 			fOld[j] = fNew[j];
 		}
-
-		//next ray:
+		//next step:
 		i++;
 		//Prevent further calculations if there is no more space in the memory for the ray coordinates:
 		if ( i > ray->nCoords - 1){
@@ -764,33 +763,32 @@ c          					Update marching solution and function:
 	/*	Ray coordinates have been computed. Finalizing */
 	//adjust memory size of the ray (we don't need more memory than nCoords
 	ray -> nCoords	= i;
+
 	reallocRay(ray, i);
-	printf(">1\t********\n");	//TODO remove
+
 	nRefl 	= sRefl + bRefl + oRefl;		//TODO is thi used later?
 	
 	//Cut the ray at box exit:
 	dr	= ray->r[ray->nCoords - 1] - ray->r[ray->nCoords-2];
 	dz	= ray->z[ray->nCoords - 1] - ray->z[ray->nCoords-2];
 	dIc	= ray->ic[ray->nCoords - 1] -ray->ic[ray->nCoords-2];
-	
+
 	if (ray->r[ray->nCoords-1] > globals->settings.source.rbox2){
 		ray->z[ray->nCoords-1]	= ray->z[ray->nCoords-2] + (globals->settings.source.rbox2 - ray->r[ray->nCoords-2])* dz/dr;
 		ray->ic[ray->nCoords-1]	= ray->ic[ray->nCoords-2] + (globals->settings.source.rbox2 - ray->r[ray->nCoords-2])* dIc/dr;
 		ray->r[ray->nCoords-1]	= globals->settings.source.rbox2;
 	}
-	
+
 	if (ray->r[ray->nCoords-1] < globals->settings.source.rbox1){
 		ray->z[ray->nCoords-1]	= ray->z[ray->nCoords-2] + (globals->settings.source.rbox1-ray->r[ray->nCoords-2])* dz/dr;
 		ray->ic[ray->nCoords-1]	= ray->ic[ray->nCoords-2] + (globals->settings.source.rbox1-ray->r[ray->nCoords-2]) * dIc/dr;
 		ray->r[ray->nCoords-1]	= globals->settings.source.rbox1;
 	}
-	
+
 	/* Search for refraction points (refraction angles are zero!), rMin, rMax and twisting of rays:	*/
 	//NOTE: We are assuming (safely) that there can't be more refraction points than the ray has coordinates,
 	//		so we can skip memory bounds-checking.
 	ray->nRefrac = 0;
-	
-	printf(">2\t********\n");	//TODO remove
 	
 	for(i=1; i>ray->nCoords-2; i++){
 		ray->rMin = min( ray->rMin, ray->r[i] );
@@ -809,7 +807,6 @@ c          					Update marching solution and function:
 		}
 	}
 	
-	printf(">3\t********\n");	//TODO remove
 	
 	//check last set of coordinates for a return condition.
 	ray-> rMin = min( ray->rMin, ray->r[ray->nCoords-1] );
@@ -821,19 +818,13 @@ c          					Update marching solution and function:
 	}
 	prod = 0.0;
 	
-	printf(">4\t********\n");	//TODO remove
-	printf("ray->nRefrac: %lu\n", ray->nRefrac);
-	
 	//clip allocated memory for refractions
 	ray->refrac = reallocPoint(ray->refrac, ray->nRefrac);
-	
-	printf(">5\t********\n");	//TODO remove
 	
 	//free memory
 	free(yOld);
 	free(fOld);
 	free(yNew);
 	free(fNew);
-	if (VERBOSE)
-		printf("Leaving \t solveEikonalEq()\n");
+	DEBUG(1,"out\n");
 }

@@ -46,8 +46,7 @@ void	rayBoundaryIntersection(interface_t*, point_t*, point_t*, point_t*);
 */
 
 void	rayBoundaryIntersection(interface_t* interface, point_t* a, point_t* b, point_t* isect){
-	if (VERBOSE)
-		printf("Entering\t rayBoundaryIntersection()\n ");
+	DEBUG(3,"in\n");
 	uint32_t	i,n;
 	double*		rl =	mallocDouble(101);
 	double*		zl =	mallocDouble(101);
@@ -100,6 +99,5 @@ void	rayBoundaryIntersection(interface_t* interface, point_t* a, point_t* b, poi
 			break;
 //TODO double check the last 20~ lines
 	}
-	if (VERBOSE)
-		printf("Leaving /t laeaving rayBoundaryIntersection().\n");
+	DEBUG(3,"out\n");
 }

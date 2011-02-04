@@ -42,8 +42,7 @@
 void rkf45(globals_t*, double*, double*, double*, double*, double*, double*, double*);
 
 void rkf45(globals_t* globals, double* dsi, double* yOld, double* fOld, double* yNew, double* fNew, double* ds4, double* ds5){
-	if (VERBOSE)
-		printf("Entering\t rkf45()\n");
+	DEBUG(6,"in\n");
 	uintptr_t	j;
 	double		dr,dz;
 	//TODO what happened to a2? double		a1,a2,a3,a4,a5;
@@ -205,6 +204,5 @@ void rkf45(globals_t* globals, double* dsi, double* yOld, double* fOld, double* 
 	fNew[1] = es.z;
 	fNew[2] = slowness.r;
 	fNew[3] = slowness.z;
-	if (VERBOSE)
-		printf("Leaving \t rkf45()\n");
+	DEBUG(6,"out\n");
 }

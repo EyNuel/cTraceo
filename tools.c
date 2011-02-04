@@ -48,6 +48,7 @@ void			reallocRay(ray_t*, uintptr_t);
 void			copyDoubleToPtr(double*, double*, uintptr_t);
 void			copyDoubleToPtr2D(double**, double*, uintptr_t, uintptr_t);
 
+
 /****************************
  *	Actual Functions		*
  ***************************/
@@ -135,19 +136,26 @@ uint32_t*	mallocUint(uintptr_t numUints){
 	uint32_t*	temp = NULL;	//temporary pointer
 
 	temp = malloc(numUints*sizeof(uint32_t));
-	return reallocUint(temp, numUints);
+	return temp;
 }
 
-uint32_t*	reallocUint(uint32_t* temp, uintptr_t numUints){
+uint32_t*	reallocUint(uint32_t* old, uintptr_t numUints){
 	/*
-		Allocates a char string and returns a pointer to it in case of success,
+		Allocates an uint array and returns a pointer to it in case of success,
 		exits with error code otherwise.
 	*/
-	temp = realloc(temp, numUints*sizeof(uint32_t));
-	if (temp == NULL){
-		fatal("Memory allocation error.\n");
+	DEBUG(5,"reallocUint(),\t in\n");
+	uint32_t*	new = NULL;
+
+	if(old == NULL){
+		return mallocUint(numUints);
+	}else{
+		new = realloc(old, numUints*sizeof(uint32_t));
 	}
-	return temp;
+	if (numUints > 0 && new == NULL)
+		fatal("Memory allocation error.\n");
+	DEBUG(5,"reallocUint(),\t out\n");
+	return old;
 }
 
 int32_t*	mallocInt(uintptr_t numInts){
@@ -158,19 +166,24 @@ int32_t*	mallocInt(uintptr_t numInts){
 	int32_t*	temp = NULL;	//temporary pointer
 
 	temp = malloc(numInts*sizeof(int32_t));
-	return reallocInt(temp, numInts);
+	return temp;
 }
 
-int32_t*	reallocInt(int32_t* temp, uintptr_t numInts){
+int32_t*	reallocInt(int32_t* old, uintptr_t numInts){
 	/*
 		Allocates a char string and returns a pointer to it in case of success,
 		exits with error code otherwise.
 	*/
-	temp = realloc(temp, numInts*sizeof(int32_t));
-	if (temp == NULL){
-		fatal("Memory allocation error.\n");
+	int32_t*	new = NULL;
+
+	if(old == NULL){
+		return mallocInt(numInts);
+	}else{
+		new = realloc(old, numInts*sizeof(int32_t));
 	}
-	return temp;
+	if (numInts > 0 && new == NULL)
+		fatal("Memory allocation error.\n");
+	return new;
 }
 
 double*		mallocDouble(uintptr_t numDoubles){
@@ -180,19 +193,24 @@ double*		mallocDouble(uintptr_t numDoubles){
 	*/
 	
 	double*	temp = NULL;	//temporary pointer
-	return	reallocDouble(temp, numDoubles);
+	temp = malloc(numDoubles * sizeof(double));
+	if(temp == NULL)
+		fatal("Memory alocation error.");
+	return temp;
 }
 
-double*		reallocDouble(double* temp, uintptr_t numDoubles){
-	/*
-		Reallocates a pointer to doubles and returns its pointer in case of success,
-		exits with error code otherwise.
-	*/
-	temp = realloc(temp, numDoubles*sizeof(double));
-	if (temp == NULL){
-		fatal("Memory allocation error.\n");
+double*		reallocDouble(double* old, uintptr_t numDoubles){
+	double*		new = NULL;
+
+	if(old == NULL){
+		return mallocDouble(numDoubles);
+	}else{
+		new = realloc(old, numDoubles*sizeof(double));
 	}
-	return temp;
+	if (numDoubles > 0 && new == NULL)
+		fatal("Memory allocation error.\n");
+		
+	return new;
 }
 
 double**	mallocDouble2D(uintptr_t numRows, uintptr_t numCols){
@@ -217,25 +235,26 @@ double**	mallocDouble2D(uintptr_t numRows, uintptr_t numCols){
 }
 
 complex double*		mallocComplex(uintptr_t numComplex){
-	/*
-		Allocates an array of doubles and returns a pointer to it in case of success,
-		Exits with error code otherwise.
-	*/
+	complex double*	temp = NULL;
 	
-	complex double*	temp = NULL;	//temporary pointer
-	return reallocComplex(temp, numComplex);
+	temp = malloc(numComplex * sizeof(complex double));
+	if(temp == NULL)
+		fatal("Memory alocation error.");
+	return temp;
 }
 
-complex double*		reallocComplex(complex double* temp, uintptr_t numComplex){
-	/*
-		Reallocates an array of doubles and returns a pointer to it in case of success,
-		Exits with error code otherwise.
-	*/
-	temp = realloc(temp, numComplex*sizeof(complex double));
-	if (temp == NULL){
-		fatal("Memory allocation error.\n");
+complex double*		reallocComplex(complex double* old, uintptr_t numComplex){
+	complex double*	new = NULL;
+
+	if(old == NULL){
+		return mallocComplex(numComplex);
+	}else{
+		new = realloc(old, numComplex*sizeof(complex double));
 	}
-	return temp;
+	if (numComplex >0 &&new == NULL)
+		fatal("Memory allocation error.\n");
+	
+	return new;
 }
 
 globals_t* 	mallocGlobals(void){
@@ -268,30 +287,50 @@ globals_t* 	mallocGlobals(void){
 
 vector_t*	mallocVector(uintptr_t	numVectors){
 	vector_t*	temp = NULL;
-	return reallocVector(temp, numVectors);
+
+	temp = malloc(numVectors * sizeof(vector_t));
+	if(temp == NULL)
+		fatal("Memory alocation error.");
+	return temp;
 }
 
-vector_t*	reallocVector(vector_t* temp, uintptr_t	numVectors){
-	temp = realloc(temp, numVectors * sizeof(vector_t));
-	if (temp == NULL){
-		fatal("Memory allocation error.\n");
+vector_t*	reallocVector(vector_t* old, uintptr_t	numVectors){
+	vector_t*	new;
+
+	if(old == NULL){
+		return mallocVector(numVectors);
+	}else{
+		new = realloc(old, numVectors * sizeof(vector_t));
 	}
-	return temp;
+	if (numVectors > 0 && new == NULL)
+		//NOTE when freeing memory (setting it to size 0) a null pointer is not an error.
+		fatal("Memory allocation error.\n");
+	return new;
 }
 
 point_t*	mallocPoint(uintptr_t	numPoints){
 	point_t*	temp = NULL;
-	return realloc(temp, numPoints);
+
+	temp = malloc(numPoints * sizeof(point_t));
+	if(temp == NULL)
+		fatal("Memory alocation error.");
+	return temp;
 }
 
-point_t*	reallocPoint(point_t* temp, uintptr_t	numPoints){
-	printf("numPoints: %lu\n", numPoints);	//TODO remove
-	temp = realloc(temp, numPoints * sizeof(point_t));
-	if (numPoints > 0 && temp == NULL){
+point_t*	reallocPoint(point_t* old, uintptr_t	numPoints){
+	point_t*	new = NULL;
+
+	if(old == NULL){
+		return mallocPoint(numPoints);
+	}else{
+		DEBUG(8,"resizing new...\n");	//TODO remove
+		new = realloc(old, numPoints * sizeof(point_t));
+	}
+	if (numPoints > 0 && new == NULL){
 		//NOTE when freeing memory (setting it to size 0) a null pointer is not an error.
 		fatal("reallocPoint(): Memory allocation error.\n");
 	}
-	return temp;
+	return new;
 }
 
 double 		readDouble(FILE* infile){
@@ -644,6 +683,7 @@ void		printSettings(globals_t*	globals){
 }
 
 void		reallocRay(ray_t* ray, uintptr_t numRayCoords){
+	DEBUG(5,"reallocRay(),\t in\n");
 	ray->nCoords	= numRayCoords;
 	ray->r			= reallocDouble(	ray->r,			numRayCoords);
 	ray->z			= reallocDouble(	ray->z,			numRayCoords);
@@ -658,6 +698,7 @@ void		reallocRay(ray_t* ray, uintptr_t numRayCoords){
 	ray->boundaryJ	= reallocInt(		ray->boundaryJ,	numRayCoords);
 	ray->nRefrac	= numRayCoords;
 	ray->refrac		= reallocPoint(		ray->refrac,		numRayCoords);
+	DEBUG(5,"reallocRay(), \t out\n");
 }
 
 void		copyDoubleToPtr(double* origin, double* dest, uintptr_t nItems){

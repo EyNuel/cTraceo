@@ -40,8 +40,7 @@ void boundaryInterpolationExplicit(uint32_t*, double*, double*, uint32_t*, doubl
 void boundaryInterpolation(interface_t*, double*, double*, vector_t*, vector_t*);
 
 void boundaryInterpolationExplicit(uint32_t* numSurfaceCoords, double* r, double* z, uint32_t* surfaceInterpolation, double* ri, double* zi, vector_t* taub, vector_t* normal){
-	if (VERBOSE)
-		printf("Entering\t boundaryInterpolationExplicit()\n");
+	DEBUG(7,"in\n");
 		
 	double		zri;	//1st derivative of z at ri
 	double		zrri;	//2nd derivative of z at ri
@@ -97,8 +96,7 @@ void boundaryInterpolationExplicit(uint32_t* numSurfaceCoords, double* r, double
 	
 	normal->r = -taub->z; 
 	normal->z =  taub->r;
-	if (VERBOSE)
-		printf("Leaving \t boundaryInterpolationExplicit()\n");
+	DEBUG(7,"out\n");
 }
 
 void boundaryInterpolation(interface_t* interface, double* ri, double* zi, vector_t* taub, vector_t* normal){

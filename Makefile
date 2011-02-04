@@ -3,14 +3,13 @@
 #		http://www.xs4all.nl/~evbergen/nonrecursive-make.html
 
 # Compiler and linker flags:
-CFLAGS := -Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align \
+CFLAGS := 	-Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align \
 			-Wwrite-strings -Wmissing-prototypes -Wmissing-declarations \
 			-Wredundant-decls -Wnested-externs -Winline -Wno-long-long \
 			-Wconversion -Wstrict-prototypes -std=gnu99 -lm -O3\
 			-I /usr/local/matlabr14/extern/include \
 #			-D_GNU_SOURCE
-# LFLAGS := 	
-# -L /usr/local/matlabr14/bin/glnxa64 -leng -lmat -lmex -lut -Wl,-rpath,/usr/local/matlabr14/bin/glnxa64
+LFLAGS := 	-L /usr/local/matlabr14/bin/glnxa64 -leng -lmat -lmex -lut -Wl,-rpath,/usr/local/matlabr14/bin/glnxa64
 
 # Define the compiler and linker comands to use:
 CC 			:= clang
@@ -45,10 +44,10 @@ ALLFILES := $(SRCFILES) $(HDRFILES) $(AUXFILES)
 #			command
 
 all:	#cTraceo.exe
-		@$(CC) $(CFLAGS) -o cTraceo.exe ctraceo.c
+		@$(CC) $(CFLAGS) $(LFLAGS) -o bin/cTraceo-64b.bin cTraceo.c
 
 32b:	#cTraceo.exe
-		@$(CC) $(CFLAGS) -march=i686 -m32 -o cTraceo.exe ctraceo.c
+		@$(CC) $(CFLAGS) $(LFLAGS) -march=i686 -m32 -o bin/cTraceo-32b.bin cTraceo.c
 
 todo:	#list todos from all files
 		@for file in $(ALLFILES); do fgrep -H -e TODO $$file; done; true

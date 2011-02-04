@@ -38,7 +38,6 @@ int main(int argc, char **argv)
 	const char*		logFilename = "flat.log";
 	const char*		line = "-----------------------------------------------";
 	FILE*			logFile = NULL;
-	uintptr_t		i;
 
 	// check if a command line argument was passed:
 	if(argc == 2){
@@ -49,14 +48,8 @@ int main(int argc, char **argv)
 		infile = "flat.in";
 	}
 
-	if (VERBOSE)
-		printf("Running cTraceo in verbose mode.\n\n");
+	DEBUG(1,"Running cTraceo in verbose mode.\n\n");
 	readIn(globals, infile);
-
-for(i=0; i<2; i++){		//TODO remove this
-	printf("globals->settings.altimetry.r[%lu]: %lf\n", i, globals->settings.altimetry.r[i]);
-	printf("globals->settings.altimetry.z[%lu]: %lf\n", i, globals->settings.altimetry.z[i]);
-}
 
 //	if (VERBOSE)
 //		printSettings(globals);

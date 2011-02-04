@@ -12,17 +12,20 @@
 /********************************************************************************
  * Configuration:																*
  *******************************************************************************/
-#define VERBOSE			1	//when set to 1, more information will be shown.
+#define VERBOSE			0	//when set to 1, more information will be shown.
+#define VERBOSITY		5
 #define MAX_LINE_LEN	256	//Maximum number of chars to read at once from a file (\n not included)
-
-//Previuously define in globli.h as:
-//	parameter (inpfil=1,outfil=2,prtfil=3)
-//	parameter (nangle=10000,nc0=5001,nc02d=1001,nbdry=5001)
-//	parameter (nhyd=5001,nhyd2=1001,nmaxo=21,npo=201,np=20001,np2=201)
 
 //basics:
 #define	TRUE	1
 #define FALSE	0
+
+//debugging help:
+#define WHERESTR				"[%s,\tline %d]:\t"
+#define WHEREARG				__FILE__, __LINE__
+#define DEBUG(level, ...)				if(VERBOSE == TRUE && VERBOSITY >= level){fprintf(stderr, WHERESTR, WHEREARG);fprintf(stderr, __VA_ARGS__);}
+///usgae is identical to printf(): DEBUG("#import antigravity; x=%d\n", x);
+
 
 /********************************************************************************
  * Minor data structures.														*

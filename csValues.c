@@ -43,8 +43,7 @@ void	csValues(globals_t*, double*, double*, double*, double*, double*, double*, 
 
 void	csValues(globals_t* globals, double* ri, double* zi, double* ci, double* cc, double* si, double* cri, double* czi,
 				vector_t* slowness, double* crri, double* czzi, double* crzi){
-	if (VERBOSE)
-		printf("Entering\t csValues().\n");
+	DEBUG(8,"csValues(),\t in\n");
 	
 	double 		k,a,eta, root, root32, root52;
 	double*		c01d;	//used locally to make code more readable
@@ -146,7 +145,6 @@ void	csValues(globals_t* globals, double* ri, double* zi, double* ci, double* cc
 	slowness->r = -(*cri) / (*cc);
 	slowness->z = -(*czi) / (*cc);
 	
-	if (VERBOSE)
-		printf("Leaving \t csValues().\n");
+	DEBUG(8,"csValues(),\t out\n");
 }
 

@@ -33,8 +33,7 @@
 void	calcRayCoords(globals_t*);
 
 void	calcRayCoords(globals_t* globals){
-	if (VERBOSE)
-		printf("Entering\t calcRayCoords()\n");
+	DEBUG(1,"in\n");
 
 	MATFile*	matfile	= NULL;
 	mxArray*	pThetas	= NULL;
@@ -44,12 +43,14 @@ void	calcRayCoords(globals_t* globals){
 	double		thetai, ctheta;
 	ray_t*		ray		= NULL;
 	double**	temp2D 	= malloc(2*sizeof(uintptr_t));
-	uintptr_t	i, j;
+	uintptr_t	i;
 	char* 		string	= mallocChar(10);
+/*
 for(i=0; i<2; i++){		//TODO remove this
 	printf("globals->settings.altimetry.r[%lu]: %lf\n", i, globals->settings.altimetry.r[i]);
 	printf("globals->settings.altimetry.z[%lu]: %lf\n", i, globals->settings.altimetry.z[i]);
 }
+*/
 	matfile		= matOpen("rco.mat", "w");
 	pThetas		= mxCreateDoubleMatrix(1, (int32_t)globals->settings.source.nThetas, mxREAL);
 	if(matfile == NULL || pThetas == NULL)
@@ -83,40 +84,21 @@ for(i=0; i<2; i++){		//TODO remove this
 		//Trace a ray as long as it is neither 90 or -90:
 		if (ctheta > 1.0e-7){
 			solveEikonalEq(globals, &ray[i]);
-			//call seikeq(thetai,imax,irefl,decay,jbdry,tbdry)
-			/*
-			for k = 1,imax
-				raydat(1,k) = r(k)
-				raydat(2,k) = z(k)
-			end do
-			*/
-printf(">6\t********\n");	//TODO remove
 			temp2D[0]	= ray[i].r;
 			temp2D[1]	= ray[i].z;
-for(j=0; j<ray[i].nCoords; j++){
-	printf("temp2D[0][%lu]: %lf\n", j, temp2D[0][j]);
-	printf("temp2D[1][%lu]: %lf\n", j, temp2D[1][j]);
-}
-printf(">7\t********\n");	//TODO remove
 			pRay		= mxCreateDoubleMatrix(2, (int32_t)ray[i].nCoords, mxREAL);
 			if(pRay == NULL)
 				fatal("Memory alocation error.");
-printf(">8\t********\n");	//TODO remove
 			copyDoubleToPtr2D(temp2D, mxGetPr(pRay), ray[i].nCoords,2);
-///copyDoubleToPtr(ray[i].r, mxGetPr(pRay), ray[i].nCoords);
-///copyDoubleToPtr(ray[i].z, mxGetPr(pRay), ray[i].nCoords);
-printf(">9\t********\n");	//TODO remove
-			//mxCopyReal8ToPtr(raydat,mxGetPr(pRay),2*imax)
+
 			sprintf(string, "ray%lu", i+1);
 			matPutVariable(matfile, (const char*)string, pRay);
 			mxDestroyArray(pRay);
 		}
-matClose(matfile);		//TODO remove
-exit(EXIT_SUCCESS);		//TODO remove
 	}
 	mxDestroyArray(pThetas);
 	mxDestroyArray(pTitle);
 	matClose(matfile);
-	if (VERBOSE)
-		printf("Leaving \t calcRayCoords");
+	free(temp2D);
+	DEBUG(1,"out\n");
 }

@@ -215,8 +215,6 @@ void	readIn(globals_t* globals, const char* filename){
 			for(i=0; i<numSurfaceCoords; i++){
 				globals->settings.altimetry.r[i] = readDouble(infile);
 				globals->settings.altimetry.z[i] = readDouble(infile);
-printf("globals->settings.altimetry.r[%u]: %lf\n", i, globals->settings.altimetry.r[i]);
-printf("globals->settings.altimetry.z[%u]: %lf\n", i, globals->settings.altimetry.z[i]);
 			}
 			break;
 		
