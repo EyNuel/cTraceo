@@ -28,6 +28,8 @@
 #include "readIn.c"
 #include "math.h"
 #include "calcRayCoords.c"
+#include <sys/time.h>		//for struct timeval
+#include <sys/resource.h>	//for getrusage()
 
 
 int main(int argc, char **argv)
@@ -53,8 +55,6 @@ int main(int argc, char **argv)
 
 //	if (VERBOSE)
 //		printSettings(settings);
-
-//	TODO	call cpu_time(timei)
 
 	omega	= 2 * M_PI * settings->source.freqx;
 
@@ -118,9 +118,8 @@ int main(int argc, char **argv)
 */
 	fprintf(logFile, "%s\n", line);
 	fprintf(logFile, "Done.\n");
-/*	TODO	call cpu_time(timef)
-	write(prtfil,*) 'CPU time:', timef-timei, ' seconds'
-*/
+	printCpuTime(stdout);
+	printCpuTime(logFile);
 	fclose(logFile);
 	exit(EXIT_SUCCESS);
 }

@@ -14,6 +14,8 @@
 #include	"globals.h"
 #include	<stdlib.h>
 #include	<string.h>
+#include <sys/time.h>		//for struct time_t
+#include <sys/resource.h>	//for getrusage()
 
 /** NOTE: the memory reallocation functions contained in this file are mostly not in use du to random occurences of "bus error".                       
  */
@@ -50,7 +52,7 @@ void			printSettings(settings_t*);
 void			reallocRay(ray_t*, uintptr_t);
 void			copyDoubleToPtr(double*, double*, uintptr_t);
 void			copyDoubleToPtr2D(double**, double*, uintptr_t, uintptr_t);
-
+void			printCpuTime(FILE*);
 
 /****************************
  *	Actual Functions		*
@@ -721,4 +723,15 @@ void		copyDoubleToPtr2D(double** origin, double* dest, uintptr_t rowSize, uintpt
 			dest[i*colSize +j] = origin[j][i];
 		}
 	}
+}
+
+void		printCpuTime(FILE* stream){
+	/*
+	 * prints total cpu time used by process.
+	 */
+	struct rusage	usage;
+
+	getrusage(RUSAGE_SELF, &usage);
+	fprintf(stream, "%ld.%06ld seconds user CPU time,\n", usage.ru_utime.tv_sec, usage.ru_utime.tv_usec);
+	fprintf(stream, "%ld.%06ld seconds system CPU time used.\n", usage.ru_stime.tv_sec, usage.ru_stime.tv_usec);
 }
