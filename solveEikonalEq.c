@@ -41,86 +41,6 @@
 
 void	solveEikonalEq(globals_t*, ray_t*);
 
-/*
-void calcReflDecay(globals_t* globals, ray_t* ray, uintptr_t boundaryId, point_t* pointA, point_t* pointB, complex double* reflDecay){
-	
-	rayBoundaryIntersection(&(globals->settings.altimetry), &pointA, &pointB, &pointIsect);
-	ri = pointIsect.r;
-	zi = pointIsect.z;
-	
-	boundaryInterpolation(	&(globals->settings.altimetry), ri, altInterpolatedZ, &tauB, &normal);
-	ibdry = -1;
-	sRefl = sRefl + 1;
-	jRefl = 1;
-	
-	//Calculate surface reflection:
-	specularReflection(&normal, &es, &tauR, &thetaRefl);
-	
-	//get the reflection coefficient (kill the ray is the surface is an absorver):
-	switch(globals->settings.altimetry.surfaceType){
-		
-		case SURFACE_TYPE__ABSORVENT:	//"A"
-			refl = 0 +0*I;
-			ray->iKill = TRUE;
-			break;
-			
-		case SURFACE_TYPE__RIGID:		//"R"
-			refl = 1 +0*I;
-			break;
-			
-		case SURFACE_TYPE__VACUUM:		//"V"
-			refl = -1 +0*I;
-			break;
-			
-		case SURFACE_TYPE__ELASTIC:		//"E"
-			switch(globals->settings.altimetry.surfacePropertyType){
-				
-				case SURFACE_PROPERTY_TYPE__HOMOGENEOUS:		//"H"
-					rho2= globals->settings.altimetry.surfaceProperties[0].rho;
-					cp2	= globals->settings.altimetry.surfaceProperties[0].cp;
-					cs2	= globals->settings.altimetry.surfaceProperties[0].cs;
-					ap	= globals->settings.altimetry.surfaceProperties[0].ap;
-					as	= globals->settings.altimetry.surfaceProperties[0].as;
-					lambda = cp2 / globals->settings.source.freqx;
-					convertUnits(	&ap,
-									&lambda,
-									&(globals->settings.source.freqx),
-									&(globals->settings.altimetry.surfaceAttenUnits),
-									&tempDouble
-								);
-					ap		= tempDouble;
-					lambda	= cs2 / globals->settings.source.freqx;
-					convertUnits(	&as,
-									&lambda,
-									&(globals->settings.source.freqx),
-									&(globals->settings.altimetry.surfaceAttenUnits),
-									&tempDouble
-								);
-					as		= tempDouble;
-					boundaryReflectionCoeff(&rho1, &rho2, &ci, &cp2, &cs2, &ap, &as, &thetaRefl, &refl);
-					break;
-				
-				case SURFACE_PROPERTY_TYPE__NON_HOMOGENEOUS:	//"N"
-					fatal("Non-homogeneous surface properties are WIP.");	//TODO restructure interfaceProperties to contain pointers to cp, cs, etc;
-
-				default:
-					fatal("Unknown surface properties (neither H or N).\nAborting...");
-					break;
-				}
-			break;
-		default:
-			fatal("Unknown surface type (neither A,E,R or V).\nAborting...");
-			break;
-	}
-	reflDecay = reflDecay * refl;
-	
-	//Kill the ray if the reflection coefficient is too small: 
-	if ( abs(refl) < 1.0e-5 ){
-		ray->iKill = TRUE;
-	}
-}
-*/
-
 void	solveEikonalEq(globals_t* globals, ray_t* ray){
 	DEBUG(1,"in. theta: %lf\n", ray->theta);
 	
@@ -153,16 +73,9 @@ void	solveEikonalEq(globals_t* globals, ray_t* ray){
 	double			dr, dz, dIc;
 	double 			prod;
 	uintptr_t		initialMemorySize;
-/**
-for(i=0; i<2; i++){		//TODO remove this
-	printf("globals->settings.altimetry.r[%u]: %lf\n", i, globals->settings.altimetry.r[i]);
-	printf("globals->settings.altimetry.z[%u]: %lf\n", i, globals->settings.altimetry.z[i]);
-}
-*/
+
 	//allocate memory for ray components:
-	//Note that memory limits will be checked and resized if necessary.
-	initialMemorySize = (uintptr_t)((globals->settings.source.rbox2 - globals->settings.source.rbox1)/globals->settings.source.ds)*2;	//TODO find good setting for this.
-	//TODO find bus error thta happens on realloc.
+	initialMemorySize = (uintptr_t)(fabs((globals->settings.source.rbox2 - globals->settings.source.rbox1)/globals->settings.source.ds))*MEM_FACTOR;
 	reallocRay(ray, initialMemorySize);
 	
 	//set parameters:
@@ -208,7 +121,7 @@ DEBUG(10,"\n");
 				&czzi,
 				&crzi);
 DEBUG(10,":");
-	sigmaR	= sigmaI * es.r;	//TODO isn't this the slowness vector (which is already calculated in csValues)?
+	sigmaR	= sigmaI * es.r;
 	sigmaZ	= sigmaI * es.z;
 	
 	ray->c[0]	= cx;
@@ -246,20 +159,10 @@ DEBUG(10,":");
 			if(numRungeKutta > 100){
 				fatal("Runge-Kutta integration: failure in step convergence.\nAborting...");
 			}
-/**			printf("yOld[0]: %lf\n", yOld[0]);	//TODO remove this
-			printf("yOld[1]: %lf\n", yOld[1]);	//TODO remove this
-			printf("yNew[0]: %lf\n", yNew[0]);	//TODO remove this
-			printf("yNew[1]: %lf\n", yNew[1]);	//TODO remove this
-*/			rkf45(globals, &dsi, yOld, fOld, yNew, fNew, &ds4, &ds5);
+			rkf45(globals, &dsi, yOld, fOld, yNew, fNew, &ds4, &ds5);
 
-/**			printf("yOld[0]: %lf\n", yOld[0]);	//TODO remove this
-			printf("yOld[1]: %lf\n", yOld[1]);	//TODO remove this
-			printf("yNew[0]: %lf\n", yNew[0]);	//TODO remove this
-			printf("yNew[1]: %lf\n", yNew[1]);	//TODO remove this
-*/
 			numRungeKutta++;
 			stepError = fabs( ds4 - ds5) / (0.5 * (ds4 + ds5));
-///			printf("stepError: %lf\n", stepError);	//TODO remove this
 			dsi *= 0.5;
 		}
 		
@@ -268,14 +171,6 @@ DEBUG(10,":");
 		ri = yNew[0];
 		zi = yNew[1];
 
-///		printf("ri: %lf, zi:%lf\n", ri, zi);	//TODO remove this
-/**		printf("r[0]: %lf, r[%u]: %lf\n", 	globals->settings.altimetry.r[0],
-											globals->settings.altimetry.numSurfaceCoords -1,
-											globals->settings.altimetry.r[globals->settings.altimetry.numSurfaceCoords -1] );	//TODO remove this
-		printf("r[0]: %lf, r[%u]: %lf\n", 	globals->settings.batimetry.r[0],
-											globals->settings.batimetry.numSurfaceCoords -1,
-											globals->settings.batimetry.r[globals->settings.batimetry.numSurfaceCoords -1] );	//TODO remove this
-*/		
 		/**		Check for boundary intersections:	**/
 		//verify that the ray is still within the defined coordinates of the surface and the bottom:
 		if (	(ri > globals->settings.altimetry.r[0]) &&
@@ -286,14 +181,13 @@ DEBUG(10,":");
 			boundaryInterpolation(	&(globals->settings.altimetry), &ri, &altInterpolatedZ, &junkVector, &normal);
 			boundaryInterpolation(	&(globals->settings.batimetry), &ri, &batInterpolatedZ, &junkVector, &normal);
 		}else{
-///			printf("ray killed\n");		//TODO remove
+			DEBUG(8,"ray killed\n");
 			ray->iKill = TRUE;
 		}
-///		printf("altInterpolatedZ: %lf\n", altInterpolatedZ);	//TODO remove
-///		printf("batInterpolatedZ: %lf\n", batInterpolatedZ);	//TODO remove
+		DEBUG(9,"altInterpolatedZ: %lf\n", altInterpolatedZ);
+		DEBUG(9,"batInterpolatedZ: %lf\n", batInterpolatedZ);
 		//Check if the ray is still between the boundaries; if not, find the intersection point and calculate the reflection:
 		if ((ray->iKill == FALSE ) && (zi < altInterpolatedZ || zi > batInterpolatedZ)){
-///printf(">A2\t********\n");	//TODO remove
 			pointA.r = yOld[0];
 			pointA.z = yOld[1];
 			pointB.r = yNew[0];
@@ -301,9 +195,7 @@ DEBUG(10,":");
 			
 			//	Ray above surface?
 			if (zi < altInterpolatedZ){
-DEBUG(3,"ray above surface.\n");		//TODO remove
-				//TODO: replace with a call to calcReflDecay()
-				//		(globals_t* globals, ray_t* ray, uintptr_t boundaryId, point_t* pointA, point_t* pointB, complex double* reflDecay)
+				DEBUG(5,"ray above surface.\n");
 				rayBoundaryIntersection(&(globals->settings.altimetry), &pointA, &pointB, &pointIsect);
 				ri = pointIsect.r;
 				zi = pointIsect.z;
@@ -362,7 +254,6 @@ DEBUG(3,"ray above surface.\n");		//TODO remove
 							
 							case SURFACE_PROPERTY_TYPE__NON_HOMOGENEOUS:	//"N"
 								fatal("Non-homogeneous surface properties are WIP.");	//TODO restructure interfaceProperties to contain pointers to cp, cs, etc;
-								if(1){
 								/*
 								//Non-Homogeneous interface =>rho, cp, cs, ap, as are variant with range, and thus have to be interpolated
 								boundaryInterpolationExplicit(	&(globals->settings.altimetry.numSurfaceCoords),
@@ -404,7 +295,6 @@ DEBUG(3,"ray above surface.\n");		//TODO remove
 								call bdryr(rho1,rho2,ci,cp2,cs2,ap,as,theta,refl)
 								break;
 								*/
-								}
 							default:
 								fatal("Unknown surface properties (neither H or N).\nAborting...");
 								break;
@@ -420,11 +310,9 @@ DEBUG(3,"ray above surface.\n");		//TODO remove
 				if ( cabs(refl) < 1.0e-5 ){
 					ray->iKill = TRUE;
 				}
-												//	end of "ray above surface?"
+			//	end of "ray above surface?"
 			}else if (zi > batInterpolatedZ){	//	Ray below bottom?
-				DEBUG(3,"ray below bottom.\n");		//TODO remove
-				//TODO: replace with a call to calcReflDecay()
-				//		(globals_t* globals, ray_t* ray, uintptr_t boundaryId, point_t* pointA, point_t* pointB, complex double* reflDecay)
+				DEBUG(5,"ray below bottom.\n");
 				rayBoundaryIntersection(&(globals->settings.batimetry), &pointA, &pointB, &pointIsect);
 				ri = pointIsect.r;
 				zi = pointIsect.z;
@@ -487,7 +375,6 @@ DEBUG(3,"ray above surface.\n");		//TODO remove
 							
 							case SURFACE_PROPERTY_TYPE__NON_HOMOGENEOUS:	//"N"
 								fatal("Non-homogeneous surface properties are WIP.");	//TODO restructure interfaceProperties to contain pointers to cp, cs, etc;
-								if(1){
 								/*
 								//Non-Homogeneous interface =>rho, cp, cs, ap, as are variant with range, and thus have to be interpolated
 								boundaryInterpolationExplicit(	&(globals->settings.altimetry.numSurfaceCoords),
@@ -529,7 +416,6 @@ DEBUG(3,"ray above surface.\n");		//TODO remove
 								call bdryr(rho1,rho2,ci,cp2,cs2,ap,as,theta,refl)
 								break;
 								*/
-								}
 							default:
 								fatal("Unknown surface properties (neither H or N).\nAborting...");
 								break;
@@ -552,7 +438,6 @@ DEBUG(3,"ray above surface.\n");		//TODO remove
 			ri = pointIsect.r;
 			zi = pointIsect.z;
 			csValues( 	globals, &ri, &zi, &ci, &cc, &sigmaI, &cri, &czi, &slowness, &crri, &czzi, &crzi);
-///printf(">A1\t********\n");	//TODO remove
 			yNew[0] = ri;
 			yNew[1] = zi;
 			yNew[2] = sigmaI*tauR.r;
@@ -715,7 +600,6 @@ c          					Update marching solution and function:
 		
 		es.r = fNew[0];
 		es.z = fNew[1];
-///printf(">A3\t********\n");	//TODO remove
 		csValues( 	globals, &ri, &zi, &ci, &cc, &sigmaI, &cri, &czi, &slowness, &crri, &czzi, &crzi);
 		
 		dr = ray->r[i+1] - ray->r[i];
@@ -753,20 +637,22 @@ c          					Update marching solution and function:
 		}
 		//next step:
 		i++;
+		
 		//Prevent further calculations if there is no more space in the memory for the ray coordinates:
 		if ( i > ray->nCoords - 1){
-			//double the memory allocated for the ray
-			reallocRay(ray, ray->nCoords * 2);
-			//fatal("Ray step too small, number of points in ray coordinates exceeds allocated memory.\nAborting...");
+			fatal("Ray step too small, number of points in ray coordinates exceeds allocated memory.\nTry changing MEM_FACTOR (in globals.h) to a higher value a recompiling.\nAborting...");
+			//double the memory allocated for the ray:
+			//TODO find bus error that happens on realloc when realloccing to a larger value (tools.c".)
+			//reallocRay(ray, ray->nCoords * 2);		//TODO disabled as this sometimes results in "bus error".
+			
 		}
 	}
 	/*	Ray coordinates have been computed. Finalizing */
-	//adjust memory size of the ray (we don't need more memory than nCoords
+	//adjust memory size of the ray (we don't need more memory than nCoords)
 	ray -> nCoords	= i;
-
 	reallocRay(ray, i);
 
-	nRefl 	= sRefl + bRefl + oRefl;		//TODO is thi used later?
+	nRefl 	= sRefl + bRefl + oRefl;		//TODO is this used later?
 	
 	//Cut the ray at box exit:
 	dr	= ray->r[ray->nCoords - 1] - ray->r[ray->nCoords-2];
@@ -808,7 +694,7 @@ c          					Update marching solution and function:
 	}
 	
 	
-	//check last set of coordinates for a return condition.
+	//check last set of coordinates for a min max values of range. (not that the last return conditio has already been tested)
 	ray-> rMin = min( ray->rMin, ray->r[ray->nCoords-1] );
 	ray-> rMax = max( ray->rMax, ray->r[ray->nCoords-1] );
 	i++;

@@ -45,9 +45,7 @@ void rkf45(globals_t* globals, double* dsi, double* yOld, double* fOld, double* 
 	DEBUG(6,"in\n");
 	uintptr_t	j;
 	double		dr,dz;
-	//TODO what happened to a2? double		a1,a2,a3,a4,a5;
 	double		a1,a3,a4,a5;
-	//TODO what happened to b2? double		b1,b2,b3,b4,b5,b6;
 	double		b1,b3,b4,b5,b6;
 	double 		k1[4],k2[4],k3[4],k4[4],k5[4],k6[4];
 	double		yk[4],yrk4[4],yrk5[4];
@@ -81,17 +79,13 @@ void rkf45(globals_t* globals, double* dsi, double* yOld, double* fOld, double* 
 	b5 =    -9.0/50.0;
 	b6 =     2.0/55.0;
 
-	//TODO make sure that this pointer juggling goes well:
 	ri = yOld[0];
 	zi = yOld[1];
-///	printf("dsi: %lf\n", *dsi);		//TODO
-///	printf("fOld:%lf, yOld:%lf, yk:%lf\n",fOld[0], yOld[0], yk[0]);
 	/* determine k1:											*/
 	csValues(globals, &ri, &zi, &ci, &cc, &sigmaI, &cri, &czi, &slowness, &crri, &czzi, &crzi);
 	for(j=0; j<4; j++){
 		k1[j] = fOld[j];
 		yk[j] = yOld[j] + 0.25 * (*dsi) * k1[j];
-///		printf("j=%lu: k1:%lf, fOld:%lf, yOld:%lf, yk:%lf\n", j, k1[j], fOld[j], yOld[j], yk[j]);		//TODO
 	}
 	/* determine k2:											*/
 	ri 	= yk[0];

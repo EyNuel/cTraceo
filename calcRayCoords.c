@@ -45,18 +45,12 @@ void	calcRayCoords(globals_t* globals){
 	double**	temp2D 	= malloc(2*sizeof(uintptr_t));
 	uintptr_t	i;
 	char* 		string	= mallocChar(10);
-/*
-for(i=0; i<2; i++){		//TODO remove this
-	printf("globals->settings.altimetry.r[%lu]: %lf\n", i, globals->settings.altimetry.r[i]);
-	printf("globals->settings.altimetry.z[%lu]: %lf\n", i, globals->settings.altimetry.z[i]);
-}
-*/
+
 	matfile		= matOpen("rco.mat", "w");
 	pThetas		= mxCreateDoubleMatrix(1, (int32_t)globals->settings.source.nThetas, mxREAL);
 	if(matfile == NULL || pThetas == NULL)
 		fatal("Memory alocation error.");
 	
-	//data		= mxGetPtr(thetas);
 	//copy cArray to mxArray:
 	copyDoubleToPtr(	globals->settings.source.thetas,
 						mxGetPr(pThetas),

@@ -359,8 +359,6 @@ void	readIn(globals_t* globals, const char* filename){
 	/************************************************************************
 	 * Read and validate object info:										*
 	 ***********************************************************************/
-	//TODO complete object info section
-
 	skipLine(infile);
 	globals->settings.objects.numObjects = (uint32_t)readInt(infile);
 

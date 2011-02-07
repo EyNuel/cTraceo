@@ -15,6 +15,9 @@
 #include	<stdlib.h>
 #include	<string.h>
 
+/** NOTE: the memory reallocation functions contained in this file are mostly not in use du to random occurences of "bus error".                       
+ */
+
 
 /****************************
  *	Function prototypes		*
