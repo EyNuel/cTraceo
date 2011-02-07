@@ -201,15 +201,17 @@ void	readIn(globals_t* globals, const char* filename){
 	switch(globals->settings.altimetry.surfacePropertyType){
 		case SURFACE_PROPERTY_TYPE__HOMOGENEOUS:
 			//malloc and read only one set of interface properties:
-			globals->settings.altimetry.surfaceProperties = malloc(sizeof(interfaceProperties_t));
-			if( globals->settings.altimetry.surfaceProperties == NULL)
-				fatal("Input file: altimetry: Memory allocation error.");
-				
-			globals->settings.altimetry.surfaceProperties[0].cp	= readDouble(infile);
-			globals->settings.altimetry.surfaceProperties[0].cs	= readDouble(infile);
-			globals->settings.altimetry.surfaceProperties[0].rho= readDouble(infile);
-			globals->settings.altimetry.surfaceProperties[0].ap	= readDouble(infile);
-			globals->settings.altimetry.surfaceProperties[0].as	= readDouble(infile);
+			globals->settings.altimetry.cp	= mallocDouble(1);
+			globals->settings.altimetry.cs	= mallocDouble(1);
+			globals->settings.altimetry.rho	= mallocDouble(1);
+			globals->settings.altimetry.ap	= mallocDouble(1);
+			globals->settings.altimetry.as	= mallocDouble(1);
+			
+			globals->settings.altimetry.cp[0]	= readDouble(infile);
+			globals->settings.altimetry.cs[0]	= readDouble(infile);
+			globals->settings.altimetry.rho[0]	= readDouble(infile);
+			globals->settings.altimetry.ap[0]	= readDouble(infile);
+			globals->settings.altimetry.as[0]	= readDouble(infile);
 			
 			//read coordinates of interface points:
 			for(i=0; i<numSurfaceCoords; i++){
@@ -220,18 +222,20 @@ void	readIn(globals_t* globals, const char* filename){
 		
 		case SURFACE_PROPERTY_TYPE__NON_HOMOGENEOUS:
 			//Read coordinates and interface properties for all interface points:
-			globals->settings.altimetry.surfaceProperties = malloc(numSurfaceCoords*sizeof(interfaceProperties_t));
-			if( globals->settings.altimetry.surfaceProperties == NULL)
-				fatal("Input file: altimetry: Memory allocation error.");
+			globals->settings.altimetry.cp	= mallocDouble(numSurfaceCoords);
+			globals->settings.altimetry.cs	= mallocDouble(numSurfaceCoords);
+			globals->settings.altimetry.rho	= mallocDouble(numSurfaceCoords);
+			globals->settings.altimetry.ap	= mallocDouble(numSurfaceCoords);
+			globals->settings.altimetry.as	= mallocDouble(numSurfaceCoords);
 				
 			for(i=0; i<numSurfaceCoords; i++){
-				globals->settings.altimetry.r[i] = readDouble(infile);
-				globals->settings.altimetry.z[i] = readDouble(infile);
-				globals->settings.altimetry.surfaceProperties[i].cp	= readDouble(infile);
-				globals->settings.altimetry.surfaceProperties[i].cs	= readDouble(infile);
-				globals->settings.altimetry.surfaceProperties[i].rho= readDouble(infile);
-				globals->settings.altimetry.surfaceProperties[i].ap	= readDouble(infile);
-				globals->settings.altimetry.surfaceProperties[i].as	= readDouble(infile);
+				globals->settings.altimetry.r[i]	= readDouble(infile);
+				globals->settings.altimetry.z[i]	= readDouble(infile);
+				globals->settings.altimetry.cp[i]	= readDouble(infile);
+				globals->settings.altimetry.cs[i]	= readDouble(infile);
+				globals->settings.altimetry.rho[i]	= readDouble(infile);
+				globals->settings.altimetry.ap[i]	= readDouble(infile);
+				globals->settings.altimetry.as[i]	= readDouble(infile);
 			}
 			break;
 	}
@@ -536,15 +540,17 @@ void	readIn(globals_t* globals, const char* filename){
 	switch(globals->settings.batimetry.surfacePropertyType){
 		case SURFACE_PROPERTY_TYPE__HOMOGENEOUS:
 			//malloc and read only one set of interface properties:
-			globals->settings.batimetry.surfaceProperties = malloc(sizeof(interfaceProperties_t));
-			if( globals->settings.batimetry.surfaceProperties == NULL)
-				fatal("Memory allocation error.");
-				
-			globals->settings.batimetry.surfaceProperties[0].cp	= readDouble(infile);
-			globals->settings.batimetry.surfaceProperties[0].cs	= readDouble(infile);
-			globals->settings.batimetry.surfaceProperties[0].rho= readDouble(infile);
-			globals->settings.batimetry.surfaceProperties[0].ap	= readDouble(infile);
-			globals->settings.batimetry.surfaceProperties[0].as	= readDouble(infile);
+			globals->settings.batimetry.cp	= mallocDouble(1);
+			globals->settings.batimetry.cs	= mallocDouble(1);
+			globals->settings.batimetry.rho	= mallocDouble(1);
+			globals->settings.batimetry.ap	= mallocDouble(1);
+			globals->settings.batimetry.as	= mallocDouble(1);
+							
+			globals->settings.batimetry.cp[0]	= readDouble(infile);
+			globals->settings.batimetry.cs[0]	= readDouble(infile);
+			globals->settings.batimetry.rho[0]	= readDouble(infile);
+			globals->settings.batimetry.ap[0]	= readDouble(infile);
+			globals->settings.batimetry.as[0]	= readDouble(infile);
 			
 			//read coordinates of interface points:
 			for(i=0; i<numSurfaceCoords; i++){
@@ -555,18 +561,20 @@ void	readIn(globals_t* globals, const char* filename){
 		
 		case SURFACE_PROPERTY_TYPE__NON_HOMOGENEOUS:
 			//Read coordinates and interface properties for all interface points:
-			globals->settings.batimetry.surfaceProperties = malloc(numSurfaceCoords*sizeof(interfaceProperties_t));
-			if( globals->settings.batimetry.surfaceProperties == NULL)
-				fatal("Memory allocation error.");
+			globals->settings.batimetry.cp	= mallocDouble(numSurfaceCoords);
+			globals->settings.batimetry.cs	= mallocDouble(numSurfaceCoords);
+			globals->settings.batimetry.rho	= mallocDouble(numSurfaceCoords);
+			globals->settings.batimetry.ap	= mallocDouble(numSurfaceCoords);
+			globals->settings.batimetry.as	= mallocDouble(numSurfaceCoords);
 				
 			for(i=0; i<numSurfaceCoords; i++){
-				globals->settings.batimetry.r[i] = readDouble(infile);
-				globals->settings.batimetry.z[i] = readDouble(infile);
-				globals->settings.batimetry.surfaceProperties[i].cp	= readDouble(infile);
-				globals->settings.batimetry.surfaceProperties[i].cs	= readDouble(infile);
-				globals->settings.batimetry.surfaceProperties[i].rho= readDouble(infile);
-				globals->settings.batimetry.surfaceProperties[i].ap	= readDouble(infile);
-				globals->settings.batimetry.surfaceProperties[i].as	= readDouble(infile);
+				globals->settings.batimetry.r[i]	= readDouble(infile);
+				globals->settings.batimetry.z[i]	= readDouble(infile);
+				globals->settings.batimetry.cp[i]	= readDouble(infile);
+				globals->settings.batimetry.cs[i]	= readDouble(infile);
+				globals->settings.batimetry.rho[i]	= readDouble(infile);
+				globals->settings.batimetry.ap[i]	= readDouble(infile);
+				globals->settings.batimetry.as[i]	= readDouble(infile);
 			}
 			break;
 	}

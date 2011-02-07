@@ -228,11 +228,11 @@ DEBUG(10,":");
 						switch(globals->settings.altimetry.surfacePropertyType){
 							
 							case SURFACE_PROPERTY_TYPE__HOMOGENEOUS:		//"H"
-								rho2= globals->settings.altimetry.surfaceProperties[0].rho;
-								cp2	= globals->settings.altimetry.surfaceProperties[0].cp;
-								cs2	= globals->settings.altimetry.surfaceProperties[0].cs;
-								ap	= globals->settings.altimetry.surfaceProperties[0].ap;
-								as	= globals->settings.altimetry.surfaceProperties[0].as;
+								rho2= globals->settings.altimetry.rho[0];
+								cp2	= globals->settings.altimetry.cp[0];
+								cs2	= globals->settings.altimetry.cs[0];
+								ap	= globals->settings.altimetry.ap[0];
+								as	= globals->settings.altimetry.as[0];
 								lambda = cp2 / globals->settings.source.freqx;
 								convertUnits(	&ap,
 												&lambda,
@@ -349,11 +349,11 @@ DEBUG(10,":");
 						switch(globals->settings.batimetry.surfacePropertyType){
 							
 							case SURFACE_PROPERTY_TYPE__HOMOGENEOUS:		//"H"
-								rho2= globals->settings.batimetry.surfaceProperties[0].rho;
-								cp2	= globals->settings.batimetry.surfaceProperties[0].cp;
-								cs2	= globals->settings.batimetry.surfaceProperties[0].cs;
-								ap	= globals->settings.batimetry.surfaceProperties[0].ap;
-								as	= globals->settings.batimetry.surfaceProperties[0].as;
+								rho2= globals->settings.batimetry.rho[0];
+								cp2	= globals->settings.batimetry.cp[0];
+								cs2	= globals->settings.batimetry.cs[0];
+								ap	= globals->settings.batimetry.ap[0];
+								as	= globals->settings.batimetry.as[0];
 								lambda = cp2 / globals->settings.source.freqx;
 								convertUnits(	&ap,
 												&lambda,

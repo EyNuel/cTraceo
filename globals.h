@@ -87,17 +87,19 @@ typedef struct source{
 	double*		thetas;			//the array that will actually contain the launching angles (is allocated in "readin.c")
 }source_t;
 
+/** TODO can safely be removed
 typedef struct interfaceProperties{
-	/*
+	*
 	 * Contains the properties of the surface or bottom interfaces. used in "interface" structs
 	 * See page 39 of "Traceo" manual.
-	 */
+	 *
 	double		cp;		//"cpati",	compressional speed
 	double		cs;		//"csati",	shear speed
 	double		rho;	//"rhoati",	density
 	double		ap;		//"apati",	compressional attenuation
 	double		as;		//"asati"	shear attenuation
 }interfaceProperties_t;
+*/
 
 typedef struct interface{
 	/*
@@ -108,7 +110,11 @@ typedef struct interface{
 	uint32_t				surfacePropertyType;	//formerly "aptype"
 	double*					r;						//"rati(n)"				|
 	double*					z;						//"zati(n)"				 }	these pointers are mallocced in "readin.c"
-	interfaceProperties_t*	surfaceProperties;		//contains the actual 	|
+	double*					cp;						//"cpati",	compressional speed
+	double*					cs;						//"csati",	shear speed
+	double*					rho;					//"rhoati",	density
+	double*					ap;						//"apati",	compressional attenuation
+	double*					as;						//"asati"	shear attenuation
 	uint32_t				surfaceInterpolation;	//formerly "aitype"
 	uint32_t				surfaceAttenUnits;		//formerly "atiu"
 	uint32_t				numSurfaceCoords;		//formerly "nati"

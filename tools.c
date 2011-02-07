@@ -276,11 +276,11 @@ globals_t* 	mallocGlobals(void){
 
 	globals->settings.altimetry.r = NULL;
 	globals->settings.altimetry.z = NULL;
-	globals->settings.altimetry.surfaceProperties = NULL;
+	//globals->settings.altimetry.surfaceProperties = NULL;
 
 	globals->settings.batimetry.r = NULL;
 	globals->settings.batimetry.z = NULL;
-	globals->settings.batimetry.surfaceProperties = NULL;
+	//globals->settings.batimetry.surfaceProperties = NULL;
 
 	globals->settings.output.arrayR = NULL;
 	globals->settings.output.arrayZ = NULL;
@@ -482,19 +482,20 @@ void		printSettings(globals_t*	globals){
 	printf("altimetry.surfaceProperties:	");
 	switch(globals->settings.altimetry.surfacePropertyType){
 		case SURFACE_PROPERTY_TYPE__HOMOGENEOUS:
-			printf("cp:%lf\n ",	globals->settings.altimetry.surfaceProperties[0].cp);
-			printf("\t\t\t\tcs:%lf\n ",	globals->settings.altimetry.surfaceProperties[0].cs);
-			printf("\t\t\t\trho:%lf\n ",	globals->settings.altimetry.surfaceProperties[0].rho);
-			printf("\t\t\t\tap:%lf\n ",	globals->settings.altimetry.surfaceProperties[0].ap);
-			printf("\t\t\t\tas:%lf\n",	globals->settings.altimetry.surfaceProperties[0].as);
+			printf("cp:%lf\n ",	globals->settings.altimetry.cp[0]);
+			printf("\t\t\t\tcs:%lf\n ",	globals->settings.altimetry.cs[0]);
+			printf("\t\t\t\trho:%lf\n ",	globals->settings.altimetry.rho[0]);
+			printf("\t\t\t\tap:%lf\n ",	globals->settings.altimetry.ap[0]);
+			printf("\t\t\t\tas:%lf\n",	globals->settings.altimetry.as[0]);
 			break;
+			
 		case SURFACE_PROPERTY_TYPE__NON_HOMOGENEOUS:
 			for(i=0; i<globals->settings.altimetry.numSurfaceCoords; i++){
-				printf("cp:%lf; ",	globals->settings.altimetry.surfaceProperties[i].cp);
-				printf("cs:%lf; ",	globals->settings.altimetry.surfaceProperties[i].cs);
-				printf("rho:%lf; ",	globals->settings.altimetry.surfaceProperties[i].rho);
-				printf("ap:%lf; ",	globals->settings.altimetry.surfaceProperties[i].ap);
-				printf("as:%lf;\n",	globals->settings.altimetry.surfaceProperties[i].as);
+				printf("cp:%lf; ",	globals->settings.altimetry.cp[i]);
+				printf("cs:%lf; ",	globals->settings.altimetry.cs[i]);
+				printf("rho:%lf; ",	globals->settings.altimetry.rho[i]);
+				printf("ap:%lf; ",	globals->settings.altimetry.ap[i]);
+				printf("as:%lf;\n",	globals->settings.altimetry.as[i]);
 			}
 			break;
 	}
@@ -614,19 +615,19 @@ void		printSettings(globals_t*	globals){
 	printf("batimetry.surfaceProperties:	");
 	switch(globals->settings.batimetry.surfacePropertyType){
 		case SURFACE_PROPERTY_TYPE__HOMOGENEOUS:
-			printf("cp:%lf\n",	globals->settings.batimetry.surfaceProperties[0].cp);
-			printf("\t\t\t\tcs:%lf\n",	globals->settings.batimetry.surfaceProperties[0].cs);
-			printf("\t\t\t\trho:%lf\n",	globals->settings.batimetry.surfaceProperties[0].rho);
-			printf("\t\t\t\tap:%lf\n",	globals->settings.batimetry.surfaceProperties[0].ap);
-			printf("\t\t\t\tas:%lf\n",	globals->settings.batimetry.surfaceProperties[0].as);
+			printf("cp:%lf\n",	globals->settings.batimetry.cp[0]);
+			printf("\t\t\t\tcs:%lf\n",	globals->settings.batimetry.cs[0]);
+			printf("\t\t\t\trho:%lf\n",	globals->settings.batimetry.rho[0]);
+			printf("\t\t\t\tap:%lf\n",	globals->settings.batimetry.ap[0]);
+			printf("\t\t\t\tas:%lf\n",	globals->settings.batimetry.as[0]);
 			break;
 		case SURFACE_PROPERTY_TYPE__NON_HOMOGENEOUS:
 			for(i=0; i<globals->settings.batimetry.numSurfaceCoords; i++){
-				printf("cp:%lf; ",	globals->settings.batimetry.surfaceProperties[i].cp);
-				printf("cs:%lf; ",	globals->settings.batimetry.surfaceProperties[i].cs);
-				printf("rho:%lf; ",	globals->settings.batimetry.surfaceProperties[i].rho);
-				printf("ap:%lf; ",	globals->settings.batimetry.surfaceProperties[i].ap);
-				printf("as:%lf;\n",	globals->settings.batimetry.surfaceProperties[i].as);
+				printf("cp:%lf; ",	globals->settings.batimetry.cp[i]);
+				printf("cs:%lf; ",	globals->settings.batimetry.cs[i]);
+				printf("rho:%lf; ",	globals->settings.batimetry.rho[i]);
+				printf("ap:%lf; ",	globals->settings.batimetry.ap[i]);
+				printf("as:%lf;\n",	globals->settings.batimetry.as[i]);
 			}
 			break;
 	}
