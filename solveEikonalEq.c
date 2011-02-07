@@ -18,7 +18,7 @@
  *							Universidade do Algarve									*
  *																					*
  *	Inputs:																			*
- * 				globals		Input information.										*
+ * 				settings		Input information.										*
  * 	Outputs:																		*
  * 				ray:		A structure containing all ray information.				*
  * 							Note that the ray's launching angle (ray->theta) must	*
@@ -39,9 +39,9 @@
 #include "convertUnits.c"
 #include "specularReflection.c"
 
-void	solveEikonalEq(globals_t*, ray_t*);
+void	solveEikonalEq(settings_t*, ray_t*);
 
-void	solveEikonalEq(globals_t* globals, ray_t* ray){
+void	solveEikonalEq(settings_t* settings, ray_t* ray){
 	DEBUG(1,"in. theta: %lf\n", ray->theta);
 	
 	double			cx, ci,	cc,	sigmaI, sigmaR, sigmaZ,	cri, czi, crri,	czzi, crzi;
@@ -75,7 +75,7 @@ void	solveEikonalEq(globals_t* globals, ray_t* ray){
 	uintptr_t		initialMemorySize;
 
 	//allocate memory for ray components:
-	initialMemorySize = (uintptr_t)(fabs((globals->settings.source.rbox2 - globals->settings.source.rbox1)/globals->settings.source.ds))*MEM_FACTOR;
+	initialMemorySize = (uintptr_t)(fabs((settings->source.rbox2 - settings->source.rbox1)/settings->source.ds))*MEM_FACTOR;
 	reallocRay(ray, initialMemorySize);
 	
 	//set parameters:
@@ -97,10 +97,10 @@ DEBUG(10,":");
 	ray->decay[0] = reflDecay;
 	ray->phase[0] = 0.0;
 DEBUG(10,"\n");
-	ray->r[0]	= globals->settings.source.rx;
+	ray->r[0]	= settings->source.rx;
 	ray->rMin	= ray->r[0];
 	ray->rMax	= ray->r[0];
-	ray->z[0]	= globals->settings.source.zx;
+	ray->z[0]	= settings->source.zx;
 DEBUG(10,"\n");
 	es.r = cos( ray->theta );
 	es.z = sin( ray->theta );
@@ -108,9 +108,9 @@ DEBUG(10,"\n");
 	e1.z =  es.r;
 DEBUG(10,"\n");
 	//Calculate initial sound speed and its derivatives:
-	csValues( 	globals,
-				&(globals->settings.source.rx),
-				&(globals->settings.source.zx),
+	csValues( 	settings,
+				&(settings->source.rx),
+				&(settings->source.zx),
 				&cx,
 				&cc,
 				&sigmaI,
@@ -130,8 +130,8 @@ DEBUG(10,":");
 	ray->ic[0]	= 0;
 
 	//prepare for Runge-Kutta-Fehlberg integration
-	yOld[0] = globals->settings.source.rx;
-	yOld[1] = globals->settings.source.zx;
+	yOld[0] = settings->source.rx;
+	yOld[1] = settings->source.zx;
 	yOld[2] = sigmaR;
 	yOld[3] = sigmaZ;
 	fOld[0] = es.r;
@@ -146,12 +146,12 @@ DEBUG(10,":");
 	 ***********************************************************************/
 	i = 0;
 	while(	(ray->iKill == FALSE )	&&
-			(ray->r[i] < globals->settings.source.rbox2 ) &&
-			(ray->r[i] > globals->settings.source.rbox1 )){
+			(ray->r[i] < settings->source.rbox2 ) &&
+			(ray->r[i] > settings->source.rbox1 )){
 			//repeat while the ray is whithin the range box (rbox), and hasn't been killed by any other condition.
 
 		//Runge-Kutta integration:
- 		dsi = globals->settings.source.ds;
+ 		dsi = settings->source.ds;
  		stepError = 1;
  		numRungeKutta = 0;
  		
@@ -159,7 +159,7 @@ DEBUG(10,":");
 			if(numRungeKutta > 100){
 				fatal("Runge-Kutta integration: failure in step convergence.\nAborting...");
 			}
-			rkf45(globals, &dsi, yOld, fOld, yNew, fNew, &ds4, &ds5);
+			rkf45(settings, &dsi, yOld, fOld, yNew, fNew, &ds4, &ds5);
 
 			numRungeKutta++;
 			stepError = fabs( ds4 - ds5) / (0.5 * (ds4 + ds5));
@@ -173,13 +173,13 @@ DEBUG(10,":");
 
 		/**		Check for boundary intersections:	**/
 		//verify that the ray is still within the defined coordinates of the surface and the bottom:
-		if (	(ri > globals->settings.altimetry.r[0]) &&
-				(ri < globals->settings.altimetry.r[globals->settings.altimetry.numSurfaceCoords -1]) ||
-				(ri > globals->settings.batimetry.r[0]) &&
-				(ri < globals->settings.batimetry.r[globals->settings.batimetry.numSurfaceCoords -1] ) ){
+		if (	(ri > settings->altimetry.r[0]) &&
+				(ri < settings->altimetry.r[settings->altimetry.numSurfaceCoords -1]) ||
+				(ri > settings->batimetry.r[0]) &&
+				(ri < settings->batimetry.r[settings->batimetry.numSurfaceCoords -1] ) ){
 			//calculate surface and bottom z at current ray position:
-			boundaryInterpolation(	&(globals->settings.altimetry), &ri, &altInterpolatedZ, &junkVector, &normal);
-			boundaryInterpolation(	&(globals->settings.batimetry), &ri, &batInterpolatedZ, &junkVector, &normal);
+			boundaryInterpolation(	&(settings->altimetry), &ri, &altInterpolatedZ, &junkVector, &normal);
+			boundaryInterpolation(	&(settings->batimetry), &ri, &batInterpolatedZ, &junkVector, &normal);
 		}else{
 			DEBUG(8,"ray killed\n");
 			ray->iKill = TRUE;
@@ -196,11 +196,11 @@ DEBUG(10,":");
 			//	Ray above surface?
 			if (zi < altInterpolatedZ){
 				DEBUG(5,"ray above surface.\n");
-				rayBoundaryIntersection(&(globals->settings.altimetry), &pointA, &pointB, &pointIsect);
+				rayBoundaryIntersection(&(settings->altimetry), &pointA, &pointB, &pointIsect);
 				ri = pointIsect.r;
 				zi = pointIsect.z;
 				
-				boundaryInterpolation(	&(globals->settings.altimetry), &ri, &altInterpolatedZ, &tauB, &normal);
+				boundaryInterpolation(	&(settings->altimetry), &ri, &altInterpolatedZ, &tauB, &normal);
 				ibdry = -1;
 				sRefl = sRefl + 1;
 				jRefl = 1;
@@ -209,7 +209,7 @@ DEBUG(10,":");
 				specularReflection(&normal, &es, &tauR, &thetaRefl);
 				
 				//get the reflection coefficient (kill the ray is the surface is an absorver):
-				switch(globals->settings.altimetry.surfaceType){
+				switch(settings->altimetry.surfaceType){
 					
 					case SURFACE_TYPE__ABSORVENT:	//"A"
 						refl = 0 +0*I;
@@ -225,27 +225,27 @@ DEBUG(10,":");
 						break;
 						
 					case SURFACE_TYPE__ELASTIC:		//"E"
-						switch(globals->settings.altimetry.surfacePropertyType){
+						switch(settings->altimetry.surfacePropertyType){
 							
 							case SURFACE_PROPERTY_TYPE__HOMOGENEOUS:		//"H"
-								rho2= globals->settings.altimetry.rho[0];
-								cp2	= globals->settings.altimetry.cp[0];
-								cs2	= globals->settings.altimetry.cs[0];
-								ap	= globals->settings.altimetry.ap[0];
-								as	= globals->settings.altimetry.as[0];
-								lambda = cp2 / globals->settings.source.freqx;
+								rho2= settings->altimetry.rho[0];
+								cp2	= settings->altimetry.cp[0];
+								cs2	= settings->altimetry.cs[0];
+								ap	= settings->altimetry.ap[0];
+								as	= settings->altimetry.as[0];
+								lambda = cp2 / settings->source.freqx;
 								convertUnits(	&ap,
 												&lambda,
-												&(globals->settings.source.freqx),
-												&(globals->settings.altimetry.surfaceAttenUnits),
+												&(settings->source.freqx),
+												&(settings->altimetry.surfaceAttenUnits),
 												&tempDouble
 											);
 								ap		= tempDouble;
-								lambda	= cs2 / globals->settings.source.freqx;
+								lambda	= cs2 / settings->source.freqx;
 								convertUnits(	&as,
 												&lambda,
-												&(globals->settings.source.freqx),
-												&(globals->settings.altimetry.surfaceAttenUnits),
+												&(settings->source.freqx),
+												&(settings->altimetry.surfaceAttenUnits),
 												&tempDouble
 											);
 								as		= tempDouble;
@@ -256,28 +256,28 @@ DEBUG(10,":");
 								fatal("Non-homogeneous surface properties are WIP.");	//TODO restructure interfaceProperties to contain pointers to cp, cs, etc;
 								/*
 								//Non-Homogeneous interface =>rho, cp, cs, ap, as are variant with range, and thus have to be interpolated
-								boundaryInterpolationExplicit(	&(globals->settings.altimetry.numSurfaceCoords),
-																globals->settings.altimetry.r,
-																&(globals->settings.altimetry.surfaceProperties.rho),
-																&(globals->settings.altimetry.surfaceInterpolation),
+								boundaryInterpolationExplicit(	&(settings->altimetry.numSurfaceCoords),
+																settings->altimetry.r,
+																&(settings->altimetry.surfaceProperties.rho),
+																&(settings->altimetry.surfaceInterpolation),
 																&ri,
 																&rho2,
 																&junkVector,
 																&junkVector
 															);
-								boundaryInterpolationExplicit(	&(globals->settings.altimetry.numSurfaceCoords),
-																globals->settings.altimetry.r,
-																&(globals->settings.altimetry.surfaceProperties.cp),
-																&(globals->settings.altimetry.surfaceInterpolation),
+								boundaryInterpolationExplicit(	&(settings->altimetry.numSurfaceCoords),
+																settings->altimetry.r,
+																&(settings->altimetry.surfaceProperties.cp),
+																&(settings->altimetry.surfaceInterpolation),
 																&ri,
 																&cp2,
 																&junkVector,
 																&junkVector
 															);
-								boundaryInterpolationExplicit(	&(globals->settings.altimetry.numSurfaceCoords),
-																globals->settings.altimetry.r,
-																&(globals->settings.altimetry.surfaceProperties.cs),
-																&(globals->settings.altimetry.surfaceInterpolation),
+								boundaryInterpolationExplicit(	&(settings->altimetry.numSurfaceCoords),
+																settings->altimetry.r,
+																&(settings->altimetry.surfaceProperties.cs),
+																&(settings->altimetry.surfaceInterpolation),
 																&ri,
 																&rho2,
 																&junkVector,
@@ -313,11 +313,11 @@ DEBUG(10,":");
 			//	end of "ray above surface?"
 			}else if (zi > batInterpolatedZ){	//	Ray below bottom?
 				DEBUG(5,"ray below bottom.\n");
-				rayBoundaryIntersection(&(globals->settings.batimetry), &pointA, &pointB, &pointIsect);
+				rayBoundaryIntersection(&(settings->batimetry), &pointA, &pointB, &pointIsect);
 				ri = pointIsect.r;
 				zi = pointIsect.z;
 				
-				boundaryInterpolation(	&(globals->settings.batimetry), &ri, &batInterpolatedZ, &tauB, &normal);
+				boundaryInterpolation(	&(settings->batimetry), &ri, &batInterpolatedZ, &tauB, &normal);
 				//Invert the normal at the bottom for reflection:
 				normal.r = -normal.r;	//NOTE: differs from altimetry
 				normal.z = -normal.z;	//NOTE: differs from altimetry
@@ -330,7 +330,7 @@ DEBUG(10,":");
 				specularReflection(&normal, &es, &tauR, &thetaRefl);
 				
 				//get the reflection coefficient (kill the ray is the surface is an absorver):
-				switch(globals->settings.batimetry.surfaceType){
+				switch(settings->batimetry.surfaceType){
 					
 					case SURFACE_TYPE__ABSORVENT:	//"A"
 						refl = 0 +0*I;
@@ -346,27 +346,27 @@ DEBUG(10,":");
 						break;
 						
 					case SURFACE_TYPE__ELASTIC:		//"E"
-						switch(globals->settings.batimetry.surfacePropertyType){
+						switch(settings->batimetry.surfacePropertyType){
 							
 							case SURFACE_PROPERTY_TYPE__HOMOGENEOUS:		//"H"
-								rho2= globals->settings.batimetry.rho[0];
-								cp2	= globals->settings.batimetry.cp[0];
-								cs2	= globals->settings.batimetry.cs[0];
-								ap	= globals->settings.batimetry.ap[0];
-								as	= globals->settings.batimetry.as[0];
-								lambda = cp2 / globals->settings.source.freqx;
+								rho2= settings->batimetry.rho[0];
+								cp2	= settings->batimetry.cp[0];
+								cs2	= settings->batimetry.cs[0];
+								ap	= settings->batimetry.ap[0];
+								as	= settings->batimetry.as[0];
+								lambda = cp2 / settings->source.freqx;
 								convertUnits(	&ap,
 												&lambda,
-												&(globals->settings.source.freqx),
-												&(globals->settings.batimetry.surfaceAttenUnits),
+												&(settings->source.freqx),
+												&(settings->batimetry.surfaceAttenUnits),
 												&tempDouble
 											);
 								ap		= tempDouble;
-								lambda	= cs2 / globals->settings.source.freqx;
+								lambda	= cs2 / settings->source.freqx;
 								convertUnits(	&as,
 												&lambda,
-												&(globals->settings.source.freqx),
-												&(globals->settings.batimetry.surfaceAttenUnits),
+												&(settings->source.freqx),
+												&(settings->batimetry.surfaceAttenUnits),
 												&tempDouble
 											);
 								as		= tempDouble;
@@ -377,28 +377,28 @@ DEBUG(10,":");
 								fatal("Non-homogeneous surface properties are WIP.");	//TODO restructure interfaceProperties to contain pointers to cp, cs, etc;
 								/*
 								//Non-Homogeneous interface =>rho, cp, cs, ap, as are variant with range, and thus have to be interpolated
-								boundaryInterpolationExplicit(	&(globals->settings.altimetry.numSurfaceCoords),
-																globals->settings.altimetry.r,
-																&(globals->settings.altimetry.surfaceProperties.rho),
-																&(globals->settings.altimetry.surfaceInterpolation),
+								boundaryInterpolationExplicit(	&(settings->altimetry.numSurfaceCoords),
+																settings->altimetry.r,
+																&(settings->altimetry.surfaceProperties.rho),
+																&(settings->altimetry.surfaceInterpolation),
 																&ri,
 																&rho2,
 																&junkVector,
 																&junkVector
 															);
-								boundaryInterpolationExplicit(	&(globals->settings.altimetry.numSurfaceCoords),
-																globals->settings.altimetry.r,
-																&(globals->settings.altimetry.surfaceProperties.cp),
-																&(globals->settings.altimetry.surfaceInterpolation),
+								boundaryInterpolationExplicit(	&(settings->altimetry.numSurfaceCoords),
+																settings->altimetry.r,
+																&(settings->altimetry.surfaceProperties.cp),
+																&(settings->altimetry.surfaceInterpolation),
 																&ri,
 																&cp2,
 																&junkVector,
 																&junkVector
 															);
-								boundaryInterpolationExplicit(	&(globals->settings.altimetry.numSurfaceCoords),
-																globals->settings.altimetry.r,
-																&(globals->settings.altimetry.surfaceProperties.cs),
-																&(globals->settings.altimetry.surfaceInterpolation),
+								boundaryInterpolationExplicit(	&(settings->altimetry.numSurfaceCoords),
+																settings->altimetry.r,
+																&(settings->altimetry.surfaceProperties.cs),
+																&(settings->altimetry.surfaceInterpolation),
 																&ri,
 																&rho2,
 																&junkVector,
@@ -437,7 +437,7 @@ DEBUG(10,":");
 			//TODO: replace ri, li with pointIsect.r, pointIsect.z
 			ri = pointIsect.r;
 			zi = pointIsect.z;
-			csValues( 	globals, &ri, &zi, &ci, &cc, &sigmaI, &cri, &czi, &slowness, &crri, &czzi, &crzi);
+			csValues( 	settings, &ri, &zi, &ci, &cc, &sigmaI, &cri, &czi, &slowness, &crri, &czzi, &crzi);
 			yNew[0] = ri;
 			yNew[1] = zi;
 			yNew[2] = sigmaI*tauR.r;
@@ -449,7 +449,7 @@ DEBUG(10,":");
 			fNew[3] = slowness.z;
 		}
 		/* TODO Object reflection	*/
-		if (globals->settings.objects.numObjects > 0){
+		if (settings->objects.numObjects > 0){
 			fatal("Object support is WIP.");
 			/*
  			//For each object detect if the ray is inside the object range: 
@@ -600,7 +600,7 @@ c          					Update marching solution and function:
 		
 		es.r = fNew[0];
 		es.z = fNew[1];
-		csValues( 	globals, &ri, &zi, &ci, &cc, &sigmaI, &cri, &czi, &slowness, &crri, &czzi, &crzi);
+		csValues( 	settings, &ri, &zi, &ci, &cc, &sigmaI, &cri, &czi, &slowness, &crri, &czzi, &crzi);
 		
 		dr = ray->r[i+1] - ray->r[i];
 		dz = ray->z[i+1] - ray->z[i];
@@ -659,16 +659,16 @@ c          					Update marching solution and function:
 	dz	= ray->z[ray->nCoords - 1] - ray->z[ray->nCoords-2];
 	dIc	= ray->ic[ray->nCoords - 1] -ray->ic[ray->nCoords-2];
 
-	if (ray->r[ray->nCoords-1] > globals->settings.source.rbox2){
-		ray->z[ray->nCoords-1]	= ray->z[ray->nCoords-2] + (globals->settings.source.rbox2 - ray->r[ray->nCoords-2])* dz/dr;
-		ray->ic[ray->nCoords-1]	= ray->ic[ray->nCoords-2] + (globals->settings.source.rbox2 - ray->r[ray->nCoords-2])* dIc/dr;
-		ray->r[ray->nCoords-1]	= globals->settings.source.rbox2;
+	if (ray->r[ray->nCoords-1] > settings->source.rbox2){
+		ray->z[ray->nCoords-1]	= ray->z[ray->nCoords-2] + (settings->source.rbox2 - ray->r[ray->nCoords-2])* dz/dr;
+		ray->ic[ray->nCoords-1]	= ray->ic[ray->nCoords-2] + (settings->source.rbox2 - ray->r[ray->nCoords-2])* dIc/dr;
+		ray->r[ray->nCoords-1]	= settings->source.rbox2;
 	}
 
-	if (ray->r[ray->nCoords-1] < globals->settings.source.rbox1){
-		ray->z[ray->nCoords-1]	= ray->z[ray->nCoords-2] + (globals->settings.source.rbox1-ray->r[ray->nCoords-2])* dz/dr;
-		ray->ic[ray->nCoords-1]	= ray->ic[ray->nCoords-2] + (globals->settings.source.rbox1-ray->r[ray->nCoords-2]) * dIc/dr;
-		ray->r[ray->nCoords-1]	= globals->settings.source.rbox1;
+	if (ray->r[ray->nCoords-1] < settings->source.rbox1){
+		ray->z[ray->nCoords-1]	= ray->z[ray->nCoords-2] + (settings->source.rbox1-ray->r[ray->nCoords-2])* dz/dr;
+		ray->ic[ray->nCoords-1]	= ray->ic[ray->nCoords-2] + (settings->source.rbox1-ray->r[ray->nCoords-2]) * dIc/dr;
+		ray->r[ray->nCoords-1]	= settings->source.rbox1;
 	}
 
 	/* Search for refraction points (refraction angles are zero!), rMin, rMax and twisting of rays:	*/

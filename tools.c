@@ -37,7 +37,7 @@ double*			reallocDouble(double*, uintptr_t);
 double**		mallocDouble2D(uintptr_t, uintptr_t);
 complex double*	mallocComplex(uintptr_t);
 complex double*	reallocComplex(complex double*, uintptr_t);
-globals_t*		mallocGlobals(void);
+settings_t*		mallocSettings(void);
 vector_t*		mallocVector(uintptr_t);
 vector_t*		reallocVector(vector_t*, uintptr_t);
 point_t*		mallocPoint(uintptr_t);
@@ -46,7 +46,7 @@ double 			readDouble(FILE*);
 int32_t			readInt(FILE*);
 char*			readStringN(FILE*, uint32_t);
 void			skipLine(FILE*);
-void			printSettings(globals_t*);
+void			printSettings(settings_t*);
 void			reallocRay(ray_t*, uintptr_t);
 void			copyDoubleToPtr(double*, double*, uintptr_t);
 void			copyDoubleToPtr2D(double**, double*, uintptr_t, uintptr_t);
@@ -260,32 +260,32 @@ complex double*		reallocComplex(complex double* old, uintptr_t numComplex){
 	return new;
 }
 
-globals_t* 	mallocGlobals(void){
+settings_t* 	mallocSettings(void){
 	/*
-		Allocate memory for a globals structure.
+		Allocate memory for a settings structure.
 		Return pointer in case o success, exit with error code otherwise.
 	*/
-	globals_t*	globals = NULL;
-	globals = malloc(sizeof(globals_t));
-	if(globals == NULL){
+	settings_t*	settings = NULL;
+	settings = malloc(sizeof(settings_t));
+	if(settings == NULL){
 		fatal("Memory allocation error.\n");
 	}
 
-	globals->settings.cTitle = mallocChar((uintptr_t)(MAX_LINE_LEN + 1));
-	globals->settings.source.thetas = NULL; //memory will be properly allocated in "readin.c"
+	settings->cTitle = mallocChar((uintptr_t)(MAX_LINE_LEN + 1));
+	settings->source.thetas = NULL; //memory will be properly allocated in "readin.c"
 
-	globals->settings.altimetry.r = NULL;
-	globals->settings.altimetry.z = NULL;
-	//globals->settings.altimetry.surfaceProperties = NULL;
+	settings->altimetry.r = NULL;
+	settings->altimetry.z = NULL;
+	//settings->altimetry.surfaceProperties = NULL;
 
-	globals->settings.batimetry.r = NULL;
-	globals->settings.batimetry.z = NULL;
-	//globals->settings.batimetry.surfaceProperties = NULL;
+	settings->batimetry.r = NULL;
+	settings->batimetry.z = NULL;
+	//settings->batimetry.surfaceProperties = NULL;
 
-	globals->settings.output.arrayR = NULL;
-	globals->settings.output.arrayZ = NULL;
+	settings->output.arrayR = NULL;
+	settings->output.arrayZ = NULL;
 
-	return(globals);
+	return(settings);
 }
 
 vector_t*	mallocVector(uintptr_t	numVectors){
@@ -391,30 +391,30 @@ void		skipLine(FILE* infile){
 	free(junkString);
 }
 
-void		printSettings(globals_t*	globals){
+void		printSettings(settings_t*	settings){
 	/************************************************
 	 *	Outputs a settings structure to stdout.		*
 	 ***********************************************/
 
-		uint32_t	i;
+	uint32_t	i;
 	
-	printf("cTitle: \t\t\t%s", globals->settings.cTitle);	//assuming a \n at the end of cTitle
-	printf("source.ds: \t\t\t%12.5lf\t[m]\n", globals->settings.source.ds);
-	printf("source.rx: \t\t\t%12.5lf\t[m]\n", globals->settings.source.rx);
-	printf("source.zx: \t\t\t%12.5lf\t[m]\n", globals->settings.source.zx);
-	printf("source.rbox1: \t\t\t%12.5lf\t[m]\n", globals->settings.source.rbox1);
-	printf("source.rbox2: \t\t\t%12.5lf\t[m]\n", globals->settings.source.rbox2);
-	printf("source.freqx: \t\t\t%12.5lf\t[m]\n", globals->settings.source.freqx);
-	printf("source.nThetas: \t\t%6.0lu\n", (long unsigned int)globals->settings.source.nThetas);
+	printf("cTitle: \t\t\t%s", settings->cTitle);	//assuming a \n at the end of cTitle
+	printf("source.ds: \t\t\t%12.5lf\t[m]\n", settings->source.ds);
+	printf("source.rx: \t\t\t%12.5lf\t[m]\n", settings->source.rx);
+	printf("source.zx: \t\t\t%12.5lf\t[m]\n", settings->source.zx);
+	printf("source.rbox1: \t\t\t%12.5lf\t[m]\n", settings->source.rbox1);
+	printf("source.rbox2: \t\t\t%12.5lf\t[m]\n", settings->source.rbox2);
+	printf("source.freqx: \t\t\t%12.5lf\t[m]\n", settings->source.freqx);
+	printf("source.nThetas: \t\t%6.0lu\n", (long unsigned int)settings->source.nThetas);
 
 	/* uncoment the following block to output all launching angles */
 	/*
-	for(i=0; i<globals->settings.source.nThetas; i++){
-		printf("source.thetas[%ld\t]: \t%lf\n", i, globals->settings.source.thetas[i]);
+	for(i=0; i<settings->source.nThetas; i++){
+		printf("source.thetas[%ld\t]: \t%lf\n", i, settings->source.thetas[i]);
 	}
 	*/
 	printf("altimetry.surfaceType: \t\t");
-	switch(globals->settings.altimetry.surfaceType){
+	switch(settings->altimetry.surfaceType){
 		case SURFACE_TYPE__ABSORVENT:
 			printf("Absorvent\n");
 			break;
@@ -430,7 +430,7 @@ void		printSettings(globals_t*	globals){
 	}
 
 	printf("altimetry.surfacePropertyType:\t");
-	switch(globals->settings.altimetry.surfacePropertyType){
+	switch(settings->altimetry.surfacePropertyType){
 		case SURFACE_PROPERTY_TYPE__HOMOGENEOUS:
 			printf("Homogeneous\n");
 			break;
@@ -440,7 +440,7 @@ void		printSettings(globals_t*	globals){
 	}
 
 	printf("altimetry.surfaceInterpolation: ");
-	switch(globals->settings.altimetry.surfaceInterpolation){
+	switch(settings->altimetry.surfaceInterpolation){
 		case SURFACE_INTERPOLATION__FLAT:
 			printf("Flat\n");
 			break;
@@ -459,7 +459,7 @@ void		printSettings(globals_t*	globals){
 	}
 
 	printf("altimetry.surfaceAttenUnits: \t");
-	switch(globals->settings.altimetry.surfaceAttenUnits){
+	switch(settings->altimetry.surfaceAttenUnits){
 		case SURFACE_ATTEN_UNITS__dBperkHz:
 			printf("dB/kHz\n");
 			break;
@@ -477,40 +477,40 @@ void		printSettings(globals_t*	globals){
 			break;
 	}
 
-	printf("altimetry.numSurfaceCoords:\t%lu\n", (long unsigned int)globals->settings.altimetry.numSurfaceCoords);
+	printf("altimetry.numSurfaceCoords:\t%lu\n", (long unsigned int)settings->altimetry.numSurfaceCoords);
 
 	printf("altimetry.surfaceProperties:	");
-	switch(globals->settings.altimetry.surfacePropertyType){
+	switch(settings->altimetry.surfacePropertyType){
 		case SURFACE_PROPERTY_TYPE__HOMOGENEOUS:
-			printf("cp:%lf\n ",	globals->settings.altimetry.cp[0]);
-			printf("\t\t\t\tcs:%lf\n ",	globals->settings.altimetry.cs[0]);
-			printf("\t\t\t\trho:%lf\n ",	globals->settings.altimetry.rho[0]);
-			printf("\t\t\t\tap:%lf\n ",	globals->settings.altimetry.ap[0]);
-			printf("\t\t\t\tas:%lf\n",	globals->settings.altimetry.as[0]);
+			printf("cp:%lf\n ",	settings->altimetry.cp[0]);
+			printf("\t\t\t\tcs:%lf\n ",	settings->altimetry.cs[0]);
+			printf("\t\t\t\trho:%lf\n ",	settings->altimetry.rho[0]);
+			printf("\t\t\t\tap:%lf\n ",	settings->altimetry.ap[0]);
+			printf("\t\t\t\tas:%lf\n",	settings->altimetry.as[0]);
 			break;
 			
 		case SURFACE_PROPERTY_TYPE__NON_HOMOGENEOUS:
-			for(i=0; i<globals->settings.altimetry.numSurfaceCoords; i++){
-				printf("cp:%lf; ",	globals->settings.altimetry.cp[i]);
-				printf("cs:%lf; ",	globals->settings.altimetry.cs[i]);
-				printf("rho:%lf; ",	globals->settings.altimetry.rho[i]);
-				printf("ap:%lf; ",	globals->settings.altimetry.ap[i]);
-				printf("as:%lf;\n",	globals->settings.altimetry.as[i]);
+			for(i=0; i<settings->altimetry.numSurfaceCoords; i++){
+				printf("cp:%lf; ",	settings->altimetry.cp[i]);
+				printf("cs:%lf; ",	settings->altimetry.cs[i]);
+				printf("rho:%lf; ",	settings->altimetry.rho[i]);
+				printf("ap:%lf; ",	settings->altimetry.ap[i]);
+				printf("as:%lf;\n",	settings->altimetry.as[i]);
 			}
 			break;
 	}
-	printf("altimetry.r[0]:\t\t\t%lf\n", globals->settings.altimetry.r[0]);
-	printf("altimetry.r[N]:\t\t\t%lf\n", globals->settings.altimetry.r[globals->settings.altimetry.numSurfaceCoords-1]);
+	printf("altimetry.r[0]:\t\t\t%lf\n", settings->altimetry.r[0]);
+	printf("altimetry.r[N]:\t\t\t%lf\n", settings->altimetry.r[settings->altimetry.numSurfaceCoords-1]);
 	
 
 	/* sound speed block */
 	
 	/*	object block	*/
-	printf("objects.numObjects:\t\t%u\n",globals->settings.objects.numObjects);
-	if(globals->settings.objects.numObjects > 0){
-		for(i=0; i<globals->settings.objects.numObjects; i++){
+	printf("objects.numObjects:\t\t%u\n",settings->objects.numObjects);
+	if(settings->objects.numObjects > 0){
+		for(i=0; i<settings->objects.numObjects; i++){
 			printf("object[%u].surfaceType: \t", i);
-			switch(globals->settings.objects.object[i].surfaceType){
+			switch(settings->objects.object[i].surfaceType){
 				case SURFACE_TYPE__ABSORVENT:
 					printf("Absorvent\n");
 					break;
@@ -525,7 +525,7 @@ void		printSettings(globals_t*	globals){
 					break;
 			}
 			printf("object[%u].surfaceAttenUnits: \t", i);
-			switch(globals->settings.objects.object[i].surfaceAttenUnits){
+			switch(settings->objects.object[i].surfaceAttenUnits){
 				case SURFACE_ATTEN_UNITS__dBperkHz:
 					printf("dB/kHz\n");
 					break;
@@ -547,7 +547,7 @@ void		printSettings(globals_t*	globals){
 	
 	/* batimetry block	*/
 	printf("batimetry.surfaceType: \t");
-	switch(globals->settings.batimetry.surfaceType){
+	switch(settings->batimetry.surfaceType){
 		case SURFACE_TYPE__ABSORVENT:
 			printf("Absorvent\n");
 			break;
@@ -563,7 +563,7 @@ void		printSettings(globals_t*	globals){
 	}
 
 	printf("batimetry.surfacePropertyType:\t");
-	switch(globals->settings.batimetry.surfacePropertyType){
+	switch(settings->batimetry.surfacePropertyType){
 		case SURFACE_PROPERTY_TYPE__HOMOGENEOUS:
 			printf("Homogeneous\n");
 			break;
@@ -573,7 +573,7 @@ void		printSettings(globals_t*	globals){
 	}
 
 	printf("batimetry.surfaceInterpolation:");
-	switch(globals->settings.batimetry.surfaceInterpolation){
+	switch(settings->batimetry.surfaceInterpolation){
 		case SURFACE_INTERPOLATION__FLAT:
 			printf("Flat\n");
 			break;
@@ -592,7 +592,7 @@ void		printSettings(globals_t*	globals){
 	}
 
 	printf("batimetry.surfaceAttenUnits: \t");
-	switch(globals->settings.batimetry.surfaceAttenUnits){
+	switch(settings->batimetry.surfaceAttenUnits){
 		case SURFACE_ATTEN_UNITS__dBperkHz:
 			printf("dB/kHz\n");
 			break;
@@ -610,30 +610,30 @@ void		printSettings(globals_t*	globals){
 			break;
 	}
 
-	printf("batimetry.numSurfaceCoords:\t%lu\n", (long unsigned int)globals->settings.batimetry.numSurfaceCoords);
+	printf("batimetry.numSurfaceCoords:\t%lu\n", (long unsigned int)settings->batimetry.numSurfaceCoords);
 
 	printf("batimetry.surfaceProperties:	");
-	switch(globals->settings.batimetry.surfacePropertyType){
+	switch(settings->batimetry.surfacePropertyType){
 		case SURFACE_PROPERTY_TYPE__HOMOGENEOUS:
-			printf("cp:%lf\n",	globals->settings.batimetry.cp[0]);
-			printf("\t\t\t\tcs:%lf\n",	globals->settings.batimetry.cs[0]);
-			printf("\t\t\t\trho:%lf\n",	globals->settings.batimetry.rho[0]);
-			printf("\t\t\t\tap:%lf\n",	globals->settings.batimetry.ap[0]);
-			printf("\t\t\t\tas:%lf\n",	globals->settings.batimetry.as[0]);
+			printf("cp:%lf\n",	settings->batimetry.cp[0]);
+			printf("\t\t\t\tcs:%lf\n",	settings->batimetry.cs[0]);
+			printf("\t\t\t\trho:%lf\n",	settings->batimetry.rho[0]);
+			printf("\t\t\t\tap:%lf\n",	settings->batimetry.ap[0]);
+			printf("\t\t\t\tas:%lf\n",	settings->batimetry.as[0]);
 			break;
 		case SURFACE_PROPERTY_TYPE__NON_HOMOGENEOUS:
-			for(i=0; i<globals->settings.batimetry.numSurfaceCoords; i++){
-				printf("cp:%lf; ",	globals->settings.batimetry.cp[i]);
-				printf("cs:%lf; ",	globals->settings.batimetry.cs[i]);
-				printf("rho:%lf; ",	globals->settings.batimetry.rho[i]);
-				printf("ap:%lf; ",	globals->settings.batimetry.ap[i]);
-				printf("as:%lf;\n",	globals->settings.batimetry.as[i]);
+			for(i=0; i<settings->batimetry.numSurfaceCoords; i++){
+				printf("cp:%lf; ",	settings->batimetry.cp[i]);
+				printf("cs:%lf; ",	settings->batimetry.cs[i]);
+				printf("rho:%lf; ",	settings->batimetry.rho[i]);
+				printf("ap:%lf; ",	settings->batimetry.ap[i]);
+				printf("as:%lf;\n",	settings->batimetry.as[i]);
 			}
 			break;
 	}
 
 	printf("output.arrayType: \t\t");
-	switch(globals->settings.output.arrayType){
+	switch(settings->output.arrayType){
 		case ARRAY_TYPE__RECTANGULAR:
 			printf("Rectangular\n");
 			break;
@@ -647,11 +647,11 @@ void		printSettings(globals_t*	globals){
 			printf("Linear\n");
 			break;
 	}
-	printf("output.nArrayR: \t\t%lu\n",(long unsigned int)globals->settings.output.nArrayR);
-	printf("output.nArrayZ: \t\t%lu\n",(long unsigned int)globals->settings.output.nArrayZ);
+	printf("output.nArrayR: \t\t%lu\n",(long unsigned int)settings->output.nArrayR);
+	printf("output.nArrayZ: \t\t%lu\n",(long unsigned int)settings->output.nArrayZ);
 
 	printf("output.calcType: \t\t");
-	switch(globals->settings.output.calcType){
+	switch(settings->output.calcType){
 		case CALC_TYPE__RAY_COORDS:
 			printf("Ray Coordinates\n");
 			break;
@@ -683,7 +683,7 @@ void		printSettings(globals_t*	globals){
 			printf("Coherent Acoustic Pressure and Particle Velocity\n");
 			break;
 	}
-	printf("output.miss: \t\t\t%12.5lf\n",globals->settings.output.miss);
+	printf("output.miss: \t\t\t%12.5lf\n",settings->output.miss);
 }
 
 void		reallocRay(ray_t* ray, uintptr_t numRayCoords){

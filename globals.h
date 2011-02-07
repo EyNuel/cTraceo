@@ -226,6 +226,9 @@ typedef struct output{
 
 
 typedef struct settings {
+	/*
+	 * Contains all input information
+	 */
 	char*			cTitle;
 	source_t		source;
 	interface_t		altimetry;
@@ -234,15 +237,4 @@ typedef struct settings {
 	interface_t		batimetry;
 	output_t		output;
 }settings_t;
-
-
-/*
- * The c language doesn't support global variables across several files, so this is
- * a (somewhat ugly) workaround.
- * The structure "global" shall contain all non-local variables and be passed by pointer.
- */
-typedef struct globals{
-	settings_t		settings;
-}globals_t;
-
 

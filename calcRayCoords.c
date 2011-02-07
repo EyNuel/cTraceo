@@ -18,7 +18,7 @@
  *							Universidade do Algarve									*
  *																					*
  *	Inputs:																			*
- * 				globals		All input information.									*
+ * 				settings	All input information.									*
  * 	Outputs:																		*
  * 				"rco.mat":	A file containing the coordinates of all rays.			*
  * 																					*
@@ -30,9 +30,9 @@
 #include "math.h"
 #include "solveEikonalEq.c"
 
-void	calcRayCoords(globals_t*);
+void	calcRayCoords(settings_t*);
 
-void	calcRayCoords(globals_t* globals){
+void	calcRayCoords(settings_t* settings){
 	DEBUG(1,"in\n");
 
 	MATFile*	matfile	= NULL;
@@ -47,14 +47,14 @@ void	calcRayCoords(globals_t* globals){
 	char* 		string	= mallocChar(10);
 
 	matfile		= matOpen("rco.mat", "w");
-	pThetas		= mxCreateDoubleMatrix(1, (int32_t)globals->settings.source.nThetas, mxREAL);
+	pThetas		= mxCreateDoubleMatrix(1, (int32_t)settings->source.nThetas, mxREAL);
 	if(matfile == NULL || pThetas == NULL)
 		fatal("Memory alocation error.");
 	
 	//copy cArray to mxArray:
-	copyDoubleToPtr(	globals->settings.source.thetas,
+	copyDoubleToPtr(	settings->source.thetas,
 						mxGetPr(pThetas),
-						globals->settings.source.nThetas);
+						settings->source.nThetas);
 	//move mxArray to file:
 	matPutVariable(matfile, "thetas", pThetas);
 
@@ -65,19 +65,19 @@ void	calcRayCoords(globals_t* globals){
 	matPutVariable(matfile, "caseTitle", pTitle);
 
 	//allocate the rays:
-	ray = malloc(globals->settings.source.nThetas * sizeof(ray_t));
+	ray = malloc(settings->source.nThetas * sizeof(ray_t));
 	if(ray == NULL)
 		fatal("Memory alocation error.");
 
 	/* Trace the rays:	*/
-	for(i=0; i<globals->settings.source.nThetas; i++){
-		thetai = -globals->settings.source.thetas[i] * M_PI/180.0;
+	for(i=0; i<settings->source.nThetas; i++){
+		thetai = -settings->source.thetas[i] * M_PI/180.0;
 		ray[i].theta = thetai;
 		ctheta = fabs( cos(thetai));
 		
 		//Trace a ray as long as it is neither 90 or -90:
 		if (ctheta > 1.0e-7){
-			solveEikonalEq(globals, &ray[i]);
+			solveEikonalEq(settings, &ray[i]);
 			temp2D[0]	= ray[i].r;
 			temp2D[1]	= ray[i].z;
 			pRay		= mxCreateDoubleMatrix(2, (int32_t)ray[i].nCoords, mxREAL);

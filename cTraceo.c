@@ -33,7 +33,7 @@
 int main(int argc, char **argv)
 {
 	const char*		infile = NULL;
-	globals_t*		globals = mallocGlobals();
+	settings_t*		settings = mallocSettings();
 	double			omega;
 	const char*		logFilename = "flat.log";
 	const char*		line = "-----------------------------------------------";
@@ -49,14 +49,14 @@ int main(int argc, char **argv)
 	}
 
 	DEBUG(1,"Running cTraceo in verbose mode.\n\n");
-	readIn(globals, infile);
+	readIn(settings, infile);
 
 //	if (VERBOSE)
-//		printSettings(globals);
+//		printSettings(settings);
 
 //	TODO	call cpu_time(timei)
 
-	omega	= 2 * M_PI * globals->settings.source.freqx;
+	omega	= 2 * M_PI * settings->source.freqx;
 
 	//open the log file and write the header:
 	logFile = openFile(logFilename, "w");
@@ -65,13 +65,13 @@ int main(int argc, char **argv)
 	fprintf(logFile, "%s\n", line);
 
 	fprintf(logFile, "INPUT:\n");
-	fprintf(logFile, "%s\n", globals->settings.cTitle);
+	fprintf(logFile, "%s\n", settings->cTitle);
 	fprintf(logFile, "%s\n", line);
 
 	fprintf(logFile, "OUTPUT:\n");
 	// if (catype.eq.'RCO'){
 		fprintf(logFile, "Ray coordinates\n");
-		calcRayCoords(globals);
+		calcRayCoords(settings);
 /*
 	 else if (catype.eq.'ARI') then
 		 write(prtfil,*) 'Ray information'

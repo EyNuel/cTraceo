@@ -38,10 +38,10 @@
 #include	"cValues1D.c"
 //#include	"cValues2D.c"
 
-void	csValues(globals_t*, double*, double*, double*, double*, double*, double*, double*,
+void	csValues(settings_t*, double*, double*, double*, double*, double*, double*, double*,
 				vector_t*, double*, double*, double*);
 
-void	csValues(globals_t* globals, double* ri, double* zi, double* ci, double* cc, double* si, double* cri, double* czi,
+void	csValues(settings_t* settings, double* ri, double* zi, double* ci, double* cc, double* si, double* cri, double* czi,
 				vector_t* slowness, double* crri, double* czzi, double* crzi){
 	DEBUG(8,"csValues(),\t in\n");
 	
@@ -55,17 +55,17 @@ void	csValues(globals_t* globals, double* ri, double* zi, double* ci, double* cc
 	bmunk  = 1300.0;
 	bmunk2 = bmunk*bmunk;
 
-	c01d = globals->settings.soundSpeed.c01d;
-	r0 =  globals->settings.soundSpeed.r0;
-	z0 =  globals->settings.soundSpeed.z0;
+	c01d = settings->soundSpeed.c01d;
+	r0 =  settings->soundSpeed.r0;
+	z0 =  settings->soundSpeed.z0;
 	
-	switch(globals->settings.soundSpeed.cDist){
+	switch(settings->soundSpeed.cDist){
 		case C_DIST__PROFILE:
 			//in the case of soundspeed profiles, all derivatives with respect to range are 0:
 			*cri = 0;
 			*crri = 0;
 			*crzi = 0;
-			switch(globals->settings.soundSpeed.cClass){
+			switch(settings->soundSpeed.cClass){
 				///	*****	analytical sound speed profiles		*****
 				case C_CLASS__ISOVELOCITY:			//"ISOV"
 					*ci = c01d[0];
@@ -125,7 +125,7 @@ void	csValues(globals_t* globals, double* ri, double* zi, double* ci, double* cc
 					
 				case C_CLASS__TABULATED:			//"TABL"
 					//cValues1D(uintptr_t n, double* xTable, double* cTable, double* xi, double* ci, double* cxi, double* cxxi){
-					cValues1D( globals->settings.soundSpeed.nz0, z0, c01d, zi, ci, czi, czzi);
+					cValues1D( settings->soundSpeed.nz0, z0, c01d, zi, ci, czi, czzi);
 					break;
 					
 				default:
@@ -133,7 +133,7 @@ void	csValues(globals_t* globals, double* ri, double* zi, double* ci, double* cc
 			}
 			break;
 		case C_DIST__FIELD:
-			//cValues2D(globals->settings.soundSpeed.nr0,globals->settings.soundSpeed.nz0,r0,z0,c02d,ri,zi,ci,cri,czi,crri,czzi,crzi)
+			//cValues2D(settings->soundSpeed.nr0,settings->soundSpeed.nz0,r0,z0,c02d,ri,zi,ci,cri,czi,crri,czzi,crzi)
 			break;
 			
 		default:
