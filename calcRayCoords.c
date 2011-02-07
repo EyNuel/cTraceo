@@ -88,6 +88,10 @@ void	calcRayCoords(globals_t* globals){
 			sprintf(string, "ray%lu", i+1);
 			matPutVariable(matfile, (const char*)string, pRay);
 			mxDestroyArray(pRay);
+			if(KEEP_RAYS_IN_MEM == FALSE){
+				//free the ray's memory
+				reallocRay(&ray[i],0);
+			}
 		}
 	}
 	mxDestroyArray(pThetas);
