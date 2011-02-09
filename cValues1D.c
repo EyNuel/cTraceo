@@ -35,8 +35,7 @@
 void	cValues1D(uintptr_t, double*, double*, double*, double*, double*, double*);
 
 void	cValues1D(uintptr_t n, double* xTable, double* cTable, double* xi, double* ci, double* cxi, double* cxxi){
-	if (VERBOSE)
-		printf("Entering cValues1D().\n");
+	DEBUG(10,"Entering cValues1D().\n");
 	uintptr_t	i;
 
 	//TODO invert order if clauses:
@@ -75,7 +74,6 @@ void	cValues1D(uintptr_t n, double* xTable, double* cTable, double* xi, double* 
 							xi, ci, cxi, cxxi);
 
 	}
-	if (VERBOSE)
-		printf("Leaving cValues1D.\n");
+	DEBUG(10,"Leaving cValues1D.\n");
 }
 

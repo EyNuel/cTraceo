@@ -35,8 +35,7 @@
 void	bracket(uintptr_t, double*, double*, uintptr_t*);
 
 void	bracket(uintptr_t n, double* x, double* xi, uintptr_t* i){
-	if (VERBOSE)
-		printf("Entering bracket().\n");
+	DEBUG(5, "Entering bracket().\n");
 	uintptr_t	ia,im,ib;
 
 	ia = 0;
@@ -44,7 +43,8 @@ void	bracket(uintptr_t n, double* x, double* xi, uintptr_t* i){
 
 	//if xi is outside the interval [ x[0], x[n-1] ], quit
 	if( (*xi < x[0]) || (*xi > x[n-1])){
-		fatal("Oops, something is rotten in the state of Denmark...");
+		printf("n: %u, xi: %lf, x[0]: %lf, x[n-1]: %lf\n", (uint32_t)n, *xi, x[0], x[n-1]);
+		fatal("Bounding error in bracket().\nAborting.");
 	}else{
 		while( ib-ia > 1){
 			//If xi is inside the interval [x(1) x(n)] just divide it by half until ib - ia = 1:
@@ -58,6 +58,5 @@ void	bracket(uintptr_t n, double* x, double* xi, uintptr_t* i){
 		}
 		*i = ia;
 	}
-	if (VERBOSE)
-		printf("Leaving bracket().\n");
+	DEBUG(5, "Leaving bracket().\n");
 }

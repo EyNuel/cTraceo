@@ -18,7 +18,7 @@
  *							Universidade do Algarve									*
  *																					*
  *	Inputs:																			*
- * 				settings		Input information.										*
+ * 				settings	Input information.										*
  * 	Outputs:																		*
  * 				ray:		A structure containing all ray information.				*
  * 							Note that the ray's launching angle (ray->theta) must	*
@@ -38,6 +38,10 @@
 #include "rayBoundaryIntersection.c"
 #include "convertUnits.c"
 #include "specularReflection.c"
+#if VERBOSE
+	#include "mat.h"
+	#include "matrix.h"
+#endif
 
 void	solveEikonalEq(settings_t*, ray_t*);
 
@@ -253,12 +257,10 @@ DEBUG(10,":");
 								break;
 							
 							case SURFACE_PROPERTY_TYPE__NON_HOMOGENEOUS:	//"N"
-								fatal("Non-homogeneous surface properties are WIP.");	//TODO restructure interfaceProperties to contain pointers to cp, cs, etc;
-								/*
 								//Non-Homogeneous interface =>rho, cp, cs, ap, as are variant with range, and thus have to be interpolated
 								boundaryInterpolationExplicit(	&(settings->altimetry.numSurfaceCoords),
 																settings->altimetry.r,
-																&(settings->altimetry.surfaceProperties.rho),
+																settings->altimetry.rho,
 																&(settings->altimetry.surfaceInterpolation),
 																&ri,
 																&rho2,
@@ -267,7 +269,7 @@ DEBUG(10,":");
 															);
 								boundaryInterpolationExplicit(	&(settings->altimetry.numSurfaceCoords),
 																settings->altimetry.r,
-																&(settings->altimetry.surfaceProperties.cp),
+																settings->altimetry.cp,
 																&(settings->altimetry.surfaceInterpolation),
 																&ri,
 																&cp2,
@@ -276,25 +278,39 @@ DEBUG(10,":");
 															);
 								boundaryInterpolationExplicit(	&(settings->altimetry.numSurfaceCoords),
 																settings->altimetry.r,
-																&(settings->altimetry.surfaceProperties.cs),
+																settings->altimetry.cs,
 																&(settings->altimetry.surfaceInterpolation),
 																&ri,
-																&rho2,
+																&cs2,
 																&junkVector,
 																&junkVector
 															);
-								call bdryi(nati,rati, csati,aitype,ri, cs2,v,v)
-								call bdryi(nati,rati, apati,aitype,ri,  ap,v,v)
-								call bdryi(nati,rati, asati,aitype,ri,  as,v,v)
-								lambda = cp2/freqx
-								call cnvnts(ap,lambda,freqx,atiu,tempDouble)
-								ap = tempDouble
-								lambda = cs2/freqx
-								call cnvnts(as,lambda,freqx,atiu,tempDouble)
-								as = tempDouble
-								call bdryr(rho1,rho2,ci,cp2,cs2,ap,as,theta,refl)
+								boundaryInterpolationExplicit(	&(settings->altimetry.numSurfaceCoords),
+																settings->altimetry.r,
+																settings->altimetry.ap,
+																&(settings->altimetry.surfaceInterpolation),
+																&ri,
+																&ap,
+																&junkVector,
+																&junkVector
+															);
+								boundaryInterpolationExplicit(	&(settings->altimetry.numSurfaceCoords),
+																settings->altimetry.r,
+																settings->altimetry.as,
+																&(settings->altimetry.surfaceInterpolation),
+																&ri,
+																&as,
+																&junkVector,
+																&junkVector
+															);
+								lambda = cp2/settings->source.freqx;
+								convertUnits(&ap, &lambda, &settings->source.freqx, &settings->altimetry.surfaceAttenUnits, &tempDouble);
+								ap = tempDouble;
+								lambda = cs2/settings->source.freqx;
+								convertUnits(&as, &lambda, &settings->source.freqx, &settings->altimetry.surfaceAttenUnits, &tempDouble);
+								as = tempDouble;
+								boundaryReflectionCoeff(&rho1, &rho2, &ci, &cp2, &cs2, &ap, &as, &thetaRefl, &refl);
 								break;
-								*/
 							default:
 								fatal("Unknown surface properties (neither H or N).\nAborting...");
 								break;
@@ -313,10 +329,11 @@ DEBUG(10,":");
 			//	end of "ray above surface?"
 			}else if (zi > batInterpolatedZ){	//	Ray below bottom?
 				DEBUG(5,"ray below bottom.\n");
+				DEBUG(3,"ri: %lf, zi: %lf\n", ri, zi);
 				rayBoundaryIntersection(&(settings->batimetry), &pointA, &pointB, &pointIsect);
 				ri = pointIsect.r;
 				zi = pointIsect.z;
-				
+				DEBUG(3,"ri: %lf, zi: %lf\n", ri, zi);
 				boundaryInterpolation(	&(settings->batimetry), &ri, &batInterpolatedZ, &tauB, &normal);
 				//Invert the normal at the bottom for reflection:
 				normal.r = -normal.r;	//NOTE: differs from altimetry
@@ -374,48 +391,60 @@ DEBUG(10,":");
 								break;
 							
 							case SURFACE_PROPERTY_TYPE__NON_HOMOGENEOUS:	//"N"
-								fatal("Non-homogeneous surface properties are WIP.");	//TODO restructure interfaceProperties to contain pointers to cp, cs, etc;
-								/*
 								//Non-Homogeneous interface =>rho, cp, cs, ap, as are variant with range, and thus have to be interpolated
-								boundaryInterpolationExplicit(	&(settings->altimetry.numSurfaceCoords),
-																settings->altimetry.r,
-																&(settings->altimetry.surfaceProperties.rho),
-																&(settings->altimetry.surfaceInterpolation),
+								boundaryInterpolationExplicit(	&(settings->batimetry.numSurfaceCoords),
+																settings->batimetry.r,
+																settings->batimetry.rho,
+																&(settings->batimetry.surfaceInterpolation),
 																&ri,
 																&rho2,
 																&junkVector,
 																&junkVector
 															);
-								boundaryInterpolationExplicit(	&(settings->altimetry.numSurfaceCoords),
-																settings->altimetry.r,
-																&(settings->altimetry.surfaceProperties.cp),
-																&(settings->altimetry.surfaceInterpolation),
+								boundaryInterpolationExplicit(	&(settings->batimetry.numSurfaceCoords),
+																settings->batimetry.r,
+																settings->batimetry.cp,
+																&(settings->batimetry.surfaceInterpolation),
 																&ri,
 																&cp2,
 																&junkVector,
 																&junkVector
 															);
-								boundaryInterpolationExplicit(	&(settings->altimetry.numSurfaceCoords),
-																settings->altimetry.r,
-																&(settings->altimetry.surfaceProperties.cs),
-																&(settings->altimetry.surfaceInterpolation),
+								boundaryInterpolationExplicit(	&(settings->batimetry.numSurfaceCoords),
+																settings->batimetry.r,
+																settings->batimetry.cs,
+																&(settings->batimetry.surfaceInterpolation),
 																&ri,
-																&rho2,
+																&cs2,
 																&junkVector,
 																&junkVector
 															);
-								call bdryi(nati,rati, csati,aitype,ri, cs2,v,v)
-								call bdryi(nati,rati, apati,aitype,ri,  ap,v,v)
-								call bdryi(nati,rati, asati,aitype,ri,  as,v,v)
-								lambda = cp2/freqx
-								call cnvnts(ap,lambda,freqx,atiu,tempDouble)
-								ap = tempDouble
-								lambda = cs2/freqx
-								call cnvnts(as,lambda,freqx,atiu,tempDouble)
-								as = tempDouble
-								call bdryr(rho1,rho2,ci,cp2,cs2,ap,as,theta,refl)
+								boundaryInterpolationExplicit(	&(settings->batimetry.numSurfaceCoords),
+																settings->batimetry.r,
+																settings->batimetry.ap,
+																&(settings->batimetry.surfaceInterpolation),
+																&ri,
+																&ap,
+																&junkVector,
+																&junkVector
+															);
+								boundaryInterpolationExplicit(	&(settings->batimetry.numSurfaceCoords),
+																settings->batimetry.r,
+																settings->batimetry.as,
+																&(settings->batimetry.surfaceInterpolation),
+																&ri,
+																&as,
+																&junkVector,
+																&junkVector
+															);
+								lambda = cp2/settings->source.freqx;
+								convertUnits(&ap, &lambda, &settings->source.freqx, &settings->batimetry.surfaceAttenUnits, &tempDouble);
+								ap = tempDouble;
+								lambda = cs2/settings->source.freqx;
+								convertUnits(&as, &lambda, &settings->source.freqx, &settings->batimetry.surfaceAttenUnits, &tempDouble);
+								as = tempDouble;
+								boundaryReflectionCoeff(&rho1, &rho2, &ci, &cp2, &cs2, &ap, &as, &thetaRefl, &refl);
 								break;
-								*/
 							default:
 								fatal("Unknown surface properties (neither H or N).\nAborting...");
 								break;
@@ -640,7 +669,27 @@ c          					Update marching solution and function:
 		
 		//Prevent further calculations if there is no more space in the memory for the ray coordinates:
 		if ( i > ray->nCoords - 1){
-			fatal("Ray step too small, number of points in ray coordinates exceeds allocated memory.\nTry changing MEM_FACTOR (in globals.h) to a higher value a recompiling.\nAborting...");
+			#if VERBOSE
+				//when debugging, save the coordinates of the last ray to a separate matfile, before exiting
+				mxArray*	pRay	= NULL;
+				MATFile*	matfile	= NULL;
+				double**	temp2D 	= malloc(2*sizeof(uintptr_t));
+				char* 		string	= mallocChar(10);
+				
+				temp2D[0]	= ray->r;
+				temp2D[1]	= ray->z;
+				matfile		= matOpen("dyingRay.mat", "w");
+				pRay		= mxCreateDoubleMatrix(2, (int32_t)ray->nCoords, mxREAL);
+				if(pRay == NULL || matfile == NULL)
+					fatal("Memory alocation error.");
+				copyDoubleToPtr2D(temp2D, mxGetPr(pRay), ray->nCoords,2);
+
+				sprintf(string, "dyingRay");
+				matPutVariable(matfile, (const char*)string, pRay);
+				mxDestroyArray(pRay);
+				matClose(matfile);
+			#endif
+			fatal("Ray step too small, number of points in ray coordinates exceeds allocated memory.\nTry changing MEM_FACTOR (in globals.h) to a higher value and recompile.\nAborting...");
 			//double the memory allocated for the ray:
 			//TODO find bus error that happens on realloc when realloccing to a larger value (tools.c".)
 			//reallocRay(ray, ray->nCoords * 2);		//TODO disabled as this sometimes results in "bus error".

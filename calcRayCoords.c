@@ -73,6 +73,7 @@ void	calcRayCoords(settings_t* settings){
 	for(i=0; i<settings->source.nThetas; i++){
 		thetai = -settings->source.thetas[i] * M_PI/180.0;
 		ray[i].theta = thetai;
+		DEBUG(2,"ray[%lu].theta: %lf\n", i, settings->source.thetas[i]);
 		ctheta = fabs( cos(thetai));
 		
 		//Trace a ray as long as it is neither 90 or -90:
@@ -98,5 +99,6 @@ void	calcRayCoords(settings_t* settings){
 	mxDestroyArray(pTitle);
 	matClose(matfile);
 	free(temp2D);
+	free(string);
 	DEBUG(1,"out\n");
 }

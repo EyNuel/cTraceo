@@ -149,7 +149,7 @@ uint32_t*	reallocUint(uint32_t* old, uintptr_t numUints){
 		Allocates an uint array and returns a pointer to it in case of success,
 		exits with error code otherwise.
 	*/
-	DEBUG(5,"reallocUint(),\t in\n");
+	DEBUG(10,"reallocUint(),\t in\n");
 	uint32_t*	new = NULL;
 
 	if(old == NULL){
@@ -159,7 +159,7 @@ uint32_t*	reallocUint(uint32_t* old, uintptr_t numUints){
 	}
 	if (numUints > 0 && new == NULL)
 		fatal("Memory allocation error.\n");
-	DEBUG(5,"reallocUint(),\t out\n");
+	DEBUG(10,"reallocUint(),\t out\n");
 	return old;
 }
 

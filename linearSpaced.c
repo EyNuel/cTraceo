@@ -28,16 +28,17 @@
  * 						correct size.												*
  * 																					*
  ***********************************************************************************/
-#pragma once
+//#pragma once
 
-void	linearSpaced(uint32_t, double*, double*, double*);
+void	linearSpaced(uint32_t, double, double, double*);
 
-void	linearSpaced(uint32_t n, double* xMin, double* xMax, double* x){
+void	linearSpaced(uint32_t n, double xMin, double xMax, double* x){
 	uintptr_t	i;
 	double_t	dx;
-	
-	dx = (xMax - xMin)/(n - 1);
+
+	DEBUG(10, "n:%u, xMin: %lf, xMax: %lf\n", n, xMin, xMax);
+	dx = (xMax - xMin)/((double)(n - 1));
 	for(i=0; i<n; i++){
-		x[i] = *xMin + dx*(i-1);
+		x[i] = xMin + dx*(double)(i);
 	}
 }

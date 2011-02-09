@@ -40,7 +40,7 @@ void boundaryInterpolationExplicit(uint32_t*, double*, double*, uint32_t*, doubl
 void boundaryInterpolation(interface_t*, double*, double*, vector_t*, vector_t*);
 
 void boundaryInterpolationExplicit(uint32_t* numSurfaceCoords, double* r, double* z, uint32_t* surfaceInterpolation, double* ri, double* zi, vector_t* taub, vector_t* normal){
-	DEBUG(7,"in\n");
+	DEBUG(5,"in\n");
 		
 	double		zri;	//1st derivative of z at ri
 	double		zrri;	//2nd derivative of z at ri
@@ -58,7 +58,7 @@ void boundaryInterpolationExplicit(uint32_t* numSurfaceCoords, double* r, double
 			break;
 			
 		case SURFACE_INTERPOLATION__2P:
-			bracket(*numSurfaceCoords, &(z[0]), ri, &i);
+			bracket(*numSurfaceCoords, r, ri, &i);
 			intLinear1D( &(r[i]), &(z[i]),ri,zi,&zri);
 			break;
 			
