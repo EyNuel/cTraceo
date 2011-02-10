@@ -372,7 +372,30 @@ void	readIn(settings_t* settings, const char* filename){
 		settings->objects.object = malloc((uintptr_t)settings->objects.numObjects * sizeof(object_t));
 		if (settings->objects.object == NULL)
 			fatal("Memory allocation error.");
+
+		/*	interpolation type	(formerly "oitype")		*/
+		tempString = readStringN(infile,6);
+		if(strcmp(tempString,"'FL'\n") == 0){
+			settings->objects.surfaceInterpolation	= SURFACE_INTERPOLATION__FLAT;
 			
+		}else if(strcmp(tempString,"'SL'\n") == 0){
+			settings->objects.surfaceInterpolation	= SURFACE_INTERPOLATION__SLOPED;
+			
+		}else if(strcmp(tempString,"'2P'\n") == 0){
+			settings->objects.surfaceInterpolation	= SURFACE_INTERPOLATION__2P;
+			
+		}else if(strcmp(tempString,"'3P'\n") == 0){
+			settings->objects.surfaceInterpolation	= SURFACE_INTERPOLATION__3P;
+			
+		}else if(strcmp(tempString,"'4P'\n") == 0){
+			settings->objects.surfaceInterpolation	= SURFACE_INTERPOLATION__4P;
+			
+		}else{
+			printf("Input file: altimetry: unknown surface interpolation type: '%s'\n",tempString);
+			fatal("Aborting...");
+		}
+		free(tempString);
+		
 		for(i=0; i<settings->objects.numObjects; i++){
 			/*	surfaceType		*/
 			tempString = readStringN(infile,5);
