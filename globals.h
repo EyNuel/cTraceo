@@ -4,7 +4,7 @@
 */
 #pragma once
 #include <inttypes.h>	//needed for inequivocal type qualifiers
-
+#include <complex.h>
 /*
 	NOTE:	The actual value defined is not important, as it will never be use -only its name will.
 */
@@ -12,20 +12,69 @@
 /********************************************************************************
  * Configuration:																*
  *******************************************************************************/
-#define VERBOSE			1	//when set to 1, more information will be shown.
-#define MAX_LINE_LEN	256	//Maximum number of chars to read at once from a file (\n not included)
-
-//Previuously define in globli.h as:
-//	parameter (inpfil=1,outfil=2,prtfil=3)
-//	parameter (nangle=10000,nc0=5001,nc02d=1001,nbdry=5001)
-//	parameter (nhyd=5001,nhyd2=1001,nmaxo=21,npo=201,np=20001,np2=201)
+#define VERBOSE				0	//when set to 1, more information will be shown.
+#define VERBOSITY			4	//verbosity level (0-10) high levels will make the code impractically slow.
+#define MAX_LINE_LEN		256	//Maximum number of chars to read at once from a file (\n not included)
+#define MEM_FACTOR			20	//The memory allocated for each ray is determined like so: ( abs(rbox2-rbox1)/dsi )* MEM_FACTOR
+#define KEEP_RAYS_IN_MEM	0	//[boolean] determines whether a rays coordinates are kept in memory after being written to the .mat file. (mat become usefull for multiprocessing)
 
 //basics:
 #define	TRUE	1
 #define FALSE	0
 
+//debugging help:
+#define WHERESTR				"[%s,\tline %d]:\t"
+#define WHEREARG				__FILE__, __LINE__
+#define DEBUG(level, ...)		if(VERBOSE == TRUE && VERBOSITY >= level){fprintf(stderr, WHERESTR, WHEREARG);fprintf(stderr, __VA_ARGS__);}
+
+
 /********************************************************************************
- * Structures that contains the settings that are read from the input file.		*
+ * Minor data structures.														*
+ *******************************************************************************/
+
+typedef struct	vector{
+	double	r;	//range component of vector
+	double	z;	//depth component of vector
+}vector_t;		//TODO add position components
+
+typedef struct	point{
+	double	r;	//range component of point
+	double	z;	//depth component of point
+}point_t;
+
+
+/********************************************************************************
+ * Output data structures.														*
+ *******************************************************************************/
+
+typedef struct	ray{
+	/*
+	 * NOTE: memory ocupied is 44B overhead + 96B per ray coordinate
+	 */
+	uintptr_t		nCoords;
+	uintptr_t		iKill;		//indicates if ray has been "killed"
+	double			theta;		//launching angle of the ray
+	double			rMin, rMax;	//used to determine if a ray "turns back"
+	uintptr_t		iReturn;	//indicates if a ray "turns back"
+	double*			r;			//range of ray at index
+	double*			z;			//depth of ray at index
+	double*			c;			//speed of sound at index
+	uint32_t*		iRefl;		//indicates if there is a reflection at a certain index of the ray coordinates.
+	complex double*	decay;		//decay of ray
+	double*			phase;		//ray phase
+	double*			tau;		//acumulated travel time
+	double*			s;			//acumulated distance travelled by the ray
+	double*			ic;			//see Chapter 3 of Traceo Manual
+	vector_t*		boundaryTg;	//"tbdry" a boundary's tangent vector
+	int32_t*		boundaryJ;	//"jbdry",	indicates at what boundary a ray is (-1 => above surface; 1 => below bottom)
+	uintptr_t		nRefrac;		//"nrefr", number of refraction points
+	point_t*		refrac;		//"rrefr, zrefr", coordinates of refraction points. used in "solveEikonalEq.c"
+}ray_t;
+
+
+
+/********************************************************************************
+ * Structures that contain the settings that are read from the input file.		*
  *******************************************************************************/
  
 typedef struct source{
@@ -39,17 +88,19 @@ typedef struct source{
 	double*		thetas;			//the array that will actually contain the launching angles (is allocated in "readin.c")
 }source_t;
 
+/** TODO can safely be removed
 typedef struct interfaceProperties{
-	/*
-	 * Contains the properties of the surface or bottom interfaces. used in "surface" structs
+	*
+	 * Contains the properties of the surface or bottom interfaces. used in "interface" structs
 	 * See page 39 of "Traceo" manual.
-	 */
+	 *
 	double		cp;		//"cpati",	compressional speed
 	double		cs;		//"csati",	shear speed
 	double		rho;	//"rhoati",	density
 	double		ap;		//"apati",	compressional attenuation
 	double		as;		//"asati"	shear attenuation
 }interfaceProperties_t;
+*/
 
 typedef struct interface{
 	/*
@@ -60,7 +111,11 @@ typedef struct interface{
 	uint32_t				surfacePropertyType;	//formerly "aptype"
 	double*					r;						//"rati(n)"				|
 	double*					z;						//"zati(n)"				 }	these pointers are mallocced in "readin.c"
-	interfaceProperties_t*	surfaceProperties;		//contains the actual 	|
+	double*					cp;						//"cpati",	compressional speed
+	double*					cs;						//"csati",	shear speed
+	double*					rho;					//"rhoati",	density
+	double*					ap;						//"apati",	compressional attenuation
+	double*					as;						//"asati"	shear attenuation
 	uint32_t				surfaceInterpolation;	//formerly "aitype"
 	uint32_t				surfaceAttenUnits;		//formerly "atiu"
 	uint32_t				numSurfaceCoords;		//formerly "nati"
@@ -171,6 +226,9 @@ typedef struct output{
 
 
 typedef struct settings {
+	/*
+	 * Contains all input information
+	 */
 	char*			cTitle;
 	source_t		source;
 	interface_t		altimetry;
@@ -179,15 +237,4 @@ typedef struct settings {
 	interface_t		batimetry;
 	output_t		output;
 }settings_t;
-
-
-/*
- * The c language doesn't support global variables across several files, so this is
- * a (somewhat ugly) workaround.
- * The structure "global" shall contain all non-local variables and be passed by pointer.
- */
-typedef struct globals{
-	settings_t		settings;
-}globals_t;
-
 
