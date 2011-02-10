@@ -36,14 +36,35 @@
 #include "lineLineIntersec.c"
 #include "linearSpaced.c"
 
+#define		DOWN	-1
+#define		UP		1
+
+void	rayObjectIntersection(objects_t*, uint32_t*, int32_t, point_t*, point_t*, point_t*);
 void	rayBoundaryIntersection(interface_t*, point_t*, point_t*, point_t*);
 
-/*
-	   real*8 rl(101),zl(101),dz(101)
-	   real*8 la(2),lb(2),li(2),q1(2),q2(2)
-	   real*8 taub(2),normal(2)
-	   real*8 ra,za,rb,zb,ri,zi
-*/
+void	rayObjectIntersection(objects_t* objects, uint32_t* j, int32_t boundary, point_t* a, point_t* b, point_t* isect){
+	/*
+	 * maps an object to rayBoundaryIntersection()
+	 */
+	interface_t		tempInterface;
+	
+	tempInterface.numSurfaceCoords		= objects->object[*j].nCoords;
+	tempInterface.r 					= objects->object[*j].r;
+	switch(boundary){
+		case DOWN:
+			tempInterface.z = objects->object[*j].zDown;
+			break;
+		case UP:
+			tempInterface.z = objects->object[*j].zUp;
+			break;
+		default:
+			fatal("rayObjectIntersection(): unknown boundary");
+			break;
+	}
+	tempInterface.surfaceInterpolation	= objects->surfaceInterpolation;
+	rayBoundaryIntersection(&tempInterface, a, b, isect);
+}
+	
 
 void	rayBoundaryIntersection(interface_t* interface, point_t* a, point_t* b, point_t* isect){
 	DEBUG(3,"in\n");
@@ -87,7 +108,7 @@ void	rayBoundaryIntersection(interface_t* interface, point_t* a, point_t* b, poi
 				boundaryInterpolation(interface, &rl[i], &(isect->z), &taub, &normal);
 				dz[i] = zl[i] - isect->z;
 				DEBUG(3,"dz0: %lf, dz[%u]: %lf | rl[%u]: %lf, rz[%u]: %lf\n", dz[0], i, dz[i], i, rl[i], i, zl[i]);
-				if( (dz[0] * dz[i]) < 0){
+				if( (dz[0] * dz[i]) <= 0){
 					//intersection point has been found, exit for-loop.
 					DEBUG(3,"Intersection point found at (%lf, %lf)\n", isect->r, isect->z);
 					break;

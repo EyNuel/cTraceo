@@ -71,12 +71,14 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 	double			stepError;
 	double			ri, zi;
 	double			altInterpolatedZ, batInterpolatedZ;
-	double_t		thetaRefl;
+	double			thetaRefl;
 	point_t			pointA, pointB, pointIsect;
 	double			rho1, rho2, cp2, cs2, ap, as, lambda, tempDouble;
 	double			dr, dz, dIc;
 	double 			prod;
 	uintptr_t		initialMemorySize;
+	uint32_t		nObjCoords;	//"noj"
+	double			ziDown, ziUp;	//"zidn, ziup", interpolated height of upper/lower boundary of an object
 
 	//allocate memory for ray components:
 	initialMemorySize = (uintptr_t)(fabs((settings->source.rbox2 - settings->source.rbox1)/settings->source.ds))*MEM_FACTOR;
@@ -84,7 +86,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 	
 	//set parameters:
 	rho1 = 1.0;			//density of water.
-DEBUG(10,"\n");
+
 	//define initial conditions:
 	ray->iKill	= FALSE;
 	iUp			= FALSE;
@@ -94,23 +96,23 @@ DEBUG(10,"\n");
 	oRefl		= 0;
 	jRefl		= 0;
 	ray->iRefl[0] = jRefl;
-DEBUG(10,":");
+
 	ray->iReturn = FALSE;
 	numRungeKutta = 0;
 	reflDecay = 1 + 0*I;
 	ray->decay[0] = reflDecay;
 	ray->phase[0] = 0.0;
-DEBUG(10,"\n");
+
 	ray->r[0]	= settings->source.rx;
 	ray->rMin	= ray->r[0];
 	ray->rMax	= ray->r[0];
 	ray->z[0]	= settings->source.zx;
-DEBUG(10,"\n");
+
 	es.r = cos( ray->theta );
 	es.z = sin( ray->theta );
 	e1.r = -es.z;
 	e1.z =  es.r;
-DEBUG(10,"\n");
+
 	//Calculate initial sound speed and its derivatives:
 	csValues( 	settings,
 				&(settings->source.rx),
@@ -124,7 +126,7 @@ DEBUG(10,"\n");
 				&crri,
 				&czzi,
 				&crzi);
-DEBUG(10,":");
+
 	sigmaR	= sigmaI * es.r;
 	sigmaZ	= sigmaI * es.z;
 	
@@ -463,7 +465,6 @@ DEBUG(10,":");
 			}
 
 			/*	Update marching solution and function:	*/
-			//TODO: replace ri, li with pointIsect.r, pointIsect.z
 			ri = pointIsect.r;
 			zi = pointIsect.z;
 			csValues( 	settings, &ri, &zi, &ci, &cc, &sigmaI, &cri, &czi, &slowness, &crri, &czzi, &crzi);
@@ -479,145 +480,211 @@ DEBUG(10,":");
 		}
 		/* TODO Object reflection	*/
 		if (settings->objects.numObjects > 0){
-			fatal("Object support is WIP.");
-			/*
- 			//For each object detect if the ray is inside the object range: 
-			do j = 1,nobj
-				noj = no(j) 
-				if ((ri.ge.ro(j,1)).and.(ri.lt.ro(j,noj))) then
-					do k = 1,noj
-						roj(k) =  ro(j,k)
-						zdnj(k) = zdn(j,k)
-						zupj(k) = zup(j,k)
-					end do        
-					if (zdnj(1).ne.zupj(1)) then
-						write(6,*) 'Lower and upper faces do not start at the same'
-						write(6,*) 'depth! aborting calculations...' 
-						stop
-					end if 
-					call bdryi(noj,roj,zdnj,oitype,ri,zidn,v,normal)
-					call bdryi(noj,roj,zupj,oitype,ri,ziup,v,normal)
+ 			for(j=0; j<settings->objects.numObjects; j++){
+				nObjCoords = settings->objects.object[j].nCoords;
 
-c   		   			Second point is inside the object?
-					if ((yNew[2).ge.zidn).and.(yNew[2).lt.ziup)) then
-						la(1) = yOld[1)
-						la(2) = yOld[2)
-						lb(1) = yNew[1)
-						lb(2) = yNew[2)
-c=============================================================================>
-c            				Which face was crossed by the ray: upper or lower?
-c            				Case 1: beginning in box & end in box:
-						if (yOld[1).ge.roj(1)) then
-							call bdryi(noj,roj,zdnj,oitype,yOld[1),zidn,v,normal)
-							call bdryi(noj,roj,zupj,oitype,yOld[1),ziup,v,normal)
-							if (yOld[2).lt.zidn) then
-								call raybi(noj,roj,zdnj,oitype,la,lb,li)
-								iDown = 1
-								iUp = 0
-							else 
-								call raybi(noj,roj,zupj,oitype,la,lb,li)
-								iDown = 0
-								iUp = 1
-							end if
-c            				Case 2: beginning out box & end in box
-c							(zdnj(1) = zupj(1)):
-						elseif (yOld[1).lt.roj(1)) then
-							za = lb(2)-(lb(2)-la(2))/(lb(1)-la(1))*(lb(1)-roj(1))
-							la(1) = roj(1)
-							la(2) = za
-							if (za.lt.zupj(1)) then
-								call raybi(noj,roj,zdnj,oitype,la,lb,li)
-								iDown = 1
-								iUp = 0
-							else
-								call raybi(noj,roj,zupj,oitype,la,lb,li)
-								iDown = 0
-								iUp = 1
-							end if
-						else
-							write(6,*) 'Object reflection case: ray beginning'
-							write(6,*) 'neither behind or between object box,'
-							write(6,*) 'check object coordinates...'
-							stop
-						end if
-c=============================================================================>
-						ri = li(1)
-						zi = li(2)
+				//For each object detect if the ray is inside the object range: 
+				if (	(ri >=	settings->objects.object[j].r[0] ) &&
+						(ri <	settings->objects.object[j].r[nObjCoords-1])){
+					DEBUG(1, "Ray in object range.\n");
+					
+					if ( settings->objects.object[j].zDown[0] != settings->objects.object[j].zUp[0]){
+						fatal("Lower and upper object boundaries do not start at the same depth!\nAborting...");
+					}
+					boundaryInterpolationExplicit(	&nObjCoords,
+													settings->objects.object[j].r,
+													settings->objects.object[j].zDown,
+													&settings->objects.surfaceInterpolation,
+													&ri,
+													&ziDown,
+													&junkVector,
+													&normal);
+					boundaryInterpolationExplicit(	&nObjCoords,
+													settings->objects.object[j].r,
+													settings->objects.object[j].zUp,
+													&settings->objects.surfaceInterpolation,
+													&ri,
+													&ziUp,
+													&junkVector,
+													&normal);
+					DEBUG(1,"ri: %lf, ziDown: %lf, ziUp: %lf\n",ri, ziDown, ziUp);
+					//Second point is inside the object?
+					if (	(yNew[1] >=	ziDown 	) &&
+							(yNew[1] <	ziUp   )){
+						DEBUG(1, "2nd point inside object.\n");
+						pointA.r = yOld[0];
+						pointA.z = yOld[1];
+						pointB.r = yNew[0];
+						pointB.z = yNew[1];
 
-c            				Face reflection: upper or lower? 
-						if ((iDown.eq.1).and.(iUp.eq.0)) then 
-							call bdryi(noj,roj,zdnj,oitype,ri,zidn,taub,normal)
-							normal(1) = -normal(1)
-							normal(2) = -normal(2)
-							ibdry = -1
-						elseif ((iDown.eq.0).and.(iUp.eq.1)) then
-							call bdryi(noj,roj,zupj,oitype,ri,ziup,taub,normal)
-							ibdry =  1
-						else
-							write(6,*) 'Object reflection case: ray neither being'
-							write(6,*) 'reflected on down or up faces,'
-							write(6,*) 'check object coordinates...'
-							stop
-						end if
-						oRefl = oRefl + 1 
-						jRefl = 1
+						//	Which face was crossed by the ray: upper or lower?
+						//	Case 1: beginning inside box & ending inside box:
+						if ( yOld[0] >= settings->objects.object[j].r[0] ){
+							DEBUG(1,"Case 1\n");
+							boundaryInterpolationExplicit(	&nObjCoords,
+															settings->objects.object[j].r,
+															settings->objects.object[j].zUp,
+															&settings->objects.surfaceInterpolation,
+															&yOld[0],
+															&ziUp,
+															&junkVector,
+															&normal);
+							boundaryInterpolationExplicit(	&nObjCoords,
+															settings->objects.object[j].r,
+															settings->objects.object[j].zDown,
+															&settings->objects.surfaceInterpolation,
+															&yOld[0],
+															&ziDown,
+															&junkVector,
+															&normal);
+							DEBUG(1,"ri: %lf, ziDown: %lf, ziUp: %lf\n",ri, ziDown, ziUp);
+							if (yOld[1] < ziDown){
+								rayObjectIntersection(&settings->objects, &j, DOWN, &pointA, &pointB, &pointIsect);
+								/*
+								iDown = TRUE;
+								iUp = FALSE;
+								*/
+								ibdry = -1;
+							}else{
+								rayObjectIntersection(&settings->objects, &j, UP, &pointA, &pointB, &pointIsect);
+								/*
+								iDown = FALSE;
+								iUp = TRUE;
+								*/
+								ibdry = 1;
+							}
+						//Case 2: beginning outside box & ending inside box
+						}else if (yOld[0] < settings->objects.object[j].r[0]){
+							DEBUG(1,"Case 2\n");
+							//Calculate the coords for point A in relation to the beginning of the box
+							//TODO why do this?
+							pointA.z = pointB.z -(pointB.z - pointA.z) / (pointB.r - pointA.r) * (pointB.r - settings->objects.object[j].r[0]);
+							pointA.r = settings->objects.object[j].r[0];
+							if (pointA.z < settings->objects.object[j].zUp[0]){
+								rayObjectIntersection(&settings->objects, &j, DOWN, &pointA, &pointB, &pointIsect);
+								/*
+								iDown =	TRUE;
+								iUp =	FALSE;
+								*/
+								ibdry = -1;
+							}else{
+								rayObjectIntersection(&settings->objects, &j, UP, &pointA, &pointB, &pointIsect);
+								/*
+								iDown = FALSE;
+								iUp = 	TRUE;
+								*/
+								ibdry =  1;
+							}
+						}else{
+							fatal("Object reflection case: ray beginning neither behind or between object box.\nCheck object coordinates.\nAborting...");
+						}
 
-c   						Calculate object reflection: 
-						call reflct( normal, es, taur, theta )
+						ri = pointIsect.r;
+						zi = pointIsect.z;
 
-c            				Object reflection => get the reflection coefficient
-c            				(kill the ray is the object is an absorver):
+						//Face reflection: upper or lower? 
+						if (	ibdry == -1 ){
+							boundaryInterpolationExplicit(	&nObjCoords,
+															settings->objects.object[j].r,
+															settings->objects.object[j].zDown,
+															&settings->objects.surfaceInterpolation,
+															&ri,
+															&ziDown,
+															&tauB,
+															&normal);
+							//invert surface normal:
+							normal.r = -normal.r;
+							normal.z = -normal.z;
+						}else if (	ibdry == 1	){
+							boundaryInterpolationExplicit(	&nObjCoords,
+															settings->objects.object[j].r,
+															settings->objects.object[j].zUp,
+															&settings->objects.surfaceInterpolation,
+															&ri,
+															&ziUp,
+															&tauB,
+															&normal);
+						}else{
+							fatal("Object reflection case: ray neither being reflected on down or up faces.\nCheck object coordinates.\nAborting...");
+						}
+						oRefl = oRefl + 1;
+						jRefl = 1;
 
-						if (otype(j:j).eq.'A') then
-							refl = (0.0,0.0)
-							ray->iKill = 1
-						elseif (otype(j:j).eq.'R') then
-							refl = (1.0,0.0)
-						elseif (otype(j:j).eq.'V') then
-							refl = (-1.0,0.0)
-						elseif (otype(j:j).eq.'E') then
-							rho2 = orho(j)
-							cp2 =  ocp(j)
-							cs2 =  ocs(j)
-							ap  =  oap(j)
-							as  =  oas(j)
-							lambda = cp2/freqx
-							call cnvnts(ap,lambda,freqx,obju(j:j),adBoW)
-							ap  = adBoW
-							lambda = cs2/freqx
-							call cnvnts(as,lambda,freqx,obju(j:j),adBoW)
-							as  = adBoW
-							call bdryr(rho1,rho2,ci,cp2,cs2,ap,as,theta,refl)
-						else
-							write(6,*) 'Unknown object type (neither A,E,R or V),'
-							write(6,*) 'aborting calculations...'
-							stop
-						end if
-						reflDecay = reflDecay*refl
+						//	Calculate object reflection:
+						specularReflection(&normal, &es, &tauR, &thetaRefl);
 
-c          					Kill the ray if the reflection coefficient is too small: 
+						//	Object reflection => get the reflection coefficient
+						//	(kill the ray is the object is an absorver):
 
-						if ( abs(refl) .lt. 1.0e-5 ) ray->iKill = 1
+						switch(settings->objects.object[j].surfaceType){
+							case SURFACE_TYPE__ABSORVENT:	//"A"
+								refl = 0 +0*I;
+								ray->iKill = TRUE;
+								break;
+						
+							case SURFACE_TYPE__RIGID:		//"R"
+								refl = 1 +0*I;
+								break;
+								
+							case SURFACE_TYPE__VACUUM:		//"V"
+								refl = -1 +0*I;
+								break;
+								
+							case SURFACE_TYPE__ELASTIC:		//"E"
+								rho2= settings->objects.object[j].rho;
+								cp2	= settings->objects.object[j].cp;
+								cs2	= settings->objects.object[j].cs;
+								ap	= settings->objects.object[j].ap;
+								as	= settings->objects.object[j].as;
+								lambda = cp2 / settings->source.freqx;
+								convertUnits(	&ap,
+												&lambda,
+												&(settings->source.freqx),
+												&(settings->objects.object[j].surfaceAttenUnits),
+												&tempDouble
+											);
+								ap		= tempDouble;
+								lambda	= cs2 / settings->source.freqx;
+								convertUnits(	&as,
+												&lambda,
+												&(settings->source.freqx),
+												&(settings->objects.object[j].surfaceAttenUnits),
+												&tempDouble
+											);
+								as		= tempDouble;
+								boundaryReflectionCoeff(&rho1, &rho2, &ci, &cp2, &cs2, &ap, &as, &thetaRefl, &refl);
+								break;
+							
+							default:
+								fatal("Unknown object boundary type (neither A,E,R or V).\nAborting...");
+								break;
+						}
+						reflDecay = reflDecay * refl;
 
-c          					Update marching solution and function:
-						es.r = taur(1)
-						es.z = taur(2)
-						e1.r = -es.z
-						e1.z =  es.r
-						call csvals(ri,zi,ci,cc,sigmaI,cri,czi,sri,szi,crri,czzi,crzi)
-						yNew[1) = ri
-						yNew[2) = zi
-						yNew[3) = sigmaI*es.r
-						yNew[4) = sigmaI*es.z
+						//Kill the ray if the reflection coefficient is too small: 
+						if ( cabs(refl) < 1.0e-5 ){
+							ray->iKill = TRUE;
+						}
+						
+						//Update marching solution and function:
+						es.r = tauR.r;
+						es.z = tauR.z;
+						e1.r = -es.z;
+						e1.z =  es.r;
+						csValues( 	settings, &ri, &zi, &ci, &cc, &sigmaI, &cri, &czi, &slowness, &crri, &czzi, &crzi);
+						
+						yNew[0] = ri;
+						yNew[1] = zi;
+						yNew[2] = sigmaI*es.r;
+						yNew[3] = sigmaI*es.z;
 
-						fNew[1) = es.r
-						fNew[2) = es.z
-						fNew[3) = sri
-						fNew[4) = szi
-					end if
-				end if 
-			end do
-			*/
+						fNew[0] = es.r;
+						fNew[1] = es.z;
+						fNew[2] = slowness.r;
+						fNew[3] = slowness.z;
+					}
+				}
+			}
 		} 
 		
 		
