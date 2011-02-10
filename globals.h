@@ -16,6 +16,9 @@
 #define VERBOSITY			4	//verbosity level (0-10) high levels will make the code impractically slow.
 #define MAX_LINE_LEN		256	//Maximum number of chars to read at once from a file (\n not included)
 #define MEM_FACTOR			20	//The memory allocated for each ray is determined like so: ( abs(rbox2-rbox1)/dsi )* MEM_FACTOR
+								//NOTE:	for deepwater cases, values between 3-5 are ok.
+								//		for shallow water, or other cases with a lot of reflections,
+								//		values of 15-25 may be adequate
 #define KEEP_RAYS_IN_MEM	0	//[boolean] determines whether a rays coordinates are kept in memory after being written to the .mat file. (mat become usefull for multiprocessing)
 
 //basics:
