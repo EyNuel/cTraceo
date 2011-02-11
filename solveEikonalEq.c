@@ -181,7 +181,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 		/**		Check for boundary intersections:	**/
 		//verify that the ray is still within the defined coordinates of the surface and the bottom:
 		if (	(ri > settings->altimetry.r[0]) &&
-				(ri < settings->altimetry.r[settings->altimetry.numSurfaceCoords -1]) ||
+				(ri < settings->altimetry.r[settings->altimetry.numSurfaceCoords -1]) &&
 				(ri > settings->batimetry.r[0]) &&
 				(ri < settings->batimetry.r[settings->batimetry.numSurfaceCoords -1] ) ){
 			//calculate surface and bottom z at current ray position:
