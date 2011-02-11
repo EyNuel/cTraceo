@@ -13,7 +13,7 @@
  * Configuration:																*
  *******************************************************************************/
 #define VERBOSE				0	//when set to 1, more information will be shown.
-#define VERBOSITY			4	//verbosity level (0-10) high levels will make the code impractically slow.
+#define VERBOSITY			1	//verbosity level (0-10) high levels will make the code impractically slow.
 #define MAX_LINE_LEN		256	//Maximum number of chars to read at once from a file (\n not included)
 #define MEM_FACTOR			20	//The memory allocated for each ray is determined like so: ( abs(rbox2-rbox1)/dsi )* MEM_FACTOR
 								//NOTE:	for deepwater cases, values between 3-5 are ok.

@@ -47,7 +47,7 @@ void	csValues(settings_t* settings, double* ri, double* zi, double* ci, double* 
 	
 	double 		k,a,eta, root, root32, root52;
 	double*		c01d;	//used locally to make code more readable
-	double**		c02d;	//used locally to make code more readable
+	double**	c02d;	//used locally to make code more readable
 	double*		r0;		//used locally to make code more readable
 	double*		z0;		//used locally to make code more readable
 	double		epsilon, bmunk, bmunk2;

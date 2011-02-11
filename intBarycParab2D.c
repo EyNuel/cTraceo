@@ -36,24 +36,16 @@
 
 #include "tools.c"
 
-void intBarycParab2D(double*, double*, double**, double*, double*, double*, double*, double*, double*, double*, double*);
+void intBarycParab2D(double*, double*, double**, double, double, double*, double*, double*, double*, double*, double*);
 
-/*
-integer*8 i,j
-real*8 f(3,3),a(3,3)
-real*8 x(3),y(3),px(3),py(3),sx(3),sy(3)
-real*8 fi,fxi,fyi,fxxi,fyyi,fxyi
-real*8 xi,x1,x2,x3
-real*8 yi,y1,y2,y3
-*/
-
-void intBarycParab2D(double* x, double* y, double** f, double* xi, double* yi, double* fi, double* fxi, double* fyi, double* fxxi, double* fyyi, double* fxyi){
+void intBarycParab2D(double* x, double* y, double** f, double xi, double yi, double* fi, double* fxi, double* fyi, double* fxxi, double* fyyi, double* fxyi){
 	DEBUG(8, "in\n");
-	double*		px	= mallocDouble(3);
-	double*		py	= mallocDouble(3);
-	double*		sx	= mallocDouble(3);
-	double*		sy	= mallocDouble(3);
-	double**	a	= mallocDouble2D(3,3);
+
+	double 		px[3];
+	double 		py[3];
+	double 		sx[3];
+	double 		sy[3];
+	double		a[3][3];
 	uintptr_t	i, j;
 	
 	px[0] = ( x[0] - x[1] )*( x[0] - x[2] );
@@ -71,21 +63,21 @@ void intBarycParab2D(double* x, double* y, double** f, double* xi, double* yi, d
 		}
 	}
 
-	px[0] = ( *xi - x[1] )*( *xi - x[2] );
-	px[1] = ( *xi - x[0] )*( *xi - x[2] );
-	px[2] = ( *xi - x[0] )*( *xi - x[1] );
+	px[0] = ( xi - x[1] )*( xi - x[2] );
+	px[1] = ( xi - x[0] )*( xi - x[2] );
+	px[2] = ( xi - x[0] )*( xi - x[1] );
 	
-	py[0] = ( *yi - y[1] )*( *yi - y[2] );
-	py[1] = ( *yi - y[0] )*( *yi - y[2] );
-	py[2] = ( *yi - y[0] )*( *yi - y[1] );
+	py[0] = ( yi - y[1] )*( yi - y[2] );
+	py[1] = ( yi - y[0] )*( yi - y[2] );
+	py[2] = ( yi - y[0] )*( yi - y[1] );
 	
-	sx[0] = 2.0* (*xi) - x[1] - x[2];
-	sx[1] = 2.0* (*xi) - x[0] - x[2];
-	sx[2] = 2.0* (*xi) - x[0] - x[1];
+	sx[0] = 2.0* (xi) - x[1] - x[2];
+	sx[1] = 2.0* (xi) - x[0] - x[2];
+	sx[2] = 2.0* (xi) - x[0] - x[1];
 	
-	sy[0] = 2.0* (*yi) - y[1] - y[2];
-	sy[1] = 2.0* (*yi) - y[0] - y[2];
-	sy[2] = 2.0* (*yi) - y[0] - y[1];
+	sy[0] = 2.0* (yi) - y[1] - y[2];
+	sy[1] = 2.0* (yi) - y[0] - y[2];
+	sy[2] = 2.0* (yi) - y[0] - y[1];
 
 	*fi		= 0;
 	*fxi	= 0;
@@ -104,11 +96,12 @@ void intBarycParab2D(double* x, double* y, double** f, double* xi, double* yi, d
 			*fxyi	+= a[i][j] * sx[j] * sy[i];
 		}
 	}
-
+/*
 	free(px);
 	free(py);
 	free(sx);
 	free(sy);
 	free(a);
+*/
 	DEBUG(8, "out\n");
 }
