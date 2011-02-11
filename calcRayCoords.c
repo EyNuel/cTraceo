@@ -74,7 +74,7 @@ void	calcRayCoords(settings_t* settings){
 	for(i=0; i<settings->source.nThetas; i++){
 		thetai = -settings->source.thetas[i] * M_PI/180.0;
 		ray[i].theta = thetai;
-		DEBUG(2,"ray[%lu].theta: %lf\n", i, settings->source.thetas[i]);
+		DEBUG(2,"ray[%u].theta: %lf\n", (uint32_t)i, settings->source.thetas[i]);
 		ctheta = fabs( cos(thetai));
 		
 		//Trace a ray as long as it is neither 90 or -90:
@@ -87,7 +87,7 @@ void	calcRayCoords(settings_t* settings){
 				fatal("Memory alocation error.");
 			copyDoubleToPtr2D(temp2D, mxGetPr(pRay), ray[i].nCoords,2);
 
-			sprintf(string, "ray%lu", i+1);
+			sprintf(string, "ray%u", (uint32_t)(i+1));
 			matPutVariable(matfile, (const char*)string, pRay);
 			mxDestroyArray(pRay);
 			if(KEEP_RAYS_IN_MEM == FALSE){

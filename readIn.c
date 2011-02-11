@@ -46,6 +46,7 @@ void	readIn(settings_t* settings, const char* filename){
 	uint32_t	numSurfaceCoords;	//used locally to make code more readable. Value is stored in settings.
 	uint32_t	nr0, nz0;			//used locally to make code more readable. Value is stored in settings.
 	char*		tempString;
+	char*		junkChar;
 	FILE*		infile;					//a pointer for the input file
 	infile = openFile(filename, "r");	//open file in "read" mode
 
@@ -56,7 +57,7 @@ void	readIn(settings_t* settings, const char* filename){
 	/************************************************************************
 	 *	Read the title:														*
 	 ***********************************************************************/
-	fgets(settings->cTitle, MAX_LINE_LEN+1, infile);
+	junkChar = fgets(settings->cTitle, MAX_LINE_LEN+1, infile);
 
 
 	/************************************************************************

@@ -36,7 +36,7 @@ void	cValues1D(uintptr_t, double*, double*, double*, double*, double*, double*);
 
 void	cValues1D(uintptr_t n, double* xTable, double* cTable, double* xi, double* ci, double* cxi, double* cxxi){
 	DEBUG(10,"Entering cValues1D().\n");
-	uintptr_t	i;
+	uintptr_t	i = 0;
 
 	//TODO invert order if clauses:
 	

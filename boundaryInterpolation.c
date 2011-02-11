@@ -42,7 +42,7 @@ void boundaryInterpolation(interface_t*, double*, double*, vector_t*, vector_t*)
 void boundaryInterpolationExplicit(uint32_t* numSurfaceCoords, double* r, double* z, uint32_t* surfaceInterpolation, double* ri, double* zi, vector_t* taub, vector_t* normal){
 	DEBUG(5,"in\n");
 		
-	double		zri;	//1st derivative of z at ri
+	double		zri = 0;	//1st derivative of z at ri
 	double		zrri;	//2nd derivative of z at ri
 	uintptr_t	i;
 	

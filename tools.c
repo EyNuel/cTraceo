@@ -344,11 +344,11 @@ double 		readDouble(FILE* infile){
 	 *	Reads a double from a file and returns it	*
 	 ***********************************************/
 	 
-	char*	junkString = NULL;
+	char*	junkString = mallocChar((uintptr_t)(MAX_LINE_LEN + 1));;
 	double 	tempDouble;
-	junkString = mallocChar((uintptr_t)(MAX_LINE_LEN + 1));
+	int32_t	junkInt;
 	
-	fscanf(infile, "%s\n", junkString);
+	junkInt = fscanf(infile, "%s\n", junkString);
 	tempDouble = atof(junkString);
 	free(junkString);
 	
@@ -360,11 +360,11 @@ int32_t		readInt(FILE* infile){
 	 *	Reads a int from a file and returns it		*
 	 ***********************************************/
 	 
-	char*		junkString = NULL;
+	char*		junkString = mallocChar((uintptr_t)(MAX_LINE_LEN + 1));
 	int32_t 	tempInt;
-	junkString = mallocChar((uintptr_t)(MAX_LINE_LEN + 1));
+	int32_t		junkInt;
 	
-	fscanf(infile, "%s\n", junkString);
+	junkInt = fscanf(infile, "%s\n", junkString);
 	tempInt = (int32_t)atol(junkString);
 	free(junkString);
 	
@@ -376,10 +376,10 @@ char*		readStringN(FILE* infile, uint32_t length){
 	 *	Reads a <lenght> chars from a filestream.						*
 	 *******************************************************************/
 	//TODO: replace readString() by readStringN()
-	char*		outputString = NULL;
-	outputString = mallocChar((uintptr_t)(MAX_LINE_LEN + 1));
+	char*		outputString = mallocChar((uintptr_t)(MAX_LINE_LEN + 1));;
+	char*		junkChar;
 
-	fgets(outputString, (int32_t)length, infile);
+	junkChar = fgets(outputString, (int32_t)length, infile);
 	return(outputString);
 }
 
@@ -387,9 +387,10 @@ void		skipLine(FILE* infile){
 	/************************************************
 	 *	Reads a int from a file and returns it		*
 	 ***********************************************/
-	char*		junkString = NULL;
-	junkString = mallocChar((uintptr_t)(MAX_LINE_LEN + 1));
-	fgets(junkString, MAX_LINE_LEN+1, infile);
+	char*		junkString = mallocChar((uintptr_t)(MAX_LINE_LEN + 1));
+	char*		junkChar;
+	
+	junkChar = fgets(junkString, MAX_LINE_LEN+1, infile);
 
 	free(junkString);
 }
