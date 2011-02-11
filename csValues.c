@@ -36,7 +36,7 @@
 #include	"globals.h"
 #include	"math.h"
 #include	"cValues1D.c"
-//#include	"cValues2D.c"
+#include	"cValues2D.c"
 
 void	csValues(settings_t*, double*, double*, double*, double*, double*, double*, double*,
 				vector_t*, double*, double*, double*);
@@ -47,6 +47,7 @@ void	csValues(settings_t* settings, double* ri, double* zi, double* ci, double* 
 	
 	double 		k,a,eta, root, root32, root52;
 	double*		c01d;	//used locally to make code more readable
+	double**		c02d;	//used locally to make code more readable
 	double*		r0;		//used locally to make code more readable
 	double*		z0;		//used locally to make code more readable
 	double		epsilon, bmunk, bmunk2;
@@ -56,6 +57,7 @@ void	csValues(settings_t* settings, double* ri, double* zi, double* ci, double* 
 	bmunk2 = bmunk*bmunk;
 
 	c01d = settings->soundSpeed.c01d;
+	c02d = settings->soundSpeed.c02d;
 	r0 =  settings->soundSpeed.r0;
 	z0 =  settings->soundSpeed.z0;
 	
@@ -133,7 +135,8 @@ void	csValues(settings_t* settings, double* ri, double* zi, double* ci, double* 
 			}
 			break;
 		case C_DIST__FIELD:
-			//cValues2D(settings->soundSpeed.nr0,settings->soundSpeed.nz0,r0,z0,c02d,ri,zi,ci,cri,czi,crri,czzi,crzi)
+			///	*****	tabulated sound speed fields		*****
+			cValues2D(settings->soundSpeed.nr0,settings->soundSpeed.nz0,r0,z0,c02d,ri,zi,ci,cri,czi,crri,czzi,crzi);
 			break;
 			
 		default:

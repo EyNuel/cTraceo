@@ -32,6 +32,8 @@
  * 																				*
  *******************************************************************************/
 
+#pragma once
+
 void	bracket(uintptr_t, double*, double*, uintptr_t*);
 
 void	bracket(uintptr_t n, double* x, double* xi, uintptr_t* i){

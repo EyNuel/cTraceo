@@ -12,10 +12,11 @@
  *							Physics Department										*
  *							Signal Processing Laboratory							*
  *																					*
- *	Ported to C by:			Emanuel Ey												*
- *							emanuel.ey@gmail.com									*
- *							Signal Processing Laboratory							*
- *							Universidade do Algarve									*
+ *	Ported to C for project SENSOCEAN by:											*
+ * 						Emanuel Ey													*
+ *						emanuel.ey@gmail.com										*
+ *						Signal Processing Laboratory								*
+ *						Universidade do Algarve										*
  *																					*
  *	Inputs:																			*
  * 				settings	All input information.									*

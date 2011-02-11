@@ -12,7 +12,8 @@
  *						Physics Department								*
  *						Signal Processing Laboratory					*
  *																		*
- *	Ported to C by:		Emanuel Ey										*
+ *	Ported to C for project SENSOCEAN by:								*
+ * 						Emanuel Ey										*
  *						emanuel.ey@gmail.com							*
  *						Signal Processing Laboratory					*
  *						Universidade do Algarve							*
@@ -47,6 +48,6 @@ void intBarycParab1D(double* x, double* f, double* xi, double* fi, double* fxi, 
 
 	*fi 	= f[0]	+	a1*px1	+a2*px2;
 	*fxi	= 			a1*sx1	+a2*sx2;
-	*fxxi=			a1*2	+a2*2;
+	*fxxi	=			a1*2	+a2*2;
 }
 

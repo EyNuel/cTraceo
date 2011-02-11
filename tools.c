@@ -223,6 +223,7 @@ double**	mallocDouble2D(uintptr_t numRows, uintptr_t numCols){
 	 * Returns a pointer to an array of pointer do doubles.
 	 * Or:
 	 * Return a 2D Array.
+	 * TODO create a free() function for mallocDouble2D!
 	 */
 
 	uint32_t	i;
