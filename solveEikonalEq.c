@@ -23,11 +23,12 @@
  * 	Outputs:																		*
  * 				ray:		A structure containing all ray information.				*
  * 							Note that the ray's launching angle (ray->theta) must	*
- *							be previously defined as it is an innput value.			*
+ *							be previously defined as it is an input value.			*
  * 							See also: "globals.h" for ray structure definition.		*
  * 																					*
  ***********************************************************************************/
 
+#pragma  once
 #include "globals.h"
 #include "tools.c"
 #include <complex.h>
@@ -52,18 +53,18 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 	double			cx, ci,	cc,	sigmaI, sigmaR, sigmaZ,	cri, czi, crri,	czzi, crzi;
 	uint32_t		iUp, iDown;
 	int32_t			ibdry;						//indicates at which boundary a ray is being reflected (-1 => surface, 1 => bottom)
-	uint32_t		sRefl, bRefl, oRefl, nRefl;	//counters for number of reflections at _s_urface, _s_ottom, _o_bject and total (n)
+	uint32_t		sRefl, bRefl, oRefl;	//counters for number of reflections at _s_urface, _s_ottom and _o_bject
 	uint32_t		jRefl;						//TODO huh?!
 	uint32_t		numRungeKutta;				//counts the number o RKF45 iterations
 	uint32_t		i, j;
 	complex double	refl, reflDecay;
-	vector_t		es;				//ray's tangent vector
-	vector_t		e1;				//ray's normal vector
-	vector_t		slowness;
-	vector_t		junkVector;
-	vector_t		normal;
-	vector_t		tauB;
-	vector_t		tauR;
+	vector_t		es = {0,0};				//ray's tangent vector
+	vector_t		e1 = {0,0};				//ray's normal vector
+	vector_t		slowness = {0,0};
+	vector_t		junkVector = {0,0};
+	vector_t		normal = {0,0};
+	vector_t		tauB = {0,0};
+	vector_t		tauR = {0,0};
 	double*			yOld			= mallocDouble(4);
 	double*			fOld 			= mallocDouble(4);
 	double*			yNew 			= mallocDouble(4);
@@ -83,7 +84,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 
 	//allocate memory for ray components:
 	initialMemorySize = (uintptr_t)(fabs((settings->source.rbox2 - settings->source.rbox1)/settings->source.ds))*MEM_FACTOR;
-	reallocRay(ray, initialMemorySize);
+	reallocRayMembers(ray, initialMemorySize);
 	
 	//set parameters:
 	rho1 = 1.0;			//density of water.
@@ -458,10 +459,13 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 						break;
 				}
 				reflDecay = reflDecay * refl;
-
+				///TODO find cause for segfault/lack of memory when running varbounds_filed02
+				///TODO why doesn't the ray get killed?
+				DEBUG(2,"decay: %lf, abs(reflDecay): %lf, refl: %lf\n", cabs(ray->decay[i]), cabs(reflDecay), cabs(refl));
 				//Kill the ray if the reflection coefficient is too small: 
-				if ( cabs(refl) < 1.0e-5 ){
+				if ( cabs(refl) < 0.00001 ){
 					ray->iKill = TRUE;
+					DEBUG(2, "Ray killed ( abs(refl) < 1e-5 )\n");
 				}
 			}
 
@@ -767,9 +771,13 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 	/*	Ray coordinates have been computed. Finalizing */
 	//adjust memory size of the ray (we don't need more memory than nCoords)
 	ray -> nCoords	= i;
-	reallocRay(ray, i);
+	reallocRayMembers(ray, i);
 
-	nRefl 	= sRefl + bRefl + oRefl;		//TODO is this used later?
+	//save reflection counters to ray struct, (these values are later used in calcAllRayInfo())
+	ray->sRefl = sRefl;
+	ray->bRefl = bRefl;
+	ray->oRefl = oRefl;
+	ray->nRefl = sRefl + bRefl + oRefl;
 	
 	//Cut the ray at box exit:
 	dr	= ray->r[ray->nCoords - 1] - ray->r[ray->nCoords-2];
@@ -811,7 +819,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 	}
 	
 	
-	//check last set of coordinates for a min max values of range. (not that the last return conditio has already been tested)
+	//check last set of coordinates for min and max values of range. (note that the last return condition has already been tested)
 	ray-> rMin = min( ray->rMin, ray->r[ray->nCoords-1] );
 	ray-> rMax = max( ray->rMax, ray->r[ray->nCoords-1] );
 	i++;

@@ -45,10 +45,10 @@ void	cValues2D(uintptr_t, uintptr_t, double*, double*, double**, double*, double
 void	cValues2D(uintptr_t nx, uintptr_t ny, double* xTable, double* yTable, double** cTable, double* xi, double* yi, double* ci, double* cxi, double* cyi, double* cxxi, double* cyyi, double* cxyi){
 	DEBUG(8, "in: nx: %u, ny: %u, xi: %lf (x[nx-2]: %lf), yi: %lf (y[ny-2]: %lf)\n", (uint32_t)nx, (uint32_t)ny, *xi, xTable[nx-2], *yi, yTable[ny-2]);
 	uintptr_t	i=0, j=0, a, b;
-	double**	tempDouble2D = mallocDouble2D(3,3);
+	double**	tempDouble2D = mallocDouble2D(3,3);	//TODO this causes a memory leak -fix!
 	
 	if (*xi <= xTable [1]){
-		i = 1;
+		i = 0;
 	}else if (*xi >= xTable[nx-2]){
 		i = nx - 3;
 	}else{
@@ -56,7 +56,7 @@ void	cValues2D(uintptr_t nx, uintptr_t ny, double* xTable, double* yTable, doubl
 	}
 
 	if (*yi <= yTable[1]){
-		j = 1;
+		j = 0;
 	}else if (*yi >= yTable[ny -2]){
 		j = ny - 3;
 	}else{

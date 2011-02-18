@@ -47,8 +47,11 @@ void intBarycParab2D(double* x, double* y, double** f, double xi, double yi, dou
 	double 		sy[3];
 	double		a[3][3];
 	uintptr_t	i, j;
+
 	
 	px[0] = ( x[0] - x[1] )*( x[0] - x[2] );
+	DEBUG(10,"px[0]\t= ( x[0] - x[1] )*( x[0] - x[2] )\n");
+	DEBUG(10,"%lf\t= ( %lf - %lf )*( %lf - %lf )\n", px[0], x[0], x[1], x[0], x[2] );
 	px[1] = ( x[1] - x[0] )*( x[1] - x[2] );
 	px[2] = ( x[2] - x[0] )*( x[2] - x[1] );
 	
@@ -59,7 +62,7 @@ void intBarycParab2D(double* x, double* y, double** f, double xi, double yi, dou
 	for(i=0; i<3; i++){
 		for(j=0; j<3; j++){
 			a[i][j] = f[i][j] / ( px[j] * py[i] );
-			DEBUG(10, "a[%u][%u]= %lf = {f[i][j] = %lf} / ( {px[j] = %lf} * {py[i] = %lf}\n", (uint32_t)i, (uint32_t)j, a[i][j], f[i][j], px[j], py[i]);
+			DEBUG(10, "i,j: %u,%u => a= %e = {f[i][j] = %lf} / ( {px[j] = %lf} * {py[i] = %lf}\n", (uint32_t)i, (uint32_t)j, a[i][j], f[i][j], px[j], py[i]);
 		}
 	}
 

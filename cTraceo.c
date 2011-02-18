@@ -28,6 +28,7 @@
 #include "readIn.c"
 #include "math.h"
 #include "calcRayCoords.c"
+#include "calcAllRayInfo.c"
 #include <sys/time.h>		//for struct timeval
 #include <sys/resource.h>	//for getrusage()
 
@@ -69,9 +70,23 @@ int main(int argc, char **argv)
 	fprintf(logFile, "%s\n", line);
 
 	fprintf(logFile, "OUTPUT:\n");
-	// if (catype.eq.'RCO'){
-		fprintf(logFile, "Ray coordinates\n");
-		calcRayCoords(settings);
+	switch(settings->output.calcType){
+		case CALC_TYPE__RAY_COORDS:
+			DEBUG(1,"Calculating ray coordinates.\n");
+			fprintf(logFile, "Ray coordinates\n");
+			calcRayCoords(settings);
+			break;
+
+		case CALC_TYPE__ALL_RAY_INFO:
+			DEBUG(1,"Calculating all ray information.\n");
+			fprintf(logFile, "Ray information\n");
+			calcAllRayInfo(settings);
+			break;
+			
+		default:
+			fatal("Work in Progress.");
+			break;
+	}
 /*
 	 else if (catype.eq.'ARI') then
 		 write(prtfil,*) 'Ray information'

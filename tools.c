@@ -49,7 +49,8 @@ int32_t			readInt(FILE*);
 char*			readStringN(FILE*, uint32_t);
 void			skipLine(FILE*);
 void			printSettings(settings_t*);
-void			reallocRay(ray_t*, uintptr_t);
+ray_t*			makeRay(uintptr_t);
+void			reallocRayMembers(ray_t*, uintptr_t);
 void			copyDoubleToPtr(double*, double*, uintptr_t);
 void			copyDoubleToPtr2D(double**, double*, uintptr_t, uintptr_t);
 void			printCpuTime(FILE*);
@@ -196,15 +197,18 @@ double*		mallocDouble(uintptr_t numDoubles){
 		Allocates an array of doubles and returns a pointer to it in case of success,
 		Exits with error code otherwise.
 	*/
-	
+	DEBUG(9,"in\n");
 	double*	temp = NULL;	//temporary pointer
 	temp = malloc(numDoubles * sizeof(double));
-	if(temp == NULL)
-		fatal("Memory alocation error.");
+	if(temp == NULL){
+		fatal("Memory alocation error.\n");
+	}
+	DEBUG(9,"out\n");
 	return temp;
 }
 
 double*		reallocDouble(double* old, uintptr_t numDoubles){
+	DEBUG(9,"in\n");
 	double*		new = NULL;
 
 	if(old == NULL){
@@ -212,9 +216,10 @@ double*		reallocDouble(double* old, uintptr_t numDoubles){
 	}else{
 		new = realloc(old, numDoubles*sizeof(double));
 	}
-	if (numDoubles > 0 && new == NULL)
+	if (numDoubles > 0 && new == NULL){
 		fatal("Memory allocation error.\n");
-		
+	}
+	DEBUG(9,"out\n");
 	return new;
 }
 
@@ -690,8 +695,44 @@ void		printSettings(settings_t*	settings){
 	printf("output.miss: \t\t\t%12.5lf\n",settings->output.miss);
 }
 
-void		reallocRay(ray_t* ray, uintptr_t numRayCoords){
-	DEBUG(5,"reallocRay(),\t in\n");
+ray_t*		makeRay(uintptr_t numRays){
+	/*
+	 * allocates rays and initializes its members
+	 */
+	ray_t*		tempRay = NULL;
+	uintptr_t	i;
+	 
+	tempRay = malloc(numRays * sizeof(ray_t));
+	if(tempRay == NULL){
+		fatal("Memory alocation error.");
+	}
+
+	for(i=0; i<numRays; i++){
+		tempRay[i].r 			= NULL;
+		tempRay[i].z 			= NULL;
+		tempRay[i].c 			= NULL;
+		tempRay[i].iRefl		= NULL;
+		tempRay[i].decay		= NULL;
+		tempRay[i].phase		= NULL;
+		tempRay[i].tau 			= NULL;
+		tempRay[i].s 			= NULL;
+		tempRay[i].ic 			= NULL;
+		tempRay[i].boundaryTg	= NULL;
+		tempRay[i].boundaryJ	= NULL;
+		tempRay[i].refrac		= NULL;
+		tempRay[i].p 			= NULL;
+		tempRay[i].q 			= NULL;
+		tempRay[i].caustc		= NULL;
+		tempRay[i].amp			= NULL;
+	}
+	return tempRay;
+}
+
+void		reallocRayMembers(ray_t* ray, uintptr_t numRayCoords){
+	/*
+	 * resizes all ray members.
+	 */
+	DEBUG(5,"reallocRay(%u),\t in\n", (uint32_t)numRayCoords);
 	ray->nCoords	= numRayCoords;
 	ray->r			= reallocDouble(	ray->r,			numRayCoords);
 	ray->z			= reallocDouble(	ray->z,			numRayCoords);
@@ -705,7 +746,11 @@ void		reallocRay(ray_t* ray, uintptr_t numRayCoords){
 	ray->boundaryTg	= reallocVector(	ray->boundaryTg,numRayCoords);
 	ray->boundaryJ	= reallocInt(		ray->boundaryJ,	numRayCoords);
 	ray->nRefrac	= numRayCoords;
-	ray->refrac		= reallocPoint(		ray->refrac,		numRayCoords);
+	ray->refrac		= reallocPoint(		ray->refrac,	numRayCoords);
+	ray->p			= reallocDouble(	ray->p,			numRayCoords);
+	ray->q			= reallocDouble(	ray->q,			numRayCoords);
+	ray->caustc		= reallocDouble(	ray->caustc,	numRayCoords);
+	ray->amp		= reallocComplex(	ray->amp,		numRayCoords);
 	DEBUG(5,"reallocRay(), \t out\n");
 }
 

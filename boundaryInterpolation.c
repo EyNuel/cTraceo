@@ -31,8 +31,9 @@
  * 																					*
  ***********************************************************************************/
 
-#include "globals.h"
-#include "interpolation.h"
+#pragma		once
+#include	"globals.h"
+#include	"interpolation.h"
 
 
 

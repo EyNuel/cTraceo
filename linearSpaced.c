@@ -34,7 +34,7 @@ void	linearSpaced(uint32_t, double, double, double*);
 
 void	linearSpaced(uint32_t n, double xMin, double xMax, double* x){
 	uintptr_t	i;
-	double_t	dx;
+	double	dx;
 
 	DEBUG(10, "n:%u, xMin: %lf, xMax: %lf\n", n, xMin, xMax);
 	dx = (xMax - xMin)/((double)(n - 1));

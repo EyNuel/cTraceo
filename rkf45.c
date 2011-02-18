@@ -34,7 +34,7 @@
  * 						that the precision corresponds to requirements.				*
  * 																					*
  ***********************************************************************************/
-
+#pragma 	once
 #include	"csValues.c"
 #include	"math.h"
 

@@ -13,7 +13,7 @@
  * Configuration:																*
  *******************************************************************************/
 #define VERBOSE				0	//when set to 1, more information will be shown.
-#define VERBOSITY			1	//verbosity level (0-10) high levels will make the code impractically slow.
+#define VERBOSITY			3	//verbosity level (0-10) high levels will make the code impractically slow.
 #define MAX_LINE_LEN		256	//Maximum number of chars to read at once from a file (\n not included)
 #define MEM_FACTOR			20	//The memory allocated for each ray is determined like so: ( abs(rbox2-rbox1)/dsi )* MEM_FACTOR
 								//NOTE:	for deepwater cases, values between 3-5 are ok.
@@ -63,6 +63,10 @@ typedef struct	ray{
 	double*			z;			//depth of ray at index
 	double*			c;			//speed of sound at index
 	uint32_t*		iRefl;		//indicates if there is a reflection at a certain index of the ray coordinates.
+	uint32_t		sRefl;		//number of surface reflections
+	uint32_t		bRefl;		//number of bottom reflections
+	uint32_t		oRefl;		//number of object reflections
+	uint32_t		nRefl;		//number of total reflections
 	complex double*	decay;		//decay of ray
 	double*			phase;		//ray phase
 	double*			tau;		//acumulated travel time
@@ -70,8 +74,13 @@ typedef struct	ray{
 	double*			ic;			//see Chapter 3 of Traceo Manual
 	vector_t*		boundaryTg;	//"tbdry" a boundary's tangent vector
 	int32_t*		boundaryJ;	//"jbdry",	indicates at what boundary a ray is (-1 => above surface; 1 => below bottom)
-	uintptr_t		nRefrac;		//"nrefr", number of refraction points
+	uintptr_t		nRefrac;	//"nrefr", number of refraction points
 	point_t*		refrac;		//"rrefr, zrefr", coordinates of refraction points. used in "solveEikonalEq.c"
+
+	double*			p;			//used in solveDynamicEq
+	double*			q;			//used in solveDynamicEq
+	double*			caustc;		//used in solveDynamicEq
+	complex double*	amp;		//ray amplitude
 }ray_t;
 
 

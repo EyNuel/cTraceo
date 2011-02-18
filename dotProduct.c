@@ -26,6 +26,7 @@
  * 						the dot product.											*
  * 																					*
  ***********************************************************************************/
+#pragma once
 
 double	dotProduct(vector_t*, vector_t*);
 

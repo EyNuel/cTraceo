@@ -25,10 +25,11 @@
  * 																					*
  ***********************************************************************************/
 
-#include "mat.h"
+#pragma  once
+#include <mat.h>
 #include "matrix.h"
 #include "tools.c"
-#include "math.h"
+#include <math.h>
 #include "solveEikonalEq.c"
 
 void	calcRayCoords(settings_t*);
@@ -66,9 +67,7 @@ void	calcRayCoords(settings_t* settings){
 	matPutVariable(matfile, "caseTitle", pTitle);
 
 	//allocate the rays:
-	ray = malloc(settings->source.nThetas * sizeof(ray_t));
-	if(ray == NULL)
-		fatal("Memory alocation error.");
+	ray = makeRay(settings->source.nThetas);
 
 	/* Trace the rays:	*/
 	for(i=0; i<settings->source.nThetas; i++){
@@ -80,6 +79,7 @@ void	calcRayCoords(settings_t* settings){
 		//Trace a ray as long as it is neither 90 or -90:
 		if (ctheta > 1.0e-7){
 			solveEikonalEq(settings, &ray[i]);
+			
 			temp2D[0]	= ray[i].r;
 			temp2D[1]	= ray[i].z;
 			pRay		= mxCreateDoubleMatrix(2, (int32_t)ray[i].nCoords, mxREAL);
@@ -92,7 +92,7 @@ void	calcRayCoords(settings_t* settings){
 			mxDestroyArray(pRay);
 			if(KEEP_RAYS_IN_MEM == FALSE){
 				//free the ray's memory
-				reallocRay(&ray[i],0);
+				reallocRayMembers(&ray[i],0);
 			}
 		}
 	}
@@ -101,5 +101,6 @@ void	calcRayCoords(settings_t* settings){
 	matClose(matfile);
 	free(temp2D);
 	free(string);
+	free(ray);
 	DEBUG(1,"out\n");
 }
