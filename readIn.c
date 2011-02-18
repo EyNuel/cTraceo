@@ -85,11 +85,14 @@ void	readIn(settings_t* settings, const char* filename){
 	
 	/*	Allocate memory for the launching angles	*/
 	settings->source.thetas = mallocDouble(nThetas);
-	
+	DEBUG(8,"number of launching angles in infile: %u\n", nThetas);
 	/*	Read the  thetas from the file	*/
 	theta0 = readDouble(infile);
 	thetaN = readDouble(infile);
-	if(settings->source.nThetas == 2){
+	if(settings->source.nThetas == 1){
+		settings->source.thetas[0] = theta0;
+		dTheta = 0;
+	}else if(settings->source.nThetas == 2){
 		settings->source.thetas[0] = theta0;
 		settings->source.thetas[1] = thetaN;
 		dTheta = thetaN - theta0;
@@ -103,7 +106,7 @@ void	readIn(settings_t* settings, const char* filename){
 		}
 	}
 	settings->source.dTheta = dTheta;
-
+	DEBUG(10,"\n");
 	/************************************************************************
 	 * Read and validate altimetry info:									*
 	 ***********************************************************************/
