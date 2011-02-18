@@ -24,7 +24,6 @@
 /****************************
  *	Function prototypes		*
  ***************************/
-double*			subVector(double*, uintptr_t);
 double			min(double, double);
 double			max(double, double);
 void 			fatal(const char*);
@@ -37,6 +36,7 @@ int32_t*		reallocInt(int32_t*, uintptr_t);
 double*			mallocDouble(uintptr_t);
 double*			reallocDouble(double*, uintptr_t);
 double**		mallocDouble2D(uintptr_t, uintptr_t);
+void			freeDouble2D(double**, uintptr_t);
 complex double*	mallocComplex(uintptr_t);
 complex double*	reallocComplex(complex double*, uintptr_t);
 settings_t*		mallocSettings(void);
@@ -59,14 +59,6 @@ void			printCpuTime(FILE*);
  *	Actual Functions		*
  ***************************/
 
-double*	subVector(double* vector, uintptr_t iniPos){
-	/*
-	 * Returns the address of a subposition of a vector.
-	 * Bounds are left unchecked, so be carefull or segfault will occur.
-	 * TODO: this function is rather redundant, but it may make code more readable (?)
-	 */
-	return( &vector[iniPos]);
-}
 
 double	min(double a, double b){
 	if( a <= b){
@@ -243,6 +235,20 @@ double**	mallocDouble2D(uintptr_t numRows, uintptr_t numCols){
 	}
 
 	return array;
+}
+
+void		freeDouble2D(double** greenMile, uintptr_t items){
+	/*
+	 * frees the memory allocated to a double pointer of type double.
+	 */
+	 uintptr_t	i;
+	 
+	for(i=0; i<items; i++){
+		if(greenMile[i] != NULL){
+			free(greenMile[i]);
+		}
+	}
+	free(greenMile);
 }
 
 complex double*		mallocComplex(uintptr_t numComplex){

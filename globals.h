@@ -52,7 +52,7 @@ typedef struct	point{
 
 typedef struct	ray{
 	/*
-	 * NOTE: memory ocupied is 44B overhead + 96B per ray coordinate
+	 * NOTE: memory ocupied is 44B overhead + 96B per ray coordinate TODO recalculate, as this has since become larger
 	 */
 	uintptr_t		nCoords;
 	uintptr_t		iKill;		//indicates if ray has been "killed"

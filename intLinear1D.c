@@ -21,7 +21,7 @@
  * 				x:		vector containing x0, x1						*
  * 				f:		vector containing f0, f1						*
  * 				xi:		scalar (the interpolation point)				*
- * 	Outputs:																*
+ * 	Outputs:															*
  * 				fi:		interpolated value of f at xi					*
  * 				fxi:	derivative of f at xi							*
  * 																		*

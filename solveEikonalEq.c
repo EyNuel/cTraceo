@@ -760,6 +760,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 				matPutVariable(matfile, (const char*)string, pRay);
 				mxDestroyArray(pRay);
 				matClose(matfile);
+				freeDouble2D(temp2D, 2);
 			#endif
 			fatal("Ray step too small, number of points in ray coordinates exceeds allocated memory.\nTry changing MEM_FACTOR (in globals.h) to a higher value and recompile.\nAborting...");
 			//double the memory allocated for the ray:

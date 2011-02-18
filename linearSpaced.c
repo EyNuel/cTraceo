@@ -28,7 +28,7 @@
  * 						correct size.												*
  * 																					*
  ***********************************************************************************/
-//#pragma once
+#pragma once
 
 void	linearSpaced(uint32_t, double, double, double*);
 

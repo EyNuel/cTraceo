@@ -51,23 +51,4 @@ void	lineLineIntersec(point_t* p1, point_t* p2, point_t* q1, point_t* q2, uint32
 		isect->z = ( (p1->r * p2->z - p1->z * p2->r) * (q1->z - q2->z) - (p1->z - p2->z) * (q1->r * q2->z - q1->z * q2->r) )/d;
 	}
 }
-/*****************
- * Original code:
-	*
-	x1 = p1(1)
-	y1 = p1(2)
-	x2 = p2(1)
-	y2 = p2(2)
-	x3 = q1(1)
-	y3 = q1(2)
-	x4 = q2(1)
-	y4 = q2(2)
-	
-	d = (x1-x2)*(y3-y4)-(y1-y2)*(x3-x4)
-	
-	if (abs(d).gt.1e-16) then
-		i = 1
-		xi = ( (x1*y2-y1*x2)*(x3-x4)-(x1-x2)*(x3*y4-y3*x4) )/d
-		yi = ( (x1*y2-y1*x2)*(y3-y4)-(y1-y2)*(x3*y4-y3*x4) )/d
-	end if
-*/
+

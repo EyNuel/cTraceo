@@ -72,7 +72,7 @@ void	cValues2D(uintptr_t nx, uintptr_t ny, double* xTable, double* yTable, doubl
 	}
 
 	intBarycParab2D( &xTable[i], &yTable[j], tempDouble2D, *xi, *yi, ci, cxi, cyi, cxxi, cyyi, cxyi);
-	free(tempDouble2D);
+	freeDouble2D(tempDouble2D,3);
 	DEBUG(8, "out, ci: %lf\n", *ci);
 }
 

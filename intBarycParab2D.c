@@ -99,12 +99,6 @@ void intBarycParab2D(double* x, double* y, double** f, double xi, double yi, dou
 			*fxyi	+= a[i][j] * sx[j] * sy[i];
 		}
 	}
-/*
-	free(px);
-	free(py);
-	free(sx);
-	free(sy);
-	free(a);
-*/
+
 	DEBUG(8, "out\n");
 }
