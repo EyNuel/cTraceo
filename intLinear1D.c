@@ -27,6 +27,7 @@
  * 																		*
  ************************************************************************/
 
+#pragma once
 void intLinear1D(double*, double*, double, double*, double*);
 
 void intLinear1D(double* x, double* f, double xi, double* fi, double* fxi){
