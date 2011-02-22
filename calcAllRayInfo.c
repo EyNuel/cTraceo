@@ -117,11 +117,11 @@ void	calcAllRayInfo(settings_t* settings){
 			///ray has been written to matfile
 
 			///save ray information:
-			rayInfo[0][i] = ray[i].iReturn;
+			rayInfo[0][i] = (double)ray[i].iReturn;
 			rayInfo[1][i] = ray[i].sRefl;
 			rayInfo[2][i] = ray[i].bRefl;
 			rayInfo[3][i] = ray[i].oRefl;
-			rayInfo[4][i] = ray[i].nRefrac;
+			rayInfo[4][i] = (double)ray[i].nRefrac;
 
 			if (ray[i].nRefrac > 0){
 				temp2D 		= malloc(2*sizeof(uintptr_t));

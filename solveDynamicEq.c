@@ -113,12 +113,12 @@ void	solveDynamicEq(settings_t* settings, ray_t* ray){
 		//determine the gradient of the sound speed at the next set of coordinates
 		ri = ray->r[i+1];
 		zi = ray->z[i+1];
-		csValues(settings, &ri, &zi, &cii, &cxc, &sigmaI, &nGradC.r, &nGradC.z, &slowness, &crri, &czzi, &crzi);
+		csValues(settings, ri, zi, &cii, &cxc, &sigmaI, &nGradC.r, &nGradC.z, &slowness, &crri, &czzi, &crzi);
 
 		//determine the gradient of the sound speed at the current set of coordinates
 		ri = ray->r[i];
 		zi = ray->z[i];
-		csValues(settings, &ri, &zi, &cii, &cxc, &sigmaI, &gradC.r, &gradC.z, &slowness, &crri, &czzi, &crzi);
+		csValues(settings, ri, zi, &cii, &cxc, &sigmaI, &gradC.r, &gradC.z, &slowness, &crri, &czzi, &crzi);
 
 		dGradC.r = nGradC.r - gradC.r;
 		dGradC.z = nGradC.z - gradC.z;

@@ -82,7 +82,7 @@ void rkf45(settings_t* settings, double* dsi, double* yOld, double* fOld, double
 	ri = yOld[0];
 	zi = yOld[1];
 	/* determine k1:											*/
-	csValues(settings, &ri, &zi, &ci, &cc, &sigmaI, &cri, &czi, &slowness, &crri, &czzi, &crzi);
+	csValues(settings, ri, zi, &ci, &cc, &sigmaI, &cri, &czi, &slowness, &crri, &czzi, &crzi);
 	for(j=0; j<4; j++){
 		k1[j] = fOld[j];
 		yk[j] = yOld[j] + 0.25 * (*dsi) * k1[j];
@@ -95,7 +95,7 @@ void rkf45(settings_t* settings, double* dsi, double* yOld, double* fOld, double
 	sigmaI = sqrt( pow(sigmaR,2) + pow(sigmaZ,2) );
 	es.r = (sigmaR)/(sigmaI);
 	es.z = (sigmaZ)/(sigmaI);
-	csValues(settings, &ri, &zi, &ci, &cc, &sigmaI, &cri, &czi, &slowness, &crri, &czzi, &crzi);	//interpolate slowness vector
+	csValues(settings, ri, zi, &ci, &cc, &sigmaI, &cri, &czi, &slowness, &crri, &czzi, &crzi);	//interpolate slowness vector
 	k2[0] = es.r;
 	k2[1] = es.z;
 	k2[2] = slowness.r;
@@ -112,7 +112,7 @@ void rkf45(settings_t* settings, double* dsi, double* yOld, double* fOld, double
 	sigmaI = sqrt( pow(sigmaR,2) + pow(sigmaZ,2) );
 	es.r = (sigmaR)/(sigmaI);
 	es.z = (sigmaZ)/(sigmaI);
-	csValues(settings, &ri, &zi, &ci, &cc, &sigmaI, &cri, &czi, &slowness, &crri, &czzi, &crzi);
+	csValues(settings, ri, zi, &ci, &cc, &sigmaI, &cri, &czi, &slowness, &crri, &czzi, &crzi);
 	k3[0] = es.r;
 	k3[1] = es.z;
 	k3[2] = slowness.r;
@@ -129,7 +129,7 @@ void rkf45(settings_t* settings, double* dsi, double* yOld, double* fOld, double
 	sigmaI = sqrt( pow(sigmaR,2) + pow(sigmaZ,2) );
 	es.r = (sigmaR)/(sigmaI);
 	es.z = (sigmaZ)/(sigmaI);
-	csValues(settings, &ri, &zi, &ci, &cc, &sigmaI, &cri, &czi, &slowness, &crri, &czzi, &crzi);
+	csValues(settings, ri, zi, &ci, &cc, &sigmaI, &cri, &czi, &slowness, &crri, &czzi, &crzi);
 	k4[0] = es.r;
 	k4[1] = es.z;
 	k4[2] = slowness.r;
@@ -146,7 +146,7 @@ void rkf45(settings_t* settings, double* dsi, double* yOld, double* fOld, double
 	sigmaI = sqrt( pow(sigmaR,2) + pow(sigmaZ,2) );
 	es.r = (sigmaR)/(sigmaI);
 	es.z = (sigmaZ)/(sigmaI);
-	csValues(settings, &ri, &zi, &ci, &cc, &sigmaI, &cri, &czi, &slowness, &crri, &czzi, &crzi);
+	csValues(settings, ri, zi, &ci, &cc, &sigmaI, &cri, &czi, &slowness, &crri, &czzi, &crzi);
 	k5[0] = es.r;
 	k5[1] = es.z;
 	k5[2] = slowness.r;
@@ -163,7 +163,7 @@ void rkf45(settings_t* settings, double* dsi, double* yOld, double* fOld, double
 	sigmaI = sqrt( pow(sigmaR,2) + pow(sigmaZ,2) );
 	es.r = (sigmaR)/(sigmaI);
 	es.z = (sigmaZ)/(sigmaI);
-	csValues(settings, &ri, &zi, &ci, &cc, &sigmaI, &cri, &czi, &slowness, &crri, &czzi, &crzi);
+	csValues(settings, ri, zi, &ci, &cc, &sigmaI, &cri, &czi, &slowness, &crri, &czzi, &crzi);
 	k6[0] = es.r;
 	k6[1] = es.z;
 	k6[2] = slowness.r;
@@ -193,7 +193,7 @@ void rkf45(settings_t* settings, double* dsi, double* yOld, double* fOld, double
 	sigmaI = sqrt( pow(sigmaR,2) + pow(sigmaZ,2) );
 	es.r = (sigmaR)/(sigmaI);
 	es.z = (sigmaZ)/(sigmaI);
-	csValues(settings, &ri, &zi, &ci, &cc, &sigmaI, &cri, &czi, &slowness, &crri, &czzi, &crzi);
+	csValues(settings, ri, zi, &ci, &cc, &sigmaI, &cri, &czi, &slowness, &crri, &czzi, &crzi);
 	fNew[0] = es.r;
 	fNew[1] = es.z;
 	fNew[2] = slowness.r;

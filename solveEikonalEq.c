@@ -117,8 +117,8 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 
 	//Calculate initial sound speed and its derivatives:
 	csValues( 	settings,
-				&(settings->source.rx),
-				&(settings->source.zx),
+				settings->source.rx,
+				settings->source.zx,
 				&cx,
 				&cc,
 				&sigmaI,
@@ -186,8 +186,8 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 				(ri > settings->batimetry.r[0]) &&
 				(ri < settings->batimetry.r[settings->batimetry.numSurfaceCoords -1] ) ){
 			//calculate surface and bottom z at current ray position:
-			boundaryInterpolation(	&(settings->altimetry), &ri, &altInterpolatedZ, &junkVector, &normal);
-			boundaryInterpolation(	&(settings->batimetry), &ri, &batInterpolatedZ, &junkVector, &normal);
+			boundaryInterpolation(	&(settings->altimetry), ri, &altInterpolatedZ, &junkVector, &normal);
+			boundaryInterpolation(	&(settings->batimetry), ri, &batInterpolatedZ, &junkVector, &normal);
 		}else{
 			DEBUG(8,"ray killed\n");
 			ray->iKill = TRUE;
@@ -208,15 +208,21 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 				ri = pointIsect.r;
 				zi = pointIsect.z;
 				
-				boundaryInterpolation(	&(settings->altimetry), &ri, &altInterpolatedZ, &tauB, &normal);
+				boundaryInterpolation(	&(settings->altimetry), ri, &altInterpolatedZ, &tauB, &normal);
 				ibdry = -1;
 				sRefl = sRefl + 1;
 				jRefl = 1;
 				
 				//Calculate surface reflection:
 				specularReflection(&normal, &es, &tauR, &thetaRefl);
+
+				//Check if the ray is "digging in" beyond the surface:
+				boundaryInterpolation(	&(settings->altimetry), ri, &altInterpolatedZ, &tauB, &normal);
+				if ( (zi + settings->source.ds*tauR.z) < altInterpolatedZ){
+					ray->iKill = TRUE;
+				}
 				
-				//get the reflection coefficient (kill the ray is the surface is an absorver):
+				//get the reflection coefficient (kill the ray if the surface is an absorver):
 				switch(settings->altimetry.surfaceType){
 					
 					case SURFACE_TYPE__ABSORVENT:	//"A"
@@ -266,7 +272,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 																settings->altimetry.r,
 																settings->altimetry.rho,
 																&(settings->altimetry.surfaceInterpolation),
-																&ri,
+																ri,
 																&rho2,
 																&junkVector,
 																&junkVector
@@ -275,7 +281,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 																settings->altimetry.r,
 																settings->altimetry.cp,
 																&(settings->altimetry.surfaceInterpolation),
-																&ri,
+																ri,
 																&cp2,
 																&junkVector,
 																&junkVector
@@ -284,7 +290,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 																settings->altimetry.r,
 																settings->altimetry.cs,
 																&(settings->altimetry.surfaceInterpolation),
-																&ri,
+																ri,
 																&cs2,
 																&junkVector,
 																&junkVector
@@ -293,7 +299,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 																settings->altimetry.r,
 																settings->altimetry.ap,
 																&(settings->altimetry.surfaceInterpolation),
-																&ri,
+																ri,
 																&ap,
 																&junkVector,
 																&junkVector
@@ -302,7 +308,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 																settings->altimetry.r,
 																settings->altimetry.as,
 																&(settings->altimetry.surfaceInterpolation),
-																&ri,
+																ri,
 																&as,
 																&junkVector,
 																&junkVector
@@ -338,7 +344,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 				ri = pointIsect.r;
 				zi = pointIsect.z;
 				DEBUG(3,"ri: %lf, zi: %lf\n", ri, zi);
-				boundaryInterpolation(	&(settings->batimetry), &ri, &batInterpolatedZ, &tauB, &normal);
+				boundaryInterpolation(	&(settings->batimetry), ri, &batInterpolatedZ, &tauB, &normal);
 				//Invert the normal at the bottom for reflection:
 				normal.r = -normal.r;	//NOTE: differs from altimetry
 				normal.z = -normal.z;	//NOTE: differs from altimetry
@@ -349,8 +355,14 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 				
 				//Calculate surface reflection:
 				specularReflection(&normal, &es, &tauR, &thetaRefl);
+
+				//Check if the ray is "digging in" beyond the surface:
+				boundaryInterpolation(	&(settings->batimetry), ri, &batInterpolatedZ, &tauB, &normal);
+				if ( (zi + settings->source.ds*tauR.z) > batInterpolatedZ){
+					ray->iKill = TRUE;
+				}
 				
-				//get the reflection coefficient (kill the ray is the surface is an absorver):
+				//get the reflection coefficient (kill the ray if the surface is an absorver):
 				switch(settings->batimetry.surfaceType){
 					
 					case SURFACE_TYPE__ABSORVENT:	//"A"
@@ -400,7 +412,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 																settings->batimetry.r,
 																settings->batimetry.rho,
 																&(settings->batimetry.surfaceInterpolation),
-																&ri,
+																ri,
 																&rho2,
 																&junkVector,
 																&junkVector
@@ -409,7 +421,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 																settings->batimetry.r,
 																settings->batimetry.cp,
 																&(settings->batimetry.surfaceInterpolation),
-																&ri,
+																ri,
 																&cp2,
 																&junkVector,
 																&junkVector
@@ -418,7 +430,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 																settings->batimetry.r,
 																settings->batimetry.cs,
 																&(settings->batimetry.surfaceInterpolation),
-																&ri,
+																ri,
 																&cs2,
 																&junkVector,
 																&junkVector
@@ -427,7 +439,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 																settings->batimetry.r,
 																settings->batimetry.ap,
 																&(settings->batimetry.surfaceInterpolation),
-																&ri,
+																ri,
 																&ap,
 																&junkVector,
 																&junkVector
@@ -436,7 +448,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 																settings->batimetry.r,
 																settings->batimetry.as,
 																&(settings->batimetry.surfaceInterpolation),
-																&ri,
+																ri,
 																&as,
 																&junkVector,
 																&junkVector
@@ -459,9 +471,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 						break;
 				}
 				reflDecay = reflDecay * refl;
-				///TODO find cause for segfault/lack of memory when running varbounds_filed02
-				///TODO why doesn't the ray get killed?
-				DEBUG(2,"decay: %lf, abs(reflDecay): %lf, refl: %lf\n", cabs(ray->decay[i]), cabs(reflDecay), cabs(refl));
+				DEBUG(7,"decay: %lf, abs(reflDecay): %lf, refl: %lf\n", cabs(ray->decay[i]), cabs(reflDecay), cabs(refl));
 				//Kill the ray if the reflection coefficient is too small: 
 				if ( cabs(refl) < 0.00001 ){
 					ray->iKill = TRUE;
@@ -472,7 +482,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 			/*	Update marching solution and function:	*/
 			ri = pointIsect.r;
 			zi = pointIsect.z;
-			csValues( 	settings, &ri, &zi, &ci, &cc, &sigmaI, &cri, &czi, &slowness, &crri, &czzi, &crzi);
+			csValues( 	settings, ri, zi, &ci, &cc, &sigmaI, &cri, &czi, &slowness, &crri, &czzi, &crzi);
 			yNew[0] = ri;
 			yNew[1] = zi;
 			yNew[2] = sigmaI*tauR.r;
@@ -500,7 +510,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 													settings->objects.object[j].r,
 													settings->objects.object[j].zDown,
 													&settings->objects.surfaceInterpolation,
-													&ri,
+													ri,
 													&ziDown,
 													&junkVector,
 													&normal);
@@ -508,7 +518,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 													settings->objects.object[j].r,
 													settings->objects.object[j].zUp,
 													&settings->objects.surfaceInterpolation,
-													&ri,
+													ri,
 													&ziUp,
 													&junkVector,
 													&normal);
@@ -530,7 +540,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 															settings->objects.object[j].r,
 															settings->objects.object[j].zUp,
 															&settings->objects.surfaceInterpolation,
-															&yOld[0],
+															yOld[0],
 															&ziUp,
 															&junkVector,
 															&normal);
@@ -538,7 +548,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 															settings->objects.object[j].r,
 															settings->objects.object[j].zDown,
 															&settings->objects.surfaceInterpolation,
-															&yOld[0],
+															yOld[0],
 															&ziDown,
 															&junkVector,
 															&normal);
@@ -593,7 +603,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 															settings->objects.object[j].r,
 															settings->objects.object[j].zDown,
 															&settings->objects.surfaceInterpolation,
-															&ri,
+															ri,
 															&ziDown,
 															&tauB,
 															&normal);
@@ -605,7 +615,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 															settings->objects.object[j].r,
 															settings->objects.object[j].zUp,
 															&settings->objects.surfaceInterpolation,
-															&ri,
+															ri,
 															&ziUp,
 															&tauB,
 															&normal);
@@ -676,7 +686,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 						es.z = tauR.z;
 						e1.r = -es.z;
 						e1.z =  es.r;
-						csValues( 	settings, &ri, &zi, &ci, &cc, &sigmaI, &cri, &czi, &slowness, &crri, &czzi, &crzi);
+						csValues( 	settings, ri, zi, &ci, &cc, &sigmaI, &cri, &czi, &slowness, &crri, &czzi, &crzi);
 						
 						yNew[0] = ri;
 						yNew[1] = zi;
@@ -701,7 +711,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 		
 		es.r = fNew[0];
 		es.z = fNew[1];
-		csValues( 	settings, &ri, &zi, &ci, &cc, &sigmaI, &cri, &czi, &slowness, &crri, &czzi, &crzi);
+		csValues( 	settings, ri, zi, &ci, &cc, &sigmaI, &cri, &czi, &slowness, &crri, &czzi, &crzi);
 		
 		dr = ray->r[i+1] - ray->r[i];
 		dz = ray->z[i+1] - ray->z[i];
@@ -742,7 +752,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 		//Prevent further calculations if there is no more space in the memory for the ray coordinates:
 		if ( i > ray->nCoords - 1){
 			#if VERBOSE
-				//when debugging, save the coordinates of the last ray to a separate matfile, before exiting
+				//when debugging, save the coordinates of the last ray to a separate matfile before exiting.
 				mxArray*	pRay	= NULL;
 				MATFile*	matfile	= NULL;
 				double**	temp2D 	= malloc(2*sizeof(uintptr_t));
@@ -762,7 +772,10 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 				matClose(matfile);
 				freeDouble2D(temp2D, 2);
 			#endif
-			fatal("Ray step too small, number of points in ray coordinates exceeds allocated memory.\nTry changing MEM_FACTOR (in globals.h) to a higher value and recompile.\nAborting...");
+			fatal(	"Ray step too small, number of points in ray coordinates exceeds allocated memory.\n"
+					"Note that in cases where neither surface nor bottom have attenuation, rays can be endlessly reflected up and down and become \"trapped\".\n"
+					"If you need a high number or reflections per ray, you may also try changing MEM_FACTOR (in globals.h) to a higher value and recompile.\n"
+					"Aborting...");
 			//double the memory allocated for the ray:
 			//TODO find bus error that happens on realloc when realloccing to a larger value (tools.c".)
 			//reallocRay(ray, ray->nCoords * 2);		//TODO disabled as this sometimes results in "bus error".
@@ -771,8 +784,8 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 	}
 	/*	Ray coordinates have been computed. Finalizing */
 	//adjust memory size of the ray (we don't need more memory than nCoords)
-	ray -> nCoords	= i;
-	reallocRayMembers(ray, i);
+	ray -> nCoords	= i+1;
+	reallocRayMembers(ray, i+1);
 
 	//save reflection counters to ray struct, (these values are later used in calcAllRayInfo())
 	ray->sRefl = sRefl;

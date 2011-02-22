@@ -105,12 +105,12 @@ void	rayBoundaryIntersection(interface_t* interface, point_t* a, point_t* b, poi
 			
 //TODO: tremendous potential for optimization here. A "paralel for" might do wonders
 			//get first dz
-			boundaryInterpolation(interface, &rl[0], &(isect->z), &taub, &normal);
+			boundaryInterpolation(interface, rl[0], &isect->z, &taub, &normal);
 			dz[0] = zl[0] - isect->z;
 			for(i=1; i<n; i++){
 				//ri = rl[i];
 				//bdryi(nr,tabr,tabz,itype,ri,zi,taub,normal)
-				boundaryInterpolation(interface, &rl[i], &(isect->z), &taub, &normal);
+				boundaryInterpolation(interface, rl[i], &isect->z, &taub, &normal);
 				dz[i] = zl[i] - isect->z;
 				DEBUG(3,"dz0: %lf, dz[%u]: %lf | rl[%u]: %lf, rz[%u]: %lf\n", dz[0], i, dz[i], i, rl[i], i, zl[i]);
 				if( (dz[0] * dz[i]) <= 0){

@@ -38,10 +38,10 @@
 #include	"cValues1D.c"
 #include	"cValues2D.c"
 
-void	csValues(settings_t*, double*, double*, double*, double*, double*, double*, double*,
+void	csValues(settings_t*, double, double, double*, double*, double*, double*, double*,
 				vector_t*, double*, double*, double*);
 
-void	csValues(settings_t* settings, double* ri, double* zi, double* ci, double* cc, double* si, double* cri, double* czi,
+void	csValues(settings_t* settings, double ri, double zi, double* ci, double* cc, double* si, double* cri, double* czi,
 				vector_t* slowness, double* crri, double* czzi, double* crzi){
 	DEBUG(8,"csValues(),\t in\n");
 	
@@ -77,31 +77,31 @@ void	csValues(settings_t* settings, double* ri, double* zi, double* ci, double* 
 					
 				case C_CLASS__LINEAR:				//"LINP"
 					k	= ( c01d[1] - c01d[0] ) / ( z0[1] - z0[0]);
-					*ci	= c01d[0] + k*( *zi - z0[0] );
+					*ci	= c01d[0] + k*( zi - z0[0] );
 					*czi = k;
 					*czzi= 0;
 					break;
 					
 				case C_CLASS__PARABOLIC:			//"PARP"
 					k	= ( c01d[1] - c01d[0] ) / pow( ( z0[1] - z0[0]), 2);
-					*ci	= c01d[0] + k * pow(( *zi - z0[0] ), 2);
-					*czi = 2*k*( *zi - z0[0] );
+					*ci	= c01d[0] + k * pow(( zi - z0[0] ), 2);
+					*czi = 2*k*( zi - z0[0] );
 					*czzi= 2*k;
 					break;
 					
 				case C_CLASS__EXPONENTIAL:			//"EXPP"
 					k	= log( c01d[0]/c01d[1] )/( z0[1] - z0[0] );
-					*ci	= c01d[0]*exp( -k*(*zi - z0[0]) );
+					*ci	= c01d[0]*exp( -k*(zi - z0[0]) );
 					*czi	= -k * (*ci);
 					*czzi= k*k * (*ci);
 					break;
 					
 				case C_CLASS__N2_LINEAR:			//"N2LP"
 					k		= ( pow( c01d[0]/c01d[1] ,2) -1) / ( z0[1] - z0[0] );
-					root	= sqrt( 1 + k*( *zi - z0[0] ) );
+					root	= sqrt( 1 + k*( zi - z0[0] ) );
 					root32	= pow(root, 3/2 );
 					root52	= pow(root, 5/2 );
-					*ci 		= c01d[0]/sqrt( 1 + k*( *zi - z0[0] ));
+					*ci 		= c01d[0]/sqrt( 1 + k*( zi - z0[0] ));
 					*czi 	= -k*c01d[0]/( 2*root32 );
 					*czzi 	= 3*k*k*c01d[0]/( 4*root52 );
 					break;
@@ -110,16 +110,16 @@ void	csValues(settings_t* settings, double* ri, double* zi, double* ci, double* 
 					a		= pow(( c01d[1]/c01d[0]) -1 , 2);
 					root 	= sqrt( a/(1-a) );
 					k 		= root/( z0[1] - z0[0] );
-					root 	= sqrt( 1 + pow( k*( *zi - z0[0] ),2) );
+					root 	= sqrt( 1 + pow( k*( zi - z0[0] ),2) );
 					root32 	= pow(root, 3/2 );
 					root52 	= pow(root, 5/2 );
-					*ci 		= c01d[0] * ( 1 + k*( *zi - z0[0] )/root );
+					*ci 		= c01d[0] * ( 1 + k*( zi - z0[0] )/root );
 					*czi 	= c01d[0] * k / root32;
 					*czzi 	= -3 * c01d[0] * pow(k,3) / root52;
 					break;
 					
 				case C_CLASS__MUNK:					//"MUNK"
-					eta 	= 2*( *zi - z0[0] )/bmunk;
+					eta 	= 2*( zi - z0[0] )/bmunk;
 					*ci 		= c01d[0]*( 1 + epsilon*( eta + exp(-eta) - 1 ) );
 					*czi 	= 2*epsilon * c01d[0]*( 1 - exp(-eta) )/bmunk;
 					*czzi	= 4*epsilon * c01d[0]*exp( -eta )/bmunk2;

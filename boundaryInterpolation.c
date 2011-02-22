@@ -37,10 +37,10 @@
 
 
 
-void boundaryInterpolationExplicit(uint32_t*, double*, double*, uint32_t*, double*, double*, vector_t*, vector_t*);
-void boundaryInterpolation(interface_t*, double*, double*, vector_t*, vector_t*);
+void boundaryInterpolationExplicit(uint32_t*, double*, double*, uint32_t*, double, double*, vector_t*, vector_t*);
+void boundaryInterpolation(interface_t*, double, double*, vector_t*, vector_t*);
 
-void boundaryInterpolationExplicit(uint32_t* numSurfaceCoords, double* r, double* z, uint32_t* surfaceInterpolation, double* ri, double* zi, vector_t* taub, vector_t* normal){
+void boundaryInterpolationExplicit(uint32_t* numSurfaceCoords, double* r, double* z, uint32_t* surfaceInterpolation, double ri, double* zi, vector_t* taub, vector_t* normal){
 	DEBUG(5,"in\n");
 		
 	double		zri = 0;	//1st derivative of z at ri
@@ -64,9 +64,9 @@ void boundaryInterpolationExplicit(uint32_t* numSurfaceCoords, double* r, double
 			break;
 			
 		case SURFACE_INTERPOLATION__3P:
-			if (*ri <= r[1]){
+			if (ri <= r[1]){
 				i = 0;
-			}else if( *ri >= r[*numSurfaceCoords - 2]){
+			}else if( ri >= r[*numSurfaceCoords - 2]){
 				i = *numSurfaceCoords-3;
 			}else{
 				bracket(*numSurfaceCoords, &(r[0]), ri, &i);
@@ -75,9 +75,9 @@ void boundaryInterpolationExplicit(uint32_t* numSurfaceCoords, double* r, double
 			break;
 			
 		case SURFACE_INTERPOLATION__4P:
-			if (*ri <= r[1]){
+			if (ri <= r[1]){
 				i = 1;
-			}else if(*ri >= r[*numSurfaceCoords - 2]){
+			}else if(ri >= r[*numSurfaceCoords - 2]){
 				i = *numSurfaceCoords - 3;
 			}else{
 				bracket( *numSurfaceCoords, &(r[0]), ri, &i);
@@ -100,7 +100,7 @@ void boundaryInterpolationExplicit(uint32_t* numSurfaceCoords, double* r, double
 	DEBUG(7,"out\n");
 }
 
-void boundaryInterpolation(interface_t* interface, double* ri, double* zi, vector_t* taub, vector_t* normal){
+void boundaryInterpolation(interface_t* interface, double ri, double* zi, vector_t* taub, vector_t* normal){
 	boundaryInterpolationExplicit( 	&(interface->numSurfaceCoords),
 									interface->r,
 									interface->z,
