@@ -32,36 +32,42 @@
 #include "calcEigRayPr.c"
 #include <sys/time.h>		//for struct timeval
 #include <sys/resource.h>	//for getrusage()
+#include <string.h>
 
+int main(int, char**);
 
-int main(int argc, char **argv)
-{
-	const char*		infile = NULL;
+int main(int argc, char **argv){
+	char*		inFileName = mallocChar(256);
+	char*		logFileName = mallocChar(256);
 	settings_t*		settings = mallocSettings();
 	double			omega;
-	const char*		logFilename = "flat.log";
 	const char*		line = "-----------------------------------------------";
 	FILE*			logFile = NULL;
 
+	DEBUG(1,"Running cTraceo in verbose mode.\n\n");
+	
 	// check if a command line argument was passed:
 	if(argc == 2){
 		//if so, try to use it as an inout file
-		infile = argv[1];
+		strcpy(inFileName, argv[1]);
+		inFileName = strcat(inFileName, ".in");
 	}else{
-		//otherwise, open the standard file.
-		infile = "flat.in";
+		//otherwise, complain and quit
+		fatal("No input file provided.\nAborting...");
 	}
 
-	DEBUG(1,"Running cTraceo in verbose mode.\n\n");
-	readIn(settings, infile);
+	//Read the input file
+	readIn(settings, inFileName);
 
-//	if (VERBOSE)
-//		printSettings(settings);
-
+	/**
+	if (VERBOSE)
+		printSettings(settings);
+	*/
 	omega	= 2 * M_PI * settings->source.freqx;
 
 	//open the log file and write the header:
-	logFile = openFile(logFilename, "w");
+	strcpy(logFileName, argv[1]);
+	logFile= openFile(strcat(logFileName,".log"), "w");
 	fprintf(logFile, "TRACEO ray tracing program.\n");
 	fprintf(logFile, "TODO: write a nice header for the log file.\n");
 	fprintf(logFile, "%s\n", line);
@@ -135,5 +141,7 @@ int main(int argc, char **argv)
 	printCpuTime(stdout);
 	printCpuTime(logFile);
 	fclose(logFile);
+	free(inFileName);
+	free(logFileName);
 	exit(EXIT_SUCCESS);
 }
