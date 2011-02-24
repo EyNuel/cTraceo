@@ -28,9 +28,9 @@
  ************************************************************************/
 #pragma once
 #include <complex.h>
-void intComplexLinear1D(complex double*, complex double*, complex double*, complex double*, complex double*);
+void intComplexLinear1D(double*, complex double*, complex double, complex double*, complex double*);
 
-void intComplexLinear1D(complex double* x, complex double* f, complex double xi, complex double* fi, complex double* fxi){
+void intComplexLinear1D(double* x, complex double* f, complex double xi, complex double* fi, complex double* fxi){
 	DEBUG(8,"in\n");
 	*fxi	= 	( f[1] -f[0]) / ( x[1] -x[0]);
 	*fi		=	f[0] +(xi -x[0]) *(*fxi);

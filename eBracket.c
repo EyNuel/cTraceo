@@ -36,9 +36,9 @@
 #pragma		once
 #include	"tools.c"
 
-void	bracket(uintptr_t, double*, double*, uintptr_t*);
+void	eBracket(uintptr_t, double*, double, uintptr_t*, uintptr_t*);
 
-void	bracket(uintptr_t n, double* x, double xi, uintptr_t* nb, uintptr_t* ib){
+void	eBracket(uintptr_t n, double* x, double xi, uintptr_t* nb, uintptr_t* ib){
 	uintptr_t	i;
 	double_t	a, b;
 	
@@ -48,9 +48,9 @@ void	bracket(uintptr_t n, double* x, double xi, uintptr_t* nb, uintptr_t* ib){
 	for(i=0; i< n-2; i++){
 		a = min( x[i], x[i+1]);
 		b = max( x[i], x[i+1]);
-		if ( (xi >= a) && (xi < b) && (nb < 51)){
-			*nb++;
-			ib[*nb] = i
+		if ( (xi >= a) && (xi < b) && (*nb < 50)){
+			*nb = *nb +1;
+			ib[*nb] = i;
 		}
 	}
 }

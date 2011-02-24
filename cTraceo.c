@@ -29,6 +29,7 @@
 #include "math.h"
 #include "calcRayCoords.c"
 #include "calcAllRayInfo.c"
+#include "calcEigRayPr.c"
 #include <sys/time.h>		//for struct timeval
 #include <sys/resource.h>	//for getrusage()
 
@@ -83,19 +84,17 @@ int main(int argc, char **argv)
 			calcAllRayInfo(settings);
 			break;
 			
+		case CALC_TYPE__EIGENRAYS_PROXIMITY:
+			DEBUG(1,"Calculating Eigenrays by proximity method.\n");
+			fprintf(logFile, "Ray information\n");
+			calcEigenRayPr(settings);
+			break;
+			
 		default:
 			fatal("Work in Progress.");
 			break;
 	}
 /*
-	 else if (catype.eq.'ARI') then
-		 write(prtfil,*) 'Ray information'
-		 call calari(ctitle,nthtas)
-
-	 else if (catype.eq.'EPR') then
-		 write(prtfil,*) 'Eigenrays (by PRoximity)'
-		 call calepr(ctitle,nthtas)
-	 
 	 else if (catype.eq.'ERF') then
 		 write(prtfil,*) 'Eigenrays (by Regula Falsi)'
 		 call calerf(ctitle,nthtas)
