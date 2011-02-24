@@ -678,7 +678,7 @@ void	readIn(settings_t* settings, const char* filename){
 		settings->output.calcType	= CALC_TYPE__COH_TRANS_LOSS;
 		
 	}else if(strcmp(tempString,"'PVL'") == 0){
-		settings->output.calcType	= CALC_TYPE__COH_PART_VEL;
+		settings->output.calcType	= CALC_TYPE__PART_VEL;
 		
 	}else if(strcmp(tempString,"'PAV'") == 0){
 		settings->output.calcType	= CALC_TYPE__COH_ACOUS_PRESS_PART_VEL;

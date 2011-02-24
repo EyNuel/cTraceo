@@ -13,7 +13,7 @@
  * Configuration:																*
  *******************************************************************************/
 #define VERBOSE				0	//when set to 1, more information will be shown.
-#define VERBOSITY			3	//verbosity level (0-10) high levels will make the code impractically slow.
+#define VERBOSITY			5	//verbosity level (0-10) high levels will make the code impractically slow.
 #define MAX_LINE_LEN		256	//Maximum number of chars to read at once from a file (\n not included)
 #define MEM_FACTOR			20	//The memory allocated for each ray is determined like so: ( abs(rbox2-rbox1)/dsi )* MEM_FACTOR
 								//NOTE:	for deepwater cases, values between 3-5 are ok.
@@ -227,7 +227,7 @@ typedef struct output{
 #define	CALC_TYPE__AMP_DELAY_PROXIMITY		32	//"ADP", write Amplitudes and Delays (use Proximity method)
 #define	CALC_TYPE__COH_ACOUS_PRESS			33	//"CPR", write Coherent Acoustic Pressure
 #define	CALC_TYPE__COH_TRANS_LOSS			34	//"CTL", write Coherent Transmission loss
-#define	CALC_TYPE__COH_PART_VEL				35	//"PVL", write Coherent Particle Velocity
+#define	CALC_TYPE__PART_VEL					35	//"PVL", write Coherent Particle Velocity
 #define	CALC_TYPE__COH_ACOUS_PRESS_PART_VEL	36	//"PAV", write Coherent Acoustic Pressure asn Particle Velocity
 
 //possible values for arrayType (Manual page 43)

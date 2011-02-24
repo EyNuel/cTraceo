@@ -691,7 +691,7 @@ void		printSettings(settings_t*	settings){
 		case CALC_TYPE__COH_TRANS_LOSS:
 			printf("Coherent Transmission loss\n");
 			break;
-		case CALC_TYPE__COH_PART_VEL:
+		case CALC_TYPE__PART_VEL:
 			printf("Coherent Particle Velocity\n");
 			break;
 		case CALC_TYPE__COH_ACOUS_PRESS_PART_VEL:

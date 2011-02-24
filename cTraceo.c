@@ -34,7 +34,16 @@
 #include <sys/resource.h>	//for getrusage()
 #include <string.h>
 
-int main(int, char**);
+void	printUsage(void);
+int 	main(int, char**);
+
+void	printUsage(void){
+	printf("Line 1\n"
+	"Line 2\n"
+	"Line %d\n",
+	3);
+	
+}
 
 int main(int argc, char **argv){
 	char*		inFileName = mallocChar(256);
@@ -53,6 +62,7 @@ int main(int argc, char **argv){
 		inFileName = strcat(inFileName, ".in");
 	}else{
 		//otherwise, complain and quit
+		printUsage();
 		fatal("No input file provided.\nAborting...");
 	}
 
@@ -86,60 +96,70 @@ int main(int argc, char **argv){
 
 		case CALC_TYPE__ALL_RAY_INFO:
 			DEBUG(1,"Calculating all ray information.\n");
-			fprintf(logFile, "Ray information\n");
+			fprintf(logFile, "All ray information\n");
 			calcAllRayInfo(settings);
 			break;
 			
 		case CALC_TYPE__EIGENRAYS_PROXIMITY:
-			DEBUG(1,"Calculating Eigenrays by proximity method.\n");
-			fprintf(logFile, "Ray information\n");
+			DEBUG(1,"Calculating eigenrays by Proximity Method.\n");
+			fprintf(logFile, "Eigenrays by Proximity Method.\n");
 			calcEigenRayPr(settings);
 			break;
 			
+		case CALC_TYPE__EIGENRAYS_REG_FALSI:
+			DEBUG(1,"Calculating eigenrays by Regula Falsi Method.\n");
+			fprintf(logFile, "Eigenrays by Regula Falsi Method.\n");
+			fatal("WIP");
+			break;
+			
+		case CALC_TYPE__AMP_DELAY_PROXIMITY:
+			DEBUG(1,"Calculating amplitudes and delays by Proximity Method.\n");
+			fprintf(logFile, "Amplitudes and delays by Proximity Method.\n");
+			fatal("WIP");
+			break;
+			
+		case CALC_TYPE__AMP_DELAY_REG_FALSI:
+			DEBUG(1,"Calculating amplitudes and delays by Regula Falsi Method.\n");
+			fprintf(logFile, "Amplitudes and delays by Regula Falsi Method.\n");
+			fatal("WIP");
+			break;
+			
+		case CALC_TYPE__COH_ACOUS_PRESS:
+			DEBUG(1,"Calculating coherent acoustic pressure.\n");
+			fprintf(logFile, "Coherent acoustic pressure by Regula Falsi Method.\n");
+			fatal("WIP");
+			break;
+			
+		case CALC_TYPE__COH_TRANS_LOSS:
+			DEBUG(1,"Calculating coherent acoustic pressure.\n");
+			fprintf(logFile, "Coherent acoustic pressure by Regula Falsi Method.\n");
+			fatal("WIP");
+			break;
+			
+		case CALC_TYPE__PART_VEL:
+			DEBUG(1,"Calculating particle velocity.\n");
+			fprintf(logFile, "Coherent acoustic pressure by Regula Falsi Method.\n");
+			fatal("WIP");
+			break;
+			
+		case CALC_TYPE__COH_ACOUS_PRESS_PART_VEL:
+			DEBUG(1,"Calculating coherent acoustic pressure and particle velocity.\n");
+			fprintf(logFile, "Coherent acoustic pressure by Regula Falsi Method.\n");
+			fatal("WIP");
+			break;
+			
 		default:
-			fatal("Work in Progress.");
+			fatal("Unknown output option.\nAborting...");
 			break;
 	}
-/*
-	 else if (catype.eq.'ERF') then
-		 write(prtfil,*) 'Eigenrays (by Regula Falsi)'
-		 call calerf(ctitle,nthtas)
 
-	 else if (catype.eq.'ADP') then
-		 write(prtfil,*) 'Amplitudes and Delays (by Proximity)'
-		 call caladp(ctitle,nthtas)
-
-	else if (catype.eq.'ADR') then
-		 write(prtfil,*) 'Amplitudes and Delays (by Regula falsi)'
-		 call caladr(ctitle,nthtas)
-
-	 else if (catype.eq.'CPR') then
-		write(prtfil,*) 'Coherent acoustic pressure'
-		call calcpr(ctitle,nthtas)
-		 
-	 else if (catype.eq.'CTL') then
-		 write(prtfil,*) 'Coherent transmission loss'
-		 call calctl(ctitle,nthtas)
-
-	else if (catype.eq.'PVL') then
-		 write(prtfil,*) 'Particle velocity'
-		 call calpvl(ctitle,nthtas)
-
-	else if (catype.eq.'PAV') then
-		 write(prtfil,*) 'Pressure and particle velocity'
-		 call calpav(ctitle,nthtas)
-
-	 else
-		 write(prtfil,*) 'Unknown output option,'
-		write(prtfil,*) 'aborting calculations...'
-		 stop
-
-	 end if
-*/
 	fprintf(logFile, "%s\n", line);
 	fprintf(logFile, "Done.\n");
+	
 	printCpuTime(stdout);
 	printCpuTime(logFile);
+
+	//free memory
 	fclose(logFile);
 	free(inFileName);
 	free(logFileName);
