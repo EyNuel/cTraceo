@@ -535,9 +535,12 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 						//	Which face was crossed by the ray: upper or lower?
 						//	Since we alrady know that the second point is inside the object, we only have to test if the first one is
 						//	above or below the object
+
 						//	Case 1: beginning inside box & ending inside box:
-						if ( yOld[0] >= settings->objects.object[j].r[0] ){
-							DEBUG(1,"Case 1\n");
+						if (	yOld[0] >= settings->objects.object[j].r[0] &&
+								yOld[0] <= settings->objects.object[j].r[nObjCoords-1] ){
+							
+							DEBUG(1,"Case 1: beginning inside box & ending inside box\n");
 							DEBUG(5,"ri:%lf\n", yOld[0]);
 							boundaryInterpolationExplicit(	&nObjCoords,
 															settings->objects.object[j].r,
@@ -563,9 +566,11 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 								rayObjectIntersection(&settings->objects, &j, UP, &pointA, &pointB, &pointIsect);
 								ibdry = 1;
 							}
-						//Case 2: beginning outside box & ending inside box
-						}else if (yOld[0] < settings->objects.object[j].r[0]){
-							DEBUG(1,"Case 2\n");
+
+						//Case 2: beginning left of box & ending inside:
+						}else if (	yOld[0] < settings->objects.object[j].r[0] ){
+							
+							DEBUG(1,"Case 2: beginning left of box & ending inside\n");
 							//Calculate the coords for point A in relation to the beginning of the box
 							//Q: why do this?
 							//R: to be able to determine if these coords are above or below the object.
@@ -578,12 +583,33 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 								rayObjectIntersection(&settings->objects, &j, UP, &pointA, &pointB, &pointIsect);
 								ibdry =  1;
 							}
+
+						//Case 3: beginning right of box and ending inside:
+						}else if(	yOld[0] > settings->objects.object[j].r[ nObjCoords-1 ] ){
+
+							DEBUG(1,"Case 3: beginning right of box and ending inside\n");
+							//Calculate the coords for point A in relation to the end of the box
+							//Q: why do this?
+							//R: to be able to determine if these coords are above or below the object.
+							pointA.z = pointB.z -(pointA.z - pointB.z) / (pointA.r - pointB.r) * (settings->objects.object[j].r[ nObjCoords-1 ] -pointB.r);
+							pointA.r = settings->objects.object[j].r[ nObjCoords-1 ];
+							if (pointA.z < settings->objects.object[j].zUp[ nObjCoords-1 ]){
+								rayObjectIntersection(&settings->objects, &j, DOWN, &pointA, &pointB, &pointIsect);
+								ibdry = -1;
+							}else{
+								rayObjectIntersection(&settings->objects, &j, UP, &pointA, &pointB, &pointIsect);
+								ibdry =  1;
+							}
+							
+						//Some weird error this would be:
 						}else{
 							fatal("Object reflection case: ray beginning neither behind or between object box.\nCheck object coordinates.\nAborting...");
 						}
 
 						ri = pointIsect.r;
 						zi = pointIsect.z;
+
+						DEBUG(4, "ri: %lf, zi: %lf\n", ri, zi);
 
 						//Face reflection: upper or lower? 
 						if (	ibdry == -1 ){	
@@ -790,9 +816,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 		ray->z[ray->nCoords-1]	= ray->z[ray->nCoords-2] + (settings->source.rbox2 - ray->r[ray->nCoords-2])* dz/dr;
 		ray->ic[ray->nCoords-1]	= ray->ic[ray->nCoords-2] + (settings->source.rbox2 - ray->r[ray->nCoords-2])* dIc/dr;
 		ray->r[ray->nCoords-1]	= settings->source.rbox2;
-	}
-
-	if (ray->r[ray->nCoords-1] < settings->source.rbox1){
+	}else if (ray->r[ray->nCoords-1] < settings->source.rbox1){
 		ray->z[ray->nCoords-1]	= ray->z[ray->nCoords-2] + (settings->source.rbox1-ray->r[ray->nCoords-2])* dz/dr;
 		ray->ic[ray->nCoords-1]	= ray->ic[ray->nCoords-2] + (settings->source.rbox1-ray->r[ray->nCoords-2]) * dIc/dr;
 		ray->r[ray->nCoords-1]	= settings->source.rbox1;
