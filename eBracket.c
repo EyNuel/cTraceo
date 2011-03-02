@@ -49,8 +49,9 @@ void	eBracket(uintptr_t n, double* x, double xi, uintptr_t* nb, uintptr_t* ib){
 		a = min( x[i], x[i+1]);
 		b = max( x[i], x[i+1]);
 		if ( (xi >= a) && (xi < b) && (*nb < 50)){
-			*nb = *nb +1;
 			ib[*nb] = i;
+			*nb = *nb +1;
+			DEBUG(5,"Bracketing point found at index: %u\n", (uint32_t)i);
 		}
 	}
 }

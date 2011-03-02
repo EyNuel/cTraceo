@@ -49,21 +49,23 @@ void boundaryInterpolationExplicit(uint32_t* numSurfaceCoords, double* r, double
 	
 	switch(*surfaceInterpolation){
 		case SURFACE_INTERPOLATION__FLAT:
-			//lini1d(xl,yl,ri,zi,zri)
+			DEBUG(5,"Flat surface interpolation\n");
 			intLinear1D( &(r[0]), &(z[0]),ri,zi,&zri);
 			break;
 			
 		case SURFACE_INTERPOLATION__SLOPED:
-			//lini1d(xl,yl,ri,zi,zri)
+			DEBUG(5,"sloped surface interpolation\n");
 			intLinear1D( &(r[0]), &(z[0]),ri,zi,&zri);
 			break;
 			
 		case SURFACE_INTERPOLATION__2P:
+			DEBUG(5,"2P surface interpolation\n");
 			bracket(*numSurfaceCoords, r, ri, &i);
 			intLinear1D( &(r[i]), &(z[i]),ri,zi,&zri);
 			break;
 			
 		case SURFACE_INTERPOLATION__3P:
+			DEBUG(5,"3P surface interpolation\n");
 			if (ri <= r[1]){
 				i = 0;
 			}else if( ri >= r[*numSurfaceCoords - 2]){
@@ -75,6 +77,7 @@ void boundaryInterpolationExplicit(uint32_t* numSurfaceCoords, double* r, double
 			break;
 			
 		case SURFACE_INTERPOLATION__4P:
+			DEBUG(5,"4P surface interpolation\n");
 			if (ri <= r[1]){
 				i = 1;
 			}else if(ri >= r[*numSurfaceCoords - 2]){
@@ -97,7 +100,7 @@ void boundaryInterpolationExplicit(uint32_t* numSurfaceCoords, double* r, double
 	
 	normal->r = -taub->z; 
 	normal->z =  taub->r;
-	DEBUG(7,"out\n");
+	DEBUG(5,"out\n");
 }
 
 void boundaryInterpolation(interface_t* interface, double ri, double* zi, vector_t* taub, vector_t* normal){

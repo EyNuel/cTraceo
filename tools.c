@@ -738,7 +738,7 @@ void		reallocRayMembers(ray_t* ray, uintptr_t numRayCoords){
 	/*
 	 * resizes all ray members.
 	 */
-	DEBUG(5,"reallocRay(%u),\t in\n", (uint32_t)numRayCoords);
+	DEBUG(5,"reallocRayMembers(%u),\t in\n", (uint32_t)numRayCoords);
 	ray->nCoords	= numRayCoords;
 	ray->r			= reallocDouble(	ray->r,			numRayCoords);
 	ray->z			= reallocDouble(	ray->z,			numRayCoords);
@@ -757,7 +757,7 @@ void		reallocRayMembers(ray_t* ray, uintptr_t numRayCoords){
 	ray->q			= reallocDouble(	ray->q,			numRayCoords);
 	ray->caustc		= reallocDouble(	ray->caustc,	numRayCoords);
 	ray->amp		= reallocComplex(	ray->amp,		numRayCoords);
-	DEBUG(5,"reallocRay(), \t out\n");
+	DEBUG(5,"reallocRayMembers(), \t out\n");
 }
 
 void		copyDoubleToPtr(double* origin, double* dest, uintptr_t nItems){

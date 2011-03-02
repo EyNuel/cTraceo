@@ -19,13 +19,9 @@
  *						Universidade do Algarve									*
  *																				*
  *	Inputs:																		*
- * 				n:		number of elements in vector x							*
- * 				x:		vector to be searched									*
- * 				xi:		scalar who's bracketing elements are to be found		*
+ * 				settings:	Pointer to structure containing all input info.		*
  * 	Outputs:																	*
- * 				nb:		number of bracketing pairs found.						*
- *				ib:		the indexes of the lower bracketing elements.			*
- * 						Note: shall be previously allocated.					*
+ * 				none:		Writes to file "eig.mat".							*
  * 																				*
  *******************************************************************************/
 
@@ -44,6 +40,7 @@ void	calcEigenRayPr(settings_t*);
 
 void	calcEigenRayPr(settings_t* settings){
 	DEBUG(1,"in\n");
+	
 	MATFile*		matfile		= NULL;
 	mxArray*		pThetas		= NULL;
 	mxArray*		pTitle		= NULL;
@@ -122,7 +119,6 @@ void	calcEigenRayPr(settings_t* settings){
 	for(i=0; i<settings->source.nThetas; i++){
 		thetai = -settings->source.thetas[i] * M_PI/180.0;
 		ray[i].theta = thetai;
-		DEBUG(2,"ray[%u].theta: %lf\n", (uint32_t)i, settings->source.thetas[i]);
 		ctheta = fabs( cos(thetai));
 		
 		//Trace a ray as long as it is neither 90 or -90:
@@ -135,15 +131,47 @@ void	calcEigenRayPr(settings_t* settings){
 			for(j=0; j<settings->output.nArrayR; j++){
 				rHyd = settings->output.arrayR[j];
 
-				if ( (rHyd >= ray[i].rMin) && (rHyd < ray[i].rMax)){
+				if ( (rHyd >= ray[i].rMin) && (rHyd <= ray[i].rMax)){
 
 					//	Check if the ray is returning back or not;
 					//	if not:		we can bracket it without problems,
-					//	otherwise:	we need to know how many times it passed by the given array range: 
+					//	otherwise:	we need to know how many times it passed by the given array range 
 					if (ray[i].iReturn == FALSE){
 
+						/*
+						//when debugging, save the coordinates of the last ray to a separate matfile before exiting.
+						#if VERBOSE
+						if((int)i==(int)4){
+							DEBUG(1,"i:%u, nCoords: %u\n", (uint32_t)i, (uint32_t)ray[i].nCoords);
+							DEBUG(1,"rMin: %e, rMax: %e\n",ray[i].rMin, ray[i].rMax);
+							
+							
+							mxArray*	pDyingRay	= NULL;
+							MATFile*	matfile2	= NULL;
+							double**	dyingRay 	= malloc(2*sizeof(uintptr_t));
+							char* 		string2		= mallocChar(10);
+							
+							dyingRay[0]	= ray[i].r;
+							dyingRay[1]	= ray[i].z;
+							matfile2	= matOpen("dyingRay.mat", "w");
+							pDyingRay	= mxCreateDoubleMatrix(2, (int32_t)ray[i].nCoords, mxREAL);
+							if(pDyingRay == NULL || matfile2 == NULL)
+								fatal("Memory alocation error.");
+							copyDoubleToPtr2D(dyingRay, mxGetPr(pDyingRay), ray[i].nCoords,2);
+							sprintf(string2, "dyingRay");
+							matPutVariable(matfile2, (const char*)string2, pDyingRay);
+
+							mxDestroyArray(pDyingRay);
+							matClose(matfile2);
+							DEBUG(1,"Dying ray written to file.\n");
+						}
+						#endif
+						*/
+						
 						//get the index of the lower bracketing element:
 						bracket(			ray[i].nCoords,	ray[i].r, rHyd, &iHyd);
+						DEBUG(8,"nCoords: %u, iHyd:%u\n", (uint32_t)ray[i].nCoords, (uint32_t)iHyd);
+
 						//from index interpolate the rays' depth, travel time and amplitude:
 						intLinear1D(		&ray[i].r[iHyd], &ray[i].z[iHyd],	rHyd, &zRay,	&junkDouble);
 						intLinear1D(		&ray[i].r[iHyd], &ray[i].tau[iHyd],	rHyd, &tauRay,	&junkDouble);
@@ -157,48 +185,51 @@ void	calcEigenRayPr(settings_t* settings){
 							if (dz < settings->output.miss){
 								nEigenRays += 1;
 
-								//adjust the ray's last set of coordinates so that it matches up with the hydrophone
-								ray[i].r[iHyd+1]	= rHyd;
-								ray[i].z[iHyd+1]	= zRay;
-								ray[i].tau[iHyd+1]	= tauRay;
-								ray[i].amp[iHyd+1]	= ampRay;
-
 								///prepare to write ray to matfile:
-								temp2D 		= malloc(5*sizeof(uintptr_t));
-								temp2D[0]	= ray[i].r;
-								temp2D[1]	= ray[i].z;
-								temp2D[2]	= ray[i].tau;
-								temp2D[3]	= mallocDouble( iHyd + 2 );
-								temp2D[4]	= mallocDouble( iHyd + 2 );
-								for(k=0; k<iHyd+2; k++){
-									temp2D[3][k] = creal( ray[i].amp[k] );
-									temp2D[4][k] = cimag( ray[i].amp[k] );
-								}
+								//create a temporary container for the files:
+								temp2D 		= mallocDouble2D(5,iHyd+2);
 
+								//copy content to the new variable:
+								for (k=0; k<iHyd+1; k++){
+									temp2D[0][k]=	ray[i].r[k];
+									temp2D[1][k]=	ray[i].z[k];
+									temp2D[2][k]=	ray[i].tau[k];
+									temp2D[3][k]=	creal( ray[i].amp[k] );
+									temp2D[4][k]=	cimag( ray[i].amp[k] );
+								}
+								
+								//adjust the ray's last set of coordinates so that it matches up with the hydrophone
+								temp2D[0][iHyd+1]	= rHyd;
+								temp2D[1][iHyd+1]	= zRay;
+								temp2D[2][iHyd+1]	= tauRay;
+								temp2D[3][iHyd+1]	= creal(ampRay);
+								temp2D[4][iHyd+1]	= cimag(ampRay);
+								
 								//(copy data to mxArray and write ray to file:
-								pRay = mxCreateDoubleMatrix(5, (int32_t)(iHyd+2), mxREAL);
+								pRay = mxCreateDoubleMatrix(5, (int32_t)(iHyd+1), mxREAL);
 								if(pRay == NULL){
 									fatal("Memory alocation error.");
 								}
 								copyDoubleToPtr2D(temp2D, mxGetPr(pRay), iHyd+1,5);
-								sprintf(string, "ray%u", (uint32_t)(i+1));
+								sprintf(string, "ray%u", (uint32_t)(nEigenRays));
 								matPutVariable(matfile, (const char*)string, pRay);
 
 								//free memory:
 								mxDestroyArray(pRay);
-								free(temp2D[3]);
-								free(temp2D[4]);
-								free(temp2D);
+								freeDouble2D(temp2D,5);
 								///ray has been written to matfile.
 							}//	if (dz settings->output.miss)
-						}//		for(jj=1; jj<=settings->output.nArrayZ; jj++)
-					}else{//	if (ray[i].iReturn == FALSE)
-					
+						}//	for(jj=1; jj<=settings->output.nArrayZ; jj++)
+						
+					}else{// if (ray[i].iReturn == FALSE)
+
+						DEBUG(8,"nCoords: %u, iHyd:%u\n", (uint32_t)ray[i].nCoords, (uint32_t)iHyd);
 						//get the indexes of the bracketing points.
 						eBracket(ray[i].nCoords, ray[i].r, rHyd, &nRet, iRet);
 
 						//from each index interpolate the rays' depth, travel time and amplitude:
 						for(l=0; l<nRet; l++){
+							DEBUG(8, "nRet=%u, iRet[%u]= %u\n", (uint32_t)nRet, (uint32_t)l, (uint32_t)iRet[l]);
 							intLinear1D(		&ray[i].r[iRet[l]], &ray[i].z[iRet[l]],		rHyd, &zRay,	&junkDouble);
 							intLinear1D(		&ray[i].r[iRet[l]], &ray[i].tau[iRet[l]],	rHyd, &tauRay,	&junkDouble);
 							intComplexLinear1D(	&ray[i].r[iRet[l]], &ray[i].amp[iRet[l]],	(complex double)rHyd, &ampRay,	&junkComplex);
@@ -210,37 +241,39 @@ void	calcEigenRayPr(settings_t* settings){
 								
 								if (dz < settings->output.miss){
 									nEigenRays += 1;
-									ray[i].r[iHyd+1]	= rHyd;
-									ray[i].z[iHyd+1]	= zRay;
-									ray[i].tau[iHyd+1]	= tauRay;
-									ray[i].amp[iHyd+1]	= ampRay;
-									
+
 									///prepare to write ray to matfile:
-									temp2D 		= malloc(5*sizeof(uintptr_t));
-									temp2D[0]	= ray[i].r;
-									temp2D[1]	= ray[i].z;
-									temp2D[2]	= ray[i].tau;
-									temp2D[3]	= mallocDouble( iHyd + 2 );
-									temp2D[4]	= mallocDouble( iHyd + 2 );
-									for(k=0; k<iHyd+2; k++){
-										temp2D[3][k] = creal( ray[i].amp[k] );
-										temp2D[4][k] = cimag( ray[i].amp[k] );
+									//create a temporary container for the files:
+									temp2D 		= mallocDouble2D(5,iRet[l]+1);
+
+									//copy content to the new variable:
+									for (k=0; k<iRet[l]+1; k++){
+										temp2D[0][k]=	ray[i].r[k];
+										temp2D[1][k]=	ray[i].z[k];
+										temp2D[2][k]=	ray[i].tau[k];
+										temp2D[3][k]=	creal( ray[i].amp[k] );
+										temp2D[4][k]=	cimag( ray[i].amp[k] );
 									}
 									
+									//adjust the ray's last set of coordinates so that it matches up with the hydrophone
+									temp2D[0][iRet[l]+1]	= rHyd;
+									temp2D[1][iRet[l]+1]	= zRay;
+									temp2D[2][iRet[l]+1]	= tauRay;
+									temp2D[3][iRet[l]+1]	= creal(ampRay);
+									temp2D[4][iRet[l]+1]	= cimag(ampRay);
+									
 									//(copy data to mxArray and write ray to file:
-									pRay = mxCreateDoubleMatrix(5, (int32_t)(iHyd+2), mxREAL);
+									pRay = mxCreateDoubleMatrix(5, (int32_t)(iRet[l]+1), mxREAL);
 									if(pRay == NULL){
 										fatal("Memory alocation error.");
 									}
-									copyDoubleToPtr2D(temp2D, mxGetPr(pRay), iHyd+1,5);
-									sprintf(string, "ray%u", (uint32_t)(i+1));
+									copyDoubleToPtr2D(temp2D, mxGetPr(pRay), iRet[l]+1,5);
+									sprintf(string, "ray%u", (uint32_t)(nEigenRays));
 									matPutVariable(matfile, (const char*)string, pRay);
 									
 									//free memory:
 									mxDestroyArray(pRay);
-									free(temp2D[3]);
-									free(temp2D[4]);
-									free(temp2D);
+									freeDouble2D(temp2D,5);
 									///ray has been written to matfile.
 								}
 							}
@@ -248,6 +281,10 @@ void	calcEigenRayPr(settings_t* settings){
 					}//	if (ray[i].iReturn == FALSE)
 				}//if ( (rHyd >= ray[i].rMin) && (rHyd < ray[i].rMax))
 			}//for(j=0; j<settings->output.nArrayR; j++){
+			if(KEEP_RAYS_IN_MEM == FALSE){
+				//free the ray's memory
+				reallocRayMembers(&ray[i],0);
+			}
 		}//if (ctheta > 1.0e-7)
 	}//for(i=0; i<settings->source.nThetas; i++)
 

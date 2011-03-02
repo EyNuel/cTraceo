@@ -94,8 +94,8 @@ void	calcRayCoords(settings_t* settings){
 				//free the ray's memory
 				reallocRayMembers(&ray[i],0);
 			}
-		}
-	}
+		}//if (ctheta > 1.0e-7)
+	}//for(i=0; i<settings->source.nThetas; i++)
 	mxDestroyArray(pThetas);
 	mxDestroyArray(pTitle);
 	matClose(matfile);

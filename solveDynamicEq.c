@@ -40,36 +40,6 @@
 
 void	solveDynamicEq(settings_t*, ray_t*);
 
-/*
-integer*8 irefl(np),jbdry(np)
-
-integer*8 i,imax
-integer*8 ibdry
-
-real*8 tbdry(2,np)
-
-real*8 es(2),normal(2),taub(2)
-real*8 gradc(2),ngradc(2),dgradc(2)
-real*8 sigma(2),sigman(2)
-
-real*8 thetax,ci,cii,cxc,cnn
-real*8 cri,czi,crri,czzi,crzi
-real*8 ri,zi,si,sigmai,zatii,zbtyi
-real*8 cnj,csj,rm,rn
-real*8 dr,dz,dsi
-real*8 drds,dzds
-real*8 alpha
-real*8 prod
-real*8 mynan,mnsone
-
-complex*8 decay(np)
-complex*8 ap_aq
-*
-* subroutine sdyneq(thetax,imax,irefl,decay,jbdry,tbdry)
-*/
-
-
-
 void	solveDynamicEq(settings_t* settings, ray_t* ray){
 	DEBUG(3,"in\n");
 	int32_t			ibdry;
@@ -135,7 +105,7 @@ void	solveDynamicEq(settings_t* settings, ray_t* ray){
 		drdn = -es.z;
 		dzdn =  es.r;
 		cnn = ( drdn*drdn )*crri + 2 * drdn * dzdn * crzi + (dzdn*dzdn )*czzi;
-		DEBUG(3,"drdn:%e, dzdn:%e, crri:%e, crzi:%e, czzi:%e, cnn:%e\n", drdn, dzdn, crri, crzi, czzi, cnn);
+		DEBUG(8,"drdn:%e, dzdn:%e, crri:%e, crzi:%e, czzi:%e, cnn:%e\n", drdn, dzdn, crri, crzi, czzi, cnn);
 
 		ci = ray->c[i];
 		cxc = ci*ci;
@@ -145,7 +115,7 @@ void	solveDynamicEq(settings_t* settings, ray_t* ray){
 			DEBUG(10,"p[0]:%e, p:%e\n", ray->p[0], ray->p[i]);
 			ray->p[i+1] = ray->p[i] - ray->q[i] * (cnn / cxc) * dsi;
 			ray->q[i+1] = ray->q[i] + ray->p[i] * ci * dsi;
-			DEBUG(3,"p:%e, q:%e, ci:%e, dsi:%e\n",ray->p[i], ray->q[i], ci, dsi);
+			DEBUG(8,"p:%e, q:%e, ci:%e, dsi:%e\n",ray->p[i], ray->q[i], ci, dsi);
 			//Bellhop's refraction correction:
 			sigmaN.r = -sigma.z;
 			sigmaN.z =  sigma.r;

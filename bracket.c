@@ -43,14 +43,22 @@ void	bracket(uintptr_t n, double* x, double xi, uintptr_t* i){
 	ia = 0;
 	ib = n-1;
 
+DEBUG(5,"n: %u\n",		(uint32_t)n);
+DEBUG(5,"xi: %e\n",		xi);
+DEBUG(5,"x[0]: %e\n",	x[0]);
+DEBUG(5,"[n-1]: %e\n",	x[n-1]);
+
 	//if xi is outside the interval [ x[0], x[n-1] ], quit
 	if( (xi < x[0]) || (xi > x[n-1])){
-		printf("n: %u, xi: %lf, x[0]: %lf, x[n-1]: %lf\n", (uint32_t)n, xi, x[0], x[n-1]);
+		printf("n: %u\n",		(uint32_t)n);
+		printf("xi: %e\n",		xi);
+		printf("x[0]: %e\n",	x[0]);
+		printf("[n-1]: %e\n",	x[n-1]);
 		fatal("Bounding error in bracket().\nAborting.");
 	}else{
 		while( ib-ia > 1){
 			//If xi is inside the interval [x(1) x(n)] just divide it by half until ib - ia = 1:
-			im = (ia+ib)/2;		//TODO check what happens with non-integer results
+			im = (ia+ib)/2;
 			if( (xi >= x[ia] ) && ( xi < x[im])){
 				ib = im;
 			}else{
