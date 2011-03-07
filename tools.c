@@ -153,7 +153,7 @@ uint32_t*	reallocUint(uint32_t* old, uintptr_t numUints){
 	if (numUints > 0 && new == NULL)
 		fatal("Memory allocation error.\n");
 	DEBUG(10,"reallocUint(),\t out\n");
-	return old;
+	return new;
 }
 
 int32_t*	mallocInt(uintptr_t numInts){
