@@ -536,11 +536,12 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 						//	Since we alrady know that the second point is inside the object, we only have to test if the first one is
 						//	above or below the object
 
-						//	Case 1: beginning inside box & ending inside box:
-						if (	yOld[0] >= settings->objects.object[j].r[0] &&
-								yOld[0] <= settings->objects.object[j].r[nObjCoords-1] ){
+						//	Case 1: from left to right, beginning inside box & ending in box:
+						if (	yOld[0] <	yNew[0]	&&
+								yOld[0] >=	settings->objects.object[j].r[0] &&
+								yNew[0] <=	settings->objects.object[j].r[nObjCoords-1] ){
 							
-							DEBUG(1,"Case 1: beginning inside box & ending inside box\n");
+							DEBUG(1,"Case 1: from left to right, beginning inside box & ending inside box\n");
 							DEBUG(5,"ri:%lf\n", yOld[0]);
 							boundaryInterpolationExplicit(	&nObjCoords,
 															settings->objects.object[j].r,
@@ -567,10 +568,11 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 								ibdry = 1;
 							}
 
-						//Case 2: beginning left of box & ending inside:
-						}else if (	yOld[0] < settings->objects.object[j].r[0] ){
+						//	Case 2: from left to right, beginning outside box & ending inside:
+						}else if (	yOld[0] <	settings->objects.object[j].r[0] &&
+									yNew[0] <	settings->objects.object[j].r[nObjCoords-1]){
 							
-							DEBUG(1,"Case 2: beginning left of box & ending inside\n");
+							DEBUG(1,"Case 2: from left to right, beginning outside box & ending inside:\n");
 							//Calculate the coords for point A in relation to the beginning of the box
 							//Q: why do this?
 							//R: to be able to determine if these coords are above or below the object.
@@ -584,14 +586,45 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 								ibdry =  1;
 							}
 
-						//Case 3: beginning right of box and ending inside:
-						}else if(	yOld[0] > settings->objects.object[j].r[ nObjCoords-1 ] ){
+						//	Case 3: from right to left, beginning inside of box and ending inside:
+						}else if(	yOld[0] >	yNew[0]	&&
+									yOld[0] <=	settings->objects.object[j].r[ nObjCoords-1 ] &&
+									yNew[0] >=	settings->objects.object[j].r[0]){
 
-							DEBUG(1,"Case 3: beginning right of box and ending inside\n");
+							DEBUG(1,"Case 3: from right to left, beginning outside of box and ending inside:\n");
+							boundaryInterpolationExplicit(	&nObjCoords,
+															settings->objects.object[j].r,
+															settings->objects.object[j].zUp,
+															&settings->objects.surfaceInterpolation,
+															yOld[0],
+															&ziUp,
+															&junkVector,
+															&normal);
+							boundaryInterpolationExplicit(	&nObjCoords,
+															settings->objects.object[j].r,
+															settings->objects.object[j].zDown,
+															&settings->objects.surfaceInterpolation,
+															yOld[0],
+															&ziDown,
+															&junkVector,
+															&normal);
+							DEBUG(1,"ri: %lf, ziDown: %lf, ziUp: %lf\n",ri, ziDown, ziUp);
+							if (yOld[1] < ziDown){
+								rayObjectIntersection(&settings->objects, &j, DOWN, &pointA, &pointB, &pointIsect);
+								ibdry = -1;
+							}else{
+								rayObjectIntersection(&settings->objects, &j, UP, &pointA, &pointB, &pointIsect);
+								ibdry = 1;
+							}
+
+						//	Case 4: from right to left, beginning outside of box and ending inside:
+						}else if(	yOld[0] >	settings->objects.object[j].r[ nObjCoords-1 ] &&
+									yNew[0] >=	settings->objects.object[j].r[0]){
+
 							//Calculate the coords for point A in relation to the end of the box
 							//Q: why do this?
 							//R: to be able to determine if these coords are above or below the object.
-							pointA.z = pointB.z -(pointA.z - pointB.z) / (pointA.r - pointB.r) * (settings->objects.object[j].r[ nObjCoords-1 ] -pointB.r);
+							pointA.z = pointB.z -(pointB.z - pointA.z) / (pointB.r - pointA.r) * (pointB.r - settings->objects.object[j].r[ nObjCoords-1 ]);
 							pointA.r = settings->objects.object[j].r[ nObjCoords-1 ];
 							if (pointA.z < settings->objects.object[j].zUp[ nObjCoords-1 ]){
 								rayObjectIntersection(&settings->objects, &j, DOWN, &pointA, &pointB, &pointIsect);
