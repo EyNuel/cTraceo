@@ -822,12 +822,12 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 		ray->r[ray->nCoords-1]	= settings->source.rbox1;
 	}
 
-	/* Search for refraction points (refraction angles are zero!), rMin, rMax and twisting of rays:	*/
+	
+	/* Search for refraction points (refraction angles are zero!), rMin, rMax and twisting(returning) of rays:	*/
 	//NOTE: We are assuming (safely) that there can't be more refraction points than the ray has coordinates,
 	//		so we can skip memory bounds-checking.
 	ray->nRefrac = 0;
-	
-	for(i=1; i>ray->nCoords-2; i++){
+	for(i=1; i<ray->nCoords-2; i++){
 		ray->rMin = min( ray->rMin, ray->r[i] );
 		ray->rMax = max( ray->rMax, ray->r[i] );
 		prod = ( ray->z[i+1] - ray->z[i] )*( ray->z[i] - ray->z[i-1] );	//TODO: this may be buggy
@@ -837,7 +837,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 			ray->refrac[ray->nRefrac - 1].r = ray->r[i];
 			ray->refrac[ray->nRefrac - 1].z = ray->z[i];
 		}
-	
+		
 		prod = ( ray->r[i+1]-ray->r[i] )*( ray->r[i]-ray->r[i-1] );
 		if ( prod < 0 ){
 			ray->iReturn = TRUE;
@@ -849,10 +849,12 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 	ray-> rMin = min( ray->rMin, ray->r[ray->nCoords-1] );
 	ray-> rMax = max( ray->rMax, ray->r[ray->nCoords-1] );
 	i++;
+/*
 	prod = ( ray->r[i+1]-ray->r[i] )*( ray->r[i]-ray->r[i-1] );
 	if ( prod < 0 ){
 		ray->iReturn = TRUE;
 	}
+*/
 	prod = 0.0;
 	
 	//clip allocated memory for refractions
