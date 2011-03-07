@@ -42,14 +42,13 @@ ALLFILES := $(SRCFILES) $(HDRFILES) $(AUXFILES)
 
 all:	#cTraceo.exe
 		@$(CC) $(CFLAGS) $(LFLAGS) -o bin/cTraceo-64b.bin cTraceo.c
-		@cp bin/cTraceo-64b.bin M-Files/
+
 
 32b:	#cTraceo.exe
 		@$(CC) $(CFLAGS) $(LFLAGS) -march=i686 -m32 -o bin/cTraceo-32b.bin cTraceo.c
 
 pg:
 		@gcc $(CFLAGS) $(LFLAGS) -pg -o bin/cTraceo-64b.bin cTraceo.c
-		@cp bin/cTraceo-64b.bin M-Files/
 
 todo:	#list todos from all files
 		@for file in $(ALLFILES); do fgrep -H -e TODO $$file; done; true

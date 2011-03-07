@@ -12,8 +12,8 @@
 /********************************************************************************
  * Configuration:																*
  *******************************************************************************/
-#define VERBOSE				0	//when set to 1, more information will be shown.
-#define VERBOSITY			5	//verbosity level (0-10) high levels will make the code impractically slow.
+#define VERBOSE				1	//when set to 1, more information will be shown.
+#define VERBOSITY			3	//verbosity level (0-10). High levels will make the code impractically slow (seriously!)
 #define MAX_LINE_LEN		256	//Maximum number of chars to read at once from a file (\n not included)
 #define MEM_FACTOR			20	//The memory allocated for each ray is determined like so: ( abs(rbox2-rbox1)/dsi )* MEM_FACTOR
 								//NOTE:	for deepwater cases, values between 3-5 are ok.
@@ -52,7 +52,7 @@ typedef struct	point{
 
 typedef struct	ray{
 	/*
-	 * NOTE: memory ocupied is 44B overhead + 96B per ray coordinate TODO recalculate, as this has since become larger
+	 * NOTE: memory ocupied is 44B overhead + 96B per ray coordinate. TODO recalculate, as this has since become larger
 	 */
 	uintptr_t		nCoords;
 	uintptr_t		iKill;		//indicates if ray has been "killed"

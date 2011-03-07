@@ -30,6 +30,7 @@
 #include "calcRayCoords.c"
 #include "calcAllRayInfo.c"
 #include "calcEigRayPr.c"
+#include "calcEigRayRF.c"
 #include <sys/time.h>		//for struct timeval
 #include <sys/resource.h>	//for getrusage()
 #include <string.h>
@@ -89,62 +90,62 @@ int main(int argc, char **argv){
 	fprintf(logFile, "OUTPUT:\n");
 	switch(settings->output.calcType){
 		case CALC_TYPE__RAY_COORDS:
-			DEBUG(1,"Calculating ray coordinates.\n");
+			printf("Calculating ray coordinates.\n");
 			fprintf(logFile, "Ray coordinates\n");
 			calcRayCoords(settings);
 			break;
 
 		case CALC_TYPE__ALL_RAY_INFO:
-			DEBUG(1,"Calculating all ray information.\n");
+			printf("Calculating all ray information.\n");
 			fprintf(logFile, "All ray information\n");
 			calcAllRayInfo(settings);
 			break;
 			
 		case CALC_TYPE__EIGENRAYS_PROXIMITY:
-			DEBUG(1,"Calculating eigenrays by Proximity Method.\n");
+			printf("Calculating eigenrays by Proximity Method.\n");
 			fprintf(logFile, "Eigenrays by Proximity Method.\n");
 			calcEigenRayPr(settings);
 			break;
 			
 		case CALC_TYPE__EIGENRAYS_REG_FALSI:
-			DEBUG(1,"Calculating eigenrays by Regula Falsi Method.\n");
+			printf("Calculating eigenrays by Regula Falsi Method.\n");
 			fprintf(logFile, "Eigenrays by Regula Falsi Method.\n");
-			fatal("WIP");
+			calcEigenRayRF(settings);
 			break;
 			
 		case CALC_TYPE__AMP_DELAY_PROXIMITY:
-			DEBUG(1,"Calculating amplitudes and delays by Proximity Method.\n");
+			printf("Calculating amplitudes and delays by Proximity Method.\n");
 			fprintf(logFile, "Amplitudes and delays by Proximity Method.\n");
 			fatal("WIP");
 			break;
 			
 		case CALC_TYPE__AMP_DELAY_REG_FALSI:
-			DEBUG(1,"Calculating amplitudes and delays by Regula Falsi Method.\n");
+			printf("Calculating amplitudes and delays by Regula Falsi Method.\n");
 			fprintf(logFile, "Amplitudes and delays by Regula Falsi Method.\n");
-			fatal("WIP");
+			fatal("WIP - Almost there.");
 			break;
 			
 		case CALC_TYPE__COH_ACOUS_PRESS:
-			DEBUG(1,"Calculating coherent acoustic pressure.\n");
-			fprintf(logFile, "Coherent acoustic pressure by Regula Falsi Method.\n");
+			printf("Calculating coherent acoustic pressure.\n");
+			fprintf(logFile, "Coherent acoustic pressure.\n");
 			fatal("WIP");
 			break;
 			
 		case CALC_TYPE__COH_TRANS_LOSS:
-			DEBUG(1,"Calculating coherent acoustic pressure.\n");
-			fprintf(logFile, "Coherent acoustic pressure by Regula Falsi Method.\n");
+			printf("Calculating coherent transmission loss.\n");
+			fprintf(logFile, "Coherent transmission loss.\n");
 			fatal("WIP");
 			break;
 			
 		case CALC_TYPE__PART_VEL:
-			DEBUG(1,"Calculating particle velocity.\n");
-			fprintf(logFile, "Coherent acoustic pressure by Regula Falsi Method.\n");
+			printf("Calculating particle velocity.\n");
+			fprintf(logFile, "Particle velocity.\n");
 			fatal("WIP");
 			break;
 			
 		case CALC_TYPE__COH_ACOUS_PRESS_PART_VEL:
-			DEBUG(1,"Calculating coherent acoustic pressure and particle velocity.\n");
-			fprintf(logFile, "Coherent acoustic pressure by Regula Falsi Method.\n");
+			printf("Calculating coherent acoustic pressure and particle velocity.\n");
+			fprintf(logFile, "Coherent acoustic pressure and particle velocity.\n");
 			fatal("WIP");
 			break;
 			

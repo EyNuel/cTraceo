@@ -98,7 +98,7 @@ void	calcEigenRayPr(settings_t* settings){
 	mxDestroyArray(pHydArrayR);
 
 
-	//write hydrophone array ranges to file:
+	//write hydrophone array depths to file:
 	pHydArrayZ			= mxCreateDoubleMatrix(1, (int32_t)settings->output.nArrayZ, mxREAL);
 	if(pHydArrayZ == NULL){
 		fatal("Memory alocation error.");
@@ -169,7 +169,7 @@ void	calcEigenRayPr(settings_t* settings){
 						*/
 						
 						//get the index of the lower bracketing element:
-						bracket(			ray[i].nCoords,	ray[i].r, rHyd, &iHyd);
+						bracket(ray[i].nCoords,	ray[i].r, rHyd, &iHyd);
 						DEBUG(8,"nCoords: %u, iHyd:%u\n", (uint32_t)ray[i].nCoords, (uint32_t)iHyd);
 
 						//from index interpolate the rays' depth, travel time and amplitude:
@@ -247,6 +247,7 @@ void	calcEigenRayPr(settings_t* settings){
 									temp2D 		= mallocDouble2D(5,iRet[l]+1);
 
 									//copy content to the new variable:
+									//TODO this is UGLY -find a better way to do it.
 									for (k=0; k<iRet[l]+1; k++){
 										temp2D[0][k]=	ray[i].r[k];
 										temp2D[1][k]=	ray[i].z[k];
