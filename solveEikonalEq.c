@@ -829,10 +829,11 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 			
 		}
 	}
+
 	/*	Ray coordinates have been computed. Finalizing */
-	//adjust memory size of the ray (we don't need more memory than nCoords)
+	//We still need to calculate the exact coords in case the for the last point is outside [rbox1,rbox2], so we add 1
 	ray -> nCoords	= i+1;
-	reallocRayMembers(ray, i+1);
+	//reallocRayMembers(ray, i+1);
 
 	//save reflection counters to ray struct, (these values are later used in calcAllRayInfo())
 	ray->sRefl = sRefl;
@@ -846,13 +847,26 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 	dIc	= ray->ic[ray->nCoords - 1] -ray->ic[ray->nCoords-2];
 
 	if (ray->r[ray->nCoords-1] > settings->source.rbox2){
+		//ray has exited rangebox at right edge
 		ray->z[ray->nCoords-1]	= ray->z[ray->nCoords-2] + (settings->source.rbox2 - ray->r[ray->nCoords-2])* dz/dr;
 		ray->ic[ray->nCoords-1]	= ray->ic[ray->nCoords-2] + (settings->source.rbox2 - ray->r[ray->nCoords-2])* dIc/dr;
 		ray->r[ray->nCoords-1]	= settings->source.rbox2;
+		
+		//adjust memory size of the ray (we don't need more memory than nCoords)
+		reallocRayMembers(ray, ray->nCoords);
+		
 	}else if (ray->r[ray->nCoords-1] < settings->source.rbox1){
+		//ray has exited rangebox at left edge
 		ray->z[ray->nCoords-1]	= ray->z[ray->nCoords-2] + (settings->source.rbox1-ray->r[ray->nCoords-2])* dz/dr;
 		ray->ic[ray->nCoords-1]	= ray->ic[ray->nCoords-2] + (settings->source.rbox1-ray->r[ray->nCoords-2]) * dIc/dr;
 		ray->r[ray->nCoords-1]	= settings->source.rbox1;
+		
+		//adjust memory size of the ray (we don't need more memory than nCoords)
+		reallocRayMembers(ray, ray->nCoords);
+		
+	}else{
+		//the last coordinate isn't outside the rangebox, so we clip the extra coordinate
+		reallocRayMembers(ray, ray->nCoords-1);
 	}
 
 	
