@@ -121,7 +121,7 @@ void	calcEigenRayPr(settings_t* settings){
 		ray[i].theta = thetai;
 		ctheta = fabs( cos(thetai));
 		
-		//Trace a ray as long as it is neither 90 or -90:
+		//Trace a ray as long as it is neither at 90 nor -90:
 		if (ctheta > 1.0e-7){
 			solveEikonalEq(settings, &ray[i]);
 			solveDynamicEq(settings, &ray[i]);
@@ -144,7 +144,6 @@ void	calcEigenRayPr(settings_t* settings){
 						if((int)i==(int)4){
 							DEBUG(1,"i:%u, nCoords: %u\n", (uint32_t)i, (uint32_t)ray[i].nCoords);
 							DEBUG(1,"rMin: %e, rMax: %e\n",ray[i].rMin, ray[i].rMax);
-							
 							
 							mxArray*	pDyingRay	= NULL;
 							MATFile*	matfile2	= NULL;
@@ -170,20 +169,24 @@ void	calcEigenRayPr(settings_t* settings){
 						
 						//get the index of the lower bracketing element:
 						bracket(ray[i].nCoords,	ray[i].r, rHyd, &iHyd);
-						DEBUG(8,"nCoords: %u, iHyd:%u\n", (uint32_t)ray[i].nCoords, (uint32_t)iHyd);
+						DEBUG(3,"non-returning ray: nCoords: %u, iHyd:%u\n", (uint32_t)ray[i].nCoords, (uint32_t)iHyd);
 
-						//from index interpolate the rays' depth, travel time and amplitude:
+						//from index interpolate the rays' depth:
 						intLinear1D(		&ray[i].r[iHyd], &ray[i].z[iHyd],	rHyd, &zRay,	&junkDouble);
-						intLinear1D(		&ray[i].r[iHyd], &ray[i].tau[iHyd],	rHyd, &tauRay,	&junkDouble);
-						intComplexLinear1D(	&ray[i].r[iHyd], &ray[i].amp[iHyd],	rHyd, &ampRay,	&junkComplex);
 
 						//for every hydrophone check distance to ray
-						for(jj=1; jj<=settings->output.nArrayZ; jj++){
+						for(jj=0; jj<settings->output.nArrayZ; jj++){
 							zHyd = settings->output.arrayZ[jj];
 							dz = fabs(zRay-zHyd);
+							DEBUG(4, "dz: %e\n", dz);
 							
 							if (dz < settings->output.miss){
+								DEBUG(3, "Eigenray found\n");
 								nEigenRays += 1;
+
+								//from index interpolate the rays' travel time and amplitude:
+								intLinear1D(		&ray[i].r[iHyd], &ray[i].tau[iHyd],	rHyd, &tauRay,	&junkDouble);
+								intComplexLinear1D(	&ray[i].r[iHyd], &ray[i].amp[iHyd],	rHyd, &ampRay,	&junkComplex);
 
 								///prepare to write ray to matfile:
 								//create a temporary container for the files:
@@ -223,16 +226,14 @@ void	calcEigenRayPr(settings_t* settings){
 						
 					}else{// if (ray[i].iReturn == FALSE)
 
-						DEBUG(8,"nCoords: %u, iHyd:%u\n", (uint32_t)ray[i].nCoords, (uint32_t)iHyd);
+						DEBUG(3,"returning ray: nCoords: %u, iHyd:%u\n", (uint32_t)ray[i].nCoords, (uint32_t)iHyd);
 						//get the indexes of the bracketing points.
 						eBracket(ray[i].nCoords, ray[i].r, rHyd, &nRet, iRet);
 
-						//from each index interpolate the rays' depth, travel time and amplitude:
+						//from each index interpolate the rays' depth:
 						for(l=0; l<nRet; l++){
-							DEBUG(8, "nRet=%u, iRet[%u]= %u\n", (uint32_t)nRet, (uint32_t)l, (uint32_t)iRet[l]);
+							DEBUG(4, "nRet=%u, iRet[%u]= %u\n", (uint32_t)nRet, (uint32_t)l, (uint32_t)iRet[l]);
 							intLinear1D(		&ray[i].r[iRet[l]], &ray[i].z[iRet[l]],		rHyd, &zRay,	&junkDouble);
-							intLinear1D(		&ray[i].r[iRet[l]], &ray[i].tau[iRet[l]],	rHyd, &tauRay,	&junkDouble);
-							intComplexLinear1D(	&ray[i].r[iRet[l]], &ray[i].amp[iRet[l]],	(complex double)rHyd, &ampRay,	&junkComplex);
 
 							//for every hydrophone check if the ray is close enough to be considered an eigenray:
 							for(jj=0;jj<settings->output.nArrayZ; jj++){
@@ -241,6 +242,10 @@ void	calcEigenRayPr(settings_t* settings){
 								
 								if (dz < settings->output.miss){
 									nEigenRays += 1;
+
+									//interpolate the ray's travel time and amplitude:
+									intLinear1D(		&ray[i].r[iRet[l]], &ray[i].tau[iRet[l]],	rHyd, &tauRay,	&junkDouble);
+									intComplexLinear1D(	&ray[i].r[iRet[l]], &ray[i].amp[iRet[l]],	(complex double)rHyd, &ampRay,	&junkComplex);
 
 									///prepare to write ray to matfile:
 									//create a temporary container for the files:
@@ -290,6 +295,7 @@ void	calcEigenRayPr(settings_t* settings){
 	}//for(i=0; i<settings->source.nThetas; i++)
 
 	///Write number of eigenrays to matfile:
+	DEBUG(2,"Number of eigenrays found: %u\n", (uint32_t)nEigenRays);
 	pnEigenRays = mxCreateDoubleMatrix(1,1,mxREAL);
 	copyDoubleToPtr(	&nEigenRays,
 						mxGetPr(pnEigenRays),
