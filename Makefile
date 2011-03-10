@@ -6,10 +6,10 @@
 CFLAGS := 	-Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align \
 			-Wwrite-strings -Wmissing-prototypes -Wmissing-declarations \
 			-Wredundant-decls -Wnested-externs -Winline -Wno-long-long \
-			-Wconversion -Wstrict-prototypes -std=gnu99 -lm -O3\
+			-Wconversion -Wstrict-prototypes -std=gnu99 -O3\
 			-I /usr/local/matlabr14/extern/include\
 #			-D_GNU_SOURCE -Warray-bounds
-LFLAGS := 	-L /usr/local/matlabr14/bin/glnxa64 -leng -lmat -lmex -lut -Wl,-rpath,/usr/local/matlabr14/bin/glnxa64
+LFLAGS := 	-L /usr/local/matlabr14/bin/glnxa64 -lm -leng -lmat -lmex -lut -Wl,-rpath,/usr/local/matlabr14/bin/glnxa64
 
 # Define the compiler and linker comands to use:
 CC 			:= clang
