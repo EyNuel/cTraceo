@@ -69,11 +69,6 @@ void	rayObjectIntersection(objects_t* objects, uint32_t* j, int32_t boundary, po
 void	rayBoundaryIntersection(interface_t* interface, point_t* a, point_t* b, point_t* isect){
 	DEBUG(5,"in\n");
 	uint32_t	i,n;
-	/*
-	double*		rl =	mallocDouble(101);
-	double*		zl =	mallocDouble(101);
-	double*		dz =	mallocDouble(101);
-	*/
 	double		rl[101];
 	double		zl[101];
 	double		dz[101];
@@ -81,7 +76,6 @@ void	rayBoundaryIntersection(interface_t* interface, point_t* a, point_t* b, poi
 	point_t		q2;
 	vector_t	taub;
 	vector_t	normal;
-	//double		dz0;
 	
 	switch(interface->surfaceInterpolation){
 		case SURFACE_INTERPOLATION__FLAT:
@@ -100,7 +94,7 @@ void	rayBoundaryIntersection(interface_t* interface, point_t* a, point_t* b, poi
 		default:
 			DEBUG(7,"Neither a flat nor sloped boundary.\n");
 			n = 101;
-			linearSpaced(n, a->r, b->r, rl);	//TODO Woah?! passed an array to a function expecting pointer... and got no bugs?
+			linearSpaced(n, a->r, b->r, rl);
 			linearSpaced(n, a->z, b->z, zl);
 			
 //TODO: tremendous potential for optimization here. A "paralel for" might do wonders
@@ -130,10 +124,5 @@ void	rayBoundaryIntersection(interface_t* interface, point_t* a, point_t* b, poi
 			break;
 //TODO double check the last 20~ lines
 	}
-	/*
-	free(rl);
-	free(zl);
-	free(dz);
-	*/
 	DEBUG(5,"out\n");
 }

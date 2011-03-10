@@ -38,9 +38,15 @@ void	cValues1D(uintptr_t n, double* xTable, double* cTable, double xi, double* c
 	DEBUG(10,"Entering cValues1D().\n");
 	uintptr_t	i = 0;
 
-	//TODO invert order if clauses:
-	
-	if( xi < xTable[1]){
+	//Note: the case that occurs most frequently is listed at top, so as to eliminate uneeded comparinson operations.
+
+	if(	xi >= xTable[2]	&&	xi <xTable[n-3]){
+		//for all other cases do barycentric cubic interpolation
+		bracket(n, xTable, xi, &i);
+		intBarycCubic1D(	&xTable[i-1],
+							&cTable[i-1],
+							xi, ci, cxi, cxxi);
+	}else if( xi < xTable[1]){
 		//if xi is in first interval of xTable, do linear interpolation
 		intLinear1D(	&xTable[0],
 						&cTable[0],
@@ -54,25 +60,20 @@ void	cValues1D(uintptr_t n, double* xTable, double* cTable, double xi, double* c
 						xi, ci, cxi);
 		*cxxi = 0.0;
 		
-	}else if(( xi >= xTable[1] ) && ( xi < xTable[2])){
+	}else if( xi >= xTable[1]  &&  xi < xTable[2]){
 		//if xi is in second interval of xTable, do barycentric parabolic interpolation
 		intBarycParab1D(	&xTable[0],
 							&cTable[0],
 							xi, ci, cxi, cxxi);
 		
-	}else if(( xi >= xTable[n-3] ) && ( xi < xTable[n-2] )){
+	}else if( xi >= xTable[n-3]  &&  xi < xTable[n-2] ){
 		//if xi is in second to last interval of xTable, do barycentric parabolic interpolation
 		intBarycParab1D(	&xTable[n-3],
 							&cTable[n-3],
 							xi, ci, cxi, cxxi);
 		
 	}else{
-		//for all other cases do barycentric cubic interpolation
-		bracket(n, xTable, xi, &i);
-		intBarycCubic1D(	&xTable[i-1],
-							&cTable[i-1],
-							xi, ci, cxi, cxxi);
-
+		fatal("in cValues1D(): This should not be possible.");		//TODO replace with assertion?
 	}
 	DEBUG(10,"Leaving cValues1D.\n");
 }

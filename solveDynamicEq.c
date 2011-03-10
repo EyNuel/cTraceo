@@ -60,14 +60,6 @@ void	solveDynamicEq(settings_t* settings, ray_t* ray){
 	complex double	ap_aq;
 	uintptr_t		i;
 
-	#if 0
-	ray->p		= mallocDouble(ray->nCoords);
-	ray->q		= mallocDouble(ray->nCoords);
-	ray->caustc	= mallocDouble(ray->nCoords);
-	#endif
-	//lambda = ray->c[0]/settings->source.freqx;		//TODO where is this used?
-
-	
 	//Define initial conditions:
 	ray->p[0]		= 1;
 	ray->q[0]		= 0;

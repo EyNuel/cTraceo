@@ -493,7 +493,10 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 			fNew[2] = slowness.r;
 			fNew[3] = slowness.z;
 		}	//if ((ray->iKill == FALSE ) && (zi < altInterpolatedZ || zi > batInterpolatedZ))
-		/* TODO Object reflection	*/
+
+		/*************************
+		 *  Object reflection:
+		 *************************/
 		if (settings->objects.numObjects > 0){
  			for(j=0; j<settings->objects.numObjects; j++){
 				nObjCoords = settings->objects.object[j].nCoords;
@@ -877,7 +880,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 	for(i=1; i<ray->nCoords-2; i++){
 		ray->rMin = min( ray->rMin, ray->r[i] );
 		ray->rMax = max( ray->rMax, ray->r[i] );
-		prod = ( ray->z[i+1] - ray->z[i] )*( ray->z[i] - ray->z[i-1] );	//TODO: this may be buggy
+		prod = ( ray->z[i+1] - ray->z[i] )*( ray->z[i] - ray->z[i-1] );
 		
 		if ( (prod < 0) && (ray->iRefl[i] != 1) ){
 			ray->nRefrac++;
