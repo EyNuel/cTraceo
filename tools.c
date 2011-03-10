@@ -10,12 +10,12 @@
  *																				*
  *******************************************************************************/
 
-#pragma once
+#pragma		once
 #include	"globals.h"
 #include	<stdlib.h>
 #include	<string.h>
-#include <sys/time.h>		//for struct time_t
-#include <sys/resource.h>	//for getrusage()
+#include	<sys/time.h>		//for struct time_t
+#include	<sys/resource.h>	//for getrusage()
 
 /** NOTE: the memory reallocation functions contained in this file are mostly not in use du to random occurences of "bus error".                       
  */
@@ -24,6 +24,7 @@
 /****************************
  *	Function prototypes		*
  ***************************/
+uint32_t		isnan_d(double);
 double			min(double, double);
 double			max(double, double);
 void 			fatal(const char*);
@@ -59,6 +60,16 @@ void			printCpuTime(FILE*);
  *	Actual Functions		*
  ***************************/
 
+
+uint32_t isnan_d(double x){
+	//Note that isnan() is only defined for the float data type, and not for doubles
+	//NANs are never equal to anything -even themselves:
+	if (x!=x){
+		return TRUE;
+	}else{
+		return FALSE;
+	}
+}
 
 double	min(double a, double b){
 	if( a <= b){
