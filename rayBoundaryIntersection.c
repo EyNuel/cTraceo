@@ -67,7 +67,7 @@ void	rayObjectIntersection(objects_t* objects, uint32_t* j, int32_t boundary, po
 	
 
 void	rayBoundaryIntersection(interface_t* interface, point_t* a, point_t* b, point_t* isect){
-	DEBUG(3,"in\n");
+	DEBUG(5,"in\n");
 	uint32_t	i,n;
 	/*
 	double*		rl =	mallocDouble(101);
@@ -98,7 +98,7 @@ void	rayBoundaryIntersection(interface_t* interface, point_t* a, point_t* b, poi
 			break;
 			
 		default:
-			DEBUG(3,"Neither a flat nor sloped boundary.\n");
+			DEBUG(7,"Neither a flat nor sloped boundary.\n");
 			n = 101;
 			linearSpaced(n, a->r, b->r, rl);	//TODO Woah?! passed an array to a function expecting pointer... and got no bugs?
 			linearSpaced(n, a->z, b->z, zl);
@@ -112,14 +112,14 @@ void	rayBoundaryIntersection(interface_t* interface, point_t* a, point_t* b, poi
 				//bdryi(nr,tabr,tabz,itype,ri,zi,taub,normal)
 				boundaryInterpolation(interface, rl[i], &isect->z, &taub, &normal);
 				dz[i] = zl[i] - isect->z;
-				DEBUG(3,"dz0: %lf, dz[%u]: %lf | rl[%u]: %lf, rz[%u]: %lf\n", dz[0], i, dz[i], i, rl[i], i, zl[i]);
+				DEBUG(7,"dz0: %lf, dz[%u]: %lf | rl[%u]: %lf, rz[%u]: %lf\n", dz[0], i, dz[i], i, rl[i], i, zl[i]);
 				if( (dz[0] * dz[i]) <= 0){
 					//intersection point has been found, exit for-loop.
-					DEBUG(3,"Intersection point found at (%lf, %lf)\n", isect->r, isect->z);
+					DEBUG(7,"Intersection point found at (%lf, %lf)\n", isect->r, isect->z);
 					break;
 				}
 			}
-			DEBUG(3,"Intersection point found at (%lf, %lf)\n", isect->r, isect->z);
+			DEBUG(7,"Intersection point found at (%lf, %lf)\n", isect->r, isect->z);
 			//isect->r = rl[i-1] - dz[i-1] * (rl[i] - rl[i-1]) / (dz[i] - dz[i-1]);
 			isect->r = rl[i-1] - dz[i-1] * (rl[i] - rl[i-1]) / (dz[i] - dz[i-1]);
 			isect->z = (isect->r - a->r) / (b->r - a->r) * (b->z - a->z) + a->z;
@@ -135,5 +135,5 @@ void	rayBoundaryIntersection(interface_t* interface, point_t* a, point_t* b, poi
 	free(zl);
 	free(dz);
 	*/
-	DEBUG(3,"out\n");
+	DEBUG(5,"out\n");
 }

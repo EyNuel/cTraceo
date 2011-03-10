@@ -12,7 +12,7 @@
 /********************************************************************************
  * Configuration:																*
  *******************************************************************************/
-#define VERBOSE				1	//when set to 1, more information will be shown.
+#define VERBOSE				0	//when set to 1, more information will be shown.
 #define VERBOSITY			3	//verbosity level (0-10). High levels will make the code impractically slow (seriously!)
 #define MAX_LINE_LEN		256	//Maximum number of chars to read at once from a file (\n not included)
 #define MEM_FACTOR			20	//The memory allocated for each ray is determined like so: ( abs(rbox2-rbox1)/dsi )* MEM_FACTOR
@@ -29,7 +29,7 @@
 #define WHERESTR				"[%s,\tline %d]:\t"
 #define WHEREARG				__FILE__, __LINE__
 #define DEBUG(level, ...)		if(VERBOSE == TRUE && VERBOSITY >= level){fprintf(stderr, WHERESTR, WHEREARG);fprintf(stderr, __VA_ARGS__);}
-
+//TODO rewrite DEBUG so that it doesn't appear in code when VERBOSE is undefined
 
 /********************************************************************************
  * Minor data structures.														*

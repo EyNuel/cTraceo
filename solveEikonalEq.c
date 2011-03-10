@@ -339,11 +339,11 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 			//	end of "ray above surface?"
 			}else if (zi > batInterpolatedZ){	//	Ray below bottom?
 				DEBUG(5,"ray below bottom.\n");
-				DEBUG(3,"ri: %lf, zi: %lf\n", ri, zi);
+				DEBUG(8,"ri: %lf, zi: %lf\n", ri, zi);
 				rayBoundaryIntersection(&(settings->batimetry), &pointA, &pointB, &pointIsect);
 				ri = pointIsect.r;
 				zi = pointIsect.z;
-				DEBUG(3,"ri: %lf, zi: %lf\n", ri, zi);
+				DEBUG(8,"ri: %lf, zi: %lf\n", ri, zi);
 				boundaryInterpolation(	&(settings->batimetry), ri, &batInterpolatedZ, &tauB, &normal);
 				//Invert the normal at the bottom for reflection:
 				normal.r = -normal.r;	//NOTE: differs from altimetry
@@ -522,11 +522,11 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 													&ziUp,
 													&junkVector,
 													&normal);
-					DEBUG(1,"ri: %lf, ziDown: %lf, ziUp: %lf\n",ri, ziDown, ziUp);
+					DEBUG(5,"ri: %lf, ziDown: %lf, ziUp: %lf\n",ri, ziDown, ziUp);
 					//Second point is inside the object?
 					if (	(yNew[1] >=	ziDown 	) &&
 							(yNew[1] <=	ziUp   )){
-						DEBUG(1, "2nd point inside object.\n");
+						DEBUG(3, "2nd point inside object.\n");
 						pointA.r = yOld[0];
 						pointA.z = yOld[1];
 						pointB.r = yNew[0];
@@ -541,8 +541,8 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 								yOld[0] >=	settings->objects.object[j].r[0] &&
 								yNew[0] <=	settings->objects.object[j].r[nObjCoords-1] ){
 							
-							DEBUG(1,"Case 1: from left to right, beginning inside box & ending inside box\n");
-							DEBUG(5,"ri:%lf\n", yOld[0]);
+							DEBUG(5,"Case 1: from left to right, beginning inside box & ending inside box\n");
+							DEBUG(7,"ri:%lf\n", yOld[0]);
 							boundaryInterpolationExplicit(	&nObjCoords,
 															settings->objects.object[j].r,
 															settings->objects.object[j].zUp,
@@ -559,7 +559,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 															&ziDown,
 															&junkVector,
 															&normal);
-							DEBUG(1,"ri: %lf, ziDown: %lf, ziUp: %lf\n",ri, ziDown, ziUp);
+							DEBUG(7,"ri: %lf, ziDown: %lf, ziUp: %lf\n",ri, ziDown, ziUp);
 							if (yOld[1] < ziDown){
 								rayObjectIntersection(&settings->objects, &j, DOWN, &pointA, &pointB, &pointIsect);
 								ibdry = -1;
@@ -572,7 +572,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 						}else if (	yOld[0] <	settings->objects.object[j].r[0] &&
 									yNew[0] <	settings->objects.object[j].r[nObjCoords-1]){
 							
-							DEBUG(1,"Case 2: from left to right, beginning outside box & ending inside:\n");
+							DEBUG(5,"Case 2: from left to right, beginning outside box & ending inside:\n");
 							//Calculate the coords for point A in relation to the beginning of the box
 							//Q: why do this?
 							//R: to be able to determine if these coords are above or below the object.
@@ -591,7 +591,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 									yOld[0] <=	settings->objects.object[j].r[ nObjCoords-1 ] &&
 									yNew[0] >=	settings->objects.object[j].r[0]){
 
-							DEBUG(1,"Case 3: from right to left, beginning outside of box and ending inside:\n");
+							DEBUG(5,"Case 3: from right to left, beginning outside of box and ending inside:\n");
 							boundaryInterpolationExplicit(	&nObjCoords,
 															settings->objects.object[j].r,
 															settings->objects.object[j].zUp,
@@ -608,7 +608,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 															&ziDown,
 															&junkVector,
 															&normal);
-							DEBUG(1,"ri: %lf, ziDown: %lf, ziUp: %lf\n",ri, ziDown, ziUp);
+							DEBUG(7,"ri: %lf, ziDown: %lf, ziUp: %lf\n",ri, ziDown, ziUp);
 							if (yOld[1] < ziDown){
 								rayObjectIntersection(&settings->objects, &j, DOWN, &pointA, &pointB, &pointIsect);
 								ibdry = -1;
@@ -642,7 +642,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 						ri = pointIsect.r;
 						zi = pointIsect.z;
 
-						DEBUG(4, "ri: %lf, zi: %lf\n", ri, zi);
+						DEBUG(7, "ri: %lf, zi: %lf\n", ri, zi);
 
 						//Face reflection: upper or lower? 
 						if (	ibdry == -1 ){	
