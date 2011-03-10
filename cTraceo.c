@@ -110,6 +110,7 @@ int main(int argc, char **argv){
 		case CALC_TYPE__EIGENRAYS_REG_FALSI:
 			printf("Calculating eigenrays by Regula Falsi Method.\n");
 			fprintf(logFile, "Eigenrays by Regula Falsi Method.\n");
+			//fatal("Not working - wip.");
 			calcEigenRayRF(settings);
 			break;
 			

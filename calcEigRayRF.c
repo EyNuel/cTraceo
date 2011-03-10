@@ -93,7 +93,8 @@ void	calcEigenRayRF(settings_t* settings){
 	double*			thetas		= NULL;
 	double 			thetai, ctheta;
 	double**		depths		= NULL;
-	uintptr_t		i, j, k, l, nRays, nEigenRays, iHyd;
+	uintptr_t		i, j, k, l, nRays, iHyd;
+	uintptr_t		nPossibleEigenRays, nFoundEigenRays;
 	double			zRay, zHyd, rHyd;
 	ray_t*			ray = NULL;
 	double*			dz = NULL;
@@ -102,15 +103,13 @@ void	calcEigenRayRF(settings_t* settings){
 	double*			thetaL = NULL;
 	double*			thetaR = NULL;
 	double			junkDouble;
-	uint32_t		nFail, iFail = FALSE, nTrial;
+	uint32_t		nTrial;
 	ray_t*			tempRay = NULL;
-	double			thetaE, theta0, f0;
+	double			theta0, f0;
 	double**		temp2D = NULL;
 	char* 			string	= mallocChar(10);
 	uint32_t		success = FALSE;
 
-
-	nEigenRays = 0;
 
 	matfile 	= matOpen("eig.mat", "w");
 	pThetas		= mxCreateDoubleMatrix(1, (int32_t)settings->source.nThetas, mxREAL);
@@ -164,10 +163,13 @@ void	calcEigenRayRF(settings_t* settings){
 	depths = mallocDouble2D(settings->source.nThetas, settings->output.nArrayR);
 	ray = makeRay(settings->source.nThetas);
 	
-	//Solve the EIKonal and the Dynamic sets of EQuations:
+	/*******************************************************************************************************************
+	 * 	1)	Create a set of arrays (thetas[], depths[][]) that relate the launching angles of the rays with their depth
+	 *		at each of the hydrophone array's depths:
+	 */
+	DEBUG(2,"Calculting preliminary rays:\n");
 	nRays = 0;
-	nEigenRays = 0;
-	
+
 	for(i=0; i<settings->source.nThetas; i++){
 		DEBUG(3, "--\n\t\tRay Launching angle: %lf\n", settings->source.thetas[i]);
 		thetai = -settings->source.thetas[i]*M_PI/180.0;
@@ -178,7 +180,6 @@ void	calcEigenRayRF(settings_t* settings){
 		if (ctheta > 1.0e-7){
 			thetas[nRays] = thetai;
 			DEBUG(3, "thetas[%u]: %e\n", (uint32_t)nRays, thetas[nRays]);
-			nRays++;
 			solveEikonalEq(settings, &ray[i]);
 			solveDynamicEq(settings, &ray[i]);
 			
@@ -187,7 +188,7 @@ void	calcEigenRayRF(settings_t* settings){
 				fatal("Returning eigenrays can only be determined by Proximity.\nAborting");
 			}
 			
-			//Got the ray? then fill the matrix of depths: 
+			//Ray calculted; now fill the matrix of depths: 
 			for(j=0; j<settings->output.nArrayR; j++){
 				rHyd = settings->output.arrayR[j];
 				
@@ -199,26 +200,30 @@ void	calcEigenRayRF(settings_t* settings){
 					
 					//interpolate the ray depth at the range coord of hydrophone
 					intLinear1D(&ray[i].r[iHyd], &ray[i].z[iHyd], rHyd, &zRay, &junkDouble);
-					depths[i][j] = zRay;
+					depths[nRays][j] = zRay;
 					DEBUG(3,"rHyd: %lf; rMin: %lf; rMax: %lf\n", rHyd, ray[i].rMin, ray[i].rMax);
 					DEBUG(3,"nCoords: %u, rHyd: %lf; iHyd: %u, zRay: %lf\n", (uint32_t)ray[i].nCoords, rHyd, (uint32_t)iHyd, zRay);
 				}else{
-					depths[i][j] = NAN;
+					depths[nRays][j] = NAN;
 				}
 			}
 			reallocRayMembers(&ray[i],0);
+			nRays++;
 		}
 	}
 	free(ray);
+	/**	1)	Done.
+	 */
+	DEBUG(3, "Preliminary rays calculated.\n");
 	
 	/********************************************************************************
-	 *	Angle loop finished? proceed searching eigenrays at each point of the array
+	 *	2)	Proceed to searching for possible eigenrays at each point of the array:
 	 */
 
-	//allocate memmory for some temporary variables
-	dz = mallocDouble(nRays);
-	thetaL = mallocDouble(nRays);
-	thetaR = mallocDouble(nRays);
+	//allocate memory for some temporary variables
+	dz =		mallocDouble(nRays);
+	thetaL =	mallocDouble(nRays);
+	thetaR =	mallocDouble(nRays);
 
 	//	iterate over....
 	for (i=0; i<settings->output.nArrayR; i++){
@@ -227,113 +232,137 @@ void	calcEigenRayRF(settings_t* settings){
 		for(j=0; j<settings->output.nArrayZ; j++){
 			zHyd = settings->output.arrayZ[j];
 			DEBUG(3, "i: %u; j: %u; rHyd:%lf, zHyd:%lf\n",(uint32_t)i, (uint32_t)j, rHyd, zHyd );
-			//At each hydrophone calculate the difference between the hydrophone and ray depths:
+			
+			//for each ray calculate the difference between the hydrophone and ray depths:
 			for(k=0; k<nRays; k++){
 				dz[k] = zHyd - depths[k][i];
 				DEBUG(3,"dz[%u]= %lf\n", (uint32_t)k, dz[k]);
 			}
 			
-			// Determine the number of eigenrays by looking at sign variations (or zero values) of the difference:
-			nEigenRays = 0;
+			/** By looking at sign variations (or zero values) of dz[]:
+			 *		:: determine the number of possible eigenrays 
+			 * 		:: find the launching angles of adjacent rays that pass above and below (named L and R) a hydrophone
+			 * 			(which implies that there may be an intermediate launching angle that corresponds to an eigenray.
+			 */
+			nPossibleEigenRays = 0;
 			for(k=0; k<nRays-1; k++){
 				fl = dz[k];
 				fr = dz[k+1];
 				prod = fl*fr;
+				DEBUG(3, "k: %u; thetaL: %e; thetaR: %e\n", (uint32_t)k, thetaL[k], thetaR[k]);
 				
-				if(	isnan((float)depths[k][i]) == FALSE	&&
-					isnan((float)depths[k+1][i]) == FALSE	){
+				if(	isnan_d(depths[k][i]) == FALSE	&&
+					isnan_d(depths[k+1][i]) == FALSE	){
 					DEBUG(3, "Not a NAN\n");
 					
 					if(	(fl == 0.0) && (fr != 0.0)){
-						thetaL[nEigenRays] = thetas[k];
-						thetaR[nEigenRays] = thetas[k+1];
-						nEigenRays++;
+						thetaL[nPossibleEigenRays] = thetas[k];
+						thetaR[nPossibleEigenRays] = thetas[k+1];
+						nPossibleEigenRays++;
 					
 					}else if(	(fr == 0.0) && (fl != 0.0)){
-						thetaL[nEigenRays] = thetas[k];
-						thetaR[nEigenRays] = thetas[k+1];
-						nEigenRays++;
+						thetaL[nPossibleEigenRays] = thetas[k];
+						thetaR[nPossibleEigenRays] = thetas[k+1];
+						nPossibleEigenRays++;
 					
 					}else if(prod < 0.0){
-						thetaL[nEigenRays] = thetas[k];
-						thetaR[nEigenRays] = thetas[k+1];
-						nEigenRays++;
+						thetaL[nPossibleEigenRays] = thetas[k];
+						thetaR[nPossibleEigenRays] = thetas[k+1];
+						nPossibleEigenRays++;
 					
 					}
-					DEBUG(3, "thetaL: %e, thetaR: %e\n", thetaL[nEigenRays], thetaR[nEigenRays]);
+					DEBUG(3, "thetaL: %e, thetaR: %e\n", thetaL[nPossibleEigenRays-1], thetaR[nPossibleEigenRays-1]);
+				}else{
+					DEBUG(4, "Its a NAN\n");
 				}
-				DEBUG(3, "nEigenRays: %u\n", (uint32_t)nEigenRays);
-				if (nEigenRays > nRays){
+				if (nPossibleEigenRays > nRays){
 					//this should not be possible. TODO replace by assertion?
-					fatal("Number of eigenrays exceeds number of calculated rays.\nAborting.");
+					fatal("Number of possible eigenrays exceeds number of calculated rays.\nAborting.");
 				}
 			}
-		
+
 			//Time to find eigenrays; either we are lucky or we need to apply regula falsi:
-			nFail = 0;
-DEBUG(3,"1\n");
-
-tempRay = makeRay(1);
-DEBUG(3,"2\n");
-			//If nEigenRays = 0 this loop will not do anything:
-			DEBUG(3, "nEigenRays: %u\n", (uint32_t)nEigenRays);
-			for(l=0; l<nEigenRays; l++){
+			/** We now know how many possible eigenrays this hydrophone has (nPossibleEigenRays),
+			 *	and for each of them we have the bracketing launching angles.
+			 *	It is now time to determine the "exact" launching angle of each eigenray.
+			 */
+			DEBUG(3, "nPossibleEigenRays: %u\n", (uint32_t)nPossibleEigenRays);
+			tempRay = makeRay(1);
+			nFoundEigenRays = 0;
+			for(l=0; l<nPossibleEigenRays; l++){		//Note that if nPossibleEigenRays = 0 this loop will not be executed:
 				settings->source.rbox2 = rHyd;
+				DEBUG(3,"l: %u\n", (uint32_t)l);
 				
-				DEBUG(3,"3; l: %u\n", (uint32_t)l);
 				//Determine "left" ray's depth at rHyd:
-				tempRay->theta = thetaL[l];
+				tempRay[0].theta = thetaL[l];
 				solveEikonalEq(settings, tempRay);
-				fl = tempRay->z[tempRay->nCoords-1] - zHyd;
+				fl = tempRay[0].z[tempRay[0].nCoords-1] - zHyd;
+				//reset the ray members to zero:
+				reallocRayMembers(tempRay, 0);	
+				
+				//Determine "right" ray's depth at rHyd:
+				tempRay[0].theta = thetaR[l];
+				solveEikonalEq(settings, tempRay);
+				fr = tempRay[0].z[tempRay[0].nCoords-1] - zHyd;
 				//reset the ray members to zero:
 				reallocRayMembers(tempRay, 0);	
 
-				DEBUG(3,"4\n");
-				//Determine "right" ray's depth at rHyd:
-				tempRay->theta = thetaR[l];
-				solveEikonalEq(settings, tempRay);
-				fr = tempRay->z[tempRay->nCoords-1] - zHyd;
-				//reset the ray members to zero:
-				reallocRayMembers(tempRay, 0);	
-				DEBUG(3,"5\n");
+				//check if either the "left" or "right" ray pass at a distance within the defined threshold
 				if (fabs(fl) <= settings->output.miss){
-					thetaE = thetaL[l];
-					iFail = FALSE;
+					DEBUG(3, "\"left\" is eigenray.\n");
+					theta0 = thetaL[l];
+					nFoundEigenRays++;
+					success = TRUE;
 				
 				}else if (fabs(fr) <= settings->output.miss){
-					thetaE = thetaR[l];
-					iFail = FALSE;
-				
+					DEBUG(3, "\"right\" is eigenray.\n");
+					theta0 = thetaR[l];
+					nFoundEigenRays++;
+					success = TRUE;
+
+				//if not, try to find the "exact" launching angle
 				}else{
+					DEBUG(3, "Neither \"left\" nor \"right\" ray are close enough to be eigenrays.\nApplying Regula-Falsi...\n");
 					nTrial = 0;
+					success = FALSE;
+					
 					//here comes the actual Regula-Falsi loop:
 					while(success == FALSE){
+						nTrial++;
+						
+						if (nTrial > 21){
+							printf("(rHyd,zHyd)= %e, %e\n", rHyd, zHyd);
+							printf("Eigenray search failure, skipping to next case...\n");
+							//iFail = TRUE;
+							break;
+						}
+						
 						theta0 = thetaR[l] - fr*( thetaL[l] - thetaR[l] )/( fl - fr );
 						DEBUG(3, "l: %u; thetaR[l]: %e; thetaL[l]: %e; theta0: %e; fl: %e; fr: %e;\n",
 								(uint32_t)l, thetaR[l], thetaL[l], 			theta0,		fl,		fr);
-						if (nTrial > 21){
-							iFail = TRUE;
-							printf("(rHyd,zHyd)= %e, %e\n", rHyd, zHyd);
-							printf("Eigenray search failure, skipping to next case...\n");
-						}
 						
-						tempRay->theta = theta0;
+						//find the distance between the new ray and the hydrophone:
+						tempRay[0].theta = theta0;
 						solveEikonalEq(settings, tempRay);
-						f0 = tempRay->z[tempRay->nCoords-1] - zHyd;
+						f0 = tempRay[0].z[tempRay[0].nCoords-1] - zHyd;
 						//reset the ray members to zero:
-						DEBUG(3, "nCoords: %u\n", (uint32_t)tempRay->nCoords);
+						DEBUG(3, "nCoords: %u\n", (uint32_t)tempRay[0].nCoords);
 						reallocRayMembers(tempRay, 0);
 						DEBUG(3, "zHyd: %e; miss: %e, nTrial: %u, f0: %e\n", zHyd, settings->output.miss, (uint32_t)nTrial, f0);
 						
+						//check if the new rays is close enough to the hydrophone to be considered and eigenray:
 						if (fabs(f0) < settings->output.miss){
-							iFail = FALSE;
+//							iFail = FALSE
+							DEBUG(3, "Found eigenray by applying Regula-Falsi.\n");
 							success = TRUE;
+							nFoundEigenRays++;
 							break;
 						
-						}else if (iFail == FALSE ){
+						//if the root wasn't found, do another Regula-Falsi iterarion:
+						}else{
 							DEBUG(3, "ASD\n");
 							prod = fl*f0;
-							nTrial++;
+							
 							if ( prod < 0.0 ){
 								DEBUG(3, "ASD1\n");
 								thetaR[l] = theta0;
@@ -343,40 +372,38 @@ DEBUG(3,"2\n");
 								thetaL[l] = theta0;
 								fl = f0;
 							}
-							success = FALSE;
 						}
 					}//while()
-					success = FALSE;
-					DEBUG(3, "iFail: %u\n", iFail);
+					//DEBUG(3, "iFail: %u\n", iFail);
 				}
-				DEBUG(3,"iFail: %u\n", (uint32_t)iFail);
-				if (iFail == FALSE){
-					nEigenRays++;
+				//DEBUG(3,"iFail: %u\n", (uint32_t)iFail);
+				if (success == TRUE){
 
-					tempRay->theta = theta0;
+					//finally: get the coordinates and amplitudes of the eigenray
+					tempRay[0].theta = theta0;
 					solveEikonalEq(settings, tempRay);
 					solveDynamicEq(settings, tempRay);
 
 					///prepare to write ray to matfile:
 					temp2D 		= malloc(5*sizeof(uintptr_t));
-					temp2D[0]	= tempRay->r;
-					temp2D[1]	= tempRay->z;
-					temp2D[2]	= tempRay->tau;
-					temp2D[3]	= mallocDouble(tempRay->nCoords);
-					temp2D[4]	= mallocDouble(tempRay->nCoords);
-					for(k=0; k<tempRay->nCoords; k++){
-						temp2D[3][k] = creal( tempRay->amp[k] );
-						temp2D[4][k] = cimag( tempRay->amp[k] );
+					temp2D[0]	= tempRay[0].r;
+					temp2D[1]	= tempRay[0].z;
+					temp2D[2]	= tempRay[0].tau;
+					temp2D[3]	= mallocDouble(tempRay[0].nCoords);
+					temp2D[4]	= mallocDouble(tempRay[0].nCoords);
+					for(k=0; k<tempRay[0].nCoords; k++){
+						temp2D[3][k] = creal( tempRay[0].amp[k] );
+						temp2D[4][k] = cimag( tempRay[0].amp[k] );
 					}
 
 					//copy data to mxArray and write ray to file:
-					pRay = mxCreateDoubleMatrix(5, (int32_t)tempRay->nCoords, mxREAL);
+					pRay = mxCreateDoubleMatrix(5, (int32_t)tempRay[0].nCoords, mxREAL);
 					if(pRay == NULL){
 						fatal("Memory alocation error.");
 					}
-					copyDoubleToPtr2D(temp2D, mxGetPr(pRay), tempRay->nCoords,5);
+					copyDoubleToPtr2D(temp2D, mxGetPr(pRay), tempRay[0].nCoords,5);
 
-					sprintf(string, "ray%u", (uint32_t)(nEigenRays+1));
+					sprintf(string, "ray%u", (uint32_t)(nFoundEigenRays));
 					matPutVariable(matfile, (const char*)string, pRay);
 
 					//reset the ray members to zero:
@@ -389,18 +416,20 @@ DEBUG(3,"2\n");
 					///ray has been written to matfile
 				}
 			}
+			DEBUG(3, "nFoundEigenRays: %u\n", (uint32_t)nFoundEigenRays);
 		}
 	}
 
 	///Write number of eigenrays to matfile:
 	pnEigenRays = mxCreateDoubleMatrix(1,1,mxREAL);
-	junkDouble = (double)nEigenRays;
+	junkDouble = (double)nFoundEigenRays;
 	copyDoubleToPtr(	&junkDouble,
 						mxGetPr(pnEigenRays),
 						1);
 	matPutVariable(matfile, "nerays", pnEigenRays);
 	mxDestroyArray(pnEigenRays);
-
+	DEBUG(3, "nFoundEigenRays: %u\n", (uint32_t)nFoundEigenRays);
+	
 	//Free memory
 	matClose(matfile);
 	free(string);
