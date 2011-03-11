@@ -24,9 +24,9 @@
 /****************************
  *	Function prototypes		*
  ***************************/
-uint32_t		isnan_d(double);
-double			min(double, double);
-double			max(double, double);
+uint32_t		isnan_d(float);
+float			min(float, float);
+float			max(float, float);
 void 			fatal(const char*);
 FILE*			openFile(const char* , const char[4]);
 char*			mallocChar(uintptr_t);
@@ -34,26 +34,26 @@ uint32_t*		mallocUint(uintptr_t);
 uint32_t*		reallocUint(uint32_t*, uintptr_t);
 int32_t*		mallocInt(uintptr_t);
 int32_t*		reallocInt(int32_t*, uintptr_t);
-double*			mallocDouble(uintptr_t);
-double*			reallocDouble(double*, uintptr_t);
-double**		mallocDouble2D(uintptr_t, uintptr_t);
-void			freeDouble2D(double**, uintptr_t);
-complex double*	mallocComplex(uintptr_t);
-complex double*	reallocComplex(complex double*, uintptr_t);
+float*			mallocfloat(uintptr_t);
+float*			reallocfloat(float*, uintptr_t);
+float**		mallocfloat2D(uintptr_t, uintptr_t);
+void			freefloat2D(float**, uintptr_t);
+complex float*	mallocComplex(uintptr_t);
+complex float*	reallocComplex(complex float*, uintptr_t);
 settings_t*		mallocSettings(void);
 vector_t*		mallocVector(uintptr_t);
 vector_t*		reallocVector(vector_t*, uintptr_t);
 point_t*		mallocPoint(uintptr_t);
 point_t*		reallocPoint(point_t*, uintptr_t);
-double 			readDouble(FILE*);
+float 			readfloat(FILE*);
 int32_t			readInt(FILE*);
 char*			readStringN(FILE*, uint32_t);
 void			skipLine(FILE*);
 void			printSettings(settings_t*);
 ray_t*			makeRay(uintptr_t);
 void			reallocRayMembers(ray_t*, uintptr_t);
-void			copyDoubleToPtr(double*, double*, uintptr_t);
-void			copyDoubleToPtr2D(double**, double*, uintptr_t, uintptr_t);
+void			copyDoubleToPtr(float*, double*, uintptr_t);
+void			copyDoubleToPtr2D(float**, double*, uintptr_t, uintptr_t);
 void			printCpuTime(FILE*);
 
 /****************************
@@ -61,8 +61,8 @@ void			printCpuTime(FILE*);
  ***************************/
 
 
-uint32_t isnan_d(double x){
-	//Note that isnan() is only defined for the float data type, and not for doubles
+uint32_t isnan_d(float x){
+	//Note that isnan() is only defined for the float data type, and not for floats
 	//NANs are never equal to anything -even themselves:
 	if (x!=x){
 		return TRUE;
@@ -71,7 +71,7 @@ uint32_t isnan_d(double x){
 	}
 }
 
-double	min(double a, double b){
+float	min(float a, float b){
 	if( a <= b){
 		return a;
 	}else{
@@ -79,7 +79,7 @@ double	min(double a, double b){
 	}
 }
 
-double max(double a, double b){
+float max(float a, float b){
 	if( a > b){
 		return a;
 	}else{
@@ -195,14 +195,14 @@ int32_t*	reallocInt(int32_t* old, uintptr_t numInts){
 	return new;
 }
 
-double*		mallocDouble(uintptr_t numDoubles){
+float*		mallocfloat(uintptr_t numfloats){
 	/*
-		Allocates an array of doubles and returns a pointer to it in case of success,
+		Allocates an array of floats and returns a pointer to it in case of success,
 		Exits with error code otherwise.
 	*/
 	DEBUG(9,"in\n");
-	double*	temp = NULL;	//temporary pointer
-	temp = malloc(numDoubles * sizeof(double));
+	float*	temp = NULL;	//temporary pointer
+	temp = malloc(numfloats * sizeof(float));
 	if(temp == NULL){
 		fatal("Memory alocation error.\n");
 	}
@@ -210,46 +210,46 @@ double*		mallocDouble(uintptr_t numDoubles){
 	return temp;
 }
 
-double*		reallocDouble(double* old, uintptr_t numDoubles){
+float*		reallocfloat(float* old, uintptr_t numfloats){
 	DEBUG(9,"in\n");
-	double*		new = NULL;
+	float*		new = NULL;
 
 	if(old == NULL){
-		return mallocDouble(numDoubles);
+		return mallocfloat(numfloats);
 	}else{
-		new = realloc(old, numDoubles*sizeof(double));
+		new = realloc(old, numfloats*sizeof(float));
 	}
-	if (numDoubles > 0 && new == NULL){
+	if (numfloats > 0 && new == NULL){
 		fatal("Memory allocation error.\n");
 	}
 	DEBUG(9,"out\n");
 	return new;
 }
 
-double**	mallocDouble2D(uintptr_t numRows, uintptr_t numCols){
+float**	mallocfloat2D(uintptr_t numRows, uintptr_t numCols){
 	/*
-	 * Returns a pointer to an array of pointer do doubles.
+	 * Returns a pointer to an array of pointer do floats.
 	 * Or:
 	 * Return a 2D Array.
 	 */
 
 	uint32_t	i;
-	double**	array = NULL;
+	float**	array = NULL;
 	array = malloc(numRows * sizeof(uintptr_t*));	//malloc an array of pointers
 	
 	if(array == NULL)
 		fatal("Memory allocation error.\n");
 
 	for(i = 0; i < numRows; i++){
-		array[i] = mallocDouble(numCols);	//Nota that mallocDouble() already checks for allocation errors
+		array[i] = mallocfloat(numCols);	//Nota that mallocfloat() already checks for allocation errors
 	}
 
 	return array;
 }
 
-void		freeDouble2D(double** greenMile, uintptr_t items){
+void		freefloat2D(float** greenMile, uintptr_t items){
 	/*
-	 * frees the memory allocated to a double pointer of type double.
+	 * frees the memory allocated to a float pointer of type float.
 	 */
 	 uintptr_t	i;
 	 
@@ -261,22 +261,22 @@ void		freeDouble2D(double** greenMile, uintptr_t items){
 	free(greenMile);
 }
 
-complex double*		mallocComplex(uintptr_t numComplex){
-	complex double*	temp = NULL;
+complex float*		mallocComplex(uintptr_t numComplex){
+	complex float*	temp = NULL;
 	
-	temp = malloc(numComplex * sizeof(complex double));
+	temp = malloc(numComplex * sizeof(complex float));
 	if(temp == NULL)
 		fatal("Memory alocation error.");
 	return temp;
 }
 
-complex double*		reallocComplex(complex double* old, uintptr_t numComplex){
-	complex double*	new = NULL;
+complex float*		reallocComplex(complex float* old, uintptr_t numComplex){
+	complex float*	new = NULL;
 
 	if(old == NULL){
 		return mallocComplex(numComplex);
 	}else{
-		new = realloc(old, numComplex*sizeof(complex double));
+		new = realloc(old, numComplex*sizeof(complex float));
 	}
 	if (numComplex >0 &&new == NULL)
 		fatal("Memory allocation error.\n");
@@ -359,20 +359,20 @@ point_t*	reallocPoint(point_t* old, uintptr_t	numPoints){
 	return new;
 }
 
-double 		readDouble(FILE* infile){
+float 		readfloat(FILE* infile){
 	/************************************************
-	 *	Reads a double from a file and returns it	*
+	 *	Reads a float from a file and returns it	*
 	 ***********************************************/
 	 
 	char*	junkString = mallocChar((uintptr_t)(MAX_LINE_LEN + 1));;
-	double 	tempDouble;
+	float 	tempfloat;
 	int32_t	junkInt;
 	
 	junkInt = fscanf(infile, "%s\n", junkString);
-	tempDouble = atof(junkString);
+	tempfloat = atof(junkString);
 	free(junkString);
 	
-	return(tempDouble);
+	return(tempfloat);
 }
 
 int32_t		readInt(FILE* infile){
@@ -748,40 +748,40 @@ void		reallocRayMembers(ray_t* ray, uintptr_t numRayCoords){
 	 */
 	DEBUG(5,"reallocRayMembers(%u),\t in\n", (uint32_t)numRayCoords);
 	ray->nCoords	= numRayCoords;
-	ray->r			= reallocDouble(	ray->r,			numRayCoords);
-	ray->z			= reallocDouble(	ray->z,			numRayCoords);
-	ray->c			= reallocDouble(	ray->c,			numRayCoords);
+	ray->r			= reallocfloat(	ray->r,			numRayCoords);
+	ray->z			= reallocfloat(	ray->z,			numRayCoords);
+	ray->c			= reallocfloat(	ray->c,			numRayCoords);
 	ray->iRefl		= reallocUint(		ray->iRefl,		numRayCoords);
 	ray->decay		= reallocComplex(	ray->decay,		numRayCoords);
-	ray->phase		= reallocDouble(	ray->phase,		numRayCoords);
-	ray->tau		= reallocDouble(	ray->tau,		numRayCoords);
-	ray->s			= reallocDouble(	ray->s, 		numRayCoords);
-	ray->ic			= reallocDouble(	ray->ic,		numRayCoords);
+	ray->phase		= reallocfloat(	ray->phase,		numRayCoords);
+	ray->tau		= reallocfloat(	ray->tau,		numRayCoords);
+	ray->s			= reallocfloat(	ray->s, 		numRayCoords);
+	ray->ic			= reallocfloat(	ray->ic,		numRayCoords);
 	ray->boundaryTg	= reallocVector(	ray->boundaryTg,numRayCoords);
 	ray->boundaryJ	= reallocInt(		ray->boundaryJ,	numRayCoords);
 	ray->nRefrac	= numRayCoords;
 	ray->refrac		= reallocPoint(		ray->refrac,	numRayCoords);
-	ray->p			= reallocDouble(	ray->p,			numRayCoords);
-	ray->q			= reallocDouble(	ray->q,			numRayCoords);
-	ray->caustc		= reallocDouble(	ray->caustc,	numRayCoords);
+	ray->p			= reallocfloat(	ray->p,			numRayCoords);
+	ray->q			= reallocfloat(	ray->q,			numRayCoords);
+	ray->caustc		= reallocfloat(	ray->caustc,	numRayCoords);
 	ray->amp		= reallocComplex(	ray->amp,		numRayCoords);
 	DEBUG(5,"reallocRayMembers(), \t out\n");
 }
 
-void		copyDoubleToPtr(double* origin, double* dest, uintptr_t nItems){
+void		copyDoubleToPtr(float* origin, double* dest, uintptr_t nItems){
 	uintptr_t	i;
 
 	for( i=0; i<nItems; i++ ){
-		dest[i] = origin[i];
+		dest[i] = (double)origin[i];
 	}
 }
 
-void		copyDoubleToPtr2D(double** origin, double* dest, uintptr_t rowSize, uintptr_t colSize){
+void		copyDoubleToPtr2D(float** origin, double* dest, uintptr_t rowSize, uintptr_t colSize){
 	uintptr_t	i,j;
 
 	for( j=0; j<colSize; j++ ){
 		for(i=0; i<rowSize; i++){
-			dest[i*colSize +j] = origin[j][i];
+			dest[i*colSize +j] = (double)origin[j][i];
 		}
 	}
 }

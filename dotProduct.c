@@ -28,8 +28,8 @@
  ***********************************************************************************/
 #pragma once
 
-double	dotProduct(vector_t*, vector_t*);
+float	dotProduct(vector_t*, vector_t*);
 
-double	dotProduct(vector_t* u, vector_t* v){
+float	dotProduct(vector_t* u, vector_t* v){
 	return( u->r * v->r + u->z * v->z);
 }

@@ -29,10 +29,10 @@
  * 																		*
  ************************************************************************/
 
-void intBarycParab1D(double*, double*, double, double*, double*, double*);
+void intBarycParab1D(float*, float*, float, float*, float*, float*);
 
-void intBarycParab1D(double* x, double* f, double xi, double* fi, double* fxi, double* fxxi){
-	double		a1,a2,px1,px2,sx1,sx2;
+void intBarycParab1D(float* x, float* f, float xi, float* fi, float* fxi, float* fxxi){
+	float		a1,a2,px1,px2,sx1,sx2;
 
 	px1 = (x[1] -x[0]) * (x[1] -x[2]);
 	px2 = (x[2] -x[0]) * (x[2] -x[1]);

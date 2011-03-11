@@ -42,9 +42,9 @@ void	calcRayCoords(settings_t* settings){
 	mxArray*	pTitle	= NULL;
 	mxArray*	pRay	= NULL;
 	
-	double		thetai, ctheta;
+	float		thetai, ctheta;
 	ray_t*		ray		= NULL;
-	double**	temp2D 	= malloc(2*sizeof(uintptr_t));
+	float**	temp2D 	= malloc(2*sizeof(uintptr_t));
 	uintptr_t	i;
 	char* 		string	= mallocChar(10);
 

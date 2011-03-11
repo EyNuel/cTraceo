@@ -50,7 +50,7 @@ int main(int argc, char **argv){
 	char*		inFileName = mallocChar(256);
 	char*		logFileName = mallocChar(256);
 	settings_t*		settings = mallocSettings();
-	double			omega;
+	float			omega;
 	const char*		line = "-----------------------------------------------";
 	FILE*			logFile = NULL;
 
@@ -74,7 +74,7 @@ int main(int argc, char **argv){
 	if (VERBOSE)
 		printSettings(settings);
 	*/
-	omega	= 2 * M_PI * settings->source.freqx;
+	omega	= 2 * (float)M_PI * settings->source.freqx;
 
 	//open the log file and write the header:
 	strcpy(logFileName, argv[1]);

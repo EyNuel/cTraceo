@@ -43,10 +43,10 @@ void	calcAllRayInfo(settings_t* settings){
 	mxArray*	pRay	= NULL;
 	mxArray*	pRefrac	= NULL;
 	mxArray*	pRayInfo= NULL;
-	double		thetai, ctheta;
+	float		thetai, ctheta;
 	ray_t*		ray		= NULL;
-	double**	temp2D 	= NULL;
-	double**	rayInfo = mallocDouble2D(5,settings->source.nThetas);
+	float**	temp2D 	= NULL;
+	float**	rayInfo = mallocfloat2D(5,settings->source.nThetas);
 	uintptr_t	i, j;
 	char* 		string	= mallocChar(10);
 
@@ -92,8 +92,8 @@ void	calcAllRayInfo(settings_t* settings){
 			temp2D[0]	= ray[i].r;
 			temp2D[1]	= ray[i].z;
 			temp2D[2]	= ray[i].tau;
-			temp2D[3]	= mallocDouble(ray[i].nCoords);
-			temp2D[4]	= mallocDouble(ray[i].nCoords);
+			temp2D[3]	= mallocfloat(ray[i].nCoords);
+			temp2D[4]	= mallocfloat(ray[i].nCoords);
 			for(j=0; j<ray[i].nCoords; j++){
 				temp2D[3][j] = creal( ray[i].amp[j] );
 				temp2D[4][j] = cimag( ray[i].amp[j] );
@@ -117,16 +117,16 @@ void	calcAllRayInfo(settings_t* settings){
 			///ray has been written to matfile
 
 			///save ray information:
-			rayInfo[0][i] = (double)ray[i].iReturn;
+			rayInfo[0][i] = (float)ray[i].iReturn;
 			rayInfo[1][i] = ray[i].sRefl;
 			rayInfo[2][i] = ray[i].bRefl;
 			rayInfo[3][i] = ray[i].oRefl;
-			rayInfo[4][i] = (double)ray[i].nRefrac;
+			rayInfo[4][i] = (float)ray[i].nRefrac;
 
 			if (ray[i].nRefrac > 0){
 				temp2D 		= malloc(2*sizeof(uintptr_t));
-				temp2D[0]	= mallocDouble(ray[i].nRefrac);
-				temp2D[1]	= mallocDouble(ray[i].nRefrac);
+				temp2D[0]	= mallocfloat(ray[i].nRefrac);
+				temp2D[1]	= mallocfloat(ray[i].nRefrac);
 				
 				for(j=0; j<ray[i].nRefrac; j++){
 					temp2D[0][j] = ray[i].refrac[j].r;

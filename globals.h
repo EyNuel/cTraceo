@@ -36,13 +36,13 @@
  *******************************************************************************/
 
 typedef struct	vector{
-	double	r;	//range component of vector
-	double	z;	//depth component of vector
+	float	r;	//range component of vector
+	float	z;	//depth component of vector
 }vector_t;		//TODO add position components
 
 typedef struct	point{
-	double	r;	//range component of point
-	double	z;	//depth component of point
+	float	r;	//range component of point
+	float	z;	//depth component of point
 }point_t;
 
 
@@ -56,31 +56,31 @@ typedef struct	ray{
 	 */
 	uintptr_t		nCoords;
 	uintptr_t		iKill;		//indicates if ray has been "killed"
-	double			theta;		//launching angle of the ray
-	double			rMin, rMax;	//used to determine if a ray "turns back"
+	float			theta;		//launching angle of the ray
+	float			rMin, rMax;	//used to determine if a ray "turns back"
 	uintptr_t		iReturn;	//indicates if a ray "turns back"
-	double*			r;			//range of ray at index
-	double*			z;			//depth of ray at index
-	double*			c;			//speed of sound at index
+	float*			r;			//range of ray at index
+	float*			z;			//depth of ray at index
+	float*			c;			//speed of sound at index
 	uint32_t*		iRefl;		//indicates if there is a reflection at a certain index of the ray coordinates.
 	uint32_t		sRefl;		//number of surface reflections
 	uint32_t		bRefl;		//number of bottom reflections
 	uint32_t		oRefl;		//number of object reflections
 	uint32_t		nRefl;		//number of total reflections
-	complex double*	decay;		//decay of ray
-	double*			phase;		//ray phase
-	double*			tau;		//acumulated travel time
-	double*			s;			//acumulated distance travelled by the ray
-	double*			ic;			//see Chapter 3 of Traceo Manual
+	complex float*	decay;		//decay of ray
+	float*			phase;		//ray phase
+	float*			tau;		//acumulated travel time
+	float*			s;			//acumulated distance travelled by the ray
+	float*			ic;			//see Chapter 3 of Traceo Manual
 	vector_t*		boundaryTg;	//"tbdry" a boundary's tangent vector
 	int32_t*		boundaryJ;	//"jbdry",	indicates at what boundary a ray is (-1 => above surface; 1 => below bottom)
 	uintptr_t		nRefrac;	//"nrefr", number of refraction points
 	point_t*		refrac;		//"rrefr, zrefr", coordinates of refraction points. used in "solveEikonalEq.c"
 
-	double*			p;			//used in solveDynamicEq
-	double*			q;			//used in solveDynamicEq
-	double*			caustc;		//used in solveDynamicEq
-	complex double*	amp;		//ray amplitude
+	float*			p;			//used in solveDynamicEq
+	float*			q;			//used in solveDynamicEq
+	float*			caustc;		//used in solveDynamicEq
+	complex float*	amp;		//ray amplitude
 }ray_t;
 
 
@@ -90,14 +90,14 @@ typedef struct	ray{
  *******************************************************************************/
  
 typedef struct source{
-	double		ds;				//ray step
-	double		rx,zx;			//source coords
-	double		rbox1, rbox2;	//the box that limits the range of the rays
-	double		freqx;			//source frequency
+	float		ds;				//ray step
+	float		rx,zx;			//source coords
+	float		rbox1, rbox2;	//the box that limits the range of the rays
+	float		freqx;			//source frequency
 	uint32_t	nThetas;		//number of launching angles
-	double		theta1, thetaN;	//first and last launching angle
-	double		dTheta;			//the increment between launching angles
-	double*		thetas;			//the array that will actually contain the launching angles (is allocated in "readin.c")
+	float		theta1, thetaN;	//first and last launching angle
+	float		dTheta;			//the increment between launching angles
+	float*		thetas;			//the array that will actually contain the launching angles (is allocated in "readin.c")
 }source_t;
 
 /** TODO can safely be removed
@@ -106,11 +106,11 @@ typedef struct interfaceProperties{
 	 * Contains the properties of the surface or bottom interfaces. used in "interface" structs
 	 * See page 39 of "Traceo" manual.
 	 *
-	double		cp;		//"cpati",	compressional speed
-	double		cs;		//"csati",	shear speed
-	double		rho;	//"rhoati",	density
-	double		ap;		//"apati",	compressional attenuation
-	double		as;		//"asati"	shear attenuation
+	float		cp;		//"cpati",	compressional speed
+	float		cs;		//"csati",	shear speed
+	float		rho;	//"rhoati",	density
+	float		ap;		//"apati",	compressional attenuation
+	float		as;		//"asati"	shear attenuation
 }interfaceProperties_t;
 */
 
@@ -121,13 +121,13 @@ typedef struct interface{
 	//See #defines following this block for possible values
 	uint32_t				surfaceType;			//formerly "atype"
 	uint32_t				surfacePropertyType;	//formerly "aptype"
-	double*					r;						//"rati(n)"				|
-	double*					z;						//"zati(n)"				 }	these pointers are mallocced in "readin.c"
-	double*					cp;						//"cpati",	compressional speed
-	double*					cs;						//"csati",	shear speed
-	double*					rho;					//"rhoati",	density
-	double*					ap;						//"apati",	compressional attenuation
-	double*					as;						//"asati"	shear attenuation
+	float*					r;						//"rati(n)"				|
+	float*					z;						//"zati(n)"				 }	these pointers are mallocced in "readin.c"
+	float*					cp;						//"cpati",	compressional speed
+	float*					cs;						//"csati",	shear speed
+	float*					rho;					//"rhoati",	density
+	float*					ap;						//"apati",	compressional attenuation
+	float*					as;						//"asati"	shear attenuation
 	uint32_t				surfaceInterpolation;	//formerly "aitype"
 	uint32_t				surfaceAttenUnits;		//formerly "atiu"
 	uint32_t				numSurfaceCoords;		//formerly "nati"
@@ -162,10 +162,10 @@ typedef struct soundSpeed{
 	uint32_t	cDist;			//"cdist", type of sound speed distribution
 	uint32_t	cClass;			//"cclass", class of sound speed
 	uint32_t	nr0, nz0;		//"nr0,nz0", number of points in range and depth
-	double*		z0;				//"z0",	depth
-	double*		r0;				//"r0", range
-	double*		c01d;			//"c0", sound speed at (z0)
-	double**	c02d;			//"c02d", sound speed at (r0,z0)
+	float*		z0;				//"z0",	depth
+	float*		r0;				//"r0", range
+	float*		c01d;			//"c0", sound speed at (z0)
+	float**	c02d;			//"c02d", sound speed at (r0,z0)
 }soundSpeed_t;
 
 //possible values for cDistribuition (see page 39, Traceo Manual)
@@ -189,15 +189,15 @@ typedef struct object{
 	 */
 	uint32_t				surfaceType;			//"otype",		Object surface type (rigid, aboservent, etc), as defined for interface_t
 	uint32_t				surfaceAttenUnits;		//"obju",		attenuation units, as define for interface_t
-	double					cp;						//"cpati",		compressional speed
-	double					cs;						//"csati",		shear speed
-	double					rho;					//"rhoati",		density
-	double					ap;						//"apati",		compressional attenuation
-	double					as;						//"asati",		shear attenuation
+	float					cp;						//"cpati",		compressional speed
+	float					cs;						//"csati",		shear speed
+	float					rho;					//"rhoati",		density
+	float					ap;						//"apati",		compressional attenuation
+	float					as;						//"asati",		shear attenuation
 	uint32_t				nCoords;				//"no",			number of coordinates
-	double*					r;						//"ro"		|
-	double*					zDown;					//"zdn"		 >	actual coordinates that define the object geometry
-	double*					zUp;					//"zup"		|
+	float*					r;						//"ro"		|
+	float*					zDown;					//"zdn"		 >	actual coordinates that define the object geometry
+	float*					zUp;					//"zup"		|
 }object_t;
 
 typedef struct objects{
@@ -213,9 +213,9 @@ typedef struct output{
 	uint32_t	calcType;			//"catype"
 	uint32_t	arrayType;			//"artype"
 	uint32_t	nArrayR, nArrayZ;	//"nra", "nrz"
-	double*		arrayR;				//"nra"			Array size in R
-	double*		arrayZ;				//"nrz"			Array size in Z
-	double		miss;				//"miss"		threshold for finding eigenrays
+	float*		arrayR;				//"nra"			Array size in R
+	float*		arrayZ;				//"nrz"			Array size in Z
+	float		miss;				//"miss"		threshold for finding eigenrays
 }output_t;
 
 //possible values for calculationType (see page 43)

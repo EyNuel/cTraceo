@@ -38,21 +38,21 @@
 #include	"cValues1D.c"
 #include	"cValues2D.c"
 
-void	csValues(settings_t*, double, double, double*, double*, double*, double*, double*,
-				vector_t*, double*, double*, double*);
+void	csValues(settings_t*, float, float, float*, float*, float*, float*, float*,
+				vector_t*, float*, float*, float*);
 
-void	csValues(settings_t* settings, double ri, double zi, double* ci, double* cc, double* si, double* cri, double* czi,
-				vector_t* slowness, double* crri, double* czzi, double* crzi){
+void	csValues(settings_t* settings, float ri, float zi, float* ci, float* cc, float* si, float* cri, float* czi,
+				vector_t* slowness, float* crri, float* czzi, float* crzi){
 	DEBUG(8,"csValues(),\t in\n");
 	
-	double 		k,a,eta, root, root32, root52;
-	double*		c01d;	//used locally to make code more readable
-	double**	c02d;	//used locally to make code more readable
-	double*		r0;		//used locally to make code more readable
-	double*		z0;		//used locally to make code more readable
-	double		epsilon, bmunk, bmunk2;
+	float 		k,a,eta, root, root32, root52;
+	float*		c01d;	//used locally to make code more readable
+	float**		c02d;	//used locally to make code more readable
+	float*		r0;		//used locally to make code more readable
+	float*		z0;		//used locally to make code more readable
+	float		epsilon, bmunk, bmunk2;
 
-	epsilon = 7.4e-3;
+	epsilon = (float)7.4e-3;
 	bmunk  = 1300.0;
 	bmunk2 = bmunk*bmunk;
 
@@ -83,50 +83,50 @@ void	csValues(settings_t* settings, double ri, double zi, double* ci, double* cc
 					break;
 					
 				case C_CLASS__PARABOLIC:			//"PARP"
-					k	= ( c01d[1] - c01d[0] ) / pow( ( z0[1] - z0[0]), 2);
-					*ci	= c01d[0] + k * pow(( zi - z0[0] ), 2);
+					k	= ( c01d[1] - c01d[0] ) / powf( ( z0[1] - z0[0]), 2);
+					*ci	= c01d[0] + k * powf(( zi - z0[0] ), 2);
 					*czi = 2*k*( zi - z0[0] );
 					*czzi= 2*k;
 					break;
 					
 				case C_CLASS__EXPONENTIAL:			//"EXPP"
-					k	= log( c01d[0]/c01d[1] )/( z0[1] - z0[0] );
-					*ci	= c01d[0]*exp( -k*(zi - z0[0]) );
+					k	= logf( c01d[0]/c01d[1] )/( z0[1] - z0[0] );
+					*ci	= c01d[0]*expf( -k*(zi - z0[0]) );
 					*czi	= -k * (*ci);
 					*czzi= k*k * (*ci);
 					break;
 					
 				case C_CLASS__N2_LINEAR:			//"N2LP"
-					k		= ( pow( c01d[0]/c01d[1] ,2) -1) / ( z0[1] - z0[0] );
-					root	= sqrt( 1 + k*( zi - z0[0] ) );
-					root32	= pow(root, 3/2 );
-					root52	= pow(root, 5/2 );
-					*ci 		= c01d[0]/sqrt( 1 + k*( zi - z0[0] ));
+					k		= ( powf( c01d[0]/c01d[1] ,2) -1) / ( z0[1] - z0[0] );
+					root	= sqrtf( 1 + k*( zi - z0[0] ) );
+					root32	= powf(root, 3/2 );
+					root52	= powf(root, 5/2 );
+					*ci 	= c01d[0]/sqrtf( 1 + k*( zi - z0[0] ));
 					*czi 	= -k*c01d[0]/( 2*root32 );
 					*czzi 	= 3*k*k*c01d[0]/( 4*root52 );
 					break;
 					
 				case C_CLASS__INV_SQUARE:			//"ISQP"
-					a		= pow(( c01d[1]/c01d[0]) -1 , 2);
-					root 	= sqrt( a/(1-a) );
+					a		= powf(( c01d[1]/c01d[0]) -1 , 2);
+					root 	= sqrtf( a/(1-a) );
 					k 		= root/( z0[1] - z0[0] );
-					root 	= sqrt( 1 + pow( k*( zi - z0[0] ),2) );
-					root32 	= pow(root, 3/2 );
-					root52 	= pow(root, 5/2 );
-					*ci 		= c01d[0] * ( 1 + k*( zi - z0[0] )/root );
+					root 	= sqrtf( 1 + powf( k*( zi - z0[0] ),2) );
+					root32 	= powf(root, 3/2 );
+					root52 	= powf(root, 5/2 );
+					*ci 	= c01d[0] * ( 1 + k*( zi - z0[0] )/root );
 					*czi 	= c01d[0] * k / root32;
-					*czzi 	= -3 * c01d[0] * pow(k,3) / root52;
+					*czzi 	= -3 * c01d[0] * powf(k,3) / root52;
 					break;
 					
 				case C_CLASS__MUNK:					//"MUNK"
 					eta 	= 2*( zi - z0[0] )/bmunk;
-					*ci 		= c01d[0]*( 1 + epsilon*( eta + exp(-eta) - 1 ) );
-					*czi 	= 2*epsilon * c01d[0]*( 1 - exp(-eta) )/bmunk;
-					*czzi	= 4*epsilon * c01d[0]*exp( -eta )/bmunk2;
+					*ci 	= c01d[0]*( 1 + epsilon*( eta + expf(-eta) - 1 ) );
+					*czi 	= 2*epsilon * c01d[0]*( 1 - expf(-eta) )/bmunk;
+					*czzi	= 4*epsilon * c01d[0]*expf( -eta )/bmunk2;
 					break;
 					
 				case C_CLASS__TABULATED:			//"TABL"
-					//cValues1D(uintptr_t n, double* xTable, double* cTable, double* xi, double* ci, double* cxi, double* cxxi){
+					//cValues1D(uintptr_t n, float* xTable, float* cTable, float* xi, float* ci, float* cxi, float* cxxi){
 					cValues1D( settings->soundSpeed.nz0, z0, c01d, zi, ci, czi, czzi);
 					break;
 					
@@ -143,7 +143,7 @@ void	csValues(settings_t* settings, double ri, double zi, double* ci, double* cc
 			fatal("Unknown sound speed distribution.\nAborting...");
 	}
 
-	*cc = pow(*ci,2);
+	*cc = powf(*ci,2);
 	*si =  1.0/(*ci);
 	slowness->r = -(*cri) / (*cc);
 	slowness->z = -(*czi) / (*cc);

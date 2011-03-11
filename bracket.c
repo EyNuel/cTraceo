@@ -34,9 +34,9 @@
 
 #pragma once
 
-void	bracket(uintptr_t, double*, double, uintptr_t*);
+void	bracket(uintptr_t, float*, float, uintptr_t*);
 
-void	bracket(uintptr_t n, double* x, double xi, uintptr_t* i){
+void	bracket(uintptr_t n, float* x, float xi, uintptr_t* i){
 	DEBUG(5, "Entering bracket().\n");
 	uintptr_t	ia,im,ib;
 

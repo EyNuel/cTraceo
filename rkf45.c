@@ -39,29 +39,29 @@
 #include	"math.h"
 
 
-void rkf45(settings_t*, double*, double*, double*, double*, double*, double*, double*);
+void rkf45(settings_t*, float*, float*, float*, float*, float*, float*, float*);
 
-void rkf45(settings_t* settings, double* dsi, double* yOld, double* fOld, double* yNew, double* fNew, double* ds4, double* ds5){
+void rkf45(settings_t* settings, float* dsi, float* yOld, float* fOld, float* yNew, float* fNew, float* ds4, float* ds5){
 	DEBUG(6,"in\n");
 	uintptr_t	j;
-	double		dr,dz;
-	double		a1,a3,a4,a5;
-	double		b1,b3,b4,b5,b6;
-	double 		k1[4],k2[4],k3[4],k4[4],k5[4],k6[4];
-	double		yk[4],yrk4[4],yrk5[4];
+	float		dr,dz;
+	float		a1,a3,a4,a5;
+	float		b1,b3,b4,b5,b6;
+	float 		k1[4],k2[4],k3[4],k4[4],k5[4],k6[4];
+	float		yk[4],yrk4[4],yrk5[4];
 
-	double		ri;
-	double		zi;
-	double		ci;
-	double		cc;
-	double		sigmaI;
-	double		cri;
-	double		czi;
-	double		crri;
-	double		czzi;
-	double		crzi;
-	double		sigmaR;
-	double		sigmaZ;
+	float		ri;
+	float		zi;
+	float		ci;
+	float		cc;
+	float		sigmaI;
+	float		cri;
+	float		czi;
+	float		crri;
+	float		czzi;
+	float		crzi;
+	float		sigmaR;
+	float		sigmaZ;
 	
 	vector_t	es;
 	vector_t 	slowness;

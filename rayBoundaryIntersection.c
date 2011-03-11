@@ -69,9 +69,9 @@ void	rayObjectIntersection(objects_t* objects, uint32_t* j, int32_t boundary, po
 void	rayBoundaryIntersection(interface_t* interface, point_t* a, point_t* b, point_t* isect){
 	DEBUG(5,"in\n");
 	uint32_t	i,n;
-	double		rl[101];
-	double		zl[101];
-	double		dz[101];
+	float		rl[101];
+	float		zl[101];
+	float		dz[101];
 	point_t		q1;
 	point_t		q2;
 	vector_t	taub;
@@ -122,7 +122,7 @@ void	rayBoundaryIntersection(interface_t* interface, point_t* a, point_t* b, poi
 				isect->z = 0.0;
 			}
 			break;
-//TODO double check the last 20~ lines
+//TODO float check the last 20~ lines
 	}
 	DEBUG(5,"out\n");
 }

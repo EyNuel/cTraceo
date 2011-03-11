@@ -32,9 +32,9 @@
 #include "interpolation.h"
 #include "bracket.c"
 
-void	cValues1D(uintptr_t, double*, double*, double, double*, double*, double*);
+void	cValues1D(uintptr_t, float*, float*, float, float*, float*, float*);
 
-void	cValues1D(uintptr_t n, double* xTable, double* cTable, double xi, double* ci, double* cxi, double* cxxi){
+void	cValues1D(uintptr_t n, float* xTable, float* cTable, float xi, float* ci, float* cxi, float* cxxi){
 	DEBUG(10,"Entering cValues1D().\n");
 	uintptr_t	i = 0;
 

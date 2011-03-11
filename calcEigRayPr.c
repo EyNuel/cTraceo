@@ -48,16 +48,16 @@ void	calcEigenRayPr(settings_t* settings){
 	mxArray*		pHydArrayZ	= NULL;
 	mxArray*		pRay		= NULL;
 	mxArray*		pnEigenRays	= NULL;
-	double			thetai, ctheta;
-	double			junkDouble;
+	float			thetai, ctheta;
+	float			junkfloat;
 	ray_t*			ray			= NULL;
-	double			nEigenRays = 0;
+	float			nEigenRays = 0;
 	uintptr_t		i, j, jj, k, l;
-	double 			rHyd, zHyd, zRay, tauRay;
-	complex	double	junkComplex, ampRay; 
-	double			dz;
+	float 			rHyd, zHyd, zRay, tauRay;
+	complex	float	junkComplex, ampRay; 
+	float			dz;
 	char* 			string	= mallocChar(10);
-	double**		temp2D 	= NULL;
+	float**		temp2D 	= NULL;
 	uintptr_t		nRet, iHyd;
 	uintptr_t		iRet[51];
 	
@@ -147,7 +147,7 @@ void	calcEigenRayPr(settings_t* settings){
 							
 							mxArray*	pDyingRay	= NULL;
 							MATFile*	matfile2	= NULL;
-							double**	dyingRay 	= malloc(2*sizeof(uintptr_t));
+							float**	dyingRay 	= malloc(2*sizeof(uintptr_t));
 							char* 		string2		= mallocChar(10);
 							
 							dyingRay[0]	= ray[i].r;
@@ -172,7 +172,7 @@ void	calcEigenRayPr(settings_t* settings){
 						DEBUG(3,"non-returning ray: nCoords: %u, iHyd:%u\n", (uint32_t)ray[i].nCoords, (uint32_t)iHyd);
 
 						//from index interpolate the rays' depth:
-						intLinear1D(		&ray[i].r[iHyd], &ray[i].z[iHyd],	rHyd, &zRay,	&junkDouble);
+						intLinear1D(		&ray[i].r[iHyd], &ray[i].z[iHyd],	rHyd, &zRay,	&junkfloat);
 
 						//for every hydrophone check distance to ray
 						for(jj=0; jj<settings->output.nArrayZ; jj++){
@@ -185,12 +185,12 @@ void	calcEigenRayPr(settings_t* settings){
 								nEigenRays += 1;
 
 								//from index interpolate the rays' travel time and amplitude:
-								intLinear1D(		&ray[i].r[iHyd], &ray[i].tau[iHyd],	rHyd, &tauRay,	&junkDouble);
+								intLinear1D(		&ray[i].r[iHyd], &ray[i].tau[iHyd],	rHyd, &tauRay,	&junkfloat);
 								intComplexLinear1D(	&ray[i].r[iHyd], &ray[i].amp[iHyd],	rHyd, &ampRay,	&junkComplex);
 
 								///prepare to write ray to matfile:
 								//create a temporary container for the files:
-								temp2D 		= mallocDouble2D(5,iHyd+2);
+								temp2D 		= mallocfloat2D(5,iHyd+2);
 
 								//copy content to the new variable:
 								for (k=0; k<iHyd+1; k++){
@@ -219,7 +219,7 @@ void	calcEigenRayPr(settings_t* settings){
 
 								//free memory:
 								mxDestroyArray(pRay);
-								freeDouble2D(temp2D,5);
+								freefloat2D(temp2D,5);
 								///ray has been written to matfile.
 							}//	if (dz settings->output.miss)
 						}//	for(jj=1; jj<=settings->output.nArrayZ; jj++)
@@ -233,7 +233,7 @@ void	calcEigenRayPr(settings_t* settings){
 						//from each index interpolate the rays' depth:
 						for(l=0; l<nRet; l++){
 							DEBUG(4, "nRet=%u, iRet[%u]= %u\n", (uint32_t)nRet, (uint32_t)l, (uint32_t)iRet[l]);
-							intLinear1D(		&ray[i].r[iRet[l]], &ray[i].z[iRet[l]],		rHyd, &zRay,	&junkDouble);
+							intLinear1D(		&ray[i].r[iRet[l]], &ray[i].z[iRet[l]],		rHyd, &zRay,	&junkfloat);
 
 							//for every hydrophone check if the ray is close enough to be considered an eigenray:
 							for(jj=0;jj<settings->output.nArrayZ; jj++){
@@ -244,12 +244,12 @@ void	calcEigenRayPr(settings_t* settings){
 									nEigenRays += 1;
 
 									//interpolate the ray's travel time and amplitude:
-									intLinear1D(		&ray[i].r[iRet[l]], &ray[i].tau[iRet[l]],	rHyd, &tauRay,	&junkDouble);
-									intComplexLinear1D(	&ray[i].r[iRet[l]], &ray[i].amp[iRet[l]],	(complex double)rHyd, &ampRay,	&junkComplex);
+									intLinear1D(		&ray[i].r[iRet[l]], &ray[i].tau[iRet[l]],	rHyd, &tauRay,	&junkfloat);
+									intComplexLinear1D(	&ray[i].r[iRet[l]], &ray[i].amp[iRet[l]],	(complex float)rHyd, &ampRay,	&junkComplex);
 
 									///prepare to write ray to matfile:
 									//create a temporary container for the files:
-									temp2D 		= mallocDouble2D(5,iRet[l]+1);
+									temp2D 		= mallocfloat2D(5,iRet[l]+1);
 
 									//copy content to the new variable:
 									//TODO this is UGLY -find a better way to do it.
@@ -279,7 +279,7 @@ void	calcEigenRayPr(settings_t* settings){
 									
 									//free memory:
 									mxDestroyArray(pRay);
-									freeDouble2D(temp2D,5);
+									freefloat2D(temp2D,5);
 									///ray has been written to matfile.
 								}
 							}

@@ -38,48 +38,6 @@
 #include "bracket.c"
 
 void 	calcEigenRayRF(settings_t*);
-/*
-       character*60 ctitle
-       character*10 eray
-       character*9 cix
-       character*8 cviii
-       character*7 cvii
-       character*6 cvi
-       character*5 cv
-       character*4 civ
-       character*3 ciii
-       character*2 cii
-       character*1 ci
-       
-       integer*8 inan(nangle,nhyd2)
-       integer*8 irefl(np),jbdry(np)
-       integer*8 i,iFail,iHyd,imax,il,ir,j,jj,jjj,k,l,m
-       integer*8 nFail,nEigenRays,nrays,nthtas,ntrial,nEigRays
-       
-       integer*8 matOpen, matClose
-       integer*8 mxCreateDoubleMatrix, mxCreateString, mxGetPr
-       integer*8 matfile, ptitle, pthtas, prh, pzh, pray, perays
-       integer*8 matPutVariable, matDeleteVariable
-       integer*8 status
-       
-       real*8 raydat(5,np)
-       real*8  tbdry(2,np)
-       
-       real*8 depths(nangle,nhyd2)
-       
-       real*8 f(nangle),thetas[nangle)
-       real*8 thetaL(np2),thetaR(np2)
-       real*8 xl(2),yl(2)
-       
-       real*8 thetai,ctheta
-       real*8 rHyd,zRay,zRay
-       real*8 thtae,thtal,thtar,thta0
-       real*8 fl,fr,f0,prod
-       real*8 mynan,mnsone
-       real*8 rerays
-       
-       complex*8 decay(np)
-*/
 
 void	calcEigenRayRF(settings_t* settings){
 	DEBUG(1,"in\n");
@@ -90,23 +48,23 @@ void	calcEigenRayRF(settings_t* settings){
 	mxArray*		pHydArrayZ	= NULL;
 	mxArray*		pnEigenRays	= NULL;
 	mxArray*		pRay		= NULL;
-	double*			thetas		= NULL;
-	double 			thetai, ctheta;
-	double**		depths		= NULL;
+	float*			thetas		= NULL;
+	float 			thetai, ctheta;
+	float**		depths		= NULL;
 	uintptr_t		i, j, k, l, nRays, iHyd;
 	uintptr_t		nPossibleEigenRays, nFoundEigenRays;
-	double			zRay, zHyd, rHyd;
+	float			zRay, zHyd, rHyd;
 	ray_t*			ray = NULL;
-	double*			dz = NULL;
+	float*			dz = NULL;
 	//used for root-finding in actual Regula-Falsi Method:
-	double			fl, fr, prod;
-	double*			thetaL = NULL;
-	double*			thetaR = NULL;
-	double			junkDouble;
+	float			fl, fr, prod;
+	float*			thetaL = NULL;
+	float*			thetaR = NULL;
+	float			junkfloat;
 	uint32_t		nTrial;
 	ray_t*			tempRay = NULL;
-	double			theta0, f0;
-	double**		temp2D = NULL;
+	float			theta0, f0;
+	float**		temp2D = NULL;
 	char* 			string	= mallocChar(10);
 	uint32_t		success = FALSE;
 
@@ -159,8 +117,8 @@ void	calcEigenRayRF(settings_t* settings){
 
 
 	//allocate memory for the rays:
-	thetas = mallocDouble(settings->source.nThetas);
-	depths = mallocDouble2D(settings->source.nThetas, settings->output.nArrayR);
+	thetas = mallocfloat(settings->source.nThetas);
+	depths = mallocfloat2D(settings->source.nThetas, settings->output.nArrayR);
 	ray = makeRay(settings->source.nThetas);
 	
 	/*******************************************************************************************************************
@@ -199,7 +157,7 @@ void	calcEigenRayRF(settings_t* settings){
 					bracket( ray[i].nCoords, ray[i].r, rHyd, &iHyd);
 					
 					//interpolate the ray depth at the range coord of hydrophone
-					intLinear1D(&ray[i].r[iHyd], &ray[i].z[iHyd], rHyd, &zRay, &junkDouble);
+					intLinear1D(&ray[i].r[iHyd], &ray[i].z[iHyd], rHyd, &zRay, &junkfloat);
 					depths[nRays][j] = zRay;
 					DEBUG(3,"rHyd: %lf; rMin: %lf; rMax: %lf\n", rHyd, ray[i].rMin, ray[i].rMax);
 					DEBUG(3,"nCoords: %u, rHyd: %lf; iHyd: %u, zRay: %lf\n", (uint32_t)ray[i].nCoords, rHyd, (uint32_t)iHyd, zRay);
@@ -221,9 +179,9 @@ void	calcEigenRayRF(settings_t* settings){
 	 */
 
 	//allocate memory for some temporary variables
-	dz =		mallocDouble(nRays);
-	thetaL =	mallocDouble(nRays);
-	thetaR =	mallocDouble(nRays);
+	dz =		mallocfloat(nRays);
+	thetaL =	mallocfloat(nRays);
+	thetaR =	mallocfloat(nRays);
 
 	//	iterate over....
 	for (i=0; i<settings->output.nArrayR; i++){
@@ -389,8 +347,8 @@ void	calcEigenRayRF(settings_t* settings){
 					temp2D[0]	= tempRay[0].r;
 					temp2D[1]	= tempRay[0].z;
 					temp2D[2]	= tempRay[0].tau;
-					temp2D[3]	= mallocDouble(tempRay[0].nCoords);
-					temp2D[4]	= mallocDouble(tempRay[0].nCoords);
+					temp2D[3]	= mallocfloat(tempRay[0].nCoords);
+					temp2D[4]	= mallocfloat(tempRay[0].nCoords);
 					for(k=0; k<tempRay[0].nCoords; k++){
 						temp2D[3][k] = creal( tempRay[0].amp[k] );
 						temp2D[4][k] = cimag( tempRay[0].amp[k] );
@@ -422,8 +380,8 @@ void	calcEigenRayRF(settings_t* settings){
 
 	///Write number of eigenrays to matfile:
 	pnEigenRays = mxCreateDoubleMatrix(1,1,mxREAL);
-	junkDouble = (double)nFoundEigenRays;
-	copyDoubleToPtr(	&junkDouble,
+	junkfloat = (float)nFoundEigenRays;
+	copyDoubleToPtr(	&junkfloat,
 						mxGetPr(pnEigenRays),
 						1);
 	matPutVariable(matfile, "nerays", pnEigenRays);

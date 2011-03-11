@@ -38,15 +38,15 @@
 #include <complex.h>
 #include <math.h>
 
-void	boundaryReflectionCoeff(double*, double*, double*, double*, double*, double*, double*, double*, complex double*);
+void	boundaryReflectionCoeff(float*, float*, float*, float*, float*, float*, float*, float*, complex float*);
 
-void	boundaryReflectionCoeff(double* rho1, double* rho2, double* cp1, double* cp2, double* cs2, double* ap,
-								double* as, double* theta, complex double* refl){
+void	boundaryReflectionCoeff(float* rho1, float* rho2, float* cp1, float* cp2, float* cs2, float* ap,
+								float* as, float* theta, complex float* refl){
 
-	double			tilap, tilas;
-	double			a1;
-	complex double	a2, a3, a4, a5, a6, a7, d;
-	complex	double	tilcp2, tilcs2;
+	float			tilap, tilas;
+	float			a1;
+	complex float	a2, a3, a4, a5, a6, a7, d;
+	complex	float	tilcp2, tilcs2;
 	
 	tilap = *ap/( 40.0 * M_PI * M_LOG10E );
 	tilas = *as/( 40.0 * M_PI * M_LOG10E );
