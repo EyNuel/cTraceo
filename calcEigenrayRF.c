@@ -1,5 +1,5 @@
 /********************************************************************************
- *	calcEigenRayPr.c		 													*
+ *	calcEigenrayPr.c		 													*
  * 	(formerly "calerf.for")														*
  *	Calculates eigenrays using Regula Falsi method.								*
  *	Note that this will only work with rays traveling from left to right and	*
@@ -27,6 +27,7 @@
  *																				*
  *******************************************************************************/
 
+#pragma  once
 #include <complex.h>
 #include "globals.h"
 #include "tools.c"
@@ -37,7 +38,7 @@
 #include "interpolation.h"
 #include "bracket.c"
 
-void 	calcEigenRayRF(settings_t*);
+void 	calcEigenrayRF(settings_t*);
 /*
        character*60 ctitle
        character*10 eray
@@ -81,7 +82,7 @@ void 	calcEigenRayRF(settings_t*);
        complex*8 decay(np)
 */
 
-void	calcEigenRayRF(settings_t* settings){
+void	calcEigenrayRF(settings_t* settings){
 	DEBUG(1,"in\n");
 	MATFile*		matfile		= NULL;
 	mxArray*		pThetas		= NULL;

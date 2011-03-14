@@ -1,5 +1,5 @@
 /********************************************************************************
- *	calcEigenRayPr.c		 													*
+ *	calcEigenrayPr.c	 														*
  * 	(formerly "calepr.for")														*
  *	Calculates eigenrays using proximity method.								*
  *																				*
@@ -25,6 +25,7 @@
  * 																				*
  *******************************************************************************/
 
+#pragma  once
 #include <complex.h>
 #include "globals.h"
 #include "tools.c"
@@ -36,9 +37,9 @@
 #include "bracket.c"
 #include "eBracket.c"
 
-void	calcEigenRayPr(settings_t*);
+void	calcEigenrayPr(settings_t*);
 
-void	calcEigenRayPr(settings_t* settings){
+void	calcEigenrayPr(settings_t* settings){
 	DEBUG(1,"in\n");
 	
 	MATFile*		matfile		= NULL;

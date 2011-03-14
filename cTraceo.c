@@ -29,8 +29,10 @@
 #include "math.h"
 #include "calcRayCoords.c"
 #include "calcAllRayInfo.c"
-#include "calcEigRayPr.c"
-#include "calcEigRayRF.c"
+#include "calcEigenrayPr.c"
+#include "calcEigenrayRF.c"
+#include "calcAmpDelPr.c"
+#include "calcAmpDelRF.c"
 #include <sys/time.h>		//for struct timeval
 #include <sys/resource.h>	//for getrusage()
 #include <string.h>
@@ -104,14 +106,13 @@ int main(int argc, char **argv){
 		case CALC_TYPE__EIGENRAYS_PROXIMITY:
 			printf("Calculating eigenrays by Proximity Method.\n");
 			fprintf(logFile, "Eigenrays by Proximity Method.\n");
-			calcEigenRayPr(settings);
+			calcEigenrayPr(settings);
 			break;
 			
 		case CALC_TYPE__EIGENRAYS_REG_FALSI:
 			printf("Calculating eigenrays by Regula Falsi Method.\n");
 			fprintf(logFile, "Eigenrays by Regula Falsi Method.\n");
-			//fatal("Not working - wip.");
-			calcEigenRayRF(settings);
+			calcEigenrayRF(settings);
 			break;
 			
 		case CALC_TYPE__AMP_DELAY_PROXIMITY:
