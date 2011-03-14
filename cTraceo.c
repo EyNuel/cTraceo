@@ -118,13 +118,13 @@ int main(int argc, char **argv){
 		case CALC_TYPE__AMP_DELAY_PROXIMITY:
 			printf("Calculating amplitudes and delays by Proximity Method.\n");
 			fprintf(logFile, "Amplitudes and delays by Proximity Method.\n");
-			fatal("WIP");
+			calcAmpDelPr(settings);
 			break;
 			
 		case CALC_TYPE__AMP_DELAY_REG_FALSI:
 			printf("Calculating amplitudes and delays by Regula Falsi Method.\n");
 			fprintf(logFile, "Amplitudes and delays by Regula Falsi Method.\n");
-			fatal("WIP - Almost there.");
+			calcAmpDelRF(settings);
 			break;
 			
 		case CALC_TYPE__COH_ACOUS_PRESS:
