@@ -50,9 +50,7 @@ void	readIn(settings_t* settings, const char* filename){
 	FILE*		infile;					//a pointer for the input file
 	infile = openFile(filename, "r");	//open file in "read" mode
 
-	if (VERBOSE)
-		printf("Reading cTraceo input file \"%s\"\n", filename);
-
+	DEBUG(1, "Reading cTraceo input file \"%s\"\n", filename);
 
 	/************************************************************************
 	 *	Read the title:														*
@@ -63,6 +61,7 @@ void	readIn(settings_t* settings, const char* filename){
 	/************************************************************************
 	 *	Read and validate the source info:									*
 	 ***********************************************************************/
+	 DEBUG(2, "Reading source info.\n");
 	 skipLine(infile);
 	 settings->source.ds		= readDouble(infile);
 	 settings->source.rx		= readDouble(infile);
@@ -110,7 +109,7 @@ void	readIn(settings_t* settings, const char* filename){
 	/************************************************************************
 	 * Read and validate altimetry info:									*
 	 ***********************************************************************/
-	 
+	DEBUG(2, "Reading altimetry info.\n");
 	skipLine(infile);
 
 	/* surfaceType;	formerly "atype"	*/
@@ -247,12 +246,15 @@ void	readIn(settings_t* settings, const char* filename){
 	/************************************************************************
 	 * Read and validate sound speed info:									*
 	 ***********************************************************************/
+	DEBUG(2, "Reading sound speed info.\n");
 	/*	sound speed distribution	"cdist"		*/
 	skipLine(infile);
 	tempString = readStringN(infile,10);
 	if(strcmp(tempString,"'c(z,z)'\n") == 0){
+		DEBUG(3, "c(z,z)\n");
 		settings->soundSpeed.cDist	= C_DIST__PROFILE;
 	}else if(strcmp(tempString,"'c(r,z)'\n") == 0){
+		DEBUG(3, "c(r,z)\n");
 		settings->soundSpeed.cDist	= C_DIST__FIELD;
 	}else{
 		printf("Input file: Sound Speed: unknown sound speed distribution type: '%s'\n",tempString);
@@ -285,7 +287,7 @@ void	readIn(settings_t* settings, const char* filename){
 		
 	}else if(strcmp(tempString,"'TABL'") == 0){
 		settings->soundSpeed.cClass	= C_CLASS__TABULATED;
-		
+		DEBUG(3, "TABL\n");
 	}else{
 		printf("Input file: Sound Speed: unknown sound class type: '%s'\n",tempString);
 		fatal("Aborting...");
@@ -295,6 +297,7 @@ void	readIn(settings_t* settings, const char* filename){
 	/* number of points in range and depth, "nr0,nz0" */
 	nr0 = (uint32_t)readInt(infile);
 	nz0 = (uint32_t)readInt(infile);
+	DEBUG(3, "nr0: %u, nz0: %u\n", nr0, nz0);
 	settings->soundSpeed.nr0 = nr0;
 	settings->soundSpeed.nz0 = nz0;
 
@@ -302,6 +305,7 @@ void	readIn(settings_t* settings, const char* filename){
 	switch(settings->soundSpeed.cDist){
 		
 		case C_DIST__PROFILE:
+			DEBUG(3, "Reading sound speed profile\n");
 			if(settings->soundSpeed.cClass != C_CLASS__TABULATED){
 				//all cClasses execept for "TABULATED" only require ( z0(0),c0(0) ) and ( z0(1), c0(1) )
 				//malloc z0 an c0:
@@ -338,6 +342,7 @@ void	readIn(settings_t* settings, const char* filename){
 			break;
 		
 		case C_DIST__FIELD:
+			DEBUG(3, "Reading sound speed field\n");
 			if(settings->soundSpeed.cClass != C_CLASS__TABULATED)
 				fatal("Input file: Unknown sound speed field type.\nAborting...");
 			
@@ -354,7 +359,7 @@ void	readIn(settings_t* settings, const char* filename){
 				settings->soundSpeed.z0[i] = readDouble(infile);
 
 			//malloc sound speeds (2 dim matrix)
-			settings->soundSpeed.c02d = mallocDouble2D(nr0, nz0);	//mallocDouble2D(numCols, numRows)
+			settings->soundSpeed.c02d = mallocDouble2D(nz0, nr0);	//mallocDouble2D(numCols, numRows)
 			//read actual sound speeds
 			for(j=0; j<nz0; j++){		//rows
 				for(i=0; i<nr0; i++){	//columns
@@ -367,6 +372,7 @@ void	readIn(settings_t* settings, const char* filename){
 	/************************************************************************
 	 * Read and validate object info:										*
 	 ***********************************************************************/
+	DEBUG(2, "Reading object info.\n");
 	skipLine(infile);
 	settings->objects.numObjects = (uint32_t)readInt(infile);
 
@@ -473,6 +479,7 @@ void	readIn(settings_t* settings, const char* filename){
 	/************************************************************************
 	 * Read and validate batimetry info:									*
 	 ***********************************************************************/
+	DEBUG(2, "Reading batimetry info.\n");
 	skipLine(infile);
 
 	/* surfaceType;	formerly "atype"	*/
@@ -609,6 +616,7 @@ void	readIn(settings_t* settings, const char* filename){
 	/************************************************************************
 	 * Read and validate array info:										*
 	 ***********************************************************************/
+	 DEBUG(2, "Reading array info.\n");
 	skipLine(infile);
 	/*	output array type "artype"	*/
 	tempString = readStringN(infile,6);
@@ -647,8 +655,9 @@ void	readIn(settings_t* settings, const char* filename){
 	}
 
 	/************************************************************************
-	 * Read and validate output info:
+	 * Read and validate output settings:
 	 ***********************************************************************/
+	DEBUG(2, "Reading output settings.\n");
 	skipLine(infile);
 	
 	/*	output calculation type "catype"	*/
@@ -701,7 +710,7 @@ void	readIn(settings_t* settings, const char* filename){
 		fatal("Minimum batimetry range > minimum rbox range.\nAborting...");
 	if(settings->batimetry.r[settings->batimetry.numSurfaceCoords-1] < settings->source.rbox2)
 		fatal("Maximum batimetry range < maximum rbox range.\nAborting...");
-	
+	DEBUG(1, "out\n");
 }
 
 
