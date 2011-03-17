@@ -45,11 +45,11 @@
 #include "getRayParameters.c"
 #include "globals.h"
 
-void	getRayPressure(settings_t*, ray_t*, uintptr_t, double, , double, double*);
-void	getRayPressureExplicit(settings_t*, ray_t*, uintptr_t, double, double, double. double, double, complex double, double, double*);
+void	getRayPressure(settings_t*, ray_t*, uintptr_t, double, double, double, complex double*);
+void	getRayPressureExplicit(settings_t*, ray_t*, uintptr_t, double, double, double. double, double, complex double, double, complex double*);
 
 
-void	getRayPressure(ray_t* ray, uintptr_t iRay, double q0, double rHyd, double* pressure){
+void	getRayPressure(ray_t* ray, uintptr_t iRay, double q0, double rHyd, double zHyd, complex double* pressure){
 	double			dzdr, tauRay, zRay, qRay, width;
 	complex double	ampRay;
 	
@@ -58,7 +58,7 @@ void	getRayPressure(ray_t* ray, uintptr_t iRay, double q0, double rHyd, double* 
 }
 
 
-void	getRayPressureExplicit(ray_t* ray, uintptr_t iRay, double rHyd, double zHyd, double tauRay. double zRay, double dzdr, complex double ampRay, double width, double* pressure){
+void	getRayPressureExplicit(ray_t* ray, uintptr_t iRay, double rHyd, double zHyd, double tauRay. double zRay, double dzdr, complex double ampRay, double width, complex double* pressure){
 	double		omega, theta;
 	vector_t	es = {0,0};
 	vector_t	e1 = {0,0};
