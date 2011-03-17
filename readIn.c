@@ -641,6 +641,11 @@ void	readIn(settings_t* settings, const char* filename){
 	settings->output.nArrayR = (uint32_t)readInt(infile);
 	settings->output.nArrayZ = (uint32_t)readInt(infile);
 
+	if(settings->output.arrayType == ARRAY_TYPE__LINEAR &&
+		(settings->output.nArrayR != settings->output.nArrayZ)){
+			fatal("Input file: Linear array: number of range and depth coordinates must match.\nAborting...");
+	}
+
 	settings->output.arrayR = mallocDouble(settings->output.nArrayR);
 	settings->output.arrayZ = mallocDouble(settings->output.nArrayZ);
 	if(	(settings->output.arrayR == NULL) || (settings->output.arrayZ == NULL))
