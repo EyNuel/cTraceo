@@ -648,8 +648,6 @@ void	readIn(settings_t* settings, const char* filename){
 
 	settings->output.arrayR = mallocDouble(settings->output.nArrayR);
 	settings->output.arrayZ = mallocDouble(settings->output.nArrayZ);
-	if(	(settings->output.arrayR == NULL) || (settings->output.arrayZ == NULL))
-		fatal("Memory allocation error.");
 
 	//read the actual array values
 	for(i=0; i<settings->output.nArrayR; i++){
