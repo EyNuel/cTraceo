@@ -26,10 +26,14 @@
 #define FALSE	0
 
 //debugging help:
-#define WHERESTR				"[%s,\tline %d]:\t"
-#define WHEREARG				__FILE__, __LINE__
-#define DEBUG(level, ...)		if(VERBOSE == TRUE && VERBOSITY >= level){fprintf(stderr, WHERESTR, WHEREARG);fprintf(stderr, __VA_ARGS__);}
-//TODO rewrite DEBUG so that it doesn't appear in code when VERBOSE is undefined
+#if VERBOSE == 1
+	#define WHERESTR				"[%s,\tline %d]:\t"
+	#define WHEREARG				__FILE__, __LINE__
+	#define DEBUG(level, ...)		if(VERBOSE == TRUE && VERBOSITY >= level){fprintf(stderr, WHERESTR, WHEREARG);fprintf(stderr, __VA_ARGS__);}
+#else
+	#define DEBUG(level, ...)		do {} while (0)
+#endif
+
 
 /********************************************************************************
  * Minor data structures.														*
