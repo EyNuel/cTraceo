@@ -40,6 +40,7 @@ double**		mallocDouble2D(uintptr_t, uintptr_t);
 void			freeDouble2D(double**, uintptr_t);
 complex double*	mallocComplex(uintptr_t);
 complex double*	reallocComplex(complex double*, uintptr_t);
+complex double** mallocComplex2D(uintptr_t, uintptr_t);
 settings_t*		mallocSettings(void);
 vector_t*		mallocVector(uintptr_t);
 vector_t*		reallocVector(vector_t*, uintptr_t);
@@ -282,6 +283,27 @@ complex double*		reallocComplex(complex double* old, uintptr_t numComplex){
 		fatal("Memory allocation error.\n");
 	
 	return new;
+}
+
+complex double**	mallocComplex2D(uintptr_t numRows, uintptr_t numCols){
+	/*
+	 * Returns a pointer to an array of pointer do doubles.
+	 * Or:
+	 * Return a 2D Array.
+	 */
+
+	uint32_t	i;
+	complex double**	array = NULL;
+	array = malloc(numRows * sizeof(uintptr_t*));	//malloc an array of pointers
+	
+	if(array == NULL)
+		fatal("Memory allocation error.\n");
+
+	for(i = 0; i < numRows; i++){
+		array[i] = mallocComplex(numCols);	//Nota that mallocDouble() already checks for allocation errors
+	}
+
+	return array;
 }
 
 settings_t* 	mallocSettings(void){
