@@ -110,6 +110,28 @@ void	calcCohAcoustPress(settings_t* settings){
 	//allocate memory for the rays:
 	ray = makeRay(settings->source.nThetas);
 
+	//allocate memory for the results:
+	switch(settings->output.arrayType){
+		case ARRAY_TYPE__HORIZONTAL:
+			press1D = mallocComplex(settings->output.nArrayR);
+			break;
+			
+		case ARRAY_TYPE__VERTICAL:
+			press1D = mallocComplex(settings->output.nArrayZ);
+			break;
+			
+		case ARRAY_TYPE__LINEAR:
+			press1D = mallocComplex(settings->output.nArrayZ);
+			break;
+			
+		case ARRAY_TYPE__RECTANGULAR:
+			press2D = mallocComplex2D(settings->output.nArrayZ, settings->output.nArrayR);
+			break;
+			
+		default:
+			fatal("calcCohAcoustPress(): unknown array type.\nAborting.");
+			break;
+	}
 
 	///Solve the EIKonal and the DYNamic sets of EQuations:
 	omega  = 2.0 * M_PI * settings->source.freqx;
@@ -137,7 +159,7 @@ void	calcCohAcoustPress(settings_t* settings){
 				case ARRAY_TYPE__HORIZONTAL:
 					DEBUG(3,"Array type: Horizontal\n");
 					zHyd = settings->output.arrayZ[0];
-					press1D = mallocComplex(settings->output.nArrayR);
+					
 					
 					for(j=0; j<settings->output.nArrayR; j++){
 						rHyd = settings->output.arrayR[j];
@@ -152,13 +174,13 @@ void	calcCohAcoustPress(settings_t* settings){
 							if ( ray[i].iReturn == FALSE){
 								//find the index of the ray coordinate that brackets the hydrophone
 								bracket(ray[i].nCoords, ray[i].r, rHyd, &iHyd);
-								getRayPressure(settings, &ray[i], iHyd, q0, rHyd, zHyd, &pressure);
+								getRayPressure( /*in:*/	settings, &ray[i], iHyd, q0, rHyd, zHyd, /*out:*/	&pressure);
 								
 								press1D[j] += pressure;
 							}else{
 								eBracket(ray[i].nCoords, ray[i].r, rHyd, &nRet, iRet);
 								for(jj=0; jj<nRet; jj++){
-									getRayPressure(settings, &ray[i], iRet[jj], q0, rHyd, zHyd, &pressure);
+									getRayPressure( /*in:*/	settings, &ray[i], iRet[jj], q0, rHyd, zHyd,  /*out:*/	&pressure);
 									
 									press1D[j] += pressure;
 								}
@@ -170,7 +192,7 @@ void	calcCohAcoustPress(settings_t* settings){
 				case ARRAY_TYPE__VERTICAL:
 					DEBUG(3,"Array type: Vertical\n");
 					rHyd = settings->output.arrayR[0];
-					press1D = mallocComplex(settings->output.nArrayZ);
+					
 
 					if ( rHyd >= ray[i].rMin	&&	rHyd < ray[i].rMax	){
 						//Check if the ray is returning back or not;
@@ -201,7 +223,7 @@ void	calcCohAcoustPress(settings_t* settings){
 				
 				case ARRAY_TYPE__LINEAR:
 					DEBUG(3,"Array type: Linear\n");
-					press1D = mallocComplex(settings->output.nArrayZ);
+					
 					for(j=0; j<settings->output.nArrayZ; j++){
 						rHyd = settings->output.arrayR[j];
 						zHyd = settings->output.arrayZ[j];
@@ -234,20 +256,22 @@ void	calcCohAcoustPress(settings_t* settings){
 				case ARRAY_TYPE__RECTANGULAR:
 					DEBUG(3,"Array type: Rectangular\n");
 					DEBUG(4,"nArrayR: %u, nArrayZ: %u\n", (uint32_t)settings->output.nArrayR, (uint32_t)settings->output.nArrayZ );
-					press2D = mallocComplex2D(settings->output.nArrayZ, settings->output.nArrayR);
+					
 					//inicialize to 0:
-					/*for (j=0; j<settings->output.nArrayZ; j++){
+					/*
+					for (j=0; j<settings->output.nArrayZ; j++){
 						for (k=0; k<settings->output.nArrayR; k++){
 							press2D[j][k] = 0;
 						}
-					}*/
+					}
 					DEBUG(5, "memory initialized\n");
+					*/
 
 					//TODO invert indices, so that the innermost loop loops over the rightmost index of press2D
 					for(j=0; j<settings->output.nArrayR; j++){
 						rHyd = settings->output.arrayR[j];
 						
-						//Check first if the array range is inside the min and max ranges of the ray:
+						//Start by checking if the array range is inside the min and max ranges of the ray:
 						if (	rHyd >= ray[i].rMin	&&	rHyd < ray[i].rMax){
 							
 							if (ray[i].iReturn == FALSE){
@@ -256,7 +280,7 @@ void	calcCohAcoustPress(settings_t* settings){
 									
 									zHyd = settings->output.arrayZ[k];
 									getRayPressure(settings, &ray[i], iHyd, q0, rHyd, zHyd, &pressure);
-									press2D[k][j] += pressure;	//verify initialization. Done -makes no difference.
+									press2D[k][j] += pressure;	//verify if initialization is necessary. Done -makes no difference.
 									DEBUG(4, "k: %u; j: %u; press2D[k][j]: %e + j*%e\n", (uint32_t)k, (uint32_t)j, creal(press2D[k][j]), cimag(press2D[k][j]));
 									DEBUG(4, "rHyd: %lf; zHyd: %lf \n", rHyd, zHyd);
 								}
@@ -303,10 +327,8 @@ void	calcCohAcoustPress(settings_t* settings){
 		matPutVariable(matfile, "p", pPressure_a);
 		mxDestroyArray(pPressure_a);
 
-		free(press1D);
 		freeDouble2D(temp2D_a, 2);
 	}else{
-//printf("a\n");
 		
 		DEBUG(3,"Writing pressure output of rectangular array to file:\n");
 		//In the fortran version there were problems when passing complex matrices to Matlab; 
@@ -320,28 +342,34 @@ void	calcCohAcoustPress(settings_t* settings){
 			}
 		}
 		
-DEBUG(3,"\n");
-//printf("b\n");
 		//write the real part to the mat-file:
 		pPressure_a = mxCreateDoubleMatrix((int32_t)settings->output.nArrayZ, (int32_t)settings->output.nArrayR, mxREAL);
 		copyDoubleToPtr2D(temp2D_a, mxGetPr(pPressure_a), settings->output.nArrayR, settings->output.nArrayZ);
 		matPutVariable(matfile, "rp", pPressure_a);
 		mxDestroyArray(pPressure_a);
-		DEBUG(2, "echo!\n");
-DEBUG(3,"\n");
-//printf("c\n");
+		
 		//write the imaginary part to the mat-file:
 		pPressure_b = mxCreateDoubleMatrix((int32_t)settings->output.nArrayZ, (int32_t)settings->output.nArrayR, mxREAL);
 		copyDoubleToPtr2D(temp2D_b, mxGetPr(pPressure_b), settings->output.nArrayR, settings->output.nArrayZ);
 		matPutVariable(matfile, "ip", pPressure_b);
 		mxDestroyArray(pPressure_b);
-DEBUG(3,"\n");
-//printf("d\n");
-		free(press2D);
+		
 		freeDouble2D(temp2D_a, settings->output.nArrayZ);
 		freeDouble2D(temp2D_b, settings->output.nArrayZ);
 	}
 
+	//free memory:
+	switch(settings->output.arrayType){
+		case ARRAY_TYPE__HORIZONTAL:
+		case ARRAY_TYPE__VERTICAL:
+		case ARRAY_TYPE__LINEAR:
+			free(press1D);
+			break;
+			
+		case ARRAY_TYPE__RECTANGULAR:
+			free(press2D);		//TODO this is a memory leak -write a freeComplex2D function.
+			break;
+	}
 	matClose(matfile);
 	DEBUG(1,"out\n");
 }
