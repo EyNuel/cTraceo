@@ -18,6 +18,7 @@
  *							Universidade do Algarve									*
  *																					*
  *	Inputs:																			*
+ *				settings:	pointer to settings structure.							*
  * 				ri:			range of interpolation point.							*
  * 				zi:			depth of interpolation point.							*
  * 	Outputs:																		*

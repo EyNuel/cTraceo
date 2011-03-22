@@ -20,7 +20,7 @@
  *																				*
  *	Inputs:																		*
  * 				ray:	Pointer to structure containing a ray.					*
- * 				iRay:	Index at which to interpolate.							*
+ * 				iHyd:	Index at which to interpolate.							*
  * 				q0:		TODO
  * 				rHyd:	Range of hydrophone.									*
  * 	Outputs:																	*
@@ -33,29 +33,30 @@
  * 																				*
  *******************************************************************************/
 
+#pragma once
 #include "globals.h"
 #include "interpolation.h"
 #include <complex.h>
 #include "tools.c"
 
-void	getRayParameters(ray_t*, uintptr_t, double, , double, double*, double*, double*, double complex*, double*, double*);
+void	getRayParameters(ray_t*, uintptr_t, double, double, double*, double*, double*, double complex*, double*, double*);
 
-void	getRayParameters(ray_t* ray, uintptr_t iRay, double q0, double rHyd, double* dzdr, double* tauRay, double* zRay, double complex* ampRay, double* qRay, double* width){
+void	getRayParameters(ray_t* ray, uintptr_t iHyd, double q0, double rHyd, double* dzdr, double* tauRay, double* zRay, double complex* ampRay, double* qRay, double* width){
 
 	complex double	junkComplex;
 	double			junkDouble;
 	double			theta;
 
-	if( ray->iRefl[iRay+1] == TRUE){
-		iRay = iRay - 1;
+	if( ray->iRefl[iHyd+1] == TRUE){
+		iHyd = iHyd - 1;
 	}
 
-	intLinear1D(		&ray->r[iRay], &ray->z[iRay],	rHyd, zRay,		dzdr);
-	intLinear1D(		&ray->r[iRay], &ray->tau[iRay],	rHyd, tauRay,	junkDouble);
-	intComplexLinear1D(	&ray->r[iRay], &ray->amp[iRay],	rHyd, ampRay,	junkComplex);
-	intLinear1D(		&ray->r[iRay], &ray->q[iRay],	rHyd, qRay,		junkDouble);
+	intLinear1D(		&ray->r[iHyd], &ray->z[iHyd],	rHyd, zRay,		dzdr);
+	intLinear1D(		&ray->r[iHyd], &ray->tau[iHyd],	rHyd, tauRay,	&junkDouble);
+	intComplexLinear1D(	&ray->r[iHyd], &ray->amp[iHyd],	rHyd, ampRay,	&junkComplex);
+	intLinear1D(		&ray->r[iHyd], &ray->q[iHyd],	rHyd, qRay,		&junkDouble);
 
 	theta = atan( *dzdr );
 	*width = max( fabs( ray->q[iHyd] ), fabs( ray->q[iHyd+1]) );
-	*width = *width / ((*q0) * cos(theta));
+	*width = *width / ((q0) * cos(theta));
 }

@@ -33,6 +33,7 @@
 #include "calcEigenrayRF.c"
 #include "calcAmpDelPr.c"
 #include "calcAmpDelRF.c"
+#include "calcCohAcoustPress.c"
 #include <sys/time.h>		//for struct timeval
 #include <sys/resource.h>	//for getrusage()
 #include <string.h>
@@ -130,7 +131,7 @@ int main(int argc, char **argv){
 		case CALC_TYPE__COH_ACOUS_PRESS:
 			printf("Calculating coherent acoustic pressure.\n");
 			fprintf(logFile, "Coherent acoustic pressure.\n");
-			fatal("WIP");
+			calcCohAcoustPress(settings);
 			break;
 			
 		case CALC_TYPE__COH_TRANS_LOSS:
