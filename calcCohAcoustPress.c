@@ -367,7 +367,7 @@ void	calcCohAcoustPress(settings_t* settings){
 			break;
 			
 		case ARRAY_TYPE__RECTANGULAR:
-			free(press2D);		//TODO this is a memory leak -write a freeComplex2D function.
+			freeComplex2D(press2D, settings->output.nArrayZ);		//TODO this is a memory leak -write a freeComplex2D function.
 			break;
 	}
 	matClose(matfile);

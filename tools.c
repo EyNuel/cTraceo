@@ -41,6 +41,7 @@ void			freeDouble2D(double**, uintptr_t);
 complex double*	mallocComplex(uintptr_t);
 complex double*	reallocComplex(complex double*, uintptr_t);
 complex double** mallocComplex2D(uintptr_t, uintptr_t);
+void			freeComplex2D(complex double**, uintptr_t);
 settings_t*		mallocSettings(void);
 vector_t*		mallocVector(uintptr_t);
 vector_t*		reallocVector(vector_t*, uintptr_t);
@@ -304,6 +305,20 @@ complex double**	mallocComplex2D(uintptr_t numRows, uintptr_t numCols){
 	}
 
 	return array;
+}
+
+void		freeComplex2D(complex double** greenMile, uintptr_t items){
+	/*
+	 * frees the memory allocated to a double pointer of type complex double.
+	 */
+	 uintptr_t	i;
+	 
+	for(i=0; i<items; i++){
+		if(greenMile[i] != NULL){
+			free(greenMile[i]);
+		}
+	}
+	free(greenMile);
 }
 
 settings_t* 	mallocSettings(void){
