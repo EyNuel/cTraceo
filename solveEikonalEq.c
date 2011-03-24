@@ -219,7 +219,17 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 				specularReflection(&normal, &es, &tauR, &thetaRefl);
 
 				DEBUG(7, "Check if the ray is 'digging in' beyond the surface: \n");
+				//before we check if the next step's depth is above the surface, we need to check if it's range is withing the rangebox:
+				DEBUG(8, "Testing step: ri+settings->source.ds*tauR.r: %lf\n", ri+settings->source.ds*tauR.r);
+				if(ri+settings->source.ds*tauR.r < settings->source.rbox1 || ri+settings->source.ds*tauR.r > settings->source.rbox2){
+					DEBUG(5, "Next step is outside of rangeBox => terminate the ray.\n");
 					ray->iKill = TRUE;
+				}else{
+					boundaryInterpolation(	&(settings->altimetry), ri+settings->source.ds*tauR.r, &altInterpolatedZ, &tauB, &normal);
+					if ( (zi + settings->source.ds*tauR.z) < altInterpolatedZ){
+						DEBUG(5, "Ray is digging in above surface: %lf\n", ray->theta);
+						ray->iKill = TRUE;
+					}
 				}
 				
 				DEBUG(7, "Get the reflection coefficient (kill the ray if the surface is an absorver): \n");
@@ -357,7 +367,17 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 				specularReflection(&normal, &es, &tauR, &thetaRefl);
 
 				DEBUG(7, "Check if the ray is 'digging in' beyond the bottom: \n");
+				//before we check if the next step's depth is below the bottom, we need to check if it's range is withing the rangebox:
+				DEBUG(8, "Testing step: ri+settings->source.ds*tauR.r: %lf\n", ri+settings->source.ds*tauR.r);
+				if(ri+settings->source.ds*tauR.r < settings->source.rbox1 || ri+settings->source.ds*tauR.r > settings->source.rbox2){
+					DEBUG(5, "Next step is outside of rangeBox => terminate the ray.\n");
 					ray->iKill = TRUE;
+				}else{
+					boundaryInterpolation(	&(settings->batimetry), ri+settings->source.ds*tauR.r, &batInterpolatedZ, &tauB, &normal);
+					if ( (zi + settings->source.ds*tauR.z) > batInterpolatedZ){
+						DEBUG(5, "Ray is digging in below bottom: %lf\n", ray->theta);
+						ray->iKill = TRUE;
+					}
 				}
 				
 				DEBUG(7, "Get the reflection coefficient (kill the ray if the surface is an absorver): \n");
