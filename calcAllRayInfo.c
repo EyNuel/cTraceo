@@ -167,14 +167,15 @@ void	calcAllRayInfo(settings_t* settings){
 	DEBUG(4, "\n");
 
 	/// All ray information to matfile:
-	pRayInfo = mxCreateDoubleMatrix(5, (int32_t)ray[i].nCoords, mxREAL);
-	if(pRay == NULL){
+	pRayInfo = mxCreateDoubleMatrix(5, (int32_t)settings->source.nThetas, mxREAL);
+	if(pRayInfo == NULL){
 		fatal("Memory alocation error.");
 	}
-	copyDoubleToPtr2D(rayInfo, mxGetPr(pRayInfo), ray[i].nCoords,5);
 	DEBUG(4, "\n");
+	copyDoubleToPtr2D(rayInfo, mxGetPr(pRayInfo), settings->source.nThetas,5);
 	sprintf(string, "rayinfo");
 	matPutVariable(matfile, (const char*)string, pRayInfo);
+	mxDestroyArray(pRayInfo);
 	DEBUG(4, "\n");
 	
 	matClose(matfile);
