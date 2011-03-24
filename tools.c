@@ -13,6 +13,7 @@
 #pragma		once
 #include	"globals.h"
 #include	<stdlib.h>
+#include 	<stdio.h>
 #include	<string.h>
 #include	<sys/time.h>		//for struct time_t
 #include	<sys/resource.h>	//for getrusage()
@@ -455,7 +456,7 @@ void		printSettings(settings_t*	settings){
 	/************************************************
 	 *	Outputs a settings structure to stdout.		*
 	 ***********************************************/
-
+	DEBUG(1, "in\n");
 	uint32_t	i;
 	
 	printf("cTitle: \t\t\t%s", settings->cTitle);	//assuming a \n at the end of cTitle
@@ -744,6 +745,10 @@ void		printSettings(settings_t*	settings){
 			break;
 	}
 	printf("output.miss: \t\t\t%12.5lf\n",settings->output.miss);
+
+	fflush(stdout); // Will now print everything in the stdout buffer
+
+	DEBUG(1, "out\n");
 }
 
 ray_t*		makeRay(uintptr_t numRays){

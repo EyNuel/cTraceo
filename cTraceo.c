@@ -73,10 +73,12 @@ int main(int argc, char **argv){
 	//Read the input file
 	readIn(settings, inFileName);
 
-	/**
-	if (VERBOSE)
+	if (VERBOSE){
+		DEBUG(2, "Calling printSettings()\n");
 		printSettings(settings);
-	*/
+		DEBUG(2, "Returned from printSettings()\n");
+	}
+
 	omega	= 2 * M_PI * settings->source.freqx;
 
 	//open the log file and write the header:
