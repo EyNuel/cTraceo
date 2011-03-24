@@ -13,7 +13,7 @@
  * Configuration:																*
  *******************************************************************************/
 #define VERBOSE				0	//when set to 1, more information will be shown.
-#define VERBOSITY			3	//verbosity level (0-10). High levels will make the code impractically slow (seriously!)
+#define VERBOSITY			8	//verbosity level (0-10). High levels will make the code impractically slow (seriously!)
 #define MAX_LINE_LEN		256	//Maximum number of chars to read at once from a file (\n not included)
 #define MEM_FACTOR			20	//The memory allocated for each ray is determined like so: ( abs(rbox2-rbox1)/dsi )* MEM_FACTOR
 								//NOTE:	for deepwater cases, values between 3-5 are ok.
@@ -31,6 +31,7 @@
 	#define WHEREARG				__FILE__, __LINE__
 	#define DEBUG(level, ...)		if(VERBOSE == TRUE && VERBOSITY >= level){fprintf(stderr, WHERESTR, WHEREARG);fprintf(stderr, __VA_ARGS__);}
 #else
+	//this should be optimized away nicely by the compiler:
 	#define DEBUG(level, ...)		do {} while (0)
 #endif
 
@@ -42,7 +43,7 @@
 typedef struct	vector{
 	double	r;	//range component of vector
 	double	z;	//depth component of vector
-}vector_t;		//TODO add position components
+}vector_t;		//TODO add position components?
 
 typedef struct	point{
 	double	r;	//range component of point

@@ -46,6 +46,7 @@ void	rayObjectIntersection(objects_t* objects, uint32_t* j, int32_t boundary, po
 	/*
 	 * maps an object to rayBoundaryIntersection()
 	 */
+	DEBUG(4, "in\n");
 	interface_t		tempInterface;
 	
 	tempInterface.numSurfaceCoords		= objects->object[*j].nCoords;
@@ -63,11 +64,12 @@ void	rayObjectIntersection(objects_t* objects, uint32_t* j, int32_t boundary, po
 	}
 	tempInterface.surfaceInterpolation	= objects->surfaceInterpolation;
 	rayBoundaryIntersection(&tempInterface, a, b, isect);
+	DEBUG(4, "out\n");
 }
 	
 
 void	rayBoundaryIntersection(interface_t* interface, point_t* a, point_t* b, point_t* isect){
-	DEBUG(5,"in\n");
+	DEBUG(4,"in\n");
 	uint32_t	i,n;
 	double		rl[101];
 	double		zl[101];
@@ -124,5 +126,5 @@ void	rayBoundaryIntersection(interface_t* interface, point_t* a, point_t* b, poi
 			break;
 //TODO double check the last 20~ lines
 	}
-	DEBUG(5,"out\n");
+	DEBUG(4,"out\n");
 }

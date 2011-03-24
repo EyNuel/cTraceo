@@ -180,12 +180,14 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 		zi = yNew[1];
 
 		/**		Check for boundary intersections:	**/
-		//verify that the ray is still within the defined coordinates of the surface and the bottom:
+		DEBUG(5,"Verify that the ray is still within the defined coordinates of the surface and the bottom: \n");
+		DEBUG(7, "altimetry.r[0]: %lf, ri: %lf, altimetry.r[N]: %lf; \n", settings->altimetry.r[0], ri, settings->altimetry.r[settings->altimetry.numSurfaceCoords -1]);
+		DEBUG(7, "batimetry.r[0]: %lf, ri: %lf, batimetry.r[N]: %lf; \n", settings->batimetry.r[0], ri, settings->batimetry.r[settings->batimetry.numSurfaceCoords -1]);
 		if (	(ri > settings->altimetry.r[0]) &&
 				(ri < settings->altimetry.r[settings->altimetry.numSurfaceCoords -1]) &&
 				(ri > settings->batimetry.r[0]) &&
 				(ri < settings->batimetry.r[settings->batimetry.numSurfaceCoords -1] ) ){
-			//calculate surface and bottom z at current ray position:
+			DEBUG(7, "Calculate surface and bottom z at current ray position: \n");
 			boundaryInterpolation(	&(settings->altimetry), ri, &altInterpolatedZ, &junkVector, &normal);
 			boundaryInterpolation(	&(settings->batimetry), ri, &batInterpolatedZ, &junkVector, &normal);
 		}else{
@@ -194,14 +196,14 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 		}
 		DEBUG(9,"altInterpolatedZ: %lf\n", altInterpolatedZ);
 		DEBUG(9,"batInterpolatedZ: %lf\n", batInterpolatedZ);
-		//Check if the ray is still between the boundaries; if not, find the intersection point and calculate the reflection:
+		DEBUG(7, "Check if the ray is still between the boundaries; if not, find the intersection point and calculate the reflection: \n");
 		if ((ray->iKill == FALSE ) && (zi < altInterpolatedZ || zi > batInterpolatedZ)){
 			pointA.r = yOld[0];
 			pointA.z = yOld[1];
 			pointB.r = yNew[0];
 			pointB.z = yNew[1];
 			
-			//	Ray above surface?
+			DEBUG(7, "Ray above surface? \n");
 			if (zi < altInterpolatedZ){
 				DEBUG(5,"ray above surface.\n");
 				rayBoundaryIntersection(&(settings->altimetry), &pointA, &pointB, &pointIsect);
@@ -213,16 +215,14 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 				sRefl = sRefl + 1;
 				jRefl = 1;
 				
-				//Calculate surface reflection:
+				DEBUG(7, "Calculate surface reflection: \n");
 				specularReflection(&normal, &es, &tauR, &thetaRefl);
 
-				//Check if the ray is "digging in" beyond the surface:
-				boundaryInterpolation(	&(settings->altimetry), ri, &altInterpolatedZ, &tauB, &normal);
-				if ( (zi + settings->source.ds*tauR.z) < altInterpolatedZ){
+				DEBUG(7, "Check if the ray is 'digging in' beyond the surface: \n");
 					ray->iKill = TRUE;
 				}
 				
-				//get the reflection coefficient (kill the ray if the surface is an absorver):
+				DEBUG(7, "Get the reflection coefficient (kill the ray if the surface is an absorver): \n");
 				switch(settings->altimetry.surfaceType){
 					
 					case SURFACE_TYPE__ABSORVENT:	//"A"
@@ -332,7 +332,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 				}
 				reflDecay = reflDecay * refl;
 
-				//Kill the ray if the reflection coefficient is too small: 
+				DEBUG(7, "Kill the ray if the reflection coefficient is too small: \n");
 				if ( cabs(refl) < 1.0e-5 ){
 					ray->iKill = TRUE;
 				}
@@ -353,16 +353,14 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 				sRefl = sRefl + 1;
 				jRefl = 1;
 				
-				//Calculate surface reflection:
+				DEBUG(7, "Calculate surface reflection: \n");
 				specularReflection(&normal, &es, &tauR, &thetaRefl);
 
-				//Check if the ray is "digging in" beyond the surface:
-				boundaryInterpolation(	&(settings->batimetry), ri, &batInterpolatedZ, &tauB, &normal);
-				if ( (zi + settings->source.ds*tauR.z) > batInterpolatedZ){
+				DEBUG(7, "Check if the ray is 'digging in' beyond the bottom: \n");
 					ray->iKill = TRUE;
 				}
 				
-				//get the reflection coefficient (kill the ray if the surface is an absorver):
+				DEBUG(7, "Get the reflection coefficient (kill the ray if the surface is an absorver): \n");
 				switch(settings->batimetry.surfaceType){
 					
 					case SURFACE_TYPE__ABSORVENT:	//"A"
@@ -479,7 +477,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 				}
 			}
 
-			/*	Update marching solution and function:	*/
+			DEBUG(6, "Update marching solution and function: \n");
 			ri = pointIsect.r;
 			zi = pointIsect.z;
 			csValues( 	settings, ri, zi, &ci, &cc, &sigmaI, &cri, &czi, &slowness, &crri, &czzi, &crzi);
@@ -497,11 +495,12 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 		/*************************
 		 *  Object reflection:
 		 *************************/
+		DEBUG(5, "Check for object reflection: \n");
 		if (settings->objects.numObjects > 0){
  			for(j=0; j<settings->objects.numObjects; j++){
 				nObjCoords = settings->objects.object[j].nCoords;
 
-				//For each object detect if the ray is inside the object range: 
+				DEBUG(7, "For each object detect if the ray is inside the object range: \n");
 				if (	(ri >=	settings->objects.object[j].r[0] ) &&
 						(ri <	settings->objects.object[j].r[nObjCoords-1])){
 					DEBUG(1, "Ray in object range.\n");
@@ -588,6 +587,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 								rayObjectIntersection(&settings->objects, &j, UP, &pointA, &pointB, &pointIsect);
 								ibdry =  1;
 							}
+							DEBUG(5, "Leaving case 2\n");
 
 						//	Case 3: from right to left, beginning inside of box and ending inside:
 						}else if(	yOld[0] >	yNew[0]	&&
@@ -683,19 +683,23 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 
 						switch(settings->objects.object[j].surfaceType){
 							case SURFACE_TYPE__ABSORVENT:	//"A"
+								DEBUG(5, "Object: SURFACE_TYPE__ABSORVENT\n");
 								refl = 0 +0*I;
 								ray->iKill = TRUE;
 								break;
 						
 							case SURFACE_TYPE__RIGID:		//"R"
+								DEBUG(5, "Object: SURFACE_TYPE__RIGID\n");
 								refl = 1 +0*I;
 								break;
 								
 							case SURFACE_TYPE__VACUUM:		//"V"
+								DEBUG(5, "Object: SURFACE_TYPE__VACUUM\n");
 								refl = -1 +0*I;
 								break;
 								
 							case SURFACE_TYPE__ELASTIC:		//"E"
+								DEBUG(5, "Object: SURFACE_TYPE__ELASTIC\n");
 								rho2= settings->objects.object[j].rho;
 								cp2	= settings->objects.object[j].cp;
 								cs2	= settings->objects.object[j].cs;
@@ -717,7 +721,9 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 												&tempDouble
 											);
 								as		= tempDouble;
+								DEBUG(6, "Calculating reflection coefficient...\n");
 								boundaryReflectionCoeff(&rho1, &rho2, &ci, &cp2, &cs2, &ap, &as, &thetaRefl, &refl);
+								DEBUG(6, "Reflection coefficient calculated\n");
 								break;
 							
 							default:
@@ -725,6 +731,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 								break;
 						}
 						reflDecay = reflDecay * refl;
+						DEBUG(7, "Object: Reflection decay calculated: %lf +j* %lf\n", creal(reflDecay), cimag(reflDecay));
 
 						//Kill the ray if the reflection coefficient is too small: 
 						if ( cabs(refl) < 1.0e-5 ){
@@ -736,7 +743,9 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 						es.z = tauR.z;
 						e1.r = -es.z;
 						e1.z =  es.r;
+						DEBUG(7, "Calculating sound speed parameters for next step...\n");
 						csValues( 	settings, ri, zi, &ci, &cc, &sigmaI, &cri, &czi, &slowness, &crri, &czzi, &crzi);
+						DEBUG(7, "Sound speed parameters for next step calculated.\n");
 						
 						yNew[0] = ri;
 						yNew[1] = zi;

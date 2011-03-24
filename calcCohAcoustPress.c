@@ -126,6 +126,15 @@ void	calcCohAcoustPress(settings_t* settings){
 			
 		case ARRAY_TYPE__RECTANGULAR:
 			press2D = mallocComplex2D(settings->output.nArrayZ, settings->output.nArrayR);
+			//inicialize to 0:
+			/*
+			for (j=0; j<settings->output.nArrayZ; j++){
+				for (k=0; k<settings->output.nArrayR; k++){
+					press2D[j][k] = 0;
+				}
+			}
+			DEBUG(5, "memory initialized\n");
+			*/
 			break;
 			
 		default:
@@ -257,16 +266,6 @@ void	calcCohAcoustPress(settings_t* settings){
 					DEBUG(3,"Array type: Rectangular\n");
 					DEBUG(4,"nArrayR: %u, nArrayZ: %u\n", (uint32_t)settings->output.nArrayR, (uint32_t)settings->output.nArrayZ );
 					
-					//inicialize to 0:
-					/*
-					for (j=0; j<settings->output.nArrayZ; j++){
-						for (k=0; k<settings->output.nArrayR; k++){
-							press2D[j][k] = 0;
-						}
-					}
-					DEBUG(5, "memory initialized\n");
-					*/
-
 					//TODO invert indices, so that the innermost loop loops over the rightmost index of press2D
 					for(j=0; j<settings->output.nArrayR; j++){
 						rHyd = settings->output.arrayR[j];

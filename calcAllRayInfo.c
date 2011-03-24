@@ -86,7 +86,8 @@ void	calcAllRayInfo(settings_t* settings){
 		if (ctheta > 1.0e-7){
 			solveEikonalEq(settings, &ray[i]);
 			solveDynamicEq(settings, &ray[i]);
-
+			DEBUG(4, "Equations solved.\n");
+			
 			///prepare to write ray to matfile:
 			temp2D 		= malloc(5*sizeof(uintptr_t));
 			temp2D[0]	= ray[i].r;
@@ -98,22 +99,26 @@ void	calcAllRayInfo(settings_t* settings){
 				temp2D[3][j] = creal( ray[i].amp[j] );
 				temp2D[4][j] = cimag( ray[i].amp[j] );
 			}
-
+			DEBUG(4, "Created temporary variables for ray.\n");
+			
 			//copy data to mxArray and write ray to file:
 			pRay = mxCreateDoubleMatrix(5, (int32_t)ray[i].nCoords, mxREAL);
 			if(pRay == NULL){
 				fatal("Memory alocation error.");
 			}
 			copyDoubleToPtr2D(temp2D, mxGetPr(pRay), ray[i].nCoords,5);
+			DEBUG(4, "Copied ray to matlab array.\n");
 
 			sprintf(string, "ray%u", (uint32_t)(i+1));
 			matPutVariable(matfile, (const char*)string, pRay);
+			DEBUG(4, "Wrote ray to matfile.\n");
 
 			//free memory
 			mxDestroyArray(pRay);
 			free(temp2D[3]);
 			free(temp2D[4]);
 			free(temp2D);
+			DEBUG(4, "Freed temporary variables.\n");
 			///ray has been written to matfile
 
 			///save ray information:
@@ -122,31 +127,36 @@ void	calcAllRayInfo(settings_t* settings){
 			rayInfo[2][i] = ray[i].bRefl;
 			rayInfo[3][i] = ray[i].oRefl;
 			rayInfo[4][i] = (double)ray[i].nRefrac;
+			DEBUG(4, "Created temporary variables for reflections counters.\n");
 
 			if (ray[i].nRefrac > 0){
 				temp2D 		= malloc(2*sizeof(uintptr_t));
 				temp2D[0]	= mallocDouble(ray[i].nRefrac);
 				temp2D[1]	= mallocDouble(ray[i].nRefrac);
+				DEBUG(4, "\n");
 				
 				for(j=0; j<ray[i].nRefrac; j++){
 					temp2D[0][j] = ray[i].refrac[j].r;
-					temp2D[0][j] = ray[i].refrac[j].r;
+					temp2D[1][j] = ray[i].refrac[j].z;
 				}
+				DEBUG(4, "\n");
 				
 				pRefrac = mxCreateDoubleMatrix(2, (int32_t)ray[i].nRefrac, mxREAL);
 				if(pRefrac == NULL){
 					fatal("Memory alocation error.");
 				}
 				copyDoubleToPtr2D(temp2D, mxGetPr(pRefrac), ray[i].nRefrac,2);
+				DEBUG(4, "\n");
 				
 				sprintf(string, "rayrfr%u", (uint32_t)(i+1));
 				matPutVariable(matfile, (const char*)string, pRefrac);
-
+				DEBUG(4, "\n");
+				
 				mxDestroyArray(pRefrac);
 				free(temp2D[0]);
 				free(temp2D[1]);
 				free(temp2D);
-
+				DEBUG(4, "\n");
 			}
 			if(KEEP_RAYS_IN_MEM == FALSE){
 				//free the ray's memory
@@ -154,6 +164,7 @@ void	calcAllRayInfo(settings_t* settings){
 			}
 		}
 	}
+	DEBUG(4, "\n");
 
 	/// All ray information to matfile:
 	pRayInfo = mxCreateDoubleMatrix(5, (int32_t)ray[i].nCoords, mxREAL);
@@ -161,8 +172,10 @@ void	calcAllRayInfo(settings_t* settings){
 		fatal("Memory alocation error.");
 	}
 	copyDoubleToPtr2D(rayInfo, mxGetPr(pRayInfo), ray[i].nCoords,5);
+	DEBUG(4, "\n");
 	sprintf(string, "rayinfo");
 	matPutVariable(matfile, (const char*)string, pRayInfo);
+	DEBUG(4, "\n");
 	
 	matClose(matfile);
 	free(string);
