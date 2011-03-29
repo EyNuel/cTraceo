@@ -52,7 +52,7 @@ void	calcAllRayInfo(settings_t* settings){
 
 
 	matfile = matOpen("ari.mat", "w");
-	pThetas		= mxCreateDoubleMatrix(1, (int32_t)settings->source.nThetas, mxREAL);
+	pThetas		= mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)settings->source.nThetas, mxREAL);
 	if(matfile == NULL || pThetas == NULL){
 		fatal("Memory alocation error.");
 	}
@@ -102,7 +102,7 @@ void	calcAllRayInfo(settings_t* settings){
 			DEBUG(4, "Created temporary variables for ray.\n");
 			
 			//copy data to mxArray and write ray to file:
-			pRay = mxCreateDoubleMatrix(5, (int32_t)ray[i].nCoords, mxREAL);
+			pRay = mxCreateDoubleMatrix((MWSIZE)5, (MWSIZE)ray[i].nCoords, mxREAL);
 			if(pRay == NULL){
 				fatal("Memory alocation error.");
 			}
@@ -141,7 +141,7 @@ void	calcAllRayInfo(settings_t* settings){
 				}
 				DEBUG(4, "\n");
 				
-				pRefrac = mxCreateDoubleMatrix(2, (int32_t)ray[i].nRefrac, mxREAL);
+				pRefrac = mxCreateDoubleMatrix((MWSIZE)2, (MWSIZE)ray[i].nRefrac, mxREAL);
 				if(pRefrac == NULL){
 					fatal("Memory alocation error.");
 				}
@@ -167,7 +167,7 @@ void	calcAllRayInfo(settings_t* settings){
 	DEBUG(4, "\n");
 
 	/// All ray information to matfile:
-	pRayInfo = mxCreateDoubleMatrix(5, (int32_t)settings->source.nThetas, mxREAL);
+	pRayInfo = mxCreateDoubleMatrix((MWSIZE)5, (MWSIZE)settings->source.nThetas, mxREAL);
 	if(pRayInfo == NULL){
 		fatal("Memory alocation error.");
 	}

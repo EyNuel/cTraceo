@@ -63,7 +63,7 @@ void	calcEigenrayPr(settings_t* settings){
 	uintptr_t		iRet[51];
 	
 	matfile 	= matOpen("eig.mat", "w");
-	pThetas		= mxCreateDoubleMatrix(1, (int32_t)settings->source.nThetas, mxREAL);
+	pThetas		= mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)settings->source.nThetas, mxREAL);
 	if(matfile == NULL || pThetas == NULL){
 		fatal("Memory alocation error.");
 	}
@@ -87,7 +87,7 @@ void	calcEigenrayPr(settings_t* settings){
 
 
 	//write hydrophone array ranges to file:
-	pHydArrayR			= mxCreateDoubleMatrix(1, (int32_t)settings->output.nArrayR, mxREAL);
+	pHydArrayR			= mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)settings->output.nArrayR, mxREAL);
 	if(pHydArrayR == NULL){
 		fatal("Memory alocation error.");
 	}
@@ -100,7 +100,7 @@ void	calcEigenrayPr(settings_t* settings){
 
 
 	//write hydrophone array depths to file:
-	pHydArrayZ			= mxCreateDoubleMatrix(1, (int32_t)settings->output.nArrayZ, mxREAL);
+	pHydArrayZ			= mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)settings->output.nArrayZ, mxREAL);
 	if(pHydArrayZ == NULL){
 		fatal("Memory alocation error.");
 	}
@@ -154,7 +154,7 @@ void	calcEigenrayPr(settings_t* settings){
 							dyingRay[0]	= ray[i].r;
 							dyingRay[1]	= ray[i].z;
 							matfile2	= matOpen("dyingRay.mat", "w");
-							pDyingRay	= mxCreateDoubleMatrix(2, (int32_t)ray[i].nCoords, mxREAL);
+							pDyingRay	= mxCreateDoubleMatrix((MWSIZE)2, (MWSIZE)ray[i].nCoords, mxREAL);
 							if(pDyingRay == NULL || matfile2 == NULL)
 								fatal("Memory alocation error.");
 							copyDoubleToPtr2D(dyingRay, mxGetPr(pDyingRay), ray[i].nCoords,2);
@@ -210,7 +210,7 @@ void	calcEigenrayPr(settings_t* settings){
 								temp2D[4][iHyd+1]	= cimag(ampRay);
 								
 								//(copy data to mxArray and write ray to file:
-								pRay = mxCreateDoubleMatrix(5, (int32_t)(iHyd+1), mxREAL);
+								pRay = mxCreateDoubleMatrix((MWSIZE)5, (MWSIZE)(iHyd+1), mxREAL);
 								if(pRay == NULL){
 									fatal("Memory alocation error.");
 								}
@@ -270,7 +270,7 @@ void	calcEigenrayPr(settings_t* settings){
 									temp2D[4][iRet[l]+1]	= cimag(ampRay);
 									
 									//(copy data to mxArray and write ray to file:
-									pRay = mxCreateDoubleMatrix(5, (int32_t)(iRet[l]+1), mxREAL);
+									pRay = mxCreateDoubleMatrix((MWSIZE)5, (MWSIZE)(iRet[l]+1), mxREAL);
 									if(pRay == NULL){
 										fatal("Memory alocation error.");
 									}
@@ -297,7 +297,7 @@ void	calcEigenrayPr(settings_t* settings){
 
 	///Write number of eigenrays to matfile:
 	DEBUG(2,"Number of eigenrays found: %u\n", (uint32_t)nEigenRays);
-	pnEigenRays = mxCreateDoubleMatrix(1,1,mxREAL);
+	pnEigenRays = mxCreateDoubleMatrix((MWSIZE)1,(MWSIZE)1,mxREAL);
 	copyDoubleToPtr(	&nEigenRays,
 						mxGetPr(pnEigenRays),
 						1);

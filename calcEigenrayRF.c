@@ -113,7 +113,7 @@ void	calcEigenrayRF(settings_t* settings){
 
 
 	matfile 	= matOpen("eig.mat", "w");
-	pThetas		= mxCreateDoubleMatrix(1, (int32_t)settings->source.nThetas, mxREAL);
+	pThetas		= mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)settings->source.nThetas, mxREAL);
 	if(matfile == NULL || pThetas == NULL){
 		fatal("Memory alocation error.");
 	}
@@ -134,7 +134,7 @@ void	calcEigenrayRF(settings_t* settings){
 	mxDestroyArray(pTitle);
 	
 	//write hydrophone array ranges to file:
-	pHydArrayR			= mxCreateDoubleMatrix(1, (int32_t)settings->output.nArrayR, mxREAL);
+	pHydArrayR			= mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)settings->output.nArrayR, mxREAL);
 	if(pHydArrayR == NULL){
 		fatal("Memory alocation error.");
 	}
@@ -147,7 +147,7 @@ void	calcEigenrayRF(settings_t* settings){
 
 
 	//write hydrophone array depths to file:
-	pHydArrayZ			= mxCreateDoubleMatrix(1, (int32_t)settings->output.nArrayZ, mxREAL);
+	pHydArrayZ			= mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)settings->output.nArrayZ, mxREAL);
 	if(pHydArrayZ == NULL){
 		fatal("Memory alocation error.");
 	}
@@ -398,7 +398,7 @@ void	calcEigenrayRF(settings_t* settings){
 					}
 
 					//copy data to mxArray and write ray to file:
-					pRay = mxCreateDoubleMatrix(5, (int32_t)tempRay[0].nCoords, mxREAL);
+					pRay = mxCreateDoubleMatrix((MWSIZE)5, (MWSIZE)tempRay[0].nCoords, mxREAL);
 					if(pRay == NULL){
 						fatal("Memory alocation error.");
 					}
@@ -422,7 +422,7 @@ void	calcEigenrayRF(settings_t* settings){
 	}
 
 	///Write number of eigenrays to matfile:
-	pnEigenRays = mxCreateDoubleMatrix(1,1,mxREAL);
+	pnEigenRays = mxCreateDoubleMatrix((MWSIZE)1,(MWSIZE)1,mxREAL);
 	junkDouble = (double)nFoundEigenRays;
 	copyDoubleToPtr(	&junkDouble,
 						mxGetPr(pnEigenRays),

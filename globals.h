@@ -5,6 +5,7 @@
 #pragma once
 #include <inttypes.h>	//needed for inequivocal type qualifiers
 #include <complex.h>
+#include <matrix.h>		//needed for matlab matrix dimensions
 /*
 	NOTE:	The actual value defined is not important, as it will never be use -only its name will.
 */
@@ -21,7 +22,11 @@
 								//		values of 15-25 may be adequate
 #define KEEP_RAYS_IN_MEM	0	//[boolean] determines whether a rays coordinates are kept in memory after being written to the .mat file. (mat become usefull for multiprocessing)
 
-//basics:
+//When writing matlab-matrixes to matfiles, the data type varies between matlab versions.
+#define MWSIZE				int32_t		//matlab R14 uses int32
+//#define MWSIZE			mwSize		//matlab R2008b uses mwSize, defined in "matrix.h"
+
+//booleans:
 #define	TRUE	1
 #define FALSE	0
 
@@ -40,6 +45,7 @@
  * Minor data structures.														*
  *******************************************************************************/
 
+//TODO this seems somewhat redundant...
 typedef struct	vector{
 	double	r;	//range component of vector
 	double	z;	//depth component of vector

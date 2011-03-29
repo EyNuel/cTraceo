@@ -840,7 +840,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 				temp2D[0]	= ray->r;
 				temp2D[1]	= ray->z;
 				matfile		= matOpen("dyingRay.mat", "w");
-				pRay		= mxCreateDoubleMatrix(2, (int32_t)ray->nCoords, mxREAL);
+				pRay		= mxCreateDoubleMatrix((MWSIZE)2, (MWSIZE)ray->nCoords, mxREAL);
 				if(pRay == NULL || matfile == NULL)
 					fatal("Memory alocation error.");
 				copyDoubleToPtr2D(temp2D, mxGetPr(pRay), ray->nCoords,2);
