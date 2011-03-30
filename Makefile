@@ -21,7 +21,7 @@ LFLAGS := 	-L /usr/local/matlabr14/bin/glnxa64 \
 #			-lm -leng -lmat -lmex -lut \
 #			-Wl,-rpath,/usr/local/matlabr2008b/bin/glnx86 \
 
-#another case:
+#another case 64b case:
 #LFLAGS :=	-L /usr/local/matlab2008a/bin/glnxa64 \
 #			-lm -leng -lmat -lmex -lut \
 #			-Wl,-rpath /usr/local/matlab2008a/bin/glnx86 \
@@ -38,20 +38,21 @@ COMPLINK 	:= $(CC) $(CFLAGS) $(LFLAGS) -o $@
 AUXFILES := Makefile
 
 # A list of directories that belong to the project
-PROJDIRS := .
+PROJDIRS := . M-Files
 	#functions includes internals
 
 # Recursively create a list of files that are inside the project
 SRCFILES := $(shell find $(PROJDIRS) -mindepth 0 -maxdepth 1 -name "*.c")
 HDRFILES := $(shell find $(PROJDIRS) -mindepth 0 -maxdepth 1 -name "*.h")
 OBJFILES := $(patsubst %.c,%.o,$(SRCFILES))
+MFILES   := $(shell find $(PROJDIRS) -mindepth 1 -maxdepth 1 -name "*.m")
 
 # Automatically create dependency files for every file in the project
 #DEPFILES := $(patsubst %.c, %.d,$(SRCFILES))
 #-include $(DEPFILES)
 
 # A list of all files that should end up in a distribuition tarball
-ALLFILES := $(SRCFILES) $(HDRFILES) $(AUXFILES)
+ALLFILES := $(SRCFILES) $(HDRFILES) $(AUXFILES) $(MFILES)
 
 # Disable checking for files with the folowing names:
 .PHONY: all todo cTraceo.exe discuss 32b pg dist
