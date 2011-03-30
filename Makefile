@@ -12,14 +12,14 @@ CFLAGS := 	-Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align \
 			-I /usr/local/matlabr14/extern/include \
 
 # The following 3 lines are for compilation on siplab 64b machines:
-#LFLAGS := 	-L /usr/local/matlabr14/bin/glnxa64 \
-#			-lm -leng -lmat -lmex -lut \
-#			-Wl,-rpath,/usr/local/matlabr14/bin/glnxa64
+LFLAGS := 	-L /usr/local/matlabr14/bin/glnxa64 \
+			-lm -leng -lmat -lmex -lut \
+			-Wl,-rpath,/usr/local/matlabr14/bin/glnxa64
 
 # The following 3 lines are a case for compilation on a 32b machine:
-LFLAGS :=	-L /usr/local/matlabr2008b/bin/glnx86 \
-			-lm -leng -lmat -lmex -lut \
-			-Wl,-rpath,/usr/local/matlabr2008b/bin/glnx86 \
+#LFLAGS :=	-L /usr/local/matlabr2008b/bin/glnx86 \
+#			-lm -leng -lmat -lmex -lut \
+#			-Wl,-rpath,/usr/local/matlabr2008b/bin/glnx86 \
 
 #another case:
 #LFLAGS :=	-L /usr/local/matlab2008a/bin/glnxa64 \
