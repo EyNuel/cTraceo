@@ -39,48 +39,6 @@
 #include "bracket.c"
 
 void 	calcEigenrayRF(settings_t*);
-/*
-       character*60 ctitle
-       character*10 eray
-       character*9 cix
-       character*8 cviii
-       character*7 cvii
-       character*6 cvi
-       character*5 cv
-       character*4 civ
-       character*3 ciii
-       character*2 cii
-       character*1 ci
-       
-       integer*8 inan(nangle,nhyd2)
-       integer*8 irefl(np),jbdry(np)
-       integer*8 i,iFail,iHyd,imax,il,ir,j,jj,jjj,k,l,m
-       integer*8 nFail,nEigenRays,nrays,nthtas,ntrial,nEigRays
-       
-       integer*8 matOpen, matClose
-       integer*8 mxCreateDoubleMatrix, mxCreateString, mxGetPr
-       integer*8 matfile, ptitle, pthtas, prh, pzh, pray, perays
-       integer*8 matPutVariable, matDeleteVariable
-       integer*8 status
-       
-       real*8 raydat(5,np)
-       real*8  tbdry(2,np)
-       
-       real*8 depths(nangle,nhyd2)
-       
-       real*8 f(nangle),thetas[nangle)
-       real*8 thetaL(np2),thetaR(np2)
-       real*8 xl(2),yl(2)
-       
-       real*8 thetai,ctheta
-       real*8 rHyd,zRay,zRay
-       real*8 thtae,thtal,thtar,thta0
-       real*8 fl,fr,f0,prod
-       real*8 mynan,mnsone
-       real*8 rerays
-       
-       complex*8 decay(np)
-*/
 
 void	calcEigenrayRF(settings_t* settings){
 	DEBUG(1,"in\n");

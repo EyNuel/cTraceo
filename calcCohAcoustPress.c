@@ -62,7 +62,7 @@ void	calcCohAcoustPress(settings_t* settings){
 
 
 	matfile		= matOpen("cpr.mat", "w");
-	pThetas		= mxCreateDoubleMatrix(1, (int32_t)settings->source.nThetas, mxREAL);
+	pThetas		= mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)settings->source.nThetas, mxREAL);
 	if(matfile == NULL || pThetas == NULL)
 		fatal("Memory alocation error.");
 	
@@ -83,7 +83,7 @@ void	calcCohAcoustPress(settings_t* settings){
 	mxDestroyArray(pTitle);
 
 	//write hydrophone array ranges to file:
-	pHydArrayR	= mxCreateDoubleMatrix(1, (int32_t)settings->output.nArrayR, mxREAL);
+	pHydArrayR	= mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)settings->output.nArrayR, mxREAL);
 	if(pHydArrayR == NULL){
 		fatal("Memory alocation error.");
 	}
@@ -96,7 +96,7 @@ void	calcCohAcoustPress(settings_t* settings){
 
 
 	//write hydrophone array depths to file:
-	pHydArrayZ	= mxCreateDoubleMatrix(1, (int32_t)settings->output.nArrayZ, mxREAL);
+	pHydArrayZ	= mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)settings->output.nArrayZ, mxREAL);
 	if(pHydArrayZ == NULL){
 		fatal("Memory alocation error.");
 	}
@@ -321,7 +321,7 @@ void	calcCohAcoustPress(settings_t* settings){
 			temp2D_a[2][j] = cimag( press1D[j]);
 		}
 		
-		pPressure_a = mxCreateDoubleMatrix(2, (int32_t)dim, mxREAL);
+		pPressure_a = mxCreateDoubleMatrix((MWSIZE)2, (MWSIZE)dim, mxREAL);
 		copyDoubleToPtr2D(temp2D_a, mxGetPr(pPressure_a), dim,2);
 		matPutVariable(matfile, "p", pPressure_a);
 		mxDestroyArray(pPressure_a);
@@ -342,13 +342,13 @@ void	calcCohAcoustPress(settings_t* settings){
 		}
 		
 		//write the real part to the mat-file:
-		pPressure_a = mxCreateDoubleMatrix((int32_t)settings->output.nArrayZ, (int32_t)settings->output.nArrayR, mxREAL);
+		pPressure_a = mxCreateDoubleMatrix((MWSIZE)settings->output.nArrayZ, (MWSIZE)settings->output.nArrayR, mxREAL);
 		copyDoubleToPtr2D(temp2D_a, mxGetPr(pPressure_a), settings->output.nArrayR, settings->output.nArrayZ);
 		matPutVariable(matfile, "rp", pPressure_a);
 		mxDestroyArray(pPressure_a);
 		
 		//write the imaginary part to the mat-file:
-		pPressure_b = mxCreateDoubleMatrix((int32_t)settings->output.nArrayZ, (int32_t)settings->output.nArrayR, mxREAL);
+		pPressure_b = mxCreateDoubleMatrix((MWSIZE)settings->output.nArrayZ, (MWSIZE)settings->output.nArrayR, mxREAL);
 		copyDoubleToPtr2D(temp2D_b, mxGetPr(pPressure_b), settings->output.nArrayR, settings->output.nArrayZ);
 		matPutVariable(matfile, "ip", pPressure_b);
 		mxDestroyArray(pPressure_b);

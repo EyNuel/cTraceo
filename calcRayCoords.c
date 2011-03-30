@@ -82,7 +82,7 @@ void	calcRayCoords(settings_t* settings){
 			
 			temp2D[0]	= ray[i].r;
 			temp2D[1]	= ray[i].z;
-			pRay		= mxCreateDoubleMatrix((MWSIZE)2, (int32_t)ray[i].nCoords, mxREAL);
+			pRay		= mxCreateDoubleMatrix((MWSIZE)2, (MWSIZE)ray[i].nCoords, mxREAL);
 			if(pRay == NULL)
 				fatal("Memory alocation error.");
 			copyDoubleToPtr2D(temp2D, mxGetPr(pRay), ray[i].nCoords,2);
