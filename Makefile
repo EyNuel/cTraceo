@@ -6,7 +6,7 @@
 CFLAGS := 	-Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align \
 			-Wwrite-strings -Wmissing-prototypes -Wmissing-declarations \
 			-Wredundant-decls -Wnested-externs -Winline -Wno-long-long \
-			-Wconversion -Wstrict-prototypes -std=gnu99 -O3 \
+			-Wconversion -Wstrict-prototypes -std=gnu99 \
 			-I /usr/local/matlabr2008b/extern/include \
 			-I /usr/local/matlab2008a/extern/include \
 			-I /usr/local/matlabr14/extern/include \
@@ -58,14 +58,17 @@ ALLFILES := $(SRCFILES) $(HDRFILES) $(AUXFILES) $(MFILES)
 .PHONY: all todo cTraceo.exe discuss 32b pg dist
 
 all:	#cTraceo.exe
-		@$(CC) $(CFLAGS) $(LFLAGS) -o bin/cTraceo-64b.bin cTraceo.c
+		@$(CC) $(CFLAGS) $(LFLAGS) -O3 -o bin/cTraceo-64b.bin cTraceo.c
 
 
 32b:	#cTraceo.exe
-		@$(CC) $(CFLAGS) $(LFLAGS) -march=i686 -m32 -o bin/cTraceo-32b.bin cTraceo.c
+		@$(CC) $(CFLAGS) $(LFLAGS) -O3 -march=i686 -m32 -o bin/cTraceo-32b.bin cTraceo.c
 
 pg:		#
-		@gcc $(CFLAGS) $(LFLAGS) -pg -o bin/cTraceo-64b.bin cTraceo.c
+		@gcc $(CFLAGS) $(LFLAGS) -O3 -pg -o bin/cTraceo-64b.bin cTraceo.c
+
+debug:	#
+		@$(CC) $(CFLAGS) $(LFLAGS)  -O0 -g -o bin/cTraceo-64b.bin cTraceo.c
 
 todo:	#list todos from all files
 		@for file in $(ALLFILES); do fgrep -H -e TODO $$file; done; true
