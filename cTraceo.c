@@ -34,6 +34,7 @@
 #include "calcAmpDelPr.c"
 #include "calcAmpDelRF.c"
 #include "calcCohAcoustPress.c"
+#include "calcCohTransLoss.c"
 #include <sys/time.h>		//for struct timeval
 #include <sys/resource.h>	//for getrusage()
 #include <string.h>
@@ -139,7 +140,8 @@ int main(int argc, char **argv){
 		case CALC_TYPE__COH_TRANS_LOSS:
 			printf("Calculating coherent transmission loss.\n");
 			fprintf(logFile, "Coherent transmission loss.\n");
-			fatal("WIP");
+			calcCohAcoustPress(settings);
+			calcCohTransLoss(settings);
 			break;
 			
 		case CALC_TYPE__PART_VEL:
