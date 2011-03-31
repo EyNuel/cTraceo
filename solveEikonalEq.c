@@ -523,7 +523,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 				DEBUG(7, "For each object detect if the ray is inside the object range: \n");
 				if (	(ri >=	settings->objects.object[j].r[0] ) &&
 						(ri <	settings->objects.object[j].r[nObjCoords-1])){
-					DEBUG(1, "Ray in object range.\n");
+					DEBUG(7, "Ray in object range.\n");
 					
 					if ( settings->objects.object[j].zDown[0] != settings->objects.object[j].zUp[0]){
 						fatal("Lower and upper object boundaries do not start at the same depth!\nAborting...");

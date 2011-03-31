@@ -254,7 +254,7 @@ void	calcEigenrayPr(settings_t* settings){
 
 									//copy content to the new variable:
 									//TODO this is UGLY -find a better way to do it.
-									for (k=0; k<iRet[l]+1; k++){
+									for (k=0; k<=iRet[l]; k++){
 										temp2D[0][k]=	ray[i].r[k];
 										temp2D[1][k]=	ray[i].z[k];
 										temp2D[2][k]=	ray[i].tau[k];
