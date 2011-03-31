@@ -221,12 +221,14 @@ typedef struct objects{
 }objects_t;
 
 typedef struct output{
-	uint32_t	calcType;			//"catype"
-	uint32_t	arrayType;			//"artype"
-	uint32_t	nArrayR, nArrayZ;	//"nra", "nrz"
-	double*		arrayR;				//"nra"			Array size in R
-	double*		arrayZ;				//"nrz"			Array size in Z
-	double		miss;				//"miss"		threshold for finding eigenrays
+	uint32_t			calcType;			//"catype"
+	uint32_t			arrayType;			//"artype"
+	uint32_t			nArrayR, nArrayZ;	//"nra", "nza"	Array sizes in R and Z
+	double*				arrayR;				//"nra"			Array R (ranges)
+	double*				arrayZ;				//"nrz"			Array Z (depths)
+	complex double*		press1D;			//will contain coherent acoustic pressure at each array element (1D), calculated in "calcCohAcoustPress.c"
+	complex double**	press2D;			//will contain coherent acoustic pressure at each array element (2D), calculated in "calcCohAcoustPress.c"
+	double				miss;				//"miss"		distance threshold for finding eigenrays
 }output_t;
 
 //possible values for calculationType (see page 43)
@@ -239,7 +241,7 @@ typedef struct output{
 #define	CALC_TYPE__COH_ACOUS_PRESS			33	//"CPR", write Coherent Acoustic Pressure
 #define	CALC_TYPE__COH_TRANS_LOSS			34	//"CTL", write Coherent Transmission loss
 #define	CALC_TYPE__PART_VEL					35	//"PVL", write Coherent Particle Velocity
-#define	CALC_TYPE__COH_ACOUS_PRESS_PART_VEL	36	//"PAV", write Coherent Acoustic Pressure asn Particle Velocity
+#define	CALC_TYPE__COH_ACOUS_PRESS_PART_VEL	36	//"PAV", write Coherent Acoustic Pressure and Particle Velocity
 
 //possible values for arrayType (Manual page 43)
 #define ARRAY_TYPE__RECTANGULAR		37	//"RRY"
