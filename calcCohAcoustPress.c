@@ -121,6 +121,7 @@ void	calcCohAcoustPress(settings_t* settings){
 			break;
 			
 		case ARRAY_TYPE__LINEAR:
+			//in linear arrays, nArrayR and nArrayZ have to be equal (this is checked in readIn.c when reading the file)
 			settings->output.press1D = mallocComplex(settings->output.nArrayZ);
 			break;
 			
@@ -317,12 +318,15 @@ void	calcCohAcoustPress(settings_t* settings){
 		//In the fortran version there were problems when passing complex matrices to Matlab; 
 		//therefore the real and complex parts will be saved separately: TODO correct this
 		for(j=0; j<dim; j++){
-			temp2D_a[1][j] = creal( settings->output.press1D[j]);
-			temp2D_a[2][j] = cimag( settings->output.press1D[j]);
+			temp2D_a[0][j] = creal( settings->output.press1D[j]);
+			temp2D_a[1][j] = cimag( settings->output.press1D[j]);
 		}
 		
 		pPressure_a = mxCreateDoubleMatrix((MWSIZE)2, (MWSIZE)dim, mxREAL);
-		copyDoubleToPtr2D(temp2D_a, mxGetPr(pPressure_a), dim,2);
+		if(pPressure_a == NULL){
+			fatal("Memory alocation error.");
+		}
+		copyDoubleToPtr2D(temp2D_a, mxGetPr(pPressure_a), dim, 2);
 		matPutVariable(matfile, "p", pPressure_a);
 		mxDestroyArray(pPressure_a);
 
@@ -343,12 +347,18 @@ void	calcCohAcoustPress(settings_t* settings){
 		
 		//write the real part to the mat-file:
 		pPressure_a = mxCreateDoubleMatrix((MWSIZE)settings->output.nArrayZ, (MWSIZE)settings->output.nArrayR, mxREAL);
+		if(pPressure_a == NULL){
+			fatal("Memory alocation error.");
+		}
 		copyDoubleToPtr2D(temp2D_a, mxGetPr(pPressure_a), settings->output.nArrayR, settings->output.nArrayZ);
 		matPutVariable(matfile, "rp", pPressure_a);
 		mxDestroyArray(pPressure_a);
 		
 		//write the imaginary part to the mat-file:
 		pPressure_b = mxCreateDoubleMatrix((MWSIZE)settings->output.nArrayZ, (MWSIZE)settings->output.nArrayR, mxREAL);
+		if(pPressure_b == NULL){
+			fatal("Memory alocation error.");
+		}
 		copyDoubleToPtr2D(temp2D_b, mxGetPr(pPressure_b), settings->output.nArrayR, settings->output.nArrayZ);
 		matPutVariable(matfile, "ip", pPressure_b);
 		mxDestroyArray(pPressure_b);

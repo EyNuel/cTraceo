@@ -24,7 +24,7 @@
 
 //When writing matlab-matrixes to matfiles, the data type varies between matlab versions.
 #define MWSIZE				int32_t		//matlab R14 uses int32
-//#define MWSIZE			mwSize		//matlab R2008b uses mwSize, defined in "matrix.h"
+//#define MWSIZE			mwSize		//matlab R2008b and others use mwSize, defined in "matrix.h"
 
 //booleans:
 #define	TRUE	1
