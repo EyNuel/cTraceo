@@ -219,10 +219,14 @@ double*		mallocDouble(uintptr_t numDoubles){
 double*		reallocDouble(double* old, uintptr_t numDoubles){
 	DEBUG(9,"in\n");
 	double*		new = NULL;
-
-	new = realloc(old, numDoubles*sizeof(double));
-	if (numDoubles > 0 && new == NULL){
-		fatal("Memory allocation error.\n");
+	
+	if(old != NULL && numDoubles = 0){
+		free(old);
+	}else{
+		new = realloc(old, numDoubles*sizeof(double));
+		if (numDoubles > 0 && new == NULL){
+			fatal("Memory allocation error.\n");
+		}
 	}
 	DEBUG(9,"out\n");
 	return new;
