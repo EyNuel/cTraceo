@@ -142,14 +142,15 @@ void	solveDynamicEq(settings_t* settings, ray_t* ray){
 
 	//Amplitude calculation:
 	DEBUG(10, "amp[10]:%lf, cxc:%lf, cnn:%e\n", cabs(ray->amp[10]), cxc, cnn);
-	for(i=1; i<ray->nCoords; i++){
+	for(i=1; i<ray->nCoords -2; i++){
 		ap_aq		= (complex double)( ray->c[0] * cos(ray->theta) * ray->c[i] / ( ray->ic[i] * ray->q[i] ));
 		DEBUG(10, "ap_aq:%lf, ic:%lf, q:%e\n", (double)cabs(ap_aq), ray->ic[i], ray->q[i]);
 		ray->amp[i]	= csqrt( ap_aq ) * ray->decay[i] * exp( -alpha * ray->s[i] );
+		/*
 		if(isnan((float)cabs(ray->amp[i]))){
 			//fatal("its a NAN!\n");
 		}
-			
+		*/
 	}
 	ray->amp[0] = NAN;
 	DEBUG(3, "out\n");
