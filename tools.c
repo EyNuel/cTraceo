@@ -220,7 +220,7 @@ double*		reallocDouble(double* old, uintptr_t numDoubles){
 	DEBUG(9,"in\n");
 	double*		new = NULL;
 	
-	if(old != NULL && numDoubles = 0){
+	if(old != NULL && numDoubles == 0){
 		free(old);
 	}else{
 		new = realloc(old, numDoubles*sizeof(double));
