@@ -44,7 +44,7 @@ void	readIn(settings_t* settings, const char* filename){
 	double		theta0;				//used locally to make code more readable. Value is stored in settings.
 	double		thetaN;				//used locally to make code more readable. Value is stored in settings.
 	uint32_t	numSurfaceCoords;	//used locally to make code more readable. Value is stored in settings.
-	uint32_t	nr0, nz0;			//used locally to make code more readable. Value is stored in settings.
+	uint32_t	nr, nz;				//used locally to make code more readable. Value is stored in settings.
 	char*		tempString;
 	char*		junkChar;
 	FILE*		infile;					//a pointer for the input file
@@ -295,11 +295,11 @@ void	readIn(settings_t* settings, const char* filename){
 	free(tempString);
 
 	/* number of points in range and depth, "nr0,nz0" */
-	nr0 = (uint32_t)readInt(infile);
-	nz0 = (uint32_t)readInt(infile);
-	DEBUG(3, "nr0: %u, nz0: %u\n", nr0, nz0);
-	settings->soundSpeed.nr0 = nr0;
-	settings->soundSpeed.nz0 = nz0;
+	nr = (uint32_t)readInt(infile);
+	nz = (uint32_t)readInt(infile);
+	DEBUG(3, "nr0: %u, nz0: %u\n", nr, nz);
+	settings->soundSpeed.nr = nr;
+	settings->soundSpeed.nz = nz;
 
 	//read actual values of soundspeed profile/field:
 	switch(settings->soundSpeed.cDist){
@@ -309,34 +309,34 @@ void	readIn(settings_t* settings, const char* filename){
 			if(settings->soundSpeed.cClass != C_CLASS__TABULATED){
 				//all cClasses execept for "TABULATED" only require ( z0(0),c0(0) ) and ( z0(1), c0(1) )
 				//malloc z0 an c0:
-				settings->soundSpeed.z0 = mallocDouble(2);
-				settings->soundSpeed.c01d = mallocDouble(2);
+				settings->soundSpeed.z = mallocDouble(2);
+				settings->soundSpeed.c1D = mallocDouble(2);
 
 				//read 4 values:
-				settings->soundSpeed.z0[0] = readDouble(infile);
-				settings->soundSpeed.c01d[0] = readDouble(infile);
-				settings->soundSpeed.z0[1] = readDouble(infile);
-				settings->soundSpeed.c01d[1] = readDouble(infile);
+				settings->soundSpeed.z[0] = readDouble(infile);
+				settings->soundSpeed.c1D[0] = readDouble(infile);
+				settings->soundSpeed.z[1] = readDouble(infile);
+				settings->soundSpeed.c1D[1] = readDouble(infile);
 
 				// validate the values that were just read:
 				if(	(settings->soundSpeed.cClass != C_CLASS__ISOVELOCITY) &&
 					(settings->soundSpeed.cClass != C_CLASS__MUNK)){
 					
-					if(settings->soundSpeed.z0[0] == settings->soundSpeed.z0[1])
+					if(settings->soundSpeed.z[0] == settings->soundSpeed.z[1])
 						fatal("Input file: Analytical sound speed: z[1] == z[0] Only valid for Isovelocity and Munk Options!\nAborting...");
 
-					if(settings->soundSpeed.c01d[0] == settings->soundSpeed.c01d[1])
+					if(settings->soundSpeed.c1D[0] == settings->soundSpeed.c1D[1])
 						fatal("Input file: Analytical sound speed: c[1] == c[0] Only valid for Isovelocity option!\nAborting...");
 				}
 			}else if(settings->soundSpeed.cClass == C_CLASS__TABULATED){
 				//malloc z0 an c0:
-				settings->soundSpeed.z0 = mallocDouble(nz0);
-				settings->soundSpeed.c01d = mallocDouble(nz0);
+				settings->soundSpeed.z = mallocDouble(nz);
+				settings->soundSpeed.c1D = mallocDouble(nz);
 
 				//read pairs of z0 and c0
-				for(i=0; i<settings->soundSpeed.nz0; i++){
-					settings->soundSpeed.z0[i]	= readDouble(infile);
-					settings->soundSpeed.c01d[i]= readDouble(infile);
+				for(i=0; i<settings->soundSpeed.nz; i++){
+					settings->soundSpeed.z[i]	= readDouble(infile);
+					settings->soundSpeed.c1D[i]= readDouble(infile);
 				}
 			}
 			break;
@@ -347,23 +347,23 @@ void	readIn(settings_t* settings, const char* filename){
 				fatal("Input file: Unknown sound speed field type.\nAborting...");
 			
 			//malloc ranges (vector)
-			settings->soundSpeed.r0 = mallocDouble(nr0);
+			settings->soundSpeed.r = mallocDouble(nr);
 			//read ranges
-			for(i=0; i<nr0; i++)
-				settings->soundSpeed.r0[i] = readDouble(infile);
+			for(i=0; i<nr; i++)
+				settings->soundSpeed.r[i] = readDouble(infile);
 
 			//malloc depths (vector)
-			settings->soundSpeed.z0 = mallocDouble(nz0);
+			settings->soundSpeed.z = mallocDouble(nz);
 			//read depths
-			for(i=0; i<nz0; i++)
-				settings->soundSpeed.z0[i] = readDouble(infile);
+			for(i=0; i<nz; i++)
+				settings->soundSpeed.z[i] = readDouble(infile);
 
 			//malloc sound speeds (2 dim matrix)
-			settings->soundSpeed.c02d = mallocDouble2D(nz0, nr0);	//mallocDouble2D(numCols, numRows)
+			settings->soundSpeed.c2D = mallocDouble2D(nz, nr);	//mallocDouble2D(numCols, numRows)
 			//read actual sound speeds
-			for(j=0; j<nz0; j++){		//rows
-				for(i=0; i<nr0; i++){	//columns
-					settings->soundSpeed.c02d[j][i] = readDouble(infile);
+			for(j=0; j<nz; j++){		//rows
+				for(i=0; i<nr; i++){	//columns
+					settings->soundSpeed.c2D[j][i] = readDouble(infile);
 				}
 			}
 			break;

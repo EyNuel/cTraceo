@@ -170,13 +170,13 @@ typedef struct interface{
 
 
 typedef struct soundSpeed{
-	uint32_t	cDist;			//"cdist", type of sound speed distribution
+	uint32_t	cDist;			//"cdist", type of sound speed distribution -profile or field (i.e. range dependent)
 	uint32_t	cClass;			//"cclass", class of sound speed
-	uint32_t	nr0, nz0;		//"nr0,nz0", number of points in range and depth
-	double*		z0;				//"z0",	depth
-	double*		r0;				//"r0", range
-	double*		c01d;			//"c0", sound speed at (z0)
-	double**	c02d;			//"c02d", sound speed at (r0,z0)
+	uint32_t	nr, nz;		//"nr0,nz0", number of points in range and depth
+	double*		z;				//"z0",	depth
+	double*		r;				//"r0", range
+	double*		c1D;			//"c0", sound speed at (z0)
+	double**	c2D;			//"c02d", sound speed at (r0,z0)
 }soundSpeed_t;
 
 //possible values for cDistribuition (see page 39, Traceo Manual)

@@ -47,20 +47,20 @@ void	csValues(settings_t* settings, double ri, double zi, double* ci, double* cc
 	DEBUG(8,"csValues(),\t in\n");
 	
 	double 		k,a,eta, root, root32, root52;
-	double*		c01d;	//used locally to make code more readable
-	double**	c02d;	//used locally to make code more readable
-	double*		r0;		//used locally to make code more readable
-	double*		z0;		//used locally to make code more readable
+	double*		c1D;	//used locally to make code more readable
+	double**	c2D;	//used locally to make code more readable
+	double*		r;		//used locally to make code more readable
+	double*		z;		//used locally to make code more readable
 	double		epsilon, bmunk, bmunk2;
 
 	epsilon = 7.4e-3;
 	bmunk  = 1300.0;
 	bmunk2 = bmunk*bmunk;
 
-	c01d = settings->soundSpeed.c01d;
-	c02d = settings->soundSpeed.c02d;
-	r0 =  settings->soundSpeed.r0;
-	z0 =  settings->soundSpeed.z0;
+	c1D = settings->soundSpeed.c1D;
+	c2D = settings->soundSpeed.c2D;
+	r =  settings->soundSpeed.r;
+	z =  settings->soundSpeed.z;
 	
 	switch(settings->soundSpeed.cDist){
 		case C_DIST__PROFILE:
@@ -71,64 +71,64 @@ void	csValues(settings_t* settings, double ri, double zi, double* ci, double* cc
 			switch(settings->soundSpeed.cClass){
 				///	*****	analytical sound speed profiles		*****
 				case C_CLASS__ISOVELOCITY:			//"ISOV"
-					*ci = c01d[0];
+					*ci = c1D[0];
 					*czi = 0;
 					*czzi = 0;
 					break;
 					
 				case C_CLASS__LINEAR:				//"LINP"
-					k	= ( c01d[1] - c01d[0] ) / ( z0[1] - z0[0]);
-					*ci	= c01d[0] + k*( zi - z0[0] );
+					k	= ( c1D[1] - c1D[0] ) / ( z[1] - z[0]);
+					*ci	= c1D[0] + k*( zi - z[0] );
 					*czi = k;
 					*czzi= 0;
 					break;
 					
 				case C_CLASS__PARABOLIC:			//"PARP"
-					k	= ( c01d[1] - c01d[0] ) / pow( ( z0[1] - z0[0]), 2);
-					*ci	= c01d[0] + k * pow(( zi - z0[0] ), 2);
-					*czi = 2*k*( zi - z0[0] );
+					k	= ( c1D[1] - c1D[0] ) / pow( ( z[1] - z[0]), 2);
+					*ci	= c1D[0] + k * pow(( zi - z[0] ), 2);
+					*czi = 2*k*( zi - z[0] );
 					*czzi= 2*k;
 					break;
 					
 				case C_CLASS__EXPONENTIAL:			//"EXPP"
-					k	= log( c01d[0]/c01d[1] )/( z0[1] - z0[0] );
-					*ci	= c01d[0]*exp( -k*(zi - z0[0]) );
+					k	= log( c1D[0]/c1D[1] )/( z[1] - z[0] );
+					*ci	= c1D[0]*exp( -k*(zi - z[0]) );
 					*czi	= -k * (*ci);
 					*czzi= k*k * (*ci);
 					break;
 					
 				case C_CLASS__N2_LINEAR:			//"N2LP"
-					k		= ( pow( c01d[0]/c01d[1] ,2) -1) / ( z0[1] - z0[0] );
-					root	= sqrt( 1 + k*( zi - z0[0] ) );
+					k		= ( pow( c1D[0]/c1D[1] ,2) -1) / ( z[1] - z[0] );
+					root	= sqrt( 1 + k*( zi - z[0] ) );
 					root32	= pow(root, 3/2 );
 					root52	= pow(root, 5/2 );
-					*ci 		= c01d[0]/sqrt( 1 + k*( zi - z0[0] ));
-					*czi 	= -k*c01d[0]/( 2*root32 );
-					*czzi 	= 3*k*k*c01d[0]/( 4*root52 );
+					*ci 		= c1D[0]/sqrt( 1 + k*( zi - z[0] ));
+					*czi 	= -k*c1D[0]/( 2*root32 );
+					*czzi 	= 3*k*k*c1D[0]/( 4*root52 );
 					break;
 					
 				case C_CLASS__INV_SQUARE:			//"ISQP"
-					a		= pow(( c01d[1]/c01d[0]) -1 , 2);
+					a		= pow(( c1D[1]/c1D[0]) -1 , 2);
 					root 	= sqrt( a/(1-a) );
-					k 		= root/( z0[1] - z0[0] );
-					root 	= sqrt( 1 + pow( k*( zi - z0[0] ),2) );
+					k 		= root/( z[1] - z[0] );
+					root 	= sqrt( 1 + pow( k*( zi - z[0] ),2) );
 					root32 	= pow(root, 3/2 );
 					root52 	= pow(root, 5/2 );
-					*ci 		= c01d[0] * ( 1 + k*( zi - z0[0] )/root );
-					*czi 	= c01d[0] * k / root32;
-					*czzi 	= -3 * c01d[0] * pow(k,3) / root52;
+					*ci 		= c1D[0] * ( 1 + k*( zi - z[0] )/root );
+					*czi 	= c1D[0] * k / root32;
+					*czzi 	= -3 * c1D[0] * pow(k,3) / root52;
 					break;
 					
 				case C_CLASS__MUNK:					//"MUNK"
-					eta 	= 2*( zi - z0[0] )/bmunk;
-					*ci 		= c01d[0]*( 1 + epsilon*( eta + exp(-eta) - 1 ) );
-					*czi 	= 2*epsilon * c01d[0]*( 1 - exp(-eta) )/bmunk;
-					*czzi	= 4*epsilon * c01d[0]*exp( -eta )/bmunk2;
+					eta 	= 2*( zi - z[0] )/bmunk;
+					*ci 		= c1D[0]*( 1 + epsilon*( eta + exp(-eta) - 1 ) );
+					*czi 	= 2*epsilon * c1D[0]*( 1 - exp(-eta) )/bmunk;
+					*czzi	= 4*epsilon * c1D[0]*exp( -eta )/bmunk2;
 					break;
 					
 				case C_CLASS__TABULATED:			//"TABL"
 					//cValues1D(uintptr_t n, double* xTable, double* cTable, double* xi, double* ci, double* cxi, double* cxxi){
-					cValues1D( settings->soundSpeed.nz0, z0, c01d, zi, ci, czi, czzi);
+					cValues1D( settings->soundSpeed.nz, z, c1D, zi, ci, czi, czzi);
 					break;
 					
 				default:
@@ -137,7 +137,7 @@ void	csValues(settings_t* settings, double ri, double zi, double* ci, double* cc
 			break;
 		case C_DIST__FIELD:
 			///	*****	tabulated sound speed fields		*****
-			cValues2D(settings->soundSpeed.nr0,settings->soundSpeed.nz0,r0,z0,c02d,ri,zi,ci,cri,czi,crri,czzi,crzi);
+			cValues2D(settings->soundSpeed.nr,settings->soundSpeed.nz,r,z,c2D,ri,zi,ci,cri,czi,crri,czzi,crzi);
 			break;
 			
 		default:
