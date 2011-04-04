@@ -37,6 +37,7 @@ int32_t*		mallocInt(uintptr_t);
 int32_t*		reallocInt(int32_t*, uintptr_t);
 double*			mallocDouble(uintptr_t);
 double*			reallocDouble(double*, uintptr_t);
+void			freeDouble(double*);
 double**		mallocDouble2D(uintptr_t, uintptr_t);
 void			freeDouble2D(double**, uintptr_t);
 complex double*	mallocComplex(uintptr_t);
@@ -220,16 +221,18 @@ double*		reallocDouble(double* old, uintptr_t numDoubles){
 	DEBUG(9,"in\n");
 	double*		new = NULL;
 	
-	if(old != NULL && numDoubles == 0){
-		free(old);
-	}else{
-		new = realloc(old, numDoubles*sizeof(double));
-		if (numDoubles > 0 && new == NULL){
-			fatal("Memory allocation error.\n");
-		}
+	new = realloc(old, numDoubles*sizeof(double));
+	if (numDoubles > 0 && new == NULL){
+		fatal("Memory allocation error.\n");
 	}
 	DEBUG(9,"out\n");
 	return new;
+}
+
+void		freeDouble(double* greenMile){
+	if(greenMile != NULL){
+		free(greenMile);
+	}
 }
 
 double**	mallocDouble2D(uintptr_t numRows, uintptr_t numCols){
@@ -363,7 +366,7 @@ void		freeInterface(interface_t* interface){
 		reallocDouble(interface->rho, 0);
 		reallocDouble(interface->ap, 0);
 		reallocDouble(interface->as, 0);
-		free(interface);
+		//free(interface);
 	}
 }
 
@@ -392,7 +395,7 @@ void		freeSettings(settings_t* settings){
 		//free source:
 		if(&settings->source != NULL){
 			reallocDouble(settings->source.thetas, 0);
-			free(&settings->source);
+			//free(&settings->source);
 		}
 		
 		//free altimetry:
@@ -400,11 +403,11 @@ void		freeSettings(settings_t* settings){
 		
 		//free soundSpeed:
 		if(&settings->soundSpeed != NULL){
-			reallocDouble(settings->soundSpeed.z, 0);
-			reallocDouble(settings->soundSpeed.r, 0);
+			freeDouble(settings->soundSpeed.z);
+			freeDouble(settings->soundSpeed.r);
 			switch (settings->soundSpeed.cDist){
 				case C_DIST__PROFILE:
-					reallocDouble(settings->soundSpeed.c1D, 0);
+					freeDouble(settings->soundSpeed.c1D);
 					break;
 					
 				case C_DIST__FIELD:
@@ -417,7 +420,7 @@ void		freeSettings(settings_t* settings){
 					fatal("freeSettings(): Unknown Sound distribution type (neither profile nor field)");
 					break;
 			}
-			free(&settings->soundSpeed);
+			//free(&settings->soundSpeed);
 		}
 		//free objects:
 		if(&settings->objects != NULL){
@@ -427,7 +430,7 @@ void		freeSettings(settings_t* settings){
 				}
 				free(&settings->objects.object);
 			}
-			free(&settings->objects);
+			//free(&settings->objects);
 		}
 		
 		//free batimetry:
@@ -436,10 +439,10 @@ void		freeSettings(settings_t* settings){
 		//free output (array configuration and acoustic pressure -if calculated):
 		if(&settings->output != NULL){
 			if(settings->output.nArrayR > 0){
-				reallocDouble(settings->output.arrayR, 0);
+				freeDouble(settings->output.arrayR);
 			}
 			if (settings->output.nArrayZ > 0){
-				reallocDouble(settings->output.arrayZ, 0);
+				freeDouble(settings->output.arrayZ);
 			}
 			if (settings->output.arrayType == ARRAY_TYPE__RECTANGULAR){
 				if(settings->output.press2D != NULL){
@@ -448,7 +451,7 @@ void		freeSettings(settings_t* settings){
 			}else{
 				reallocComplex(settings->output.press1D, 0);
 			}
-			free(&settings->output);
+			//free(&settings->output);
 		}
 
 		//free the actual settings struct:
