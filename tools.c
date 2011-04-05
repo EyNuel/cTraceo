@@ -164,13 +164,14 @@ uint32_t*	reallocUint(uint32_t* old, uintptr_t numUints){
 	DEBUG(10,"reallocUint(),\t in\n");
 	uint32_t*	new = NULL;
 
-	if(old == NULL){
-		return mallocUint(numUints);
+	if(numUints == 0){
+		free(old);
 	}else{
 		new = realloc(old, numUints*sizeof(uint32_t));
+		if (new == NULL){
+			fatal("Memory allocation error.\n");
+		}
 	}
-	if (numUints > 0 && new == NULL)
-		fatal("Memory allocation error.\n");
 	DEBUG(10,"reallocUint(),\t out\n");
 	return new;
 }
@@ -192,14 +193,15 @@ int32_t*	reallocInt(int32_t* old, uintptr_t numInts){
 		exits with error code otherwise.
 	*/
 	int32_t*	new = NULL;
-
-	if(old == NULL){
-		return mallocInt(numInts);
+	
+	if(numInts == 0){
+		free(old);
 	}else{
 		new = realloc(old, numInts*sizeof(int32_t));
+		if (new == NULL){
+			fatal("Memory allocation error.\n");
+		}
 	}
-	if (numInts > 0 && new == NULL)
-		fatal("Memory allocation error.\n");
 	return new;
 }
 
@@ -219,14 +221,18 @@ double*		mallocDouble(uintptr_t numDoubles){
 }
 
 double*		reallocDouble(double* old, uintptr_t numDoubles){
-	DEBUG(9,"in\n");
+	DEBUG(10,"in\n");
 	double*		new = NULL;
 	
-	new = realloc(old, numDoubles*sizeof(double));
-	if (numDoubles > 0 && new == NULL){
-		fatal("Memory allocation error.\n");
+	if(numDoubles == 0){
+		free(old);
+	}else{
+		new = realloc(old, numDoubles*sizeof(double));
+		if (new == NULL){
+			fatal("Memory allocation error.\n");
+		}
 	}
-	DEBUG(9,"out\n");
+	DEBUG(10,"out\n");
 	return new;
 }
 
@@ -283,14 +289,14 @@ complex double*		mallocComplex(uintptr_t numComplex){
 complex double*		reallocComplex(complex double* old, uintptr_t numComplex){
 	complex double*	new = NULL;
 
-	if(old == NULL){
-		return mallocComplex(numComplex);
+	if(numComplex == 0){
+		free(old);
 	}else{
 		new = realloc(old, numComplex*sizeof(complex double));
+		if (new == NULL){
+			fatal("Memory allocation error.\n");
+		}
 	}
-	if (numComplex >0 &&new == NULL)
-		fatal("Memory allocation error.\n");
-	
 	return new;
 }
 
@@ -478,16 +484,16 @@ vector_t*	mallocVector(uintptr_t	numVectors){
 }
 
 vector_t*	reallocVector(vector_t* old, uintptr_t	numVectors){
-	vector_t*	new;
+	vector_t*	new; = NULL;
 
-	if(old == NULL){
-		return mallocVector(numVectors);
+	if(numVectors == 0){
+		free(old);
 	}else{
 		new = realloc(old, numVectors * sizeof(vector_t));
+		if (new == NULL){
+			fatal("Memory allocation error.\n");
+		}
 	}
-	if (numVectors > 0 && new == NULL)
-		//NOTE when freeing memory (setting it to size 0) a null pointer is not an error.
-		fatal("Memory allocation error.\n");
 	return new;
 }
 
