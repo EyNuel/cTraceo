@@ -42,6 +42,7 @@ double**		mallocDouble2D(uintptr_t, uintptr_t);
 void			freeDouble2D(double**, uintptr_t);
 complex double*	mallocComplex(uintptr_t);
 complex double*	reallocComplex(complex double*, uintptr_t);
+void			freeComplex(complex double*);
 complex double** mallocComplex2D(uintptr_t, uintptr_t);
 void			freeComplex2D(complex double**, uintptr_t);
 settings_t*		mallocSettings(void);
@@ -293,6 +294,12 @@ complex double*		reallocComplex(complex double* old, uintptr_t numComplex){
 	return new;
 }
 
+void		freeComplex(complex double* greenMile){
+	if(greenMile != NULL){
+		free(greenMile);
+	}
+}
+
 complex double**	mallocComplex2D(uintptr_t numRows, uintptr_t numCols){
 	/*
 	 * Returns a pointer to an array of pointer do doubles.
@@ -449,7 +456,7 @@ void		freeSettings(settings_t* settings){
 					freeComplex2D(settings->output.press2D, settings->output.nArrayZ);
 				}
 			}else{
-				reallocComplex(settings->output.press1D, 0);
+				freeComplex(settings->output.press1D);
 			}
 			//free(&settings->output);
 		}
