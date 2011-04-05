@@ -377,18 +377,12 @@ void		freeInterface(interface_t* interface){
 	}
 }
 
-void		freeObject(object_t* object){
-	if (object->nCoords > 0){
-		reallocDouble(object->r, 0);
-		reallocDouble(object->zDown, 0);
-		reallocDouble(object->zUp, 0);
-	}
-}
-
 void		freeSettings(settings_t* settings){
 	/*
 	 * Go through all items in a settings struct and free the alocated memory.
 	 */
+
+	uintptr_t		i;
 
 	if(settings != NULL){
 		
@@ -430,12 +424,14 @@ void		freeSettings(settings_t* settings){
 		//free objects:
 		if(&settings->objects != NULL){
 			if(settings->objects.numObjects > 0){
-				/*
 				for (i=0; i<settings->objects.numObjects; i++){
-					freeObject(&settings->objects.object[i]);
+					if (settings->objects.object[i].nCoords > 0){
+						freeDouble(settings->objects.object[i].r);
+						freeDouble(settings->objects.object[i].zDown);
+						freeDouble(settings->objects.object[i].zUp);
+					}
 				}
-				*/
-				free(&settings->objects.object);
+				free(settings->objects.object);
 			}
 		}
 		
