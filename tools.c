@@ -390,8 +390,6 @@ void		freeSettings(settings_t* settings){
 	 * Go through all items in a settings struct and free the alocated memory.
 	 */
 
-	uintptr_t		i;
-	
 	if(settings != NULL){
 		
 		//free title:
@@ -432,9 +430,11 @@ void		freeSettings(settings_t* settings){
 		//free objects:
 		if(&settings->objects != NULL){
 			if(settings->objects.numObjects > 0){
+				/*
 				for (i=0; i<settings->objects.numObjects; i++){
 					freeObject(&settings->objects.object[i]);
 				}
+				*/
 				free(&settings->objects.object);
 			}
 		}
@@ -507,14 +507,14 @@ point_t*	mallocPoint(uintptr_t	numPoints){
 point_t*	reallocPoint(point_t* old, uintptr_t	numPoints){
 	point_t*	new = NULL;
 
-	if(old == NULL){
-		return mallocPoint(numPoints);
+	if(numPoints == 0){
+		free(old);
 	}else{
 		new = realloc(old, numPoints * sizeof(point_t));
-	}
-	if (numPoints > 0 && new == NULL){
-		//NOTE when freeing memory (setting it to size 0) a null pointer is not an error.
-		fatal("reallocPoint(): Memory allocation error.\n");
+		if (new == NULL){
+			//NOTE when freeing memory (setting it to size 0) a null pointer is not an error.
+			fatal("reallocPoint(): Memory allocation error.\n");
+		}
 	}
 	return new;
 }
