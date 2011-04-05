@@ -368,7 +368,7 @@ void	calcCohAcoustPress(settings_t* settings){
 	}
 
 	//free memory for pressure, only if not needed for calculating Transmission Loss (or others):
-	/*
+	/*TODO this is now done in freeSettings() -remove?
 	if(settings->output.calcType != CALC_TYPE__COH_TRANS_LOSS){
 		switch(settings->output.arrayType){
 			case ARRAY_TYPE__HORIZONTAL:
