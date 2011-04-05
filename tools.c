@@ -37,13 +37,18 @@ int32_t*		mallocInt(uintptr_t);
 int32_t*		reallocInt(int32_t*, uintptr_t);
 double*			mallocDouble(uintptr_t);
 double*			reallocDouble(double*, uintptr_t);
+void			freeDouble(double*);
 double**		mallocDouble2D(uintptr_t, uintptr_t);
 void			freeDouble2D(double**, uintptr_t);
 complex double*	mallocComplex(uintptr_t);
 complex double*	reallocComplex(complex double*, uintptr_t);
+void			freeComplex(complex double*);
 complex double** mallocComplex2D(uintptr_t, uintptr_t);
 void			freeComplex2D(complex double**, uintptr_t);
 settings_t*		mallocSettings(void);
+void			freeInterface(interface_t*);
+void			freeObject(object_t*);
+void			freeSettings(settings_t*);
 vector_t*		mallocVector(uintptr_t);
 vector_t*		reallocVector(vector_t*, uintptr_t);
 point_t*		mallocPoint(uintptr_t);
@@ -216,17 +221,19 @@ double*		mallocDouble(uintptr_t numDoubles){
 double*		reallocDouble(double* old, uintptr_t numDoubles){
 	DEBUG(9,"in\n");
 	double*		new = NULL;
-
-	if(old == NULL){
-		return mallocDouble(numDoubles);
-	}else{
-		new = realloc(old, numDoubles*sizeof(double));
-	}
+	
+	new = realloc(old, numDoubles*sizeof(double));
 	if (numDoubles > 0 && new == NULL){
 		fatal("Memory allocation error.\n");
 	}
 	DEBUG(9,"out\n");
 	return new;
+}
+
+void		freeDouble(double* greenMile){
+	if(greenMile != NULL){
+		free(greenMile);
+	}
 }
 
 double**	mallocDouble2D(uintptr_t numRows, uintptr_t numCols){
@@ -285,6 +292,12 @@ complex double*		reallocComplex(complex double* old, uintptr_t numComplex){
 		fatal("Memory allocation error.\n");
 	
 	return new;
+}
+
+void		freeComplex(complex double* greenMile){
+	if(greenMile != NULL){
+		free(greenMile);
+	}
 }
 
 complex double**	mallocComplex2D(uintptr_t numRows, uintptr_t numCols){
@@ -348,6 +361,111 @@ settings_t* 	mallocSettings(void){
 	settings->output.arrayZ = NULL;
 
 	return(settings);
+}
+
+void		freeInterface(interface_t* interface){
+	if(interface != NULL){
+		//Note that reallcing to size 0, corresponds to deallocing the memory
+		reallocDouble(interface->r, 0);
+		reallocDouble(interface->z, 0);
+		reallocDouble(interface->cp, 0);
+		reallocDouble(interface->cs, 0);
+		reallocDouble(interface->rho, 0);
+		reallocDouble(interface->ap, 0);
+		reallocDouble(interface->as, 0);
+		//free(interface);
+	}
+}
+
+void		freeObject(object_t* object){
+	if (object->nCoords > 0){
+		reallocDouble(object->r, 0);
+		reallocDouble(object->zDown, 0);
+		reallocDouble(object->zUp, 0);
+	}
+}
+
+void		freeSettings(settings_t* settings){
+	/*
+	 * Go through all items in a settings struct and free the alocated memory.
+	 */
+
+	uintptr_t		i;
+	
+	if(settings != NULL){
+		
+		//free title:
+		if(settings->cTitle != NULL){
+			free(settings->cTitle);
+		}
+		
+		//free source:
+		if(&settings->source != NULL){
+			reallocDouble(settings->source.thetas, 0);
+			//free(&settings->source);
+		}
+		
+		//free altimetry:
+		freeInterface(&settings->altimetry);
+		
+		//free soundSpeed:
+		if(&settings->soundSpeed != NULL){
+			freeDouble(settings->soundSpeed.z);
+			//note that the range coordinates of the soundspeed are only allocated for cDist = C_DIST__FIELD
+			
+			switch (settings->soundSpeed.cDist){
+				case C_DIST__PROFILE:
+					freeDouble(settings->soundSpeed.c1D);
+					break;
+					
+				case C_DIST__FIELD:
+					freeDouble(settings->soundSpeed.r);
+					freeDouble2D(settings->soundSpeed.c2D, settings->soundSpeed.nz);
+					break;
+					
+				default:
+					//this should not be possible, as the values are verified when reading the input file
+					//if this occurs, some kind of memmory corruption must have taken place
+					fatal("freeSettings(): Unknown Sound distribution type (neither profile nor field)");
+					break;
+			}
+			//free(&settings->soundSpeed);
+		}
+		//free objects:
+		if(&settings->objects != NULL){
+			if(settings->objects.numObjects > 0){
+				for (i=0; i<settings->objects.numObjects; i++){
+					freeObject(&settings->objects.object[i]);
+				}
+				free(&settings->objects.object);
+			}
+			//free(&settings->objects);
+		}
+		
+		//free batimetry:
+		freeInterface(&settings->batimetry);
+		
+		//free output (array configuration and acoustic pressure -if calculated):
+		if(&settings->output != NULL){
+			if(settings->output.nArrayR > 0){
+				freeDouble(settings->output.arrayR);
+			}
+			if (settings->output.nArrayZ > 0){
+				freeDouble(settings->output.arrayZ);
+			}
+			if (settings->output.arrayType == ARRAY_TYPE__RECTANGULAR){
+				if(settings->output.press2D != NULL){
+					freeComplex2D(settings->output.press2D, settings->output.nArrayZ);
+				}
+			}else{
+				freeComplex(settings->output.press1D);
+			}
+			//free(&settings->output);
+		}
+
+		//free the actual settings struct:
+		free(settings);
+	}
 }
 
 vector_t*	mallocVector(uintptr_t	numVectors){
