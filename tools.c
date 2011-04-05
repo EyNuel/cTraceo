@@ -411,13 +411,15 @@ void		freeSettings(settings_t* settings){
 		//free soundSpeed:
 		if(&settings->soundSpeed != NULL){
 			freeDouble(settings->soundSpeed.z);
-			freeDouble(settings->soundSpeed.r);
+			//note that the range coordinates of the soundspeed are only allocated for cDist = C_DIST__FIELD
+			
 			switch (settings->soundSpeed.cDist){
 				case C_DIST__PROFILE:
 					freeDouble(settings->soundSpeed.c1D);
 					break;
 					
 				case C_DIST__FIELD:
+					freeDouble(settings->soundSpeed.r);
 					freeDouble2D(settings->soundSpeed.c2D, settings->soundSpeed.nz);
 					break;
 					
