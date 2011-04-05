@@ -231,7 +231,7 @@ void	calcEigenrayPr(settings_t* settings){
 						//get the indexes of the bracketing points.
 						eBracket(ray[i].nCoords, ray[i].r, rHyd, &nRet, iRet);
 
-						//from each index interpolate the rays' depth:
+						//for each index where the ray passes at the hydrophone, interpolate the rays' depth:
 						for(l=0; l<nRet; l++){
 							DEBUG(4, "nRet=%u, iRet[%u]= %u\n", (uint32_t)nRet, (uint32_t)l, (uint32_t)iRet[l]);
 							intLinear1D(		&ray[i].r[iRet[l]], &ray[i].z[iRet[l]],		rHyd, &zRay,	&junkDouble);
@@ -254,20 +254,20 @@ void	calcEigenrayPr(settings_t* settings){
 
 									//copy content to the new variable:
 									//TODO this is UGLY -find a better way to do it.
-									for (k=0; k<=iRet[l]; k++){
-										temp2D[0][k]=	ray[i].r[k];
-										temp2D[1][k]=	ray[i].z[k];
-										temp2D[2][k]=	ray[i].tau[k];
-										temp2D[3][k]=	creal( ray[i].amp[k] );
-										temp2D[4][k]=	cimag( ray[i].amp[k] );
+									for (k=0; k<iRet[l]; k++){
+										temp2D[0][k] =	ray[i].r[k];
+										temp2D[1][k] =	ray[i].z[k];
+										temp2D[2][k] =	ray[i].tau[k];
+										temp2D[3][k] =	creal( ray[i].amp[k] );
+										temp2D[4][k] =	cimag( ray[i].amp[k] );
 									}
 									
 									//adjust the ray's last set of coordinates so that it matches up with the hydrophone
-									temp2D[0][iRet[l]+1]	= rHyd;
-									temp2D[1][iRet[l]+1]	= zRay;
-									temp2D[2][iRet[l]+1]	= tauRay;
-									temp2D[3][iRet[l]+1]	= creal(ampRay);
-									temp2D[4][iRet[l]+1]	= cimag(ampRay);
+									temp2D[0][iRet[l]]	= rHyd;
+									temp2D[1][iRet[l]]	= zRay;
+									temp2D[2][iRet[l]]	= tauRay;
+									temp2D[3][iRet[l]]	= creal(ampRay);
+									temp2D[4][iRet[l]]	= cimag(ampRay);
 									
 									//(copy data to mxArray and write ray to file:
 									pRay = mxCreateDoubleMatrix((MWSIZE)5, (MWSIZE)(iRet[l]+1), mxREAL);
