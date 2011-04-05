@@ -306,5 +306,7 @@ void	calcEigenrayPr(settings_t* settings){
 
 	matClose(matfile);
 	free(string);
+	reallocRayMembers(ray, 0);
+	free(ray);
 	DEBUG(1,"out\n");
 }
