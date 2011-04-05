@@ -168,6 +168,7 @@ int main(int argc, char **argv){
 	printCpuTime(logFile);
 
 	//free memory
+	freeSettings(settings);
 	fclose(logFile);
 	free(inFileName);
 	free(logFileName);

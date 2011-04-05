@@ -48,9 +48,10 @@ void	readIn(settings_t* settings, const char* filename){
 	char*		tempString;
 	char*		junkChar;
 	FILE*		infile;					//a pointer for the input file
-	infile = openFile(filename, "r");	//open file in "read" mode
+	
 
 	DEBUG(1, "Reading cTraceo input file \"%s\"\n", filename);
+	infile = openFile(filename, "r");	//open file in "read" mode
 
 	/************************************************************************
 	 *	Read the title:														*
@@ -714,6 +715,9 @@ void	readIn(settings_t* settings, const char* filename){
 	if(settings->batimetry.r[settings->batimetry.numSurfaceCoords-1] < settings->source.rbox2)
 		fatal("Maximum batimetry range < maximum rbox range.\nAborting...");
 	DEBUG(1, "out\n");
+
+	//close the input file
+	fclose(infile);
 }
 
 
