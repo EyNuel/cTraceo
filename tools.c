@@ -402,7 +402,6 @@ void		freeSettings(settings_t* settings){
 		//free source:
 		if(&settings->source != NULL){
 			reallocDouble(settings->source.thetas, 0);
-			//free(&settings->source);
 		}
 		
 		//free altimetry:
@@ -429,7 +428,6 @@ void		freeSettings(settings_t* settings){
 					fatal("freeSettings(): Unknown Sound distribution type (neither profile nor field)");
 					break;
 			}
-			//free(&settings->soundSpeed);
 		}
 		//free objects:
 		if(&settings->objects != NULL){
@@ -439,7 +437,6 @@ void		freeSettings(settings_t* settings){
 				}
 				free(&settings->objects.object);
 			}
-			//free(&settings->objects);
 		}
 		
 		//free batimetry:
@@ -453,14 +450,21 @@ void		freeSettings(settings_t* settings){
 			if (settings->output.nArrayZ > 0){
 				freeDouble(settings->output.arrayZ);
 			}
-			if (settings->output.arrayType == ARRAY_TYPE__RECTANGULAR){
-				if(settings->output.press2D != NULL){
-					freeComplex2D(settings->output.press2D, settings->output.nArrayZ);
+			
+			//Acoustic pressure is only calculated for some types of output
+			if(	settings->output.calcType == CALC_TYPE__COH_ACOUS_PRESS	||
+				settings->output.calcType == CALC_TYPE__COH_TRANS_LOSS	||
+				settings->output.calcType == CALC_TYPE__PART_VEL		||
+				settings->output.calcType == CALC_TYPE__COH_ACOUS_PRESS_PART_VEL){
+					
+				if (settings->output.arrayType == ARRAY_TYPE__RECTANGULAR){
+					if(settings->output.press2D != NULL){
+						freeComplex2D(settings->output.press2D, settings->output.nArrayZ);
+					}
+				}else{
+					freeComplex(settings->output.press1D);
 				}
-			}else{
-				freeComplex(settings->output.press1D);
 			}
-			//free(&settings->output);
 		}
 
 		//free the actual settings struct:
