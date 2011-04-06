@@ -55,6 +55,7 @@ void calcCohTransLoss(settings_t* settings){
 		
 		for(j=0; j<jj; j++){
 			tl[j] = -20.0*log10( cabs( settings->output.press1D[j] ) );
+			DEBUG(8, "|p|: %lf, tl: %lf\n", cabs( settings->output.press1D[j] ), tl[j]);
 		}
 		
 		ptl = mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)jj, mxREAL);

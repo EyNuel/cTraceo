@@ -484,7 +484,7 @@ vector_t*	mallocVector(uintptr_t	numVectors){
 }
 
 vector_t*	reallocVector(vector_t* old, uintptr_t	numVectors){
-	vector_t*	new; = NULL;
+	vector_t*	new = NULL;
 
 	if(numVectors == 0){
 		free(old);
