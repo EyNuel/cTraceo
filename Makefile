@@ -28,8 +28,8 @@ LFLAGS := 	-L /usr/local/matlabr14/bin/glnxa64 \
 
 
 # Define the compiler and linker comands to use:
-#CC 			:= clang
-CC 			:= gcc
+CC 			:= clang
+#CC 			:= gcc
 
 LINK 		:= $(CC) $(LFLAGS) -o 
 COMPLINK 	:= $(CC) $(CFLAGS) $(LFLAGS) -o $@

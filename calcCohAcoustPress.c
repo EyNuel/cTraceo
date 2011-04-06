@@ -176,7 +176,6 @@ void	calcCohAcoustPress(settings_t* settings){
 						
 						//check wether the hydrophone is within the range coordinates of the ray:
 						if ( rHyd >= ray[i].rMin	&&	rHyd < ray[i].rMax){
-							settings->output.press1D[j] = 0 + 0*I;
 							
 							//Check if the ray is returning back or not;
 							//if not we can bracket it without problems, otherwise we need to know how many
@@ -184,13 +183,13 @@ void	calcCohAcoustPress(settings_t* settings){
 							if ( ray[i].iReturn == FALSE){
 								//find the index of the ray coordinate that brackets the hydrophone
 								bracket(ray[i].nCoords, ray[i].r, rHyd, &iHyd);
-								getRayPressure( /*in:*/	settings, &ray[i], iHyd, q0, rHyd, zHyd, /*out:*/	&pressure);
+								getRayPressure( settings, &ray[i], iHyd, q0, rHyd, zHyd, /**/	&pressure);
 								
 								settings->output.press1D[j] += pressure;
 							}else{
 								eBracket(ray[i].nCoords, ray[i].r, rHyd, &nRet, iRet);
 								for(jj=0; jj<nRet; jj++){
-									getRayPressure( /*in:*/	settings, &ray[i], iRet[jj], q0, rHyd, zHyd,  /*out:*/	&pressure);
+									getRayPressure( settings, &ray[i], iRet[jj], q0, rHyd, zHyd,  /**/	&pressure);
 									
 									settings->output.press1D[j] += pressure;
 								}
@@ -237,7 +236,6 @@ void	calcCohAcoustPress(settings_t* settings){
 					for(j=0; j<settings->output.nArrayZ; j++){
 						rHyd = settings->output.arrayR[j];
 						zHyd = settings->output.arrayZ[j];
-						settings->output.press1D[j] = 0;
 
 						if (	rHyd >= ray[i].rMin	&&	rHyd < ray[i].rMax	){
 
@@ -368,21 +366,7 @@ void	calcCohAcoustPress(settings_t* settings){
 	}
 
 	//free memory for pressure, only if not needed for calculating Transmission Loss (or others):
-	/*TODO this is now done in freeSettings() -remove?
-	if(settings->output.calcType != CALC_TYPE__COH_TRANS_LOSS){
-		switch(settings->output.arrayType){
-			case ARRAY_TYPE__HORIZONTAL:
-			case ARRAY_TYPE__VERTICAL:
-			case ARRAY_TYPE__LINEAR:
-				free(settings->output.press1D);
-				break;
-				
-			case ARRAY_TYPE__RECTANGULAR:
-				freeComplex2D(settings->output.press2D, settings->output.nArrayZ);
-				break;
-		}
-	}
-	*/
+	//this is now done in freeSettings(), tools.c
 	
 	//free ray memory.
 	for(i=0; i<settings->source.nThetas; i++){
