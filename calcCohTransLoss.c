@@ -50,11 +50,14 @@ void calcCohTransLoss(settings_t* settings){
 	}
 	
 	if (settings->output.arrayType != ARRAY_TYPE__RECTANGULAR){
+		/*
+		 * This will apply to horizontal, vertical and linear hydrophone arrays.
+		 */
 		jj = (uint32_t)max((double)settings->output.nArrayR, (double)settings->output.nArrayZ);
 		tl = mallocDouble(jj);
 		
 		for(j=0; j<jj; j++){
-			tl[j] = -20.0*log10( cabs( settings->output.press1D[j] ) );
+			tl[j] = -20.0*log10( cabs( settings->output.pressure1D[j] ) );
 			DEBUG(8, "|p|: %lf, tl: %lf\n", cabs( settings->output.press1D[j] ), tl[j]);
 		}
 		
@@ -68,11 +71,14 @@ void calcCohTransLoss(settings_t* settings){
 
 		free(tl);
 	}else{
+		/*
+		 * Rectangular hydrophone arrays.
+		 */
 		tl2D = mallocDouble2D(settings->output.nArrayZ, settings->output.nArrayR);
 		
 		for(i=0; i<settings->output.nArrayZ; i++){
 			for(j=0; j<settings->output.nArrayR; j++){
-				tl2D[i][j] = -20.0*log10( cabs( settings->output.press2D[i][j] ) );
+				tl2D[i][j] = -20.0*log10( cabs( settings->output.pressure2D[i][j] ) );
 			}
 		}
 		

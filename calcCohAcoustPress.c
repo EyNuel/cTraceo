@@ -33,6 +33,7 @@
 #include "solveEikonalEq.c"
 #include "solveDynamicEq.c"
 #include "getRayPressure.c"
+#include "pressureStar.c"
 
 void	calcCohAcoustPress(settings_t*);
 
@@ -45,23 +46,32 @@ void	calcCohAcoustPress(settings_t* settings){
 	mxArray*			pHydArrayZ	= NULL;
 	mxArray*			pPressure_a	= NULL;
 	mxArray*			pPressure_b	= NULL;
-	double				omega;
-	uintptr_t			i, j, jj, k, iHyd, dim;
+	double				omega, lambda;
+	uintptr_t			i, j, jj, k, l, iHyd, dim;
 	ray_t*				ray = NULL;
 	double 				ctheta, thetai, cx, q0;
 	double 				junkDouble;
 	vector_t			junkVector;
 	double 				rHyd, zHyd;
 	complex double 		pressure;
-	//complex double*		press1D = NULL;
-	//complex double**	press2D = NULL;
+	complex double		pressureStar1D[4];
 	uintptr_t			nRet;
 	uintptr_t			iRet[51];
 	double**			temp2D_a = NULL;
 	double**			temp2D_b = NULL;
+	double				dr, dz;	//used for star pressure contributions (for particle velocity)
 
-
-	matfile		= matOpen("cpr.mat", "w");
+	switch(settings->output.calcType){
+		case CALC_TYPE__COH_ACOUS_PRESS:
+			matfile		= matOpen("cpr.mat", "w");
+			break;
+		case CALC_TYPE__PART_VEL:
+			matfile		= matOpen("pvl.mat", "w");
+			break;
+		default:
+			fatal("Uh-oh - calcCohAcoustPress(): unknown output type.");
+			break;
+	}
 	pThetas		= mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)settings->source.nThetas, mxREAL);
 	if(matfile == NULL || pThetas == NULL)
 		fatal("Memory alocation error.");
@@ -113,25 +123,25 @@ void	calcCohAcoustPress(settings_t* settings){
 	//allocate memory for the results:
 	switch(settings->output.arrayType){
 		case ARRAY_TYPE__HORIZONTAL:
-			settings->output.press1D = mallocComplex(settings->output.nArrayR);
+			settings->output.pressure1D = mallocComplex(settings->output.nArrayR);
 			break;
 			
 		case ARRAY_TYPE__VERTICAL:
-			settings->output.press1D = mallocComplex(settings->output.nArrayZ);
+			settings->output.pressure1D = mallocComplex(settings->output.nArrayZ);
 			break;
 			
 		case ARRAY_TYPE__LINEAR:
 			//in linear arrays, nArrayR and nArrayZ have to be equal (this is checked in readIn.c when reading the file)
-			settings->output.press1D = mallocComplex(settings->output.nArrayZ);
+			settings->output.pressure1D = mallocComplex(settings->output.nArrayZ);
 			break;
 			
 		case ARRAY_TYPE__RECTANGULAR:
-			settings->output.press2D = mallocComplex2D(settings->output.nArrayZ, settings->output.nArrayR);
+			settings->output.pressure2D = mallocComplex2D(settings->output.nArrayZ, settings->output.nArrayR);
 			//inicialize to 0:
 			/*
 			for (j=0; j<settings->output.nArrayZ; j++){
 				for (k=0; k<settings->output.nArrayR; k++){
-					settings->output.press2D[j][k] = 0;
+					settings->output.pressure2D[j][k] = 0;
 				}
 			}
 			DEBUG(5, "memory initialized\n");
@@ -145,6 +155,28 @@ void	calcCohAcoustPress(settings_t* settings){
 
 	///Solve the EIKonal and the DYNamic sets of EQuations:
 	omega  = 2.0 * M_PI * settings->source.freqx;
+
+	if(	settings->output.calcType == CALC_TYPE__PART_VEL ||
+		settings->output.calcType == CALC_TYPE__COH_ACOUS_PRESS_PART_VEL){
+		
+		/*
+		 * Determine the size of the "star".
+		 * This is the vertical/horizontal offset for the pressure contribuitions.
+		 */
+		lambda	= cx/settings->source.freqx;
+		dr = lambda/10;
+		dz = lambda/10;
+		
+		for (i=1; i<settings->output.nArrayR; i++){
+			dr = min( fabs( settings->output.arrayR[i] - settings->output.arrayR[i-1]), dr);
+		}
+		for (i=1; i<settings->output.nArrayZ; i++){
+			dr = min( fabs( settings->output.arrayZ[i] - settings->output.arrayZ[i-1]), dz);
+		}
+		
+		settings->output.dr = dr;
+		settings->output.dz = dz;
+	}
 	
 	for(i=0; i<settings->source.nThetas; i++){
 		thetai = -settings->source.thetas[i] * M_PI/180.0;
@@ -170,31 +202,68 @@ void	calcCohAcoustPress(settings_t* settings){
 					DEBUG(3,"Array type: Horizontal\n");
 					zHyd = settings->output.arrayZ[0];
 					
-					
-					for(j=0; j<settings->output.nArrayR; j++){
-						rHyd = settings->output.arrayR[j];
-						
-						//check wether the hydrophone is within the range coordinates of the ray:
-						if ( rHyd >= ray[i].rMin	&&	rHyd < ray[i].rMax){
-							
-							//Check if the ray is returning back or not;
-							//if not we can bracket it without problems, otherwise we need to know how many
-							//times it passed by the given array range: 
-							if ( ray[i].iReturn == FALSE){
-								//find the index of the ray coordinate that brackets the hydrophone
-								bracket(ray[i].nCoords, ray[i].r, rHyd, &iHyd);
-								getRayPressure( settings, &ray[i], iHyd, q0, rHyd, zHyd, /**/	&pressure);
+					switch(settings->output.calcType){
+						/*
+						 * NOTE:	the code for both cases of this "switch" is almost identical,
+						 * 			yet it is kept unrolled for performance reasons.
+						 */
+						case CALC_TYPE__PART_VEL:
+							for(j=0; j<settings->output.nArrayR; j++){
+								rHyd = settings->output.arrayR[j];
 								
-								settings->output.press1D[j] += pressure;
-							}else{
-								eBracket(ray[i].nCoords, ray[i].r, rHyd, &nRet, iRet);
-								for(jj=0; jj<nRet; jj++){
-									getRayPressure( settings, &ray[i], iRet[jj], q0, rHyd, zHyd,  /**/	&pressure);
+								//check whether the hydrophone is within the range coordinates of the ray:
+								if ( rHyd >= ray[i].rMin	&&	rHyd < ray[i].rMax){
 									
-									settings->output.press1D[j] += pressure;
+									if ( ray[i].iReturn == FALSE){
+										pressureStar( settings, &ray[i], rHyd, zHyd, q0, &pressure, pressureStar1D);
+
+										settings->output.pressure1D[j] += pressure;
+										for (l=0; l<4; l++){
+											settings->output.pressureStar1D[j][l] += pressureStar1D[l];
+										}
+										
+									}else{
+										fatal("the end");	//TODO
+										/*
+										eBracket(ray[i].nCoords, ray[i].r, rHyd, &nRet, iRet);
+										for(jj=0; jj<nRet; jj++){
+											getRayPressure( settings, &ray[i], iRet[jj], q0, rHyd, zHyd,	&pressure);
+											
+											settings->output.pressure1D[j] += pressure;
+										}
+										*/
+									}
 								}
 							}
-						}
+							break;
+						
+						default:
+							for(j=0; j<settings->output.nArrayR; j++){
+								rHyd = settings->output.arrayR[j];
+								
+								//check whether the hydrophone is within the range coordinates of the ray:
+								if ( rHyd >= ray[i].rMin	&&	rHyd < ray[i].rMax){
+									
+									//Check if the ray is returning back or not;
+									//if not we can bracket it without problems, otherwise we need to know how many
+									//times it passed by the given array range: 
+									if ( ray[i].iReturn == FALSE){
+										//find the index of the ray coordinate that brackets the hydrophone
+										bracket(ray[i].nCoords, ray[i].r, rHyd, &iHyd);
+										getRayPressure( settings, &ray[i], iHyd, q0, rHyd, zHyd,	&pressure);
+										
+										settings->output.pressure1D[j] += pressure;
+									}else{
+										eBracket(ray[i].nCoords, ray[i].r, rHyd, &nRet, iRet);
+										for(jj=0; jj<nRet; jj++){
+											getRayPressure( settings, &ray[i], iRet[jj], q0, rHyd, zHyd,	&pressure);
+											
+											settings->output.pressure1D[j] += pressure;
+										}
+									}
+								}
+							}
+							break;
 					}
 					break;
 				
@@ -214,7 +283,7 @@ void	calcCohAcoustPress(settings_t* settings){
 							for(j=0; j<settings->output.nArrayZ; j++){
 								zHyd = settings->output.arrayZ[j];
 								getRayPressure(settings, &ray[i], iHyd, q0, rHyd, zHyd, &pressure);
-								settings->output.press1D[j] = pressure;
+								settings->output.pressure1D[j] = pressure;
 							}
 						}else{
 							eBracket(ray[i].nCoords, ray[i].r, rHyd, &nRet, iRet);
@@ -223,7 +292,7 @@ void	calcCohAcoustPress(settings_t* settings){
 									zHyd = settings->output.arrayZ[j];
 
 									getRayPressure(settings, &ray[i], iRet[jj], q0, rHyd, zHyd, &pressure);
-									settings->output.press1D[j] += pressure;	//TODO make sure this value is initialized
+									settings->output.pressure1D[j] += pressure;	//TODO make sure this value is initialized
 								}
 							}
 						}
@@ -242,7 +311,7 @@ void	calcCohAcoustPress(settings_t* settings){
 							if (ray[i].iReturn == FALSE){
 								bracket(ray[i].nCoords, ray[i].r, rHyd, &iHyd);
 								getRayPressure(settings, &ray[i], iHyd, q0, rHyd, zHyd, &pressure);
-								settings->output.press1D[j] += pressure;
+								settings->output.pressure1D[j] += pressure;
 								
 							}else{
 								eBracket(ray[i].nCoords, ray[i].r, rHyd, &nRet, iRet);
@@ -253,7 +322,7 @@ void	calcCohAcoustPress(settings_t* settings){
 									for(k=0; k<settings->output.nArrayZ; k++){
 										zHyd = settings->output.arrayZ[k];
 										getRayPressure(settings, &ray[i], iRet[jj], q0, rHyd, zHyd, &pressure);
-										settings->output.press1D[j] += pressure;	//TODO make sure this value is initialized
+										settings->output.pressure1D[j] += pressure;	//TODO make sure this value is initialized
 									}
 								}
 							}
@@ -264,37 +333,79 @@ void	calcCohAcoustPress(settings_t* settings){
 				case ARRAY_TYPE__RECTANGULAR:
 					DEBUG(3,"Array type: Rectangular\n");
 					DEBUG(4,"nArrayR: %u, nArrayZ: %u\n", (uint32_t)settings->output.nArrayR, (uint32_t)settings->output.nArrayZ );
-					
-					//TODO invert indices, so that the innermost loop loops over the rightmost index of press2D
-					for(j=0; j<settings->output.nArrayR; j++){
-						rHyd = settings->output.arrayR[j];
-						
-						//Start by checking if the array range is inside the min and max ranges of the ray:
-						if (	rHyd >= ray[i].rMin	&&	rHyd < ray[i].rMax){
-							
-							if (ray[i].iReturn == FALSE){
-								bracket(ray[i].nCoords, ray[i].r, rHyd, &iHyd);
-								for(k=0; k<settings->output.nArrayZ; k++){
+
+					switch(settings->output.calcType){
+						/*
+						 * NOTE:	the code for both cases of this "switch" is almost identical,
+						 * 			yet it is kept unrolled for performance reasons.
+						 */
+						case CALC_TYPE__PART_VEL:
+							for(j=0; j<settings->output.nArrayR; j++){
+								rHyd = settings->output.arrayR[j];
+								
+								//check whether the hydrophone is within the range coordinates of the ray:
+								if ( rHyd >= ray[i].rMin	&&	rHyd < ray[i].rMax){
 									
-									zHyd = settings->output.arrayZ[k];
-									getRayPressure(settings, &ray[i], iHyd, q0, rHyd, zHyd, &pressure);
-									settings->output.press2D[k][j] += pressure;	//verify if initialization is necessary. Done -makes no difference.
-									DEBUG(4, "k: %u; j: %u; press2D[k][j]: %e + j*%e\n", (uint32_t)k, (uint32_t)j, creal(settings->output.press2D[k][j]), cimag(settings->output.press2D[k][j]));
-									DEBUG(4, "rHyd: %lf; zHyd: %lf \n", rHyd, zHyd);
-								}
-							
-							}else{
-								eBracket(ray[i].nCoords, ray[i].r, rHyd, &nRet, iRet);
-								for(k=0; k<settings->output.nArrayZ; k++){
-									zHyd = settings->output.arrayZ[k];
-									
-									for(jj=0; jj<nRet; jj++){
-										getRayPressure(settings, &ray[i], iRet[jj], q0, rHyd, zHyd, &pressure);
-										settings->output.press2D[k][j] += pressure;
+									if ( ray[i].iReturn == FALSE){
+										for(k=0; k<settings->output.nArrayZ; k++){
+											zHyd = settings->output.arrayZ[k];
+
+											pressureStar( settings, &ray[i], rHyd, zHyd, q0, &pressure, pressureStar1D);
+											settings->output.pressure1D[j] += pressure;
+											for (l=0; l<4; l++){
+												settings->output.pressureStar1D[j][l] += pressureStar1D[l];
+											}
+											DEBUG(4, "k: %u; j: %u; pressure2D[k][j]: %e + j*%e\n", (uint32_t)k, (uint32_t)j, creal(settings->output.pressure2D[k][j]), cimag(settings->output.pressure2D[k][j]));
+											DEBUG(4, "rHyd: %lf; zHyd: %lf \n", rHyd, zHyd);
+										}
+									}else{
+										fatal("the end");	//TODO
+										/*
+										eBracket(ray[i].nCoords, ray[i].r, rHyd, &nRet, iRet);
+										for(jj=0; jj<nRet; jj++){
+											getRayPressure( settings, &ray[i], iRet[jj], q0, rHyd, zHyd,	&pressure);
+											
+											settings->output.pressure1D[j] += pressure;
+										}
+										*/
 									}
 								}
 							}
-						}
+							break;
+						
+						default:
+							//TODO invert indices, so that the innermost loop loops over the rightmost index of pressure2D
+							for(j=0; j<settings->output.nArrayR; j++){
+								rHyd = settings->output.arrayR[j];
+								
+								//Start by checking if the array range is inside the min and max ranges of the ray:
+								if (	rHyd >= ray[i].rMin	&&	rHyd < ray[i].rMax){
+									
+									if (ray[i].iReturn == FALSE){
+										bracket(ray[i].nCoords, ray[i].r, rHyd, &iHyd);
+										for(k=0; k<settings->output.nArrayZ; k++){
+											
+											zHyd = settings->output.arrayZ[k];
+											getRayPressure(settings, &ray[i], iHyd, q0, rHyd, zHyd, &pressure);
+											settings->output.pressure2D[k][j] += pressure;	//verify if initialization is necessary. Done -makes no difference.
+											DEBUG(4, "k: %u; j: %u; pressure2D[k][j]: %e + j*%e\n", (uint32_t)k, (uint32_t)j, creal(settings->output.pressure2D[k][j]), cimag(settings->output.pressure2D[k][j]));
+											DEBUG(4, "rHyd: %lf; zHyd: %lf \n", rHyd, zHyd);
+										}
+									
+									}else{
+										eBracket(ray[i].nCoords, ray[i].r, rHyd, &nRet, iRet);
+										for(k=0; k<settings->output.nArrayZ; k++){
+											zHyd = settings->output.arrayZ[k];
+											
+											for(jj=0; jj<nRet; jj++){
+												getRayPressure(settings, &ray[i], iRet[jj], q0, rHyd, zHyd, &pressure);
+												settings->output.pressure2D[k][j] += pressure;
+											}
+										}
+									}
+								}
+							}
+							break;
 					}
 					break;
 				
@@ -316,8 +427,8 @@ void	calcCohAcoustPress(settings_t* settings){
 		//In the fortran version there were problems when passing complex matrices to Matlab; 
 		//therefore the real and complex parts will be saved separately: TODO correct this
 		for(j=0; j<dim; j++){
-			temp2D_a[0][j] = creal( settings->output.press1D[j]);
-			temp2D_a[1][j] = cimag( settings->output.press1D[j]);
+			temp2D_a[0][j] = creal( settings->output.pressure1D[j]);
+			temp2D_a[1][j] = cimag( settings->output.pressure1D[j]);
 		}
 		
 		pPressure_a = mxCreateDoubleMatrix((MWSIZE)2, (MWSIZE)dim, mxREAL);
@@ -338,8 +449,8 @@ void	calcCohAcoustPress(settings_t* settings){
 		temp2D_b = mallocDouble2D(settings->output.nArrayZ, settings->output.nArrayR);
 		for(i=0; i<settings->output.nArrayZ; i++){
 			for(j=0; j<settings->output.nArrayR; j++){
-				temp2D_a[i][j] = creal( settings->output.press2D[i][j]);
-				temp2D_b[i][j] = cimag( settings->output.press2D[i][j]);
+				temp2D_a[i][j] = creal( settings->output.pressure2D[i][j]);
+				temp2D_b[i][j] = cimag( settings->output.pressure2D[i][j]);
 			}
 		}
 		

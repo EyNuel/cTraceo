@@ -26,9 +26,14 @@
 #define MWSIZE				int32_t		//matlab R14 uses int32
 //#define MWSIZE			mwSize		//matlab R2008b and others use mwSize, defined in "matrix.h"
 
-//booleans:
+/** Usefull: **/
 #define	TRUE	1
 #define FALSE	0
+//the following 4 lines are used to simplify access to star pressure elements (for particle velocity)
+#define _LEFT	0
+#define _DOWN	1
+#define _UP		2
+#define _RIGHT	3
 
 //debugging help:
 #if VERBOSE == 1
@@ -226,8 +231,10 @@ typedef struct output{
 	uint32_t			nArrayR, nArrayZ;	//"nra", "nza"	Array sizes in R and Z
 	double*				arrayR;				//"nra"			Array R (ranges)
 	double*				arrayZ;				//"nrz"			Array Z (depths)
-	complex double*		press1D;			//will contain coherent acoustic pressure at each array element (1D), calculated in "calcCohAcoustPress.c"
-	complex double**	press2D;			//will contain coherent acoustic pressure at each array element (2D), calculated in "calcCohAcoustPress.c"
+	complex double*		pressure1D;			//will contain coherent acoustic pressure at each array element (1D), calculated in "calcCohAcoustPress.c"
+	complex double**	pressure2D;			//will contain coherent acoustic pressure at each array element (2D), calculated in "calcCohAcoustPress.c"
+	complex double*		pressureStar1D[4];		//used when calculating particle velocity (pressure at
+	double				dr, dz;				//horizontal and vertical offset of the star pressure elements
 	double				miss;				//"miss"		distance threshold for finding eigenrays
 }output_t;
 

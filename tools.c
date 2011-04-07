@@ -460,11 +460,11 @@ void		freeSettings(settings_t* settings){
 				settings->output.calcType == CALC_TYPE__COH_ACOUS_PRESS_PART_VEL){
 					
 				if (settings->output.arrayType == ARRAY_TYPE__RECTANGULAR){
-					if(settings->output.press2D != NULL){
-						freeComplex2D(settings->output.press2D, settings->output.nArrayZ);
+					if(settings->output.pressure2D != NULL){
+						freeComplex2D(settings->output.pressure2D, settings->output.nArrayZ);
 					}
 				}else{
-					freeComplex(settings->output.press1D);
+					freeComplex(settings->output.pressure1D);
 				}
 			}
 		}
