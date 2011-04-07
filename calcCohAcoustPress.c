@@ -48,13 +48,15 @@ void	calcCohAcoustPress(settings_t* settings){
 	mxArray*			pPressure_b	= NULL;
 	double				omega, lambda;
 	uintptr_t			i, j, jj, k, l, iHyd, dim;
+	uintptr_t			dimR, dimZ;
 	ray_t*				ray = NULL;
 	double 				ctheta, thetai, cx, q0;
 	double 				junkDouble;
 	vector_t			junkVector;
 	double 				rHyd, zHyd;
 	complex double 		pressure;
-	complex double		pressureStar1D[4];
+	complex double		pressure_H[3];
+	complex double		pressure_V[3];
 	uintptr_t			nRet;
 	uintptr_t			iRet[51];
 	double**			temp2D_a = NULL;
@@ -63,6 +65,7 @@ void	calcCohAcoustPress(settings_t* settings){
 
 	switch(settings->output.calcType){
 		case CALC_TYPE__COH_ACOUS_PRESS:
+		case CALC_TYPE__COH_TRANS_LOSS:
 			matfile		= matOpen("cpr.mat", "w");
 			break;
 		case CALC_TYPE__PART_VEL:
@@ -116,53 +119,32 @@ void	calcCohAcoustPress(settings_t* settings){
 	//move mxArray to file and free memory:
 	matPutVariable(matfile, "zarray", pHydArrayZ);
 	mxDestroyArray(pHydArrayZ);
-
+	
+	
 	//allocate memory for the rays:
 	ray = makeRay(settings->source.nThetas);
-
-	//allocate memory for the results:
-	switch(settings->output.arrayType){
-		case ARRAY_TYPE__HORIZONTAL:
-			settings->output.pressure1D = mallocComplex(settings->output.nArrayR);
-			break;
+	
+	
+	//get sound speed at source (cx):
+	csValues( 	settings, settings->source.rx, settings->source.zx, &cx,
+				&junkDouble, &junkDouble, &junkDouble, &junkDouble,
+				&junkVector, &junkDouble, &junkDouble, &junkDouble);
 			
-		case ARRAY_TYPE__VERTICAL:
-			settings->output.pressure1D = mallocComplex(settings->output.nArrayZ);
-			break;
-			
-		case ARRAY_TYPE__LINEAR:
-			//in linear arrays, nArrayR and nArrayZ have to be equal (this is checked in readIn.c when reading the file)
-			settings->output.pressure1D = mallocComplex(settings->output.nArrayZ);
-			break;
-			
-		case ARRAY_TYPE__RECTANGULAR:
-			settings->output.pressure2D = mallocComplex2D(settings->output.nArrayZ, settings->output.nArrayR);
-			//inicialize to 0:
-			/*
-			for (j=0; j<settings->output.nArrayZ; j++){
-				for (k=0; k<settings->output.nArrayR; k++){
-					settings->output.pressure2D[j][k] = 0;
-				}
-			}
-			DEBUG(5, "memory initialized\n");
-			*/
-			break;
-			
-		default:
-			fatal("calcCohAcoustPress(): unknown array type.\nAborting.");
-			break;
-	}
-
-	///Solve the EIKonal and the DYNamic sets of EQuations:
+	q0 = cx / ( M_PI * settings->source.dTheta/180.0 );
 	omega  = 2.0 * M_PI * settings->source.freqx;
-
+	
+	
 	if(	settings->output.calcType == CALC_TYPE__PART_VEL ||
 		settings->output.calcType == CALC_TYPE__COH_ACOUS_PRESS_PART_VEL){
-		
-		/*
-		 * Determine the size of the "star".
-		 * This is the vertical/horizontal offset for the pressure contribuitions.
+		/**
+		 *	In these cases, we will need memory to save the horizontal/vertical pressure components
+		 *	(pressure_H[3], presure_V[3])
+		 *	see also: globals.h, output struct
 		 */
+
+		 
+		//Determine the size of the "star".
+		//This is the vertical/horizontal offset for the pressure contribuitions.
 		lambda	= cx/settings->source.freqx;
 		dr = lambda/10;
 		dz = lambda/10;
@@ -176,8 +158,81 @@ void	calcCohAcoustPress(settings_t* settings){
 		
 		settings->output.dr = dr;
 		settings->output.dz = dz;
+
+		//determine necessary memory for pressure components:
+		switch(settings->output.arrayType){
+			case ARRAY_TYPE__HORIZONTAL:
+				dimR = settings->output.nArrayR;
+				dimZ = 1;
+				break;
+				
+			case ARRAY_TYPE__VERTICAL:
+				dimR = 1;
+				dimZ = settings->output.nArrayZ;
+				break;
+				
+			case ARRAY_TYPE__LINEAR:
+				//in linear arrays, nArrayR and nArrayZ have to be equal (this is checked in readIn.c when reading the file)
+				dimR = 1;
+				dimZ = settings->output.nArrayZ;	//this should be equal to nArrayR
+				break;
+				
+			case ARRAY_TYPE__RECTANGULAR:
+				dimR = settings->output.nArrayR;
+				dimZ = settings->output.nArrayZ;
+				break;
+				
+			default:
+				fatal("calcCohAcoustPress(): unknown array type.\nAborting.");
+				break;
+		}
+		//malloc memory for horizontal and vertical pressure components:
+		settings->output.pressure_H = malloc( dimR * sizeof(uintptr_t));
+		settings->output.pressure_V = malloc( dimR * sizeof(uintptr_t));
+		for (i=0; i<dimR; i++){
+			settings->output.pressure_H = malloc(dimZ * sizeof(complex double[3]));
+			settings->output.pressure_V = malloc(dimZ * sizeof(complex double[3]));
+		}
+		
+	}else{
+		/**
+		 * in this case we only need memory the simple pressure, no H/V components
+		 */
+		//allocate memory for the results:
+		switch(settings->output.arrayType){
+			case ARRAY_TYPE__HORIZONTAL:
+				settings->output.pressure1D = mallocComplex(settings->output.nArrayR);
+				break;
+				
+			case ARRAY_TYPE__VERTICAL:
+				settings->output.pressure1D = mallocComplex(settings->output.nArrayZ);
+				break;
+				
+			case ARRAY_TYPE__LINEAR:
+				//in linear arrays, nArrayR and nArrayZ have to be equal (this is checked in readIn.c when reading the file)
+				settings->output.pressure1D = mallocComplex(settings->output.nArrayZ);
+				break;
+				
+			case ARRAY_TYPE__RECTANGULAR:
+				settings->output.pressure2D = mallocComplex2D(settings->output.nArrayZ, settings->output.nArrayR);
+				//inicialize to 0:
+				/*
+				for (j=0; j<settings->output.nArrayZ; j++){
+					for (k=0; k<settings->output.nArrayR; k++){
+						settings->output.pressure2D[j][k] = 0;
+					}
+				}
+				DEBUG(5, "memory initialized\n");
+				*/
+				break;
+				
+			default:
+				fatal("calcCohAcoustPress(): unknown array type.\nAborting.");
+				break;
+		}
 	}
 	
+	///Solve the EIKonal and the DYNamic sets of EQuations:
 	for(i=0; i<settings->source.nThetas; i++){
 		thetai = -settings->source.thetas[i] * M_PI/180.0;
 		ray[i].theta = thetai;
@@ -188,12 +243,6 @@ void	calcCohAcoustPress(settings_t* settings){
 			solveEikonalEq(settings, &ray[i]);
 			solveDynamicEq(settings, &ray[i]);
 			
-			//get sound speed at source (cx):
-			csValues( 	settings, settings->source.rx, settings->source.zx, &cx,
-						&junkDouble, &junkDouble, &junkDouble, &junkDouble,
-						&junkVector, &junkDouble, &junkDouble, &junkDouble);
-			
-			q0 = cx / ( M_PI * settings->source.dTheta/180.0 );
 			DEBUG(3,"q0: %e\n", q0);
 			//TODO: this is UGLY - find a better way to do it! (pull cases together?)
 			//Now that the ray has been calculated let's determine the ray influence at each point of the array:
@@ -215,11 +264,12 @@ void	calcCohAcoustPress(settings_t* settings){
 								if ( rHyd >= ray[i].rMin	&&	rHyd < ray[i].rMax){
 									
 									if ( ray[i].iReturn == FALSE){
-										pressureStar( settings, &ray[i], rHyd, zHyd, q0, &pressure, pressureStar1D);
+										pressureStar( settings, &ray[i], rHyd, zHyd, q0, pressure_H, pressure_V);
 
-										settings->output.pressure1D[j] += pressure;
-										for (l=0; l<4; l++){
-											settings->output.pressureStar1D[j][l] += pressureStar1D[l];
+										//settings->output.pressure1D[j] += pressure;
+										for (l=0; l<3; l++){
+											settings->output.pressure_H[0][j][l] += pressure_H[l];
+											settings->output.pressure_V[0][j][l] += pressure_V[l];
 										}
 										
 									}else{
@@ -340,7 +390,7 @@ void	calcCohAcoustPress(settings_t* settings){
 						 * 			yet it is kept unrolled for performance reasons.
 						 */
 						case CALC_TYPE__PART_VEL:
-							for(j=0; j<settings->output.nArrayR; j++){
+							for(k=0; j<settings->output.nArrayR; j++){
 								rHyd = settings->output.arrayR[j];
 								
 								//check whether the hydrophone is within the range coordinates of the ray:
@@ -350,10 +400,10 @@ void	calcCohAcoustPress(settings_t* settings){
 										for(k=0; k<settings->output.nArrayZ; k++){
 											zHyd = settings->output.arrayZ[k];
 
-											pressureStar( settings, &ray[i], rHyd, zHyd, q0, &pressure, pressureStar1D);
-											settings->output.pressure1D[j] += pressure;
-											for (l=0; l<4; l++){
-												settings->output.pressureStar1D[j][l] += pressureStar1D[l];
+											pressureStar( settings, &ray[i], rHyd, zHyd, q0, pressure_H, pressure_V);
+											for (l=0; l<3; l++){
+												settings->output.pressure_H[j][k][l] += pressure_H[l];
+												settings->output.pressure_V[j][k][l] += pressure_V[l];
 											}
 											DEBUG(4, "k: %u; j: %u; pressure2D[k][j]: %e + j*%e\n", (uint32_t)k, (uint32_t)j, creal(settings->output.pressure2D[k][j]), cimag(settings->output.pressure2D[k][j]));
 											DEBUG(4, "rHyd: %lf; zHyd: %lf \n", rHyd, zHyd);
@@ -484,6 +534,8 @@ void	calcCohAcoustPress(settings_t* settings){
 		reallocRayMembers(&ray[i], 0);
 	}
 	free(ray);
+
+	//TODO free H/V pressure components
 	
 	matClose(matfile);
 	DEBUG(1,"out\n");

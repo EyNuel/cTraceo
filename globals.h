@@ -30,10 +30,13 @@
 #define	TRUE	1
 #define FALSE	0
 //the following 4 lines are used to simplify access to star pressure elements (for particle velocity)
-#define _LEFT	0
-#define _DOWN	1
-#define _UP		2
-#define _RIGHT	3
+#define LEFT	0
+#define CENTER	1
+#define RIGHT	2
+
+#define TOP		0
+#define	BOTTOM	2
+
 
 //debugging help:
 #if VERBOSE == 1
@@ -233,7 +236,11 @@ typedef struct output{
 	double*				arrayZ;				//"nrz"			Array Z (depths)
 	complex double*		pressure1D;			//will contain coherent acoustic pressure at each array element (1D), calculated in "calcCohAcoustPress.c"
 	complex double**	pressure2D;			//will contain coherent acoustic pressure at each array element (2D), calculated in "calcCohAcoustPress.c"
-	complex double*		pressureStar1D[4];		//used when calculating particle velocity (pressure at
+	complex double		(**pressure_H)[3];		//used when calculating particle velocity (pressure at left, center, right)
+	complex double		(**pressure_V)[3];		//used when calculating particle velocity (pressure at top, center, bottom)
+												/* Note the redundancy:	the center pressure is present in both cases.
+												 *						This is done for performance reasons.
+												 */
 	double				dr, dz;				//horizontal and vertical offset of the star pressure elements
 	double				miss;				//"miss"		distance threshold for finding eigenrays
 }output_t;
