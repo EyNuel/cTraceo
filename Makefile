@@ -10,6 +10,7 @@ CFLAGS := 	-Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align \
 			-I /usr/local/matlabr2008b/extern/include \
 			-I /usr/local/matlab2008a/extern/include \
 			-I /usr/local/matlabr14/extern/include \
+			-D VERBOSE=0
 
 # The following 3 lines are for compilation on siplab 64b machines:
 LFLAGS := 	-L /usr/local/matlabr14/bin/glnxa64 \
@@ -68,7 +69,10 @@ pg:		#
 		@gcc $(CFLAGS) $(LFLAGS) -O3 -pg -o bin/cTraceo-64b.bin cTraceo.c
 
 debug:	#
-		@$(CC) $(CFLAGS) $(LFLAGS)  -O0 -g -o bin/cTraceo-64b.bin cTraceo.c
+		@$(CC) $(CFLAGS) $(LFLAGS) -O0 -g -o bin/cTraceo-64b.bin cTraceo.c
+		
+verbose:#
+		@$(CC) $(CFLAGS) $(LFLAGS) -D VERBOSE=1 -O0 -g -o bin/cTraceo-64b.bin cTraceo.c
 
 todo:	#list todos from all files
 		@for file in $(ALLFILES); do fgrep -H -e TODO $$file; done; true
