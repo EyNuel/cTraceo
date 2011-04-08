@@ -34,6 +34,7 @@
 #include "solveDynamicEq.c"
 #include "getRayPressure.c"
 #include "pressureStar.c"
+#include <complex.h>
 
 void	calcCohAcoustPress(settings_t*);
 
@@ -190,8 +191,8 @@ void	calcCohAcoustPress(settings_t* settings){
 		settings->output.pressure_H = malloc( dimR * sizeof(uintptr_t));
 		settings->output.pressure_V = malloc( dimR * sizeof(uintptr_t));
 		for (i=0; i<dimR; i++){
-			settings->output.pressure_H = malloc(dimZ * sizeof(complex double[3]));
-			settings->output.pressure_V = malloc(dimZ * sizeof(complex double[3]));
+			settings->output.pressure_H[i] = malloc(dimZ * sizeof(complex double[3]));
+			settings->output.pressure_V[i] = malloc(dimZ * sizeof(complex double[3]));
 		}
 		
 	}else{
@@ -390,23 +391,30 @@ void	calcCohAcoustPress(settings_t* settings){
 						 * 			yet it is kept unrolled for performance reasons.
 						 */
 						case CALC_TYPE__PART_VEL:
-							for(k=0; j<settings->output.nArrayR; j++){
+							for(j=0; j<settings->output.nArrayR; j++){
 								rHyd = settings->output.arrayR[j];
 								
 								//check whether the hydrophone is within the range coordinates of the ray:
+								//if ( (rHyd - dr)>= ray[i].rMin	&&	(rHyd + dr) < ray[i].rMax){
 								if ( rHyd >= ray[i].rMin	&&	rHyd < ray[i].rMax){
 									
 									if ( ray[i].iReturn == FALSE){
 										for(k=0; k<settings->output.nArrayZ; k++){
 											zHyd = settings->output.arrayZ[k];
 
-											pressureStar( settings, &ray[i], rHyd, zHyd, q0, pressure_H, pressure_V);
-											for (l=0; l<3; l++){
-												settings->output.pressure_H[j][k][l] += pressure_H[l];
-												settings->output.pressure_V[j][k][l] += pressure_V[l];
+											if( pressureStar( settings, &ray[i], rHyd, zHyd, q0, pressure_H, pressure_V) ){
+												DEBUG(1, "i: %u, j:%u, k:%u\n", (uint32_t)i, (uint32_t)j, (uint32_t)k);
+												DEBUG(1, "abs(pressure_H): %lf, %lf, %lf\n",
+														cabs(pressure_H[LEFT]), cabs(pressure_H[CENTER]), cabs(pressure_H[RIGHT]));
+												DEBUG(1, "settings->output.pressure_H[0][0][0]: %lf\n",
+														cabs(settings->output.pressure_H[0][0][0]));
+												for (l=0; l<3; l++){
+													settings->output.pressure_H[j][k][l] += pressure_H[l];
+													settings->output.pressure_V[j][k][l] += pressure_V[l];
+												}
 											}
-											DEBUG(4, "k: %u; j: %u; pressure2D[k][j]: %e + j*%e\n", (uint32_t)k, (uint32_t)j, creal(settings->output.pressure2D[k][j]), cimag(settings->output.pressure2D[k][j]));
-											DEBUG(4, "rHyd: %lf; zHyd: %lf \n", rHyd, zHyd);
+											//DEBUG(4, "k: %u; j: %u; pressure2D[k][j]: %e + j*%e\n", (uint32_t)k, (uint32_t)j, creal(settings->output.pressure2D[k][j]), cimag(settings->output.pressure2D[k][j]));
+											//DEBUG(4, "rHyd: %lf; zHyd: %lf \n", rHyd, zHyd);
 										}
 									}else{
 										fatal("the end");	//TODO
@@ -468,62 +476,64 @@ void	calcCohAcoustPress(settings_t* settings){
 	}//for(i=0; i<settings->source.nThetas; i++
 	
 	DEBUG(3,"Rays and pressure calculated\n");
-	/***********************************************************************
-	 *      Write the data to the output file:
-	 **********************************************************************/
-	if (settings->output.arrayType != ARRAY_TYPE__RECTANGULAR){
-		dim = (uintptr_t)max((double)settings->output.nArrayR, (double)settings->output.nArrayZ);
-		temp2D_a = mallocDouble2D(2, dim);
-		//In the fortran version there were problems when passing complex matrices to Matlab; 
-		//therefore the real and complex parts will be saved separately: TODO correct this
-		for(j=0; j<dim; j++){
-			temp2D_a[0][j] = creal( settings->output.pressure1D[j]);
-			temp2D_a[1][j] = cimag( settings->output.pressure1D[j]);
-		}
-		
-		pPressure_a = mxCreateDoubleMatrix((MWSIZE)2, (MWSIZE)dim, mxREAL);
-		if(pPressure_a == NULL){
-			fatal("Memory alocation error.");
-		}
-		copyDoubleToPtr2D(temp2D_a, mxGetPr(pPressure_a), dim, 2);
-		matPutVariable(matfile, "p", pPressure_a);
-		mxDestroyArray(pPressure_a);
-
-		freeDouble2D(temp2D_a, 2);
-	}else{
-		
-		DEBUG(3,"Writing pressure output of rectangular array to file:\n");
-		//In the fortran version there were problems when passing complex matrices to Matlab; 
-		//therefore the real and complex parts will be saved separately: TODO correct this
-		temp2D_a = mallocDouble2D(settings->output.nArrayZ, settings->output.nArrayR);
-		temp2D_b = mallocDouble2D(settings->output.nArrayZ, settings->output.nArrayR);
-		for(i=0; i<settings->output.nArrayZ; i++){
-			for(j=0; j<settings->output.nArrayR; j++){
-				temp2D_a[i][j] = creal( settings->output.pressure2D[i][j]);
-				temp2D_b[i][j] = cimag( settings->output.pressure2D[i][j]);
+	/*
+	 * Write Acoustic pressure to file, if needed.
+	 */
+	if(settings->output.calcType == CALC_TYPE__COH_ACOUS_PRESS){
+		if (settings->output.arrayType != ARRAY_TYPE__RECTANGULAR){
+			dim = (uintptr_t)max((double)settings->output.nArrayR, (double)settings->output.nArrayZ);
+			temp2D_a = mallocDouble2D(2, dim);
+			//In the fortran version there were problems when passing complex matrices to Matlab; 
+			//therefore the real and complex parts will be saved separately: TODO correct this
+			for(j=0; j<dim; j++){
+				temp2D_a[0][j] = creal( settings->output.pressure1D[j]);
+				temp2D_a[1][j] = cimag( settings->output.pressure1D[j]);
 			}
+			
+			pPressure_a = mxCreateDoubleMatrix((MWSIZE)2, (MWSIZE)dim, mxREAL);
+			if(pPressure_a == NULL){
+				fatal("Memory alocation error.");
+			}
+			copyDoubleToPtr2D(temp2D_a, mxGetPr(pPressure_a), dim, 2);
+			matPutVariable(matfile, "p", pPressure_a);
+			mxDestroyArray(pPressure_a);
+
+			freeDouble2D(temp2D_a, 2);
+		}else{
+			
+			DEBUG(3,"Writing pressure output of rectangular array to file:\n");
+			//In the fortran version there were problems when passing complex matrices to Matlab; 
+			//therefore the real and complex parts will be saved separately: TODO correct this
+			temp2D_a = mallocDouble2D(settings->output.nArrayZ, settings->output.nArrayR);
+			temp2D_b = mallocDouble2D(settings->output.nArrayZ, settings->output.nArrayR);
+			for(i=0; i<settings->output.nArrayZ; i++){
+				for(j=0; j<settings->output.nArrayR; j++){
+					temp2D_a[i][j] = creal( settings->output.pressure2D[i][j]);
+					temp2D_b[i][j] = cimag( settings->output.pressure2D[i][j]);
+				}
+			}
+			
+			//write the real part to the mat-file:
+			pPressure_a = mxCreateDoubleMatrix((MWSIZE)settings->output.nArrayZ, (MWSIZE)settings->output.nArrayR, mxREAL);
+			if(pPressure_a == NULL){
+				fatal("Memory alocation error.");
+			}
+			copyDoubleToPtr2D(temp2D_a, mxGetPr(pPressure_a), settings->output.nArrayR, settings->output.nArrayZ);
+			matPutVariable(matfile, "rp", pPressure_a);
+			mxDestroyArray(pPressure_a);
+			
+			//write the imaginary part to the mat-file:
+			pPressure_b = mxCreateDoubleMatrix((MWSIZE)settings->output.nArrayZ, (MWSIZE)settings->output.nArrayR, mxREAL);
+			if(pPressure_b == NULL){
+				fatal("Memory alocation error.");
+			}
+			copyDoubleToPtr2D(temp2D_b, mxGetPr(pPressure_b), settings->output.nArrayR, settings->output.nArrayZ);
+			matPutVariable(matfile, "ip", pPressure_b);
+			mxDestroyArray(pPressure_b);
+			
+			freeDouble2D(temp2D_a, settings->output.nArrayZ);
+			freeDouble2D(temp2D_b, settings->output.nArrayZ);
 		}
-		
-		//write the real part to the mat-file:
-		pPressure_a = mxCreateDoubleMatrix((MWSIZE)settings->output.nArrayZ, (MWSIZE)settings->output.nArrayR, mxREAL);
-		if(pPressure_a == NULL){
-			fatal("Memory alocation error.");
-		}
-		copyDoubleToPtr2D(temp2D_a, mxGetPr(pPressure_a), settings->output.nArrayR, settings->output.nArrayZ);
-		matPutVariable(matfile, "rp", pPressure_a);
-		mxDestroyArray(pPressure_a);
-		
-		//write the imaginary part to the mat-file:
-		pPressure_b = mxCreateDoubleMatrix((MWSIZE)settings->output.nArrayZ, (MWSIZE)settings->output.nArrayR, mxREAL);
-		if(pPressure_b == NULL){
-			fatal("Memory alocation error.");
-		}
-		copyDoubleToPtr2D(temp2D_b, mxGetPr(pPressure_b), settings->output.nArrayR, settings->output.nArrayZ);
-		matPutVariable(matfile, "ip", pPressure_b);
-		mxDestroyArray(pPressure_b);
-		
-		freeDouble2D(temp2D_a, settings->output.nArrayZ);
-		freeDouble2D(temp2D_b, settings->output.nArrayZ);
 	}
 
 	//free memory for pressure, only if not needed for calculating Transmission Loss (or others):
