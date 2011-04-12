@@ -5,7 +5,7 @@
 #pragma once
 #include <inttypes.h>	//needed for inequivocal type qualifiers
 #include <complex.h>
-#include <matrix.h>		//needed for matlab matrix dimensions
+#include <matrix.h>		//needed for matlab matrix dimensions (mwSize)
 /*
 	NOTE:	The actual value defined is not important, as it will never be use -only its name will.
 */
@@ -13,8 +13,8 @@
 /********************************************************************************
  * Configuration:																*
  *******************************************************************************/
-#define VERBOSE				0	//when set to 1, more information will be shown.
-#define VERBOSITY			3	//verbosity level (0-10). High levels will make the code impractically slow (seriously!)
+//#define VERBOSE				0	//when set to 1, more information will be shown.
+#define VERBOSITY			1	//verbosity level (0-10). High levels will make the code impractically slow (seriously!)
 #define MAX_LINE_LEN		256	//Maximum number of chars to read at once from a file (\n not included)
 #define MEM_FACTOR			20	//The memory allocated for each ray is determined like so: ( abs(rbox2-rbox1)/dsi )* MEM_FACTOR
 								//NOTE:	for deepwater cases, values between 3-5 are ok.

@@ -10,7 +10,6 @@ CFLAGS := 	-Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align \
 			-I /usr/local/matlabr2008b/extern/include \
 			-I /usr/local/matlab2008a/extern/include \
 			-I /usr/local/matlabr14/extern/include \
-			-D VERBOSE=0
 
 # The following 3 lines are for compilation on siplab 64b machines:
 LFLAGS := 	-L /usr/local/matlabr14/bin/glnxa64 \
@@ -59,17 +58,17 @@ ALLFILES := $(SRCFILES) $(HDRFILES) $(AUXFILES) $(MFILES)
 .PHONY: all todo cTraceo.exe discuss 32b pg dist
 
 all:	#cTraceo.exe
-		@$(CC) $(CFLAGS) $(LFLAGS) -O3 -o bin/cTraceo-64b.bin cTraceo.c
+		@$(CC) $(CFLAGS) $(LFLAGS) -D VERBOSE=0 -O3 -o bin/cTraceo-64b.bin cTraceo.c
 
 
 32b:	#cTraceo.exe
-		@$(CC) $(CFLAGS) $(LFLAGS) -O3 -march=i686 -m32 -o bin/cTraceo-32b.bin cTraceo.c
+		@$(CC) $(CFLAGS) $(LFLAGS) -D VERBOSE=0 -O3 -march=i686 -m32 -o bin/cTraceo-32b.bin cTraceo.c
 
 pg:		#
-		@gcc $(CFLAGS) $(LFLAGS) -O3 -pg -o bin/cTraceo-64b.bin cTraceo.c
+		@gcc $(CFLAGS) $(LFLAGS) -D VERBOSE=0 -O3 -pg -o bin/cTraceo-64b.bin cTraceo.c
 
 debug:	#
-		@$(CC) $(CFLAGS) $(LFLAGS) -O0 -g -o bin/cTraceo-64b.bin cTraceo.c
+		@$(CC) $(CFLAGS) $(LFLAGS) -D VERBOSE=0 -O0 -g -o bin/cTraceo-64b.bin cTraceo.c
 		
 verbose:#
 		@$(CC) $(CFLAGS) $(LFLAGS) -D VERBOSE=1 -O0 -g -o bin/cTraceo-64b.bin cTraceo.c
