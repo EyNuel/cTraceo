@@ -243,6 +243,15 @@ c***********************************************************************
 					intComplexBarycParab1D(xp, settings->output.pressure_H[j][k], zHyd, &junkComplex, &dP_dZi, &junkComplex);
 					
 					dP_dZ2D[j][k] = -I*dP_dZi;
+					
+					//show the pressure contribuitions:
+					DEBUG(1, "(j,k)=(%u,%u)>> pL: %lf,  pU, %lf,  pR: %lf,  pD: %lf,  pC:%lf\n",
+							(uint32_t)j, (uint32_t)k,
+							cabs(settings->output.pressure_H[j][k][LEFT]),
+							cabs(settings->output.pressure_V[j][k][TOP]),
+							cabs(settings->output.pressure_H[j][k][RIGHT]),
+							cabs(settings->output.pressure_V[j][k][BOTTOM]),
+							cabs(settings->output.pressure_H[j][k][CENTER]));
 				}
 			}
 			break;

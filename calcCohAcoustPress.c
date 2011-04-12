@@ -159,6 +159,7 @@ void	calcCohAcoustPress(settings_t* settings){
 		
 		settings->output.dr = dr;
 		settings->output.dz = dz;
+		DEBUG(1, "dr: %lf; dz: %lf\n", dr, dz);
 
 		//determine necessary memory for pressure components:
 		switch(settings->output.arrayType){
@@ -403,11 +404,16 @@ void	calcCohAcoustPress(settings_t* settings){
 											zHyd = settings->output.arrayZ[k];
 
 											if( pressureStar( settings, &ray[i], rHyd, zHyd, q0, pressure_H, pressure_V) ){
-												DEBUG(1, "i: %u, j:%u, k:%u\n", (uint32_t)i, (uint32_t)j, (uint32_t)k);
-												DEBUG(1, "abs(pressure_H): %lf, %lf, %lf\n",
-														cabs(pressure_H[LEFT]), cabs(pressure_H[CENTER]), cabs(pressure_H[RIGHT]));
-												DEBUG(1, "settings->output.pressure_H[0][0][0]: %lf\n",
-														cabs(settings->output.pressure_H[0][0][0]));
+												DEBUG(1, "i=%u: (j,k)=(%u,%u): \n",(uint32_t)i, (uint32_t)j, (uint32_t)k);
+												DEBUG(1,	"in>>  (rH,zH)=(%.2lf,%.2lf), nCoords: %u, q0: %e\n",
+															rHyd, zHyd, (uint32_t)ray[i].nCoords, q0);
+												DEBUG(1, "out>> pL: %e,  pU, %e,  pR: %e,  pD: %e,  pC:%e\n",
+															cabs(pressure_H[LEFT]),
+															cabs(pressure_V[TOP]),
+															cabs(pressure_H[RIGHT]),
+															cabs(pressure_V[BOTTOM]),
+															cabs(pressure_H[CENTER]));
+															
 												for (l=0; l<3; l++){
 													settings->output.pressure_H[j][k][l] += pressure_H[l];
 													settings->output.pressure_V[j][k][l] += pressure_V[l];
