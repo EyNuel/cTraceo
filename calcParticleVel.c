@@ -353,7 +353,7 @@ c***********************************************************************
 		if(piw2D == NULL){
 			fatal("Memory alocation error.");
 		}
-		copyDoubleToPtr2D(ru2D, mxGetPr(piw2D), settings->output.nArrayR, settings->output.nArrayZ);
+		copyDoubleToPtr2D(iw2D, mxGetPr(piw2D), settings->output.nArrayR, settings->output.nArrayZ);
 		matPutVariable(matfile, "iw", piw2D);
 		mxDestroyArray(piw2D);
 		
