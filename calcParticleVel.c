@@ -122,6 +122,7 @@ c***********************************************************************
 	 *	We can now use this to calculate the actual particle velocity components:
 	 */
 
+	DEBUG(1, "absolute pressure values at the array:\n");
 	switch(settings->output.arrayType){
 		case ARRAY_TYPE__HORIZONTAL:
 			/* TODO
@@ -240,18 +241,23 @@ c***********************************************************************
 					xp[1] = zHyd;
 					xp[2] = zHyd + dz;
 					
-					intComplexBarycParab1D(xp, settings->output.pressure_H[j][k], zHyd, &junkComplex, &dP_dZi, &junkComplex);
+					intComplexBarycParab1D(xp, settings->output.pressure_V[j][k], zHyd, &junkComplex, &dP_dZi, &junkComplex);
 					
 					dP_dZ2D[j][k] = -I*dP_dZi;
 					
 					//show the pressure contribuitions:
-					DEBUG(1, "(j,k)=(%u,%u)>> pL: %lf,  pU, %lf,  pR: %lf,  pD: %lf,  pC:%lf\n",
+					/*
+					DEBUG(1, "(j,k)=(%u,%u)>> pL: %e,  pU, %e,  pR: %e,  pD: %e,  pC:%e\n",
 							(uint32_t)j, (uint32_t)k,
 							cabs(settings->output.pressure_H[j][k][LEFT]),
 							cabs(settings->output.pressure_V[j][k][TOP]),
 							cabs(settings->output.pressure_H[j][k][RIGHT]),
 							cabs(settings->output.pressure_V[j][k][BOTTOM]),
 							cabs(settings->output.pressure_H[j][k][CENTER]));
+					*/
+					DEBUG(1, "(j,k)=(%u,%u)>> dP_dR: %e, dP_dZ: %e\n",
+							(uint32_t)j, (uint32_t)k,
+							cabs(dP_dR2D[j][k]), cabs(dP_dZ2D[j][k]));
 				}
 			}
 			break;
@@ -314,7 +320,8 @@ c***********************************************************************
 		call mxDestroyArray(piw2d
 		*/
 		
-		//write the real part to the mat-file:
+		/// **************************************
+		/// write the U-component to the mat-file:
 		pru2D = mxCreateDoubleMatrix((MWSIZE)settings->output.nArrayZ, (MWSIZE)settings->output.nArrayR, mxREAL);
 		if(pru2D == NULL){
 			fatal("Memory alocation error.");
@@ -330,7 +337,10 @@ c***********************************************************************
 		copyDoubleToPtr2D(iu2D, mxGetPr(piu2D), settings->output.nArrayR, settings->output.nArrayZ);
 		matPutVariable(matfile, "iu", piu2D);
 		mxDestroyArray(piu2D);
-		
+
+
+		/// **************************************
+		/// write the W-component to the mat-file:
 		prw2D = mxCreateDoubleMatrix((MWSIZE)settings->output.nArrayZ, (MWSIZE)settings->output.nArrayR, mxREAL);
 		if(prw2D == NULL){
 			fatal("Memory alocation error.");

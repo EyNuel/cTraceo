@@ -151,7 +151,7 @@ void	solveDynamicEq(settings_t* settings, ray_t* ray){
 	DEBUG(10, "amp[10]:%lf, cxc:%lf, cnn:%e\n", cabs(ray->amp[10]), cxc, cnn);
 	for(i=1; i<ray->nCoords -1; i++){
 		ap_aq		= (complex double)( ray->c[0] * cos(ray->theta) * ray->c[i] / ( ray->ic[i] * ray->q[i] ));
-		DEBUG(1, "i:%u, ap_aq:%lf, c: %lf, ic:%lf, q:%e\n", (uint32_t)i, (double)cabs(ap_aq), ray->c[i], ray->ic[i], ray->q[i]);
+		DEBUG(1, "i:%u, ap_aq:%e, c: %lf, ic:%lf, q:%e\n", (uint32_t)i, (double)cabs(ap_aq), ray->c[i], ray->ic[i], ray->q[i]);
 		ray->amp[i]	= csqrt( ap_aq ) * ray->decay[i] * exp( -alpha * ray->s[i] );
 		/*
 		if(isnan((float)cabs(ray->amp[i]))){

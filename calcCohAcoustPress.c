@@ -407,7 +407,7 @@ void	calcCohAcoustPress(settings_t* settings){
 												DEBUG(1, "i=%u: (j,k)=(%u,%u): \n",(uint32_t)i, (uint32_t)j, (uint32_t)k);
 												DEBUG(1,	"in>>  (rH,zH)=(%.2lf,%.2lf), nCoords: %u, q0: %e\n",
 															rHyd, zHyd, (uint32_t)ray[i].nCoords, q0);
-												DEBUG(1, "out>> pL: %e,  pU, %e,  pR: %e,  pD: %e,  pC:%e\n",
+												DEBUG(1, "out>> pL: %e,  pU, %e,  pR: %e,  pD: %e,  pC:%e\n\n",
 															cabs(pressure_H[LEFT]),
 															cabs(pressure_V[TOP]),
 															cabs(pressure_H[RIGHT]),
