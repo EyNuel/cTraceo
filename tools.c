@@ -17,6 +17,7 @@
 #include	<string.h>
 #include	<sys/time.h>		//for struct time_t
 #include	<sys/resource.h>	//for getrusage()
+#include	<matrix.h>			//for matlab functions (used in copyComplexToPtr and copyComplexToPtr2D)
 
 /** NOTE: the memory reallocation functions contained in this file are mostly not in use du to random occurences of "bus error".                       
  */
@@ -63,8 +64,8 @@ void			reallocRayMembers(ray_t*, uintptr_t);
 
 void			copyDoubleToPtr(double*, double*, uintptr_t);
 void			copyDoubleToPtr2D(double**, double*, uintptr_t, uintptr_t);
-void			copyComplexToPtr(complex double*, complex double*, uintptr_t);
-void			copyComplexToPtr2D(complex double**, complex double*, uintptr_t, uintptr_t);
+void			copyComplexToPtr(complex double*, mxArray*, uintptr_t);
+void			copyComplexToPtr2D(complex double**, mxArray*, uintptr_t, uintptr_t);
 void			printCpuTime(FILE*);
 
 /****************************
@@ -955,20 +956,34 @@ void		copyDoubleToPtr2D(double** origin, double* dest, uintptr_t rowSize, uintpt
 	}
 }
 
-void		copyComplexToPtr(complex double* origin, complex double* dest, uintptr_t nItems){
+void		copyComplexToPtr(complex double* origin, mxArray* dest, uintptr_t nItems){
 	uintptr_t	i;
-
+	double*	destImag = NULL;
+	double*	destReal = NULL;
+	
+	//get a pointer to the real and imaginary parts of the destination:
+	destReal = mxGetData(dest);
+	destImag = mxGetImagData(dest);
+	
 	for( i=0; i<nItems; i++ ){
-		dest[i] = origin[i];
+		destReal[i] = creal(origin[i]);
+		destImag[i] = cimag(origin[i]);
 	}
 }
 
-void		copyComplexToPtr2D(complex double** origin, complex double* dest, uintptr_t rowSize, uintptr_t colSize){
+void		copyComplexToPtr2D(complex double** origin, mxArray* dest, uintptr_t rowSize, uintptr_t colSize){
 	uintptr_t	i,j;
-
+	double*	destImag = NULL;
+	double*	destReal = NULL;
+	
+	//get a pointer to the real and imaginary parts of the destination:
+	destReal = mxGetData(dest);
+	destImag = mxGetImagData(dest);
+	
 	for( j=0; j<colSize; j++ ){
 		for(i=0; i<rowSize; i++){
-			dest[i*colSize +j] = origin[j][i];
+			destReal[i*colSize +j] = creal(origin[j][i]);
+			destImag[i*colSize +j] = cimag(origin[j][i]);
 		}
 	}
 }
