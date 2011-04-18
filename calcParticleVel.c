@@ -124,7 +124,7 @@ c***********************************************************************
 
 	DEBUG(1, "absolute pressure values at the array:\n");
 	switch(settings->output.arrayType){
-		case ARRAY_TYPE__HORIZONTAL:
+		//case ARRAY_TYPE__HORIZONTAL:
 			/* TODO
 			zh = zarray(1)
 			do j = 1,nra
@@ -154,7 +154,7 @@ c***********************************************************************
 				dpdz(j) = -imunit*dpdzi
 			end do
 			*/
-			break;
+			//break;
 		case ARRAY_TYPE__VERTICAL:
 			/* TODO
 			rh = rarray(1)
@@ -217,6 +217,7 @@ c***********************************************************************
 			end do
 			*/
 			break;
+		case ARRAY_TYPE__HORIZONTAL:
 		case ARRAY_TYPE__RECTANGULAR:
 			dP_dR2D = mallocComplex2D(settings->output.nArrayR, settings->output.nArrayZ);
 			dP_dZ2D = mallocComplex2D(settings->output.nArrayR, settings->output.nArrayZ);
@@ -266,7 +267,8 @@ c***********************************************************************
 	/**
 	 *	Write the data to the output file:
 	 */
-	if(settings->output.arrayType == ARRAY_TYPE__RECTANGULAR){
+	if(	settings->output.arrayType == ARRAY_TYPE__RECTANGULAR ||
+		settings->output.arrayType == ARRAY_TYPE__HORIZONTAL){
 		DEBUG(3,"Writing pressure output of rectangular array to file:\n");
 		//In the fortran version there were problems when passing complex matrices to Matlab; 
 		//therefore the real and complex parts will be saved separately.
@@ -277,17 +279,6 @@ c***********************************************************************
 		rw2D = mallocDouble2D(settings->output.nArrayZ, settings->output.nArrayR);
 		iw2D = mallocDouble2D(settings->output.nArrayZ, settings->output.nArrayR);
 		
-		/*
-		do i = 1,nza
-			do j = 1,nra
-				ru2d(i,j) = realpart( dpdr2d(i,j) )
-				iu2d(i,j) = imagpart( dpdr2d(i,j) )
-				rw2d(i,j) = realpart( dpdz2d(i,j) )
-				iw2d(i,j) = imagpart( dpdz2d(i,j) )
-			end do
-		end do
-		*/
-		
 		for(i=0; i<settings->output.nArrayZ; i++){
 			for(j=0; j<settings->output.nArrayR; j++){
 				//NOTE: in xx2D, i corresponds to Z, and j for R. in dP_dX2D, it is the other way around.
@@ -297,28 +288,6 @@ c***********************************************************************
 				iw2D[i][j] = cimag( dP_dZ2D[j][i] );
 			}
 		}
-		
-		/*
-		pru2d = mxCreateDoubleMatrix(nza,nra,0)
-		call mxCopyReal8ToPtr(ru2d(1:nza,1:nra), mxGetPr(pru2d),nra*nza)
-		status = matPutVariable(mp,'ru',pru2d)
-		call mxDestroyArray(pru2d)
-
-		piu2d = mxCreateDoubleMatrix(nza,nra,0)
-		call mxCopyReal8ToPtr(iu2d(1:nza,1:nra), mxGetPr(piu2d),nra*nza)
-		status = matPutVariable(mp,'iu',piu2d)
-		call mxDestroyArray(piu2d)
-
-		prw2d = mxCreateDoubleMatrix(nza,nra,0)
-		call mxCopyReal8ToPtr(rw2d(1:nza,1:nra), mxGetPr(prw2d),nra*nza)
-		status = matPutVariable(mp,'rw',prw2d)
-		call mxDestroyArray(prw2d)
-
-		piw2d = mxCreateDoubleMatrix(nza,nra,0)
-		call mxCopyReal8ToPtr(iw2d(1:nza,1:nra), mxGetPr(piw2d),nra*nza)
-		status = matPutVariable(mp,'iw',piw2d)
-		call mxDestroyArray(piw2d
-		*/
 		
 		/// **************************************
 		/// write the U-component to the mat-file:
