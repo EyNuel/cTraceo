@@ -179,7 +179,9 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 		ri = yNew[0];
 		zi = yNew[1];
 
-		/**		Check for boundary intersections:	**/
+		/**
+		 * Check for boundary intersections:
+		 ***/
 		DEBUG(5,"Verify that the ray is still within the defined coordinates of the surface and the bottom: \n");
 		DEBUG(7, "altimetry.r[0]: %lf, ri: %lf, altimetry.r[N]: %lf; \n", settings->altimetry.r[0], ri, settings->altimetry.r[settings->altimetry.numSurfaceCoords -1]);
 		DEBUG(7, "batimetry.r[0]: %lf, ri: %lf, batimetry.r[N]: %lf; \n", settings->batimetry.r[0], ri, settings->batimetry.r[settings->batimetry.numSurfaceCoords -1]);
@@ -197,19 +199,27 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 		DEBUG(9,"altInterpolatedZ: %lf\n", altInterpolatedZ);
 		DEBUG(9,"batInterpolatedZ: %lf\n", batInterpolatedZ);
 		DEBUG(7, "Check if the ray is still between the boundaries; if not, find the intersection point and calculate the reflection: \n");
-		if ((ray->iKill == FALSE ) && (zi < altInterpolatedZ || zi > batInterpolatedZ)){
+		if ((ray->iKill == FALSE ) && (zi <= altInterpolatedZ || zi >= batInterpolatedZ)){
 			pointA.r = yOld[0];
 			pointA.z = yOld[1];
 			pointB.r = yNew[0];
 			pointB.z = yNew[1];
 			
 			DEBUG(7, "Ray above surface? \n");
-			if (zi < altInterpolatedZ){
+			if (zi <= altInterpolatedZ){
 				DEBUG(5,"ray above surface.\n");
+				//determine the coordinates of the ray-boundary intersection:
 				rayBoundaryIntersection(&(settings->altimetry), &pointA, &pointB, &pointIsect);
 				ri = pointIsect.r;
 				zi = pointIsect.z;
+				//verify if the intersection point is identical to the first point:
+				/*
+				if(pointIsect.r == pointA.r && pointIsect.z == pointA.z){
+					fatal("points coincide.");
+				}
+				*/
 				
+				//get the boundary's normal and tangent vector:
 				boundaryInterpolation(	&(settings->altimetry), ri, &altInterpolatedZ, &tauB, &normal);
 				ibdry = -1;
 				sRefl = sRefl + 1;
@@ -347,12 +357,19 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 					ray->iKill = TRUE;
 				}
 			//	end of "ray above surface?"
-			}else if (zi > batInterpolatedZ){	//	Ray below bottom?
+			}else if (zi >= batInterpolatedZ){	//	Ray below bottom?
 				DEBUG(5,"ray below bottom.\n");
 				DEBUG(8,"ri: %lf, zi: %lf\n", ri, zi);
 				rayBoundaryIntersection(&(settings->batimetry), &pointA, &pointB, &pointIsect);
 				ri = pointIsect.r;
 				zi = pointIsect.z;
+				//verify if the intersection point is identical to the first point:
+				/*
+				if(pointIsect.r == pointA.r && pointIsect.z == pointA.z){
+					fatal("points coincide.");
+				}
+				*/
+				
 				DEBUG(8,"ri: %lf, zi: %lf\n", ri, zi);
 				boundaryInterpolation(	&(settings->batimetry), ri, &batInterpolatedZ, &tauB, &normal);
 				//Invert the normal at the bottom for reflection:
@@ -360,7 +377,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 				normal.z = -normal.z;	//NOTE: differs from altimetry
 				
 				ibdry = 1;			
-				sRefl = sRefl + 1;
+				bRefl = bRefl + 1;
 				jRefl = 1;
 				
 				DEBUG(7, "Calculate surface reflection: \n");
@@ -487,7 +504,8 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 					default:
 						fatal("Unknown surface type (neither A,E,R or V).\nAborting...");
 						break;
-				}
+				}//switch(settings->batimetry.surfaceType)
+				
 				reflDecay = reflDecay * refl;
 				DEBUG(7,"decay: %lf, abs(reflDecay): %lf, refl: %lf\n", cabs(ray->decay[i]), cabs(reflDecay), cabs(refl));
 				//Kill the ray if the reflection coefficient is too small: 
@@ -495,7 +513,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 					ray->iKill = TRUE;
 					DEBUG(2, "Ray killed ( abs(refl) < 1e-5 )\n");
 				}
-			}
+			}	//if (zi > batInterpolatedZ) (	Ray below bottom?)
 
 			DEBUG(6, "Update marching solution and function: \n");
 			ri = pointIsect.r;

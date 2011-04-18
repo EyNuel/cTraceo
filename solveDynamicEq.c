@@ -73,6 +73,7 @@ void	solveDynamicEq(settings_t* settings, ray_t* ray){
 	for(i=0; i<ray->nCoords -2; i++){
 
 		//determine the gradient of the sound speed at the next set of coordinates
+		//TODO call csvalues directly with ray->xx (i.e.: skip the intermediate variable ri,zi
 		ri = ray->r[i+1];
 		zi = ray->z[i+1];
 		csValues(settings, ri, zi, &cii, &cxc, &sigmaI, &nGradC.r, &nGradC.z, &slowness, &crri, &czzi, &crzi);
@@ -89,6 +90,12 @@ void	solveDynamicEq(settings_t* settings, ray_t* ray){
 
 		dsi = sqrt( dr*dr + dz*dz );
 		es.r = dr/dsi;
+		#if VERBOSE == 1
+			if(isnan(es.r)){
+				DEBUG(1,"i: %u\n", (uint32_t)i);
+				fatal("Found NaN!");
+			}
+		#endif
 		es.z = dz/dsi;
 
 		sigma.r = sigmaI * es.r;
@@ -137,14 +144,14 @@ void	solveDynamicEq(settings_t* settings, ray_t* ray){
 			ray->caustc[i+1] = ray->caustc[i] + M_PI/2.0;
 		}else{
 			ray->caustc[i+1] = ray->caustc[i];
-		} 
-	}
+		}
+	}	//for(i=0; i<ray->nCoords -2; i++)
 
 	//Amplitude calculation:
 	DEBUG(10, "amp[10]:%lf, cxc:%lf, cnn:%e\n", cabs(ray->amp[10]), cxc, cnn);
-	for(i=1; i<ray->nCoords -2; i++){
+	for(i=1; i<ray->nCoords -1; i++){
 		ap_aq		= (complex double)( ray->c[0] * cos(ray->theta) * ray->c[i] / ( ray->ic[i] * ray->q[i] ));
-		DEBUG(10, "ap_aq:%lf, ic:%lf, q:%e\n", (double)cabs(ap_aq), ray->ic[i], ray->q[i]);
+		DEBUG(1, "i:%u, ap_aq:%e, c: %lf, ic:%lf, q:%e\n", (uint32_t)i, (double)cabs(ap_aq), ray->c[i], ray->ic[i], ray->q[i]);
 		ray->amp[i]	= csqrt( ap_aq ) * ray->decay[i] * exp( -alpha * ray->s[i] );
 		/*
 		if(isnan((float)cabs(ray->amp[i]))){

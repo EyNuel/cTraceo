@@ -114,7 +114,7 @@ uintptr_t	pressureStar( settings_t* settings, ray_t* ray, double rHyd, double zH
 			DEBUG(1, "dzdr: %e, tauRay: %e, zRay: %e, ampRay: %e, qRay: %e, w: %e\n", dzdr, tauRay, zRay, cabs(ampRay), qRay, width);
 			getRayPressureExplicit(settings, ray, iHyd, zTop,	tauRay, zRay, dzdr, ampRay, width, &pressure_V[TOP]);
 			getRayPressureExplicit(settings, ray, iHyd, zHyd,	tauRay, zRay, dzdr, ampRay, width, &pressure_V[CENTER]);
-			getRayPressureExplicit(settings, ray, iHyd, zBottom,	tauRay, zRay, dzdr, ampRay, width, &pressure_V[BOTTOM]);
+			getRayPressureExplicit(settings, ray, iHyd, zBottom,tauRay, zRay, dzdr, ampRay, width, &pressure_V[BOTTOM]);
 			pressure_H[CENTER] = pressure_V[CENTER];
 		}
 	}else{
