@@ -36,75 +36,19 @@ void calcParticleVel(settings_t*);
 void calcParticleVel(settings_t* settings){
 	MATFile*			matfile	= NULL;
 	mxArray*			pTitle	= NULL;
-	mxArray*			pru2D	= NULL;
-	mxArray*			piu2D	= NULL;
-	mxArray*			prw2D	= NULL;
-	mxArray*			piw2D	= NULL;
-	uintptr_t			i, j, k;
+	mxArray*			pu2D;
+	mxArray*			pw2D;
+	uintptr_t			j, k;
 	double				rHyd, zHyd;
 	double				xp[3];
 	double 				dr, dz;		//used locally to make code more efficient (and more readable)
 	complex double 		junkComplex, dP_dRi, dP_dZi;
 	complex double**	dP_dR2D = NULL;
 	complex double**	dP_dZ2D = NULL;
-	//the next 4 variables are temporary variables used to write particle velocity components to matfiles
-	double**			ru2D = NULL;
-	double**			iu2D = NULL;
-	double**			rw2D = NULL;
-	double**			iw2D = NULL;
-	
-/*
-c	  Include global (common) variables:
 
-include 'global.for'
-
-c	  Define local variables:
-
-character*60 ctitle
-
-integer*8 irefl(np),jbdry(np)
-integer*8 i,ih,ii,imax,j,jn,k,nthtas
-
-integer*8 matOpen, matClose
-integer*8 mxCreateDoubleMatrix, mxCreateString, mxGetPr
-integer*8 mp, ptitle, pthtas, prh, pzh
-integer*8 puu, pww, pru2d, piu2d, prw2d, piw2d
-integer*8 matPutVariable, matDeleteVariable
-integer*8 status
-
-real*8 ru2d(nhyd2,nhyd2),rw2d(nhyd2,nhyd2)
-real*8 iu2d(nhyd2,nhyd2),iw2d(nhyd2,nhyd2)
-real*8 uu(2,np),ww(2,np)
-real*8 tbdry(2,np)
-real*8 xp(3)
-real*8 es(2),e1(2),deltar(2)
-
-real*8 thetai,ctheta
-real*8 rh,zh,n,nxn,dzdr,qray
-real*8 sray,dr,dz,q0,w
-real*8 drarray,dzarray
-
-complex*8 dpdr2d(nhyd2,nhyd2),dpdz2d(nhyd2,nhyd2)
-complex*8   pl2d(nhyd2,nhyd2),  pc2d(nhyd2,nhyd2)
-complex*8   pr2d(nhyd2,nhyd2)
-complex*8   pu2d(nhyd2,nhyd2),  pd2d(nhyd2,nhyd2)
-
-complex*8   dpdr(np),  dpdz(np)
-complex*8 pressl(np),pressc(np),pressr(np),pressu(np),pressd(np)
-complex*8  decay(np)
-complex*8 zp(3)
-
-complex*8 aray,pc,pl,pr,pu,pd
-complex*8 dpdri,dpdzi
-complex*8 dummi
-
-c***********************************************************************
-
-c***********************************************************************
-*/
 
 	matfile		= matOpen("pvl.mat", "u");		//open file in "update" mode
-
+	
 	//write title to matfile:
 	pTitle = mxCreateString("TRACEO: Coherent Acoustic Pressure");
 	if(pTitle == NULL){
@@ -112,16 +56,16 @@ c***********************************************************************
 	}
 	matPutVariable(matfile, "caseTitle", pTitle);
 	mxDestroyArray(pTitle);
-
+	
 	//get dr, dz:
 	dr = settings->output.dr;
 	dz = settings->output.dz;
-
+	
 	/*
 	 *	Horizontal and vertical pressure components where calculated in calcCohAcoustpress.
 	 *	We can now use this to calculate the actual particle velocity components:
 	 */
-
+	
 	DEBUG(1, "absolute pressure values at the array:\n");
 	switch(settings->output.arrayType){
 		//case ARRAY_TYPE__HORIZONTAL:
@@ -270,62 +214,27 @@ c***********************************************************************
 	if(	settings->output.arrayType == ARRAY_TYPE__RECTANGULAR ||
 		settings->output.arrayType == ARRAY_TYPE__HORIZONTAL){
 		DEBUG(3,"Writing pressure output of rectangular array to file:\n");
-		//In the fortran version there were problems when passing complex matrices to Matlab; 
-		//therefore the real and complex parts will be saved separately.
-		//TODO correct this, this is way to expensive
-		
-		ru2D = mallocDouble2D(settings->output.nArrayZ, settings->output.nArrayR);
-		iu2D = mallocDouble2D(settings->output.nArrayZ, settings->output.nArrayR);
-		rw2D = mallocDouble2D(settings->output.nArrayZ, settings->output.nArrayR);
-		iw2D = mallocDouble2D(settings->output.nArrayZ, settings->output.nArrayR);
-		
-		for(i=0; i<settings->output.nArrayZ; i++){
-			for(j=0; j<settings->output.nArrayR; j++){
-				//NOTE: in xx2D, i corresponds to Z, and j for R. in dP_dX2D, it is the other way around.
-				ru2D[i][j] = creal( dP_dR2D[j][i] );
-				iu2D[i][j] = cimag( dP_dR2D[j][i] );
-				rw2D[i][j] = creal( dP_dZ2D[j][i] );
-				iw2D[i][j] = cimag( dP_dZ2D[j][i] );
-			}
-		}
 		
 		/// **************************************
 		/// write the U-component to the mat-file:
-		pru2D = mxCreateDoubleMatrix((MWSIZE)settings->output.nArrayZ, (MWSIZE)settings->output.nArrayR, mxREAL);
-		if(pru2D == NULL){
+		pu2D = mxCreateDoubleMatrix((MWSIZE)settings->output.nArrayR, (MWSIZE)settings->output.nArrayZ, mxCOMPLEX);
+		if( pu2D == NULL){
 			fatal("Memory alocation error.");
 		}
-		copyDoubleToPtr2D(ru2D, mxGetPr(pru2D), settings->output.nArrayR, settings->output.nArrayZ);
-		matPutVariable(matfile, "ru", pru2D);
-		mxDestroyArray(pru2D);
-		
-		piu2D = mxCreateDoubleMatrix((MWSIZE)settings->output.nArrayZ, (MWSIZE)settings->output.nArrayR, mxREAL);
-		if(piu2D == NULL){
-			fatal("Memory alocation error.");
-		}
-		copyDoubleToPtr2D(iu2D, mxGetPr(piu2D), settings->output.nArrayR, settings->output.nArrayZ);
-		matPutVariable(matfile, "iu", piu2D);
-		mxDestroyArray(piu2D);
+		copyComplexToPtr2D(dP_dR2D, pu2D, settings->output.nArrayZ, settings->output.nArrayR);
+		matPutVariable(matfile, "u", pu2D);
+		mxDestroyArray(pu2D);
 
 
 		/// **************************************
 		/// write the W-component to the mat-file:
-		prw2D = mxCreateDoubleMatrix((MWSIZE)settings->output.nArrayZ, (MWSIZE)settings->output.nArrayR, mxREAL);
-		if(prw2D == NULL){
+		pw2D = mxCreateDoubleMatrix((MWSIZE)settings->output.nArrayR, (MWSIZE)settings->output.nArrayZ, mxCOMPLEX);
+		if( pw2D == NULL){
 			fatal("Memory alocation error.");
 		}
-		copyDoubleToPtr2D(rw2D, mxGetPr(prw2D), settings->output.nArrayR, settings->output.nArrayZ);
-		matPutVariable(matfile, "rw", prw2D);
-		mxDestroyArray(prw2D);
-		
-		piw2D = mxCreateDoubleMatrix((MWSIZE)settings->output.nArrayZ, (MWSIZE)settings->output.nArrayR, mxREAL);
-		if(piw2D == NULL){
-			fatal("Memory alocation error.");
-		}
-		copyDoubleToPtr2D(iw2D, mxGetPr(piw2D), settings->output.nArrayR, settings->output.nArrayZ);
-		matPutVariable(matfile, "iw", piw2D);
-		mxDestroyArray(piw2D);
-		
+		copyComplexToPtr2D(dP_dZ2D, pw2D, settings->output.nArrayZ, settings->output.nArrayR);
+		matPutVariable(matfile, "w", pw2D);
+		mxDestroyArray(pw2D);
 	}else{
 		/*
 	if (artype.ne.'RRY') then
@@ -354,8 +263,4 @@ c***********************************************************************
 	matClose(matfile);
 	freeComplex2D(dP_dR2D, settings->output.nArrayR);
 	freeComplex2D(dP_dZ2D, settings->output.nArrayR);
-	freeDouble2D(ru2D, settings->output.nArrayZ);
-	freeDouble2D(iu2D, settings->output.nArrayZ);
-	freeDouble2D(rw2D, settings->output.nArrayZ);
-	freeDouble2D(iw2D, settings->output.nArrayZ);
 }

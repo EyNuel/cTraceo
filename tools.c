@@ -982,8 +982,8 @@ void		copyComplexToPtr2D(complex double** origin, mxArray* dest, uintptr_t rowSi
 	
 	for( j=0; j<colSize; j++ ){
 		for(i=0; i<rowSize; i++){
-			destReal[i*colSize +j] = creal(origin[j][i]);
-			destImag[i*colSize +j] = cimag(origin[j][i]);
+			destReal[j + i*colSize] = creal(origin[j][i]);
+			destImag[j + i*colSize] = cimag(origin[j][i]);
 		}
 	}
 }
