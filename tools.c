@@ -60,8 +60,11 @@ void			skipLine(FILE*);
 void			printSettings(settings_t*);
 ray_t*			makeRay(uintptr_t);
 void			reallocRayMembers(ray_t*, uintptr_t);
+
 void			copyDoubleToPtr(double*, double*, uintptr_t);
 void			copyDoubleToPtr2D(double**, double*, uintptr_t, uintptr_t);
+void			copyComplexToPtr(complex double*, complex double*, uintptr_t);
+void			copyComplexToPtr2D(complex double**, complex double*, uintptr_t, uintptr_t);
 void			printCpuTime(FILE*);
 
 /****************************
@@ -943,6 +946,24 @@ void		copyDoubleToPtr(double* origin, double* dest, uintptr_t nItems){
 }
 
 void		copyDoubleToPtr2D(double** origin, double* dest, uintptr_t rowSize, uintptr_t colSize){
+	uintptr_t	i,j;
+
+	for( j=0; j<colSize; j++ ){
+		for(i=0; i<rowSize; i++){
+			dest[i*colSize +j] = origin[j][i];
+		}
+	}
+}
+
+void		copyComplexToPtr(complex double* origin, complex double* dest, uintptr_t nItems){
+	uintptr_t	i;
+
+	for( i=0; i<nItems; i++ ){
+		dest[i] = origin[i];
+	}
+}
+
+void		copyComplexToPtr2D(complex double** origin, complex double* dest, uintptr_t rowSize, uintptr_t colSize){
 	uintptr_t	i,j;
 
 	for( j=0; j<colSize; j++ ){
