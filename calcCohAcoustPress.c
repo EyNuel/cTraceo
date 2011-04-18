@@ -227,15 +227,6 @@ void	calcCohAcoustPress(settings_t* settings){
 					
 				case ARRAY_TYPE__RECTANGULAR:
 					settings->output.pressure2D = mallocComplex2D(settings->output.nArrayZ, settings->output.nArrayR);
-					//inicialize to 0:
-					/*
-					for (j=0; j<settings->output.nArrayZ; j++){
-						for (k=0; k<settings->output.nArrayR; k++){
-							settings->output.pressure2D[j][k] = 0;
-						}
-					}
-					DEBUG(5, "memory initialized\n");
-					*/
 					break;
 					
 				default:
@@ -268,42 +259,11 @@ void	calcCohAcoustPress(settings_t* settings){
 				case CALC_TYPE__COH_ACOUS_PRESS_PART_VEL:
 					switch(settings->output.arrayType){
 						case ARRAY_TYPE__HORIZONTAL:
-							/*
-							DEBUG(3,"Array type: Horizontal\n");
-							zHyd = settings->output.arrayZ[0];
-							for(j=0; j<settings->output.nArrayR; j++){
-								rHyd = settings->output.arrayR[j];
-								
-								//check whether the hydrophone is within the range coordinates of the ray:
-								if ( rHyd >= ray[i].rMin	&&	rHyd < ray[i].rMax){
-									
-									if ( ray[i].iReturn == FALSE){
-										pressureStar( settings, &ray[i], rHyd, zHyd, q0, pressure_H, pressure_V);
-										//settings->output.pressure1D[j] += pressure;
-										for (l=0; l<3; l++){
-											settings->output.pressure_H[0][j][l] += pressure_H[l];
-											settings->output.pressure_V[0][j][l] += pressure_V[l];
-										}
-										
-									}else{
-										fatal("wip");	//TODO
-//										eBracket(ray[i].nCoords, ray[i].r, rHyd, &nRet, iRet);
-//										for(jj=0; jj<nRet; jj++){
-//											getRayPressure( settings, &ray[i], iRet[jj], q0, rHyd, zHyd,	&pressure);
-//											
-//											settings->output.pressure1D[j] += pressure;
-//										}
-									}
-								}
-							}
-							break;
-							*/
-						
+						case ARRAY_TYPE__VERTICAL:
 						case ARRAY_TYPE__RECTANGULAR:
 							DEBUG(3,"Array type: Horizontal/Rectangular\n");
-							DEBUG(4,"nArrayR: %u, nArrayZ: %u\n",
-									(uint32_t)settings->output.nArrayR,
-									(uint32_t)settings->output.nArrayZ );
+							DEBUG(4,"nArrayR: %u, nArrayZ: %u\n", (uint32_t)settings->output.nArrayR, (uint32_t)settings->output.nArrayZ );
+							
 							for(j=0; j<settings->output.nArrayR; j++){
 								rHyd = settings->output.arrayR[j];
 								
@@ -317,14 +277,8 @@ void	calcCohAcoustPress(settings_t* settings){
 											
 											if( pressureStar( settings, &ray[i], rHyd, zHyd, q0, pressure_H, pressure_V) ){
 												DEBUG(1, "i=%u: (j,k)=(%u,%u): \n",(uint32_t)i, (uint32_t)j, (uint32_t)k);
-												DEBUG(1,	"in>>  (rH,zH)=(%.2lf,%.2lf), nCoords: %u, q0: %e\n",
-															rHyd, zHyd, (uint32_t)ray[i].nCoords, q0);
-												DEBUG(1, "out>> pL: %e,  pU, %e,  pR: %e,  pD: %e,  pC:%e\n\n",
-															cabs(pressure_H[LEFT]),
-															cabs(pressure_V[TOP]),
-															cabs(pressure_H[RIGHT]),
-															cabs(pressure_V[BOTTOM]),
-															cabs(pressure_H[CENTER]));
+												DEBUG(1, "in>>  (rH,zH)=(%.2lf,%.2lf), nCoords: %u, q0: %e\n", rHyd, zHyd, (uint32_t)ray[i].nCoords, q0);
+												DEBUG(1, "out>> pL: %e,  pU, %e,  pR: %e,  pD: %e,  pC:%e\n\n", cabs(pressure_H[LEFT]), cabs(pressure_V[TOP]), cabs(pressure_H[RIGHT]), cabs(pressure_V[BOTTOM]), cabs(pressure_H[CENTER]));
 															
 												for (l=0; l<3; l++){
 													settings->output.pressure_H[j][k][l] += pressure_H[l];
@@ -335,7 +289,7 @@ void	calcCohAcoustPress(settings_t* settings){
 											//DEBUG(4, "rHyd: %lf; zHyd: %lf \n", rHyd, zHyd);
 										}
 									}else{
-										fatal("the end");	//TODO
+										fatal("The End.");	//TODO
 										/*
 										eBracket(ray[i].nCoords, ray[i].r, rHyd, &nRet, iRet);
 										for(jj=0; jj<nRet; jj++){
@@ -347,6 +301,43 @@ void	calcCohAcoustPress(settings_t* settings){
 									}
 								}
 							}
+							break;
+						case ARRAY_TYPE__LINEAR:
+							for(j=0; j<settings->output.nArrayR; j++){
+								rHyd = settings->output.arrayR[j];
+								if ( rHyd >= ray[i].rMin	&&	rHyd < ray[i].rMax){
+									if ( ray[i].iReturn == FALSE){
+											zHyd = settings->output.arrayZ[j];
+											
+											if( pressureStar( settings, &ray[i], rHyd, zHyd, q0, pressure_H, pressure_V) ){
+												DEBUG(1, "i=%u: (j,k)=(%u,%u): \n",(uint32_t)i, (uint32_t)j, (uint32_t)k);
+												DEBUG(1, "in>>  (rH,zH)=(%.2lf,%.2lf), nCoords: %u, q0: %e\n", rHyd, zHyd, (uint32_t)ray[i].nCoords, q0);
+												DEBUG(1, "out>> pL: %e,  pU, %e,  pR: %e,  pD: %e,  pC:%e\n\n", cabs(pressure_H[LEFT]), cabs(pressure_V[TOP]), cabs(pressure_H[RIGHT]), cabs(pressure_V[BOTTOM]), cabs(pressure_H[CENTER]));
+															
+												for (l=0; l<3; l++){
+													settings->output.pressure_H[0][j][l] += pressure_H[l];
+													settings->output.pressure_V[0][j][l] += pressure_V[l];
+												}
+											}
+											//DEBUG(4, "k: %u; j: %u; pressure2D[k][j]: %e + j*%e\n", (uint32_t)k, (uint32_t)j, creal(settings->output.pressure2D[k][j]), cimag(settings->output.pressure2D[k][j]));
+											//DEBUG(4, "rHyd: %lf; zHyd: %lf \n", rHyd, zHyd);
+										}
+									}else{
+										fatal("The End.");	//TODO
+										/*
+										eBracket(ray[i].nCoords, ray[i].r, rHyd, &nRet, iRet);
+										for(jj=0; jj<nRet; jj++){
+											getRayPressure( settings, &ray[i], iRet[jj], q0, rHyd, zHyd,	&pressure);
+											
+											settings->output.pressure1D[j] += pressure;
+										}
+										*/
+									}
+								}
+							}
+							break;
+						default:
+							fatal("calcCohAcoustPress(): unknown array type.");
 							break;
 					}
 					break;
@@ -485,7 +476,7 @@ void	calcCohAcoustPress(settings_t* settings){
 							break;
 					}
 				default:
-					fatal("calcCohAcoustPress(): Unknown output type. Aborting.");
+					fatal("calcCohAcoustPress(): Unknown output type.");
 					break;
 			}//switch(settings->output.calcType){
 		}//if (ctheta > 1.0e-7)

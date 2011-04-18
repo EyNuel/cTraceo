@@ -642,9 +642,23 @@ void	readIn(settings_t* settings, const char* filename){
 	settings->output.nArrayR = (uint32_t)readInt(infile);
 	settings->output.nArrayZ = (uint32_t)readInt(infile);
 
-	if(settings->output.arrayType == ARRAY_TYPE__LINEAR &&
-		(settings->output.nArrayR != settings->output.nArrayZ)){
-			fatal("Input file: Linear array: number of range and depth coordinates must match.\nAborting...");
+	/* validate the array dimensions			*/
+	switch(settings->output.arrayType){
+		case ARRAY_TYPE__LINEAR:
+			if (settings->output.nArrayR != settings->output.nArrayZ){
+				fatal("Input file: Linear array: number of range and depth coordinates must match.\nAborting...");
+			}
+			break;
+		case ARRAY_TYPE__HORIZONTAL:
+			if(settings->output.nArrayZ != 1){
+				fatal("Input file: array type is 'horizontal' but horizontal dimensions is not 1.\nAborting.");
+			}
+			break;
+		case ARRAY_TYPE__VERTICAL:
+			if(settings->output.nArrayR != 1){
+				fatal("Input file: array type is 'Vertical' but vertical dimensions is not 1.\nAborting.");
+			}
+			break;
 	}
 
 	settings->output.arrayR = mallocDouble(settings->output.nArrayR);

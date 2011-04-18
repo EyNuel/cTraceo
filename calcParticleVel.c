@@ -68,100 +68,8 @@ void calcParticleVel(settings_t* settings){
 	
 	DEBUG(1, "absolute pressure values at the array:\n");
 	switch(settings->output.arrayType){
-		//case ARRAY_TYPE__HORIZONTAL:
-			/* TODO
-			zh = zarray(1)
-			do j = 1,nra
-				rh = rarray(j)
-
-				xp(1) = rh - drarray
-				xp(2) = rh
-				xp(3) = rh + drarray
-
-				zp(1) = pressl(j)
-				zp(2) = pressc(j)
-				zp(3) = pressr(j)
-
-				call cbpa1d(xp,zp,rh,dummi,dpdri,dummi)
-
-				dpdr(j) = -imunit*dpdri
-
-				xp(1) = zh - dzarray
-				xp(2) = zh
-				xp(3) = zh + dzarray
-
-				zp(1) = pressd(j)
-				zp(3) = pressu(j)
-
-				call cbpa1d(xp,zp,zh,dummi,dpdzi,dummi)
-
-				dpdz(j) = -imunit*dpdzi
-			end do
-			*/
-			//break;
-		case ARRAY_TYPE__VERTICAL:
-			/* TODO
-			rh = rarray(1)
-			do j = 1,nza
-				zh = zarray(j)
-
-				xp(1) = rh - drarray
-				xp(2) = rh
-				xp(3) = rh + drarray
-
-				zp(1) = pressl(j)
-				zp(2) = pressc(j)
-				zp(3) = pressr(j)
-
-				call cbpa1d(xp,zp,rh,dummi,dpdri,dummi)
-
-				dpdr(j) = -imunit*dpdri
-
-				xp(1) = zh - dzarray
-				xp(2) = zh
-				xp(3) = zh + dzarray
-
-				zp(1) = pressd(j)
-				zp(3) = pressu(j)
-
-				call cbpa1d(xp,zp,zh,dummi,dpdzi,dummi)
-
-				dpdz(j) = -imunit*dpdzi
-			end do
-			*/
-			break;
-		case ARRAY_TYPE__LINEAR:
-			/* TODO
-			do j = 1,nra
-				rh = rarray(j)
-				zh = zarray(j)
-
-				xp(1) = rh - drarray
-				xp(2) = rh
-				xp(3) = rh + drarray
-
-				zp(1) = pressl(j)
-				zp(2) = pressc(j)
-				zp(3) = pressr(j)
-
-				call cbpa1d(xp,zp,rh,dummi,dpdri,dummi)
-
-				dpdr(j) = -imunit*dpdri
-
-				xp(1) = zh - dzarray
-				xp(2) = zh
-				xp(3) = zh + dzarray
-
-				zp(1) = pressd(j)
-				zp(3) = pressu(j)
-
-				call cbpa1d(xp,zp,zh,dummi,dpdzi,dummi)
-
-				dpdz(j) = -imunit*dpdzi
-			end do
-			*/
-			break;
 		case ARRAY_TYPE__HORIZONTAL:
+		case ARRAY_TYPE__VERTICAL:
 		case ARRAY_TYPE__RECTANGULAR:
 			dP_dR2D = mallocComplex2D(settings->output.nArrayR, settings->output.nArrayZ);
 			dP_dZ2D = mallocComplex2D(settings->output.nArrayR, settings->output.nArrayZ);
@@ -206,37 +114,73 @@ void calcParticleVel(settings_t* settings){
 				}
 			}
 			break;
+		case ARRAY_TYPE__LINEAR:
+		/*	TODO
+			dP_dR2D = mallocComplex2D(settings->output.nArrayR, settings->output.nArrayZ);
+			dP_dZ2D = mallocComplex2D(settings->output.nArrayR, settings->output.nArrayZ);
+			for(j=0; j<settings->output.nArrayR; j++){
+				//TODO invert for-loops to improove performance (by looping over rightmost element of array)
+				rHyd = settings->output.arrayR[j];
+				for(k=0; k<settings->output.nArrayZ; k++){
+					zHyd = settings->output.arrayZ[k],
+					
+					//TODO	get these values from a struct, instead of calculating them again?
+					//		(they where previously calculated in pressureStar.c)
+					
+					xp[0] = rHyd - dr;
+					xp[1] = rHyd;
+					xp[2] = rHyd + dr;
+					
+					intComplexBarycParab1D(xp, settings->output.pressure_H[j][k], rHyd, &junkComplex, &dP_dRi, &junkComplex);
+					
+					dP_dR2D[j][k] = -I*dP_dRi;
+					
+					xp[0] = zHyd - dz;
+					xp[1] = zHyd;
+					xp[2] = zHyd + dz;
+					
+					intComplexBarycParab1D(xp, settings->output.pressure_V[j][k], zHyd, &junkComplex, &dP_dZi, &junkComplex);
+					
+					dP_dZ2D[j][k] = -I*dP_dZi;
+				}
+			}
+			break;
+		*/
 	}
 
 	/**
 	 *	Write the data to the output file:
 	 */
-	if(	settings->output.arrayType == ARRAY_TYPE__RECTANGULAR ||
-		settings->output.arrayType == ARRAY_TYPE__HORIZONTAL){
-		DEBUG(3,"Writing pressure output of rectangular array to file:\n");
-		
-		/// **************************************
-		/// write the U-component to the mat-file:
-		pu2D = mxCreateDoubleMatrix((MWSIZE)settings->output.nArrayR, (MWSIZE)settings->output.nArrayZ, mxCOMPLEX);
-		if( pu2D == NULL){
-			fatal("Memory alocation error.");
-		}
-		copyComplexToPtr2D(dP_dR2D, pu2D, settings->output.nArrayZ, settings->output.nArrayR);
-		matPutVariable(matfile, "u", pu2D);
-		mxDestroyArray(pu2D);
+	switch(	settings->output.arrayType){
+		case ARRAY_TYPE__RECTANGULAR:
+		case ARRAY_TYPE__VERTICAL:
+		case ARRAY_TYPE__HORIZONTAL:
+			DEBUG(3,"Writing pressure output of rectangular array to file:\n");
+			
+			/// **************************************
+			/// write the U-component to the mat-file:
+			pu2D = mxCreateDoubleMatrix((MWSIZE)settings->output.nArrayR, (MWSIZE)settings->output.nArrayZ, mxCOMPLEX);
+			if( pu2D == NULL){
+				fatal("Memory alocation error.");
+			}
+			copyComplexToPtr2D(dP_dR2D, pu2D, settings->output.nArrayZ, settings->output.nArrayR);
+			matPutVariable(matfile, "u", pu2D);
+			mxDestroyArray(pu2D);
 
 
-		/// **************************************
-		/// write the W-component to the mat-file:
-		pw2D = mxCreateDoubleMatrix((MWSIZE)settings->output.nArrayR, (MWSIZE)settings->output.nArrayZ, mxCOMPLEX);
-		if( pw2D == NULL){
-			fatal("Memory alocation error.");
-		}
-		copyComplexToPtr2D(dP_dZ2D, pw2D, settings->output.nArrayZ, settings->output.nArrayR);
-		matPutVariable(matfile, "w", pw2D);
-		mxDestroyArray(pw2D);
-	}else{
-		/*
+			/// **************************************
+			/// write the W-component to the mat-file:
+			pw2D = mxCreateDoubleMatrix((MWSIZE)settings->output.nArrayR, (MWSIZE)settings->output.nArrayZ, mxCOMPLEX);
+			if( pw2D == NULL){
+				fatal("Memory alocation error.");
+			}
+			copyComplexToPtr2D(dP_dZ2D, pw2D, settings->output.nArrayZ, settings->output.nArrayR);
+			matPutVariable(matfile, "w", pw2D);
+			mxDestroyArray(pw2D);
+			break;
+	}
+	/*
+	else{
 	if (artype.ne.'RRY') then
 		jj = max(nra,nza)
 
@@ -256,8 +200,9 @@ void calcParticleVel(settings_t* settings){
 		call mxCopyReal8ToPtr(ww,mxGetPr(pww),2*jj)
 		status = matPutVariable(mp,'w',pww)
 		call mxDestroyArray(pww)
-		*/
+		
 	}
+	*/
 
 	//free memory
 	matClose(matfile);
