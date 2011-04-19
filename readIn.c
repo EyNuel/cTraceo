@@ -646,17 +646,17 @@ void	readIn(settings_t* settings, const char* filename){
 	switch(settings->output.arrayType){
 		case ARRAY_TYPE__LINEAR:
 			if (settings->output.nArrayR != settings->output.nArrayZ){
-				fatal("Input file: Linear array: number of range and depth coordinates must match.\nAborting...");
+				fatal("Input file: Linear array: number of range and depth coordinates must match.\nAborting.");
 			}
 			break;
 		case ARRAY_TYPE__HORIZONTAL:
 			if(settings->output.nArrayZ != 1){
-				fatal("Input file: array type is 'horizontal' but horizontal dimensions is not 1.\nAborting.");
+				fatal("Input file: Horizontal array: number of hydrophone elements in Z must be 1.\nAborting.");
 			}
 			break;
 		case ARRAY_TYPE__VERTICAL:
 			if(settings->output.nArrayR != 1){
-				fatal("Input file: array type is 'Vertical' but vertical dimensions is not 1.\nAborting.");
+				fatal("Input file: Vertical array: number of hydrophone elements in R must be 1.\nAborting.");
 			}
 			break;
 	}
