@@ -100,7 +100,7 @@ void calcParticleVel(settings_t* settings){
 
 
 
-	/*
+	/**
 	 *	Horizontal and vertical pressure components where calculated in calcCohAcoustpress.
 	 *	We can now use this to calculate the actual particle velocity components:
 	 */
@@ -222,60 +222,8 @@ void calcParticleVel(settings_t* settings){
 			matPutVariable(matfile, "w", pw2D);
 			mxDestroyArray(pw2D);
 			break;
-/*
- * TODO remove?
-		///---------------------------------------------------------------
-		case ARRAY_TYPE__LINEAR:
-			DEBUG(3,"Writing pressure output of linear array to file:\n");
-			
-			/// **************************************
-			/// write the U-component to the mat-file:
-			pu2D = mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)settings->output.nArrayZ, mxCOMPLEX);
-			if( pu2D == NULL){
-				fatal("Memory alocation error.");
-			}
-			copyComplexToPtr2D(dP_dR2D, pu2D, settings->output.nArrayZ, 1);
-			matPutVariable(matfile, "u", pu2D);
-			mxDestroyArray(pu2D);
-
-
-			/// **************************************
-			/// write the W-component to the mat-file:
-			pw2D = mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)settings->output.nArrayZ, mxCOMPLEX);
-			if( pw2D == NULL){
-				fatal("Memory alocation error.");
-			}
-			copyComplexToPtr2D(dP_dZ2D, pw2D, settings->output.nArrayZ, 1);
-			matPutVariable(matfile, "w", pw2D);
-			mxDestroyArray(pw2D);
-			break;
-*/
 	}
-	/*
-	else{
-	if (artype.ne.'RRY') then
-		jj = max(nra,nza)
-
-		do j = 1,jj
-			uu(1,j) = realpart( dpdr(j) )
-			uu(2,j) = imagpart( dpdr(j) )
-			ww(1,j) = realpart( dpdz(j) )
-			ww(2,j) = imagpart( dpdz(j) )
-		end do
-
-		puu = mxCreateDoubleMatrix(2,jj,0)
-		call mxCopyReal8ToPtr(uu,mxGetPr(puu),2*jj)
-		status = matPutVariable(mp,'u',puu)
-		call mxDestroyArray(puu)
-
-		pww = mxCreateDoubleMatrix(2,jj,0)
-		call mxCopyReal8ToPtr(ww,mxGetPr(pww),2*jj)
-		status = matPutVariable(mp,'w',pww)
-		call mxDestroyArray(pww)
-		
-	}
-	*/
-
+	
 	//free memory
 	matClose(matfile);
 	freeComplex2D(dP_dR2D, dimR);
