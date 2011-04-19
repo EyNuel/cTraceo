@@ -165,7 +165,7 @@ void	calcCohAcoustPress(settings_t* settings){
 			DEBUG(1, "dr: %lf; dz: %lf\n", dr, dz);
 			
 			
-			//determine necessary memory for pressure components:
+			//determine array dimensions for pressure components:
 			switch(settings->output.arrayType){
 				case ARRAY_TYPE__HORIZONTAL:
 					dimR = settings->output.nArrayR;
@@ -321,7 +321,6 @@ void	calcCohAcoustPress(settings_t* settings){
 											}
 											//DEBUG(4, "k: %u; j: %u; pressure2D[k][j]: %e + j*%e\n", (uint32_t)k, (uint32_t)j, creal(settings->output.pressure2D[k][j]), cimag(settings->output.pressure2D[k][j]));
 											//DEBUG(4, "rHyd: %lf; zHyd: %lf \n", rHyd, zHyd);
-										}
 									}else{
 										fatal("The End.");	//TODO
 										/*

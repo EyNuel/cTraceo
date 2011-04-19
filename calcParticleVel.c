@@ -96,19 +96,16 @@ void calcParticleVel(settings_t* settings){
 					
 					intComplexBarycParab1D(xp, settings->output.pressure_V[j][k], zHyd, &junkComplex, &dP_dZi, &junkComplex);
 					
-					dP_dZ2D[j][k] = -I*dP_dZi;
+					dP_dZ2D[j][k] = I*dP_dZi;
 					
 					//show the pressure contribuitions:
 					/*
 					DEBUG(1, "(j,k)=(%u,%u)>> pL: %e,  pU, %e,  pR: %e,  pD: %e,  pC:%e\n",
-							(uint32_t)j, (uint32_t)k,
-							cabs(settings->output.pressure_H[j][k][LEFT]),
-							cabs(settings->output.pressure_V[j][k][TOP]),
-							cabs(settings->output.pressure_H[j][k][RIGHT]),
-							cabs(settings->output.pressure_V[j][k][BOTTOM]),
-							cabs(settings->output.pressure_H[j][k][CENTER]));
+							(uint32_t)j, (uint32_t)k, cabs(settings->output.pressure_H[j][k][LEFT]),
+							cabs(settings->output.pressure_V[j][k][TOP]), cabs(settings->output.pressure_H[j][k][RIGHT]),
+							cabs(settings->output.pressure_V[j][k][BOTTOM]), cabs(settings->output.pressure_H[j][k][CENTER]));
 					*/
-					DEBUG(1, "(j,k)=(%u,%u)>> dP_dR: %e, dP_dZ: %e\n",
+					DEBUG(7, "(j,k)=(%u,%u)>> dP_dR: %e, dP_dZ: %e\n",
 							(uint32_t)j, (uint32_t)k,
 							cabs(dP_dR2D[j][k]), cabs(dP_dZ2D[j][k]));
 				}
