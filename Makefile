@@ -28,8 +28,8 @@ LFLAGS := 	-L /usr/local/matlabr14/bin/glnxa64 \
 
 
 # Define the compiler and linker comands to use:
-#CC 			:= clang
-CC 			:= gcc
+CC 			:= clang
+#CC 			:= gcc
 
 LINK 		:= $(CC) $(LFLAGS) -o 
 COMPLINK 	:= $(CC) $(CFLAGS) $(LFLAGS) -o $@
@@ -68,7 +68,7 @@ pg:		#
 		@gcc $(CFLAGS) $(LFLAGS) -D VERBOSE=0 -O3 -pg -o bin/cTraceo-64b.bin cTraceo.c
 
 debug:	#
-		@$(CC) $(CFLAGS) $(LFLAGS) -D VERBOSE=0 -O0 -g -o bin/cTraceo-64b.bin cTraceo.c
+		@gcc $(CFLAGS) $(LFLAGS) -D VERBOSE=0 -O0 -g -o bin/cTraceo-64b.bin cTraceo.c
 		
 verbose:#
 		@$(CC) $(CFLAGS) $(LFLAGS) -D VERBOSE=1 -O0 -g -o bin/cTraceo-64b.bin cTraceo.c
