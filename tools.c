@@ -66,6 +66,7 @@ void			copyDoubleToPtr(double*, double*, uintptr_t);
 void			copyDoubleToPtr2D(double**, double*, uintptr_t, uintptr_t);
 void			copyComplexToPtr(complex double*, mxArray*, uintptr_t);
 void			copyComplexToPtr2D(complex double**, mxArray*, uintptr_t, uintptr_t);
+void			copyComplexToPtr2D_transposed(complex double**, mxArray*, uintptr_t, uintptr_t);
 void			printCpuTime(FILE*);
 
 /****************************
@@ -971,7 +972,7 @@ void		copyComplexToPtr(complex double* origin, mxArray* dest, uintptr_t nItems){
 	}
 }
 
-void		copyComplexToPtr2D(complex double** origin, mxArray* dest, uintptr_t rowSize, uintptr_t colSize){
+void		copyComplexToPtr2D(complex double** origin, mxArray* dest, uintptr_t dimZ, uintptr_t dimR){
 	uintptr_t	i,j;
 	double*	destImag = NULL;
 	double*	destReal = NULL;
@@ -980,10 +981,27 @@ void		copyComplexToPtr2D(complex double** origin, mxArray* dest, uintptr_t rowSi
 	destReal = mxGetData(dest);
 	destImag = mxGetImagData(dest);
 	
-	for( j=0; j<colSize; j++ ){
-		for(i=0; i<rowSize; i++){
-			destReal[j + i*colSize] = creal(origin[j][i]);
-			destImag[j + i*colSize] = cimag(origin[j][i]);
+	for( j=0; j<dimR; j++ ){
+		for(i=0; i<dimZ; i++){
+			destReal[j + i*dimR] = creal(origin[j][i]);
+			destImag[j + i*dimR] = cimag(origin[j][i]);
+		}
+	}
+}
+
+void		copyComplexToPtr2D_transposed(complex double** origin, mxArray* dest, uintptr_t dimZ, uintptr_t dimR){
+	uintptr_t	i,j;
+	double*	destImag = NULL;
+	double*	destReal = NULL;
+	
+	//get a pointer to the real and imaginary parts of the destination:
+	destReal = mxGetData(dest);
+	destImag = mxGetImagData(dest);
+	
+	for( j=0; j<dimR; j++ ){
+		for(i=0; i<dimZ; i++){
+			destReal[j*dimZ + i] = creal(origin[j][i]);
+			destImag[j*dimZ + i] = cimag(origin[j][i]);
 		}
 	}
 }

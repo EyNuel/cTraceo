@@ -148,44 +148,58 @@ void calcParticleVel(settings_t* settings){
 			}
 			break;
 		case ARRAY_TYPE__LINEAR:
-		/*	TODO
-			dP_dR2D = mallocComplex2D(settings->output.nArrayR, settings->output.nArrayZ);
-			dP_dZ2D = mallocComplex2D(settings->output.nArrayR, settings->output.nArrayZ);
 			for(j=0; j<settings->output.nArrayR; j++){
-				//TODO invert for-loops to improove performance (by looping over rightmost element of array)
 				rHyd = settings->output.arrayR[j];
-				for(k=0; k<settings->output.nArrayZ; k++){
-					zHyd = settings->output.arrayZ[k],
-					
-					//TODO	get these values from a struct, instead of calculating them again?
-					//		(they where previously calculated in pressureStar.c)
-					
-					xp[0] = rHyd - dr;
-					xp[1] = rHyd;
-					xp[2] = rHyd + dr;
-					
-					intComplexBarycParab1D(xp, settings->output.pressure_H[j][k], rHyd, &junkComplex, &dP_dRi, &junkComplex);
-					
-					dP_dR2D[j][k] = -I*dP_dRi;
-					
-					xp[0] = zHyd - dz;
-					xp[1] = zHyd;
-					xp[2] = zHyd + dz;
-					
-					intComplexBarycParab1D(xp, settings->output.pressure_V[j][k], zHyd, &junkComplex, &dP_dZi, &junkComplex);
-					
-					dP_dZ2D[j][k] = -I*dP_dZi;
-				}
+				zHyd = settings->output.arrayZ[j],
+				
+				//TODO	get these values from a struct, instead of calculating them again?
+				//		(they where previously calculated in pressureStar.c)
+				
+				xp[0] = rHyd - dr;
+				xp[1] = rHyd;
+				xp[2] = rHyd + dr;
+				
+				intComplexBarycParab1D(xp, settings->output.pressure_H[0][j], rHyd, &junkComplex, &dP_dRi, &junkComplex);
+				
+				dP_dR2D[0][j] = -I*dP_dRi;
+				
+				xp[0] = zHyd - dz;
+				xp[1] = zHyd;
+				xp[2] = zHyd + dz;
+				
+				intComplexBarycParab1D(xp, settings->output.pressure_V[0][j], zHyd, &junkComplex, &dP_dZi, &junkComplex);
+				
+				dP_dZ2D[0][j] = I*dP_dZi;
 			}
 			break;
-		*/
 	}
 
 	/**
 	 *	Write the data to the output file:
 	 */
 	switch(	settings->output.arrayType){
+		case ARRAY_TYPE__HORIZONTAL:
 		case ARRAY_TYPE__RECTANGULAR:
+			//Note: the output for rectangular and horizontal cases has to be transposed.
+			/// write the U-component to the mat-file:
+			pu2D = mxCreateDoubleMatrix((MWSIZE)dimZ, (MWSIZE)dimR, mxCOMPLEX);
+			if( pu2D == NULL){
+				fatal("Memory alocation error.");
+			}
+			copyComplexToPtr2D_transposed(dP_dR2D, pu2D, dimZ, dimR);
+			matPutVariable(matfile, "u", pu2D);
+			mxDestroyArray(pu2D);
+
+			/// write the W-component to the mat-file:
+			pw2D = mxCreateDoubleMatrix((MWSIZE)dimZ, (MWSIZE)dimR, mxCOMPLEX);
+			if( pw2D == NULL){
+				fatal("Memory alocation error.");
+			}
+			copyComplexToPtr2D_transposed(dP_dZ2D, pw2D, dimZ, dimR);
+			matPutVariable(matfile, "w", pw2D);
+			mxDestroyArray(pw2D);
+			break;
+			
 		case ARRAY_TYPE__VERTICAL:
 		case ARRAY_TYPE__LINEAR:
 			DEBUG(3,"Writing pressure output of rectangular/vertical/horizontal array to file:\n");
