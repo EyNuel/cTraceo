@@ -100,7 +100,7 @@ uintptr_t	pressureMStar(settings_t*, ray_t*, double, double, double, complex dou
 uintptr_t	pressureMStar( settings_t* settings, ray_t* ray, double rHyd, double zHyd, double q0, complex double* pressure_H, complex double* pressure_V){
 
 	double				rLeft, rRight, zTop, zBottom;
-	uintptr_t			i, jj;
+	uintptr_t			jj;
 	double				dzdr, tauRay, zRay, qRay, width;
 	complex double		ampRay;
 	uintptr_t			nRet;
@@ -125,7 +125,7 @@ uintptr_t	pressureMStar( settings_t* settings, ray_t* ray, double rHyd, double z
 	
 	
 	//if(eBracket(ray->nCoords, ray[i].r, rLeft, &nRet, iRet)){
-		eBracket(ray->nCoords, ray[i].r, rLeft, &nRet, iRet);
+		eBracket(ray->nCoords, ray->r, rLeft, &nRet, iRet);
 		DEBUG(1,"nRet: %u\n", (uint32_t)nRet);
 		// NOTE:	this block will not be run if the index returned by bracket() is out of bounds.
 		for(jj=0; jj<nRet; jj++){
@@ -144,7 +144,7 @@ uintptr_t	pressureMStar( settings_t* settings, ray_t* ray, double rHyd, double z
 	
 	
 	//if(eBracket(ray->nCoords, ray[i].r, rHyd, &nRet, iRet)){
-		eBracket(ray->nCoords, ray[i].r, rHyd, &nRet, iRet);
+		eBracket(ray->nCoords, ray->r, rHyd, &nRet, iRet);
 		DEBUG(1,"nRet: %u\n", (uint32_t)nRet);
 		for(jj=0; jj<nRet; jj++){
 			getRayParameters(ray, iRet[jj], q0, rHyd, &dzdr, &tauRay, &zRay, &ampRay, &qRay, &width);
@@ -166,7 +166,7 @@ uintptr_t	pressureMStar( settings_t* settings, ray_t* ray, double rHyd, double z
 	
 	
 	//if(eBracket(ray->nCoords, ray[i].r, rRight, &nRet, iRet)){
-	eBracket(ray->nCoords, ray[i].r, rRight, &nRet, iRet);
+	eBracket(ray->nCoords, ray->r, rRight, &nRet, iRet);
 	DEBUG(1,"nRet: %u\n", (uint32_t)nRet);
 		for(jj=0; jj<nRet; jj++){
 			getRayParameters(ray, iRet[jj], q0, rRight, &dzdr, &tauRay, &zRay, &ampRay, &qRay, &width);
