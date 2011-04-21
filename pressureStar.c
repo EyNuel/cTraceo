@@ -46,6 +46,7 @@
 #pragma once
 #include "globals.h"
 #include <complex.h>
+#include "bracket.c"
 
 uintptr_t	pressureStar(settings_t*, ray_t*, double, double, double, complex double*, complex double[]);
 
@@ -56,17 +57,7 @@ uintptr_t	pressureStar( settings_t* settings, ray_t* ray, double rHyd, double zH
 	double			dzdr, tauRay, zRay, qRay, width;
 	complex double	ampRay;
 	
-	/*
-	 * TODO check if this would ruin the result:
-	pressure1D=  0 + 0*I;
-	pressureStar1D[_LEFT]	= 0 + 0*I;
-	pressureStar1D[_RIGHT]	= 0 + 0*I;
-	pressureStar1D[_UP]		= 0 + 0*I;
-	pressureStar1D[_DOWN]	= 0 + 0*I;
-	*/
-	
-	/*
-	 * start with determining the coordinates for which we will need to calculate
+	/* start with determining the coordinates for which we will need to calculate
 	 * acoustic pressure.
 	 */
 	rLeft	= rHyd - settings->output.dr;
@@ -74,82 +65,70 @@ uintptr_t	pressureStar( settings_t* settings, ray_t* ray, double rHyd, double zH
 	zBottom	= zHyd - settings->output.dz;
 	zTop	= zHyd + settings->output.dz;
 	
-	DEBUG(1,"rL: %.2lf; rR: %.2lf; zD: %.2lf; zU: %.2lf;\n", rLeft, rRight, zBottom, zTop);
+	DEBUG(9,"rL: %.2lf; rR: %.2lf; zD: %.2lf; zU: %.2lf;\n", rLeft, rRight, zBottom, zTop);
 	
 	//we have to check that these points are within the rBox:
 	if(	rLeft	<	settings->source.rbox1 ||
 		rRight	>=	settings->source.rbox2 ){
-		DEBUG(1, "Either rLeft or rRight are outside rBox\n");
+		DEBUG(8, "Either rLeft or rRight are outside rBox\n");
 		return 0;
 	}
 	
-	//TODO check if zBottom/zTop are below bottom/above surface?
 	
 	//find out at what index of the ray coordinates the hydrophone is located:
 	if( bracket(ray->nCoords, ray->r, rLeft, &iHyd) ){
-		/* NOTE:	this block will not be run if the index returned by
-		 *			bracket() is out of bounds.
-		 */
-		 
-		DEBUG(1, "iHyd: %u => iRefl: %u\n", (uint32_t)iHyd, (uint32_t)ray->iRefl[iHyd]);
+		// NOTE:	this block will not be run if the index returned by bracket() is out of bounds.
+		DEBUG(8, "iHyd: %u => iRefl: %u\n", (uint32_t)iHyd, (uint32_t)ray->iRefl[iHyd]);
 		if ( iHyd<ray->nCoords-1 ){
 			getRayParameters(ray, iHyd, q0, rLeft, &dzdr, &tauRay, &zRay, &ampRay, &qRay, &width);
-			DEBUG(1, "dzdr: %e, tauRay: %e, zRay: %e, ampRay: %e, qRay: %e, w: %e\n", dzdr, tauRay, zRay, cabs(ampRay), qRay, width);
+			DEBUG(8, "dzdr: %e, tauRay: %e, zRay: %e, ampRay: %e, qRay: %e, w: %e\n", dzdr, tauRay, zRay, cabs(ampRay), qRay, width);
 			getRayPressureExplicit(settings, ray, iHyd, zHyd, tauRay, zRay, dzdr, ampRay, width, &pressure_H[LEFT]);
-			//getRayPressure( settings, &ray[i], iHyd, q0, rLeft, zHyd,	&pressureStar1D[_LEFT]);
 		}
 	}else{
-		DEBUG(1, "rLeft (%lf) can not be bracketed.\n", rLeft);
+		DEBUG(6, "rLeft (%lf) can not be bracketed.\n", rLeft);
 		return 0;
 	}
+	
+	
 	
 	if( bracket(ray->nCoords, ray->r, rHyd, &iHyd)){
 		/* NOTE:	this block will not be run if the index returned by
 		 *			bracket() is out of bounds.
 		 */
 		 
-		DEBUG(1, "iHyd: %u => iRefl: %u\n", (uint32_t)iHyd, (uint32_t)ray->iRefl[iHyd]);
+		DEBUG(8, "iHyd: %u => iRefl: %u\n", (uint32_t)iHyd, (uint32_t)ray->iRefl[iHyd]);
 		if ( iHyd<ray->nCoords-1 ){
 			getRayParameters(ray, iHyd, q0, rHyd, &dzdr, &tauRay, &zRay, &ampRay, &qRay, &width);
-			DEBUG(1, "dzdr: %e, tauRay: %e, zRay: %e, ampRay: %e, qRay: %e, w: %e\n", dzdr, tauRay, zRay, cabs(ampRay), qRay, width);
+			DEBUG(8, "dzdr: %e, tauRay: %e, zRay: %e, ampRay: %e, qRay: %e, w: %e\n", dzdr, tauRay, zRay, cabs(ampRay), qRay, width);
 			getRayPressureExplicit(settings, ray, iHyd, zTop,	tauRay, zRay, dzdr, ampRay, width, &pressure_V[TOP]);
 			getRayPressureExplicit(settings, ray, iHyd, zHyd,	tauRay, zRay, dzdr, ampRay, width, &pressure_V[CENTER]);
 			getRayPressureExplicit(settings, ray, iHyd, zBottom,tauRay, zRay, dzdr, ampRay, width, &pressure_V[BOTTOM]);
 			pressure_H[CENTER] = pressure_V[CENTER];
 		}
 	}else{
-		DEBUG(1, "rHyd (%lf) can not be bracketed.\n", rHyd);
+		DEBUG(6, "rHyd (%lf) can not be bracketed.\n", rHyd);
 		return 0;
 	}
+	
+	
 	
 	if(	bracket(ray->nCoords, ray->r, rRight, &iHyd)){
 		/* NOTE:	this block will not be run if the index returned by
 		 *			bracket() is out of bounds.
 		 */
 		 
-		DEBUG(1, "iHyd: %u => iRefl: %u\n", (uint32_t)iHyd, (uint32_t)ray->iRefl[iHyd]);
+		DEBUG(8, "iHyd: %u => iRefl: %u\n", (uint32_t)iHyd, (uint32_t)ray->iRefl[iHyd]);
 		if ( iHyd<ray->nCoords-1 ){
 			//DEBUG(3, "r: %lf, z: %lf, amp:%lf, iHyd: %u\n", ray->r[iHyd], ray->z[iHyd], cabs(ray->amp[iHyd]), (uint32_t)iHyd);
 			getRayParameters(ray, iHyd, q0, rRight, &dzdr, &tauRay, &zRay, &ampRay, &qRay, &width);
-			DEBUG(1, "dzdr: %e, tauRay: %e, zRay: %e, ampRay: %e, qRay: %e, w: %e\n", dzdr, tauRay, zRay, cabs(ampRay), qRay, width);
+			DEBUG(8, "dzdr: %e, tauRay: %e, zRay: %e, ampRay: %e, qRay: %e, w: %e\n", dzdr, tauRay, zRay, cabs(ampRay), qRay, width);
 			getRayPressureExplicit(settings, ray, iHyd, zHyd,	tauRay, zRay, dzdr, ampRay, width, &pressure_H[RIGHT]);
 		}
 	}else{
-		DEBUG(1, "rRight (%lf) can not be bracketed.\n", rRight);
+		DEBUG(6, "rRight (%lf) can not be bracketed.\n", rRight);
 		return 0;
 	}
 	
-	/*
-	pressure_H[0] = 1 +I;
-	pressure_H[1] = 1 +I;
-	pressure_H[2] = 1 +I;
-	*/
+	//success
 	return 1;
-	/*
-	uintptr_t i;
-	for (i=0; i<3 ; i++){
-		printf(" %lf, %lf\n", cabs(pressure_H[i]), cabs(pressure_V[i]) );
-	}
-	*/
-	
 }

@@ -53,7 +53,7 @@ void	getRayParameters(ray_t* ray, uintptr_t iHyd, double q0, double rHyd, double
 
 	intLinear1D(		&ray->r[iHyd], &ray->z[iHyd],	rHyd, zRay,		dzdr);
 	intLinear1D(		&ray->r[iHyd], &ray->tau[iHyd],	rHyd, tauRay,	&junkDouble);
-	DEBUG(1, "iHyd = %u: ampRay = %e + j*%e\n", (uint32_t)iHyd, creal(ray->amp[iHyd]), cimag(ray->amp[iHyd]));
+	DEBUG(7, "iHyd = %u: ampRay = %e + j*%e\n", (uint32_t)iHyd, creal(ray->amp[iHyd]), cimag(ray->amp[iHyd]));
 	intComplexLinear1D(	&ray->r[iHyd], &ray->amp[iHyd],	rHyd, ampRay,	&junkComplex);
 	intLinear1D(		&ray->r[iHyd], &ray->q[iHyd],	rHyd, qRay,		&junkDouble);
 
