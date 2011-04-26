@@ -589,13 +589,13 @@ void		printSettings(settings_t*	settings){
 	uint32_t	i;
 	
 	printf("cTitle: \t\t\t%s", settings->cTitle);	//assuming a \n at the end of cTitle
-	printf("source.ds: \t\t\t%12.5lf\t[m]\n", settings->source.ds);
-	printf("source.rx: \t\t\t%12.5lf\t[m]\n", settings->source.rx);
-	printf("source.zx: \t\t\t%12.5lf\t[m]\n", settings->source.zx);
-	printf("source.rbox1: \t\t\t%12.5lf\t[m]\n", settings->source.rbox1);
-	printf("source.rbox2: \t\t\t%12.5lf\t[m]\n", settings->source.rbox2);
-	printf("source.freqx: \t\t\t%12.5lf\t[m]\n", settings->source.freqx);
-	printf("source.nThetas: \t\t%6.0lu\n", (long unsigned int)settings->source.nThetas);
+	printf("\nsource.ds: \t\t\t%12.5lf\t[m]\n",		settings->source.ds);
+	printf("source.rx: \t\t\t%12.5lf\t[m]\n",		settings->source.rx);
+	printf("source.zx: \t\t\t%12.5lf\t[m]\n", 		settings->source.zx);
+	printf("source.rbox1: \t\t\t%12.5lf\t[m]\n",	settings->source.rbox1);
+	printf("source.rbox2: \t\t\t%12.5lf\t[m]\n",	settings->source.rbox2);
+	printf("source.freqx: \t\t\t%12.5lf\t[m]\n",	settings->source.freqx);
+	printf("source.nThetas: \t\t%6.0u\n", (uint32_t)settings->source.nThetas);
 
 	/* uncoment the following block to output all launching angles */
 	/*
@@ -603,7 +603,7 @@ void		printSettings(settings_t*	settings){
 		printf("source.thetas[%ld\t]: \t%lf\n", i, settings->source.thetas[i]);
 	}
 	*/
-	printf("altimetry.surfaceType: \t\t");
+	printf("\naltimetry.surfaceType: \t\t");
 	switch(settings->altimetry.surfaceType){
 		case SURFACE_TYPE__ABSORVENT:
 			printf("Absorvent\n");
@@ -696,8 +696,23 @@ void		printSettings(settings_t*	settings){
 	/* sound speed block */
 	
 	/*	object block	*/
-	printf("objects.numObjects:\t\t%u\n",settings->objects.numObjects);
+	printf("\nobjects.numObjects:\t\t%u\n",settings->objects.numObjects);
 	if(settings->objects.numObjects > 0){
+		printf("objects.surfaceInterpolation: ");
+		switch(settings->objects.surfaceInterpolation){
+			case SURFACE_INTERPOLATION__2P:
+				printf("2P\n");
+				break;
+			case SURFACE_INTERPOLATION__3P:
+				printf("3P\n");
+				break;
+			case SURFACE_INTERPOLATION__4P:
+				printf("4P\n");
+				break;
+			default:
+				fatal("Unknown object surface interpolation type.\nAborting");
+				break;
+		}
 		for(i=0; i<settings->objects.numObjects; i++){
 			printf("object[%u].surfaceType: \t", i);
 			switch(settings->objects.object[i].surfaceType){
@@ -731,12 +746,15 @@ void		printSettings(settings_t*	settings){
 				case SURFACE_ATTEN_UNITS__dBperLambda:
 					printf("dB/<lambda>\n");
 					break;
+				default:
+					fatal("Unknown object surface attenuation units.\nAborting.");
+					break;
 			}
 		}
 	}
 	
 	/* batimetry block	*/
-	printf("batimetry.surfaceType: \t");
+	printf("\nbatimetry.surfaceType: \t");
 	switch(settings->batimetry.surfaceType){
 		case SURFACE_TYPE__ABSORVENT:
 			printf("Absorvent\n");
@@ -822,7 +840,7 @@ void		printSettings(settings_t*	settings){
 			break;
 	}
 
-	printf("output.arrayType: \t\t");
+	printf("\noutput.arrayType: \t\t");
 	switch(settings->output.arrayType){
 		case ARRAY_TYPE__RECTANGULAR:
 			printf("Rectangular\n");
