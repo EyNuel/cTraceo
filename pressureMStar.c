@@ -46,49 +46,6 @@
 *																				*
 *********************************************************************************/
 
-/*
-	   subroutine mstar(imax,rc,zc,q0,irefl,dr,dz,pl,pc,pr,pu,pd)
-
-c***********************************************************************
-c	  Multiple STAR pressure contributions for velocity components
-c	  Written by Orlando Camargo Rodriguez
-c	  orodrig@ualg.pt
-c	  Universidade do Algarve
-c	  Physics Department
-c	  Signal Processing Laboratory
-c	  Faro, 22/11/2010 at 19:30
-c****&******************************************************************
-
-c	  Include global (common) variables:
-
-	   include 'global.for'
-
-c	  Define local variables:
-
-	   integer*8 irefl(np)
-	   integer*8 iret(51)
-	   integer*8 i,imax,jj,nret
-
-	   real*8 xl(2),yl(2)
-
-	   real*8 rl,rc,rr,zu,zc,zd,dr,dz
-	   real*8 tauray,zray,qray,dzdr,thta,q0,w
-
-	   real*8 dummy
-
-	   complex*8 aray,pl,pc,pr,pu,pd,p0
-
-	   complex*8 dummi
-
-c***********************************************************************
-
-	   p0 = (0.0 , 0.0)
-	   pl = (0.0 , 0.0)
-	   pc = (0.0 , 0.0)
-	   pr = (0.0 , 0.0)
-	   pu = (0.0 , 0.0)
-	   pd = (0.0 , 0.0)
-*/
 
 #pragma once
 #include "globals.h"
@@ -126,7 +83,7 @@ uintptr_t	pressureMStar( settings_t* settings, ray_t* ray, double rHyd, double z
 	
 	//if(eBracket(ray->nCoords, ray[i].r, rLeft, &nRet, iRet)){
 		eBracket(ray->nCoords, ray->r, rLeft, &nRet, iRet);
-		DEBUG(1,"nRet: %u\n", (uint32_t)nRet);
+		DEBUG(8,"nRet: %u\n", (uint32_t)nRet);
 		// NOTE:	this block will not be run if the index returned by bracket() is out of bounds.
 		for(jj=0; jj<nRet; jj++){
 			getRayParameters(ray, iRet[jj], q0, rLeft, &dzdr, &tauRay, &zRay, &ampRay, &qRay, &width);
@@ -145,9 +102,10 @@ uintptr_t	pressureMStar( settings_t* settings, ray_t* ray, double rHyd, double z
 	
 	//if(eBracket(ray->nCoords, ray[i].r, rHyd, &nRet, iRet)){
 		eBracket(ray->nCoords, ray->r, rHyd, &nRet, iRet);
-		DEBUG(1,"nRet: %u\n", (uint32_t)nRet);
+		DEBUG(8,"nRet: %u\n", (uint32_t)nRet);
 		for(jj=0; jj<nRet; jj++){
 			getRayParameters(ray, iRet[jj], q0, rHyd, &dzdr, &tauRay, &zRay, &ampRay, &qRay, &width);
+			DEBUG(1, "dzdr: %e, tau: %e, amp: %e\n", dzdr, tauRay, ampRay);
 			getRayPressureExplicit(settings, ray, iRet[jj], zTop, tauRay, zRay, dzdr, ampRay, width, &tempPressure[TOP]);
 			getRayPressureExplicit(settings, ray, iRet[jj], zHyd, tauRay, zRay, dzdr, ampRay, width, &tempPressure[CENTER]);
 			getRayPressureExplicit(settings, ray, iRet[jj], zBottom, tauRay, zRay, dzdr, ampRay, width, &tempPressure[BOTTOM]);
@@ -167,7 +125,7 @@ uintptr_t	pressureMStar( settings_t* settings, ray_t* ray, double rHyd, double z
 	
 	//if(eBracket(ray->nCoords, ray[i].r, rRight, &nRet, iRet)){
 	eBracket(ray->nCoords, ray->r, rRight, &nRet, iRet);
-	DEBUG(1,"nRet: %u\n", (uint32_t)nRet);
+	DEBUG(8,"nRet: %u\n", (uint32_t)nRet);
 		for(jj=0; jj<nRet; jj++){
 			getRayParameters(ray, iRet[jj], q0, rRight, &dzdr, &tauRay, &zRay, &ampRay, &qRay, &width);
 			getRayPressureExplicit(settings, ray, iRet[jj], zHyd, tauRay, zRay, dzdr, ampRay, width, &tempPressure[RIGHT]);

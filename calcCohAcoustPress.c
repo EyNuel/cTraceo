@@ -273,7 +273,7 @@ void	calcCohAcoustPress(settings_t* settings){
 								if ( rHyd >= ray[i].rMin	&&	rHyd < ray[i].rMax){
 									
 									if ( ray[i].iReturn == FALSE){
-										DEBUG(1, "Ray doesn't return\n");
+										DEBUG(5, "Ray doesn't return\n");
 										for(k=0; k<settings->output.nArrayZ; k++){
 											zHyd = settings->output.arrayZ[k];
 											
@@ -291,18 +291,26 @@ void	calcCohAcoustPress(settings_t* settings){
 											//DEBUG(4, "rHyd: %lf; zHyd: %lf \n", rHyd, zHyd);
 										}
 									}else{
-										DEBUG(1, "Ray returns\n");
+										DEBUG(5, "Ray returns\n");
 										for(k=0; k<settings->output.nArrayZ; k++){
 											zHyd = settings->output.arrayZ[k];
-											
+											DEBUG(6, "i=%u: (j,k)=(%u, %u):\n",(uint32_t)i, (uint32_t)j, (uint32_t)k);
 											if( pressureMStar( settings, &ray[i], rHyd, zHyd, q0, pressure_H, pressure_V) ){
+												 DEBUG(6, "pL: %e, pU: %e, pR: %e, pD: %e, pC: %e\n",
+														cabs(pressure_H[LEFT]),
+														cabs(pressure_V[TOP]), cabs(pressure_H[RIGHT]),
+														cabs(pressure_V[BOTTOM]), cabs(pressure_H[CENTER]));
 												for (l=0; l<3; l++){
 													settings->output.pressure_H[j][k][l] += pressure_H[l];
 													settings->output.pressure_V[j][k][l] += pressure_V[l];
 												}
+											}else{
+												DEBUG(6,"pressureMStar returned FALSE => at least one of the pressure contribution points is outside rBox\n");
 											}
 										}
 									}
+								}else{
+									DEBUG(5, "Hydrophone not within range of ray coordinates.\n");
 								}
 							}
 							break;
