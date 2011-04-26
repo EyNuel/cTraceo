@@ -46,7 +46,6 @@
 *																				*
 *********************************************************************************/
 
-
 #pragma once
 #include "globals.h"
 #include <complex.h>
@@ -57,7 +56,7 @@ uintptr_t	pressureMStar(settings_t*, ray_t*, double, double, double, complex dou
 uintptr_t	pressureMStar( settings_t* settings, ray_t* ray, double rHyd, double zHyd, double q0, complex double* pressure_H, complex double* pressure_V){
 
 	double				rLeft, rRight, zTop, zBottom;
-	uintptr_t			jj;
+	uintptr_t			i, jj;
 	double				dzdr, tauRay, zRay, qRay, width;
 	complex double		ampRay;
 	uintptr_t			nRet;
@@ -79,7 +78,11 @@ uintptr_t	pressureMStar( settings_t* settings, ray_t* ray, double rHyd, double z
 		return 0;
 	}
 	
-	
+	//set pressure contributions to 0;
+	for(i=0; i<3; i++){
+		pressure_H[i] = 0;
+		pressure_V[i] = 0;
+	}
 	
 	//if(eBracket(ray->nCoords, ray[i].r, rLeft, &nRet, iRet)){
 		eBracket(ray->nCoords, ray->r, rLeft, &nRet, iRet);
