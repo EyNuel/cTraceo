@@ -425,19 +425,19 @@ void	readIn(settings_t* settings, const char* filename){
 			/* surfaceAttenUnits	*/
 			tempString = readStringN(infile,5);
 			if(strcmp(tempString,"'F'\n") == 0){
-				settings->batimetry.surfaceAttenUnits	= SURFACE_ATTEN_UNITS__dBperkHz;
+				settings->objects.object[i].surfaceAttenUnits	= SURFACE_ATTEN_UNITS__dBperkHz;
 				
 			}else if(strcmp(tempString,"'M'\n") == 0){
-				settings->batimetry.surfaceAttenUnits	= SURFACE_ATTEN_UNITS__dBperMeter;
+				settings->objects.object[i].surfaceAttenUnits	= SURFACE_ATTEN_UNITS__dBperMeter;
 				
 			}else if(strcmp(tempString,"'N'\n") == 0){
-				settings->batimetry.surfaceAttenUnits	= SURFACE_ATTEN_UNITS__dBperNeper;
+				settings->objects.object[i].surfaceAttenUnits	= SURFACE_ATTEN_UNITS__dBperNeper;
 				
 			}else if(strcmp(tempString,"'Q'\n") == 0){
-				settings->batimetry.surfaceAttenUnits	= SURFACE_ATTEN_UNITS__qFactor;
+				settings->objects.object[i].surfaceAttenUnits	= SURFACE_ATTEN_UNITS__qFactor;
 				
 			}else if(strcmp(tempString,"'W'\n") == 0){
-				settings->batimetry.surfaceAttenUnits	= SURFACE_ATTEN_UNITS__dBperLambda;
+				settings->objects.object[i].surfaceAttenUnits	= SURFACE_ATTEN_UNITS__dBperLambda;
 				
 			}else{
 				printf("Input file: Object %u: unknown surface attenuation units: %s\n", i, tempString);
