@@ -386,13 +386,7 @@ void	readIn(settings_t* settings, const char* filename){
 
 		/*	interpolation type	(formerly "oitype")		*/
 		tempString = readStringN(infile,6);
-		if(strcmp(tempString,"'FL'\n") == 0){
-			settings->objects.surfaceInterpolation	= SURFACE_INTERPOLATION__FLAT;
-			
-		}else if(strcmp(tempString,"'SL'\n") == 0){
-			settings->objects.surfaceInterpolation	= SURFACE_INTERPOLATION__SLOPED;
-			
-		}else if(strcmp(tempString,"'2P'\n") == 0){
+		if(strcmp(tempString,"'2P'\n") == 0){
 			settings->objects.surfaceInterpolation	= SURFACE_INTERPOLATION__2P;
 			
 		}else if(strcmp(tempString,"'3P'\n") == 0){
