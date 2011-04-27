@@ -46,10 +46,9 @@ void	calcCohAcoustPress(settings_t* settings){
 	mxArray*			pTitle	= NULL;
 	mxArray*			pHydArrayR	= NULL;
 	mxArray*			pHydArrayZ	= NULL;
-	mxArray*			pPressure_a	= NULL;
-	mxArray*			pPressure_b	= NULL;
+	mxArray*			p	= NULL;
 	double				omega, lambda;
-	uintptr_t			i, j, jj, k, l, iHyd, dim;
+	uintptr_t			i, j, jj, k, l, iHyd;
 	uintptr_t			dimR, dimZ;
 	ray_t*				ray = NULL;
 	double 				ctheta, thetai, cx, q0;
@@ -61,22 +60,56 @@ void	calcCohAcoustPress(settings_t* settings){
 	complex double		pressure_V[3];
 	uintptr_t			nRet;
 	uintptr_t			iRet[51];
-	double**			temp2D_a = NULL;
-	double**			temp2D_b = NULL;
 	double				dr, dz;	//used for star pressure contributions (for particle velocity)
 
+	//get dimensions of hydrophone array:
+	switch(settings->output.arrayType){
+		case ARRAY_TYPE__HORIZONTAL:
+			dimR = settings->output.nArrayR;
+			dimZ = 1;
+			break;
+			
+		case ARRAY_TYPE__VERTICAL:
+			dimR = 1;
+			dimZ = settings->output.nArrayZ;
+			break;
+			
+		case ARRAY_TYPE__LINEAR:
+			/*	in linear arrays, nArrayR and nArrayZ have to be equal
+			* 	(this is checked in readIn.c when reading the file).
+			* 	The pressure components will be written to the rightmost index
+			* 	of the 2d-array.
+			*/
+			dimR = 1;
+			dimZ = settings->output.nArrayZ;	//this should be equal to nArrayR
+			break;
+			
+		case ARRAY_TYPE__RECTANGULAR:
+			dimR = settings->output.nArrayR;
+			dimZ = settings->output.nArrayZ;
+			break;
+			
+		default:
+			fatal("calcCohAcoustPress(): unknown array type.\nAborting.");
+			break;
+	}
+	
+	//open the corresponding file:
 	switch(settings->output.calcType){
 		case CALC_TYPE__COH_ACOUS_PRESS:
-		case CALC_TYPE__COH_TRANS_LOSS:
 			matfile		= matOpen("cpr.mat", "w");
 			break;
 		case CALC_TYPE__PART_VEL:
 			matfile		= matOpen("pvl.mat", "w");
 			break;
+		case CALC_TYPE__COH_ACOUS_PRESS_PART_VEL:
+			matfile		= matOpen("pav.mat", "w");
+			break;
 		default:
 			fatal("Uh-oh - calcCohAcoustPress(): unknown output type.");
 			break;
 	}
+	
 	pThetas		= mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)settings->source.nThetas, mxREAL);
 	if(matfile == NULL || pThetas == NULL)
 		fatal("Memory alocation error.");
@@ -137,109 +170,56 @@ void	calcCohAcoustPress(settings_t* settings){
 	
 
 	/**
-	 * Allocate memory for pressure
+	 * Allocate memory for pressure and some other case specific initialization
 	 */
-	switch( settings->output.calcType){
-		case CALC_TYPE__PART_VEL:
-		case CALC_TYPE__COH_ACOUS_PRESS_PART_VEL:
+	if( settings->output.calcType == CALC_TYPE__PART_VEL ||
+		settings->output.calcType == CALC_TYPE__COH_ACOUS_PRESS_PART_VEL){
+		/**
+		 *	In these cases, we will need memory to save the horizontal/vertical pressure components
+		 *	(pressure_H[3], presure_V[3])
+		 *	see also: globals.h, output struct
+		 */
+		 
+		//Determine the size of the "star" (the vertical/horizontal offset for the pressure contribuitions).
+		lambda	= cx/settings->source.freqx;
+		dr = lambda/10;
+		dz = lambda/10;
+		
+		for (i=1; i<settings->output.nArrayR; i++){
+			dr = min( fabs( settings->output.arrayR[i] - settings->output.arrayR[i-1]), dr);
+		}
+		for (i=1; i<settings->output.nArrayZ; i++){
+			dr = min( fabs( settings->output.arrayZ[i] - settings->output.arrayZ[i-1]), dz);
+		}
+		
+		settings->output.dr = dr;
+		settings->output.dz = dz;
+		DEBUG(1, "dr: %lf; dz: %lf\n", dr, dz);
+		
+		//malloc memory for horizontal and vertical pressure components:
+		settings->output.pressure_H = malloc( dimR * sizeof(uintptr_t));
+		settings->output.pressure_V = malloc( dimR * sizeof(uintptr_t));
+		if (	settings->output.pressure_H == NULL || settings->output.pressure_V == NULL){
+			fatal("Memory alocation error.");
+		}
+		for (i=0; i<dimR; i++){
+			settings->output.pressure_H[i] = malloc(dimZ * sizeof(complex double[3]));
+			settings->output.pressure_V[i] = malloc(dimZ * sizeof(complex double[3]));
+			if(settings->output.pressure_H[i] == NULL || settings->output.pressure_V[i] == NULL){
+				fatal("Memory allocation error.");
+			}
+		}
+	}
+	if( settings->output.calcType == CALC_TYPE__COH_ACOUS_PRESS ||
+		settings->output.calcType == CALC_TYPE__COH_ACOUS_PRESS_PART_VEL){
 			/**
-			 *	In these cases, we will need memory to save the horizontal/vertical pressure components
-			 *	(pressure_H[3], presure_V[3])
-			 *	see also: globals.h, output struct
+			 * when calculating only the Acoustic Pressure only need memory the simple pressure, no H/V components.
+			 * when calculating both Acoustic Pressure and Particle Velocity, pressure2D is used as a temporary
+			 * variable at the end of the file to obtain the simple pressure from the center elements of
+			 * star pressure contributions.
 			 */
-
-			 
-			//Determine the size of the "star" (the vertical/horizontal offset for the pressure contribuitions).
-			lambda	= cx/settings->source.freqx;
-			dr = lambda/10;
-			dz = lambda/10;
-			
-			for (i=1; i<settings->output.nArrayR; i++){
-				dr = min( fabs( settings->output.arrayR[i] - settings->output.arrayR[i-1]), dr);
-			}
-			for (i=1; i<settings->output.nArrayZ; i++){
-				dr = min( fabs( settings->output.arrayZ[i] - settings->output.arrayZ[i-1]), dz);
-			}
-			
-			settings->output.dr = dr;
-			settings->output.dz = dz;
-			DEBUG(1, "dr: %lf; dz: %lf\n", dr, dz);
-			
-			
-			//determine array dimensions for pressure components:
-			switch(settings->output.arrayType){
-				case ARRAY_TYPE__HORIZONTAL:
-					dimR = settings->output.nArrayR;
-					dimZ = 1;
-					break;
-					
-				case ARRAY_TYPE__VERTICAL:
-					dimR = 1;
-					dimZ = settings->output.nArrayZ;
-					break;
-					
-				case ARRAY_TYPE__LINEAR:
-					/*	in linear arrays, nArrayR and nArrayZ have to be equal
-					* 	(this is checked in readIn.c when reading the file).
-					* 	The pressure components will be written to the rightmost index
-					* 	of the 2d-array.
-					*/
-					dimR = 1;
-					dimZ = settings->output.nArrayZ;	//this should be equal to nArrayR
-					break;
-					
-				case ARRAY_TYPE__RECTANGULAR:
-					dimR = settings->output.nArrayR;
-					dimZ = settings->output.nArrayZ;
-					break;
-					
-				default:
-					fatal("calcCohAcoustPress(): unknown array type.\nAborting.");
-					break;
-			}
-			
-			//malloc memory for horizontal and vertical pressure components:
-			settings->output.pressure_H = malloc( dimR * sizeof(uintptr_t));
-			settings->output.pressure_V = malloc( dimR * sizeof(uintptr_t));
-			for (i=0; i<dimR; i++){
-				settings->output.pressure_H[i] = malloc(dimZ * sizeof(complex double[3]));
-				settings->output.pressure_V[i] = malloc(dimZ * sizeof(complex double[3]));
-			}
-			break;
-			
-		case CALC_TYPE__COH_ACOUS_PRESS:
-			/**
-			 * in this case we only need memory the simple pressure, no H/V components
-			 */
-			//allocate memory for the results:
-			switch(settings->output.arrayType){
-				case ARRAY_TYPE__HORIZONTAL:
-					settings->output.pressure1D = mallocComplex(settings->output.nArrayR);
-					break;
-					
-				case ARRAY_TYPE__VERTICAL:
-					settings->output.pressure1D = mallocComplex(settings->output.nArrayZ);
-					break;
-					
-				case ARRAY_TYPE__LINEAR:
-					//in linear arrays, nArrayR and nArrayZ have to be equal (this is checked in readIn.c when reading the file)
-					settings->output.pressure1D = mallocComplex(settings->output.nArrayZ);
-					break;
-					
-				case ARRAY_TYPE__RECTANGULAR:
-					settings->output.pressure2D = mallocComplex2D(settings->output.nArrayZ, settings->output.nArrayR);
-					break;
-					
-				default:
-					fatal("calcCohAcoustPress(): unknown array type.\nAborting.");
-					break;
-			}
-			break;
-			
-		default:
-			fatal("calcCohAcoustPress(): Unknown output type. Aborting.");
-			break;
-	}//switch( settings->output.calcType){
+			settings->output.pressure2D = mallocComplex2D(dimR, dimZ);
+	}
 	
 	///Solve the EIKonal and the DYNamic sets of EQuations:
 	for(i=0; i<settings->source.nThetas; i++){
@@ -274,7 +254,7 @@ void	calcCohAcoustPress(settings_t* settings){
 									
 									if ( ray[i].iReturn == FALSE){
 										DEBUG(5, "Ray doesn't return\n");
-										for(k=0; k<settings->output.nArrayZ; k++){
+										for(k=0; k<dimZ; k++){
 											zHyd = settings->output.arrayZ[k];
 											
 											if( pressureStar( settings, &ray[i], rHyd, zHyd, q0, pressure_H, pressure_V) ){
@@ -292,7 +272,7 @@ void	calcCohAcoustPress(settings_t* settings){
 										}
 									}else{
 										DEBUG(5, "Ray returns\n");
-										for(k=0; k<settings->output.nArrayZ; k++){
+										for(k=0; k<dimZ; k++){
 											zHyd = settings->output.arrayZ[k];
 											DEBUG(6, "i=%u: (j,k)=(%u, %u):\n",(uint32_t)i, (uint32_t)j, (uint32_t)k);
 											if( pressureMStar( settings, &ray[i], rHyd, zHyd, q0, pressure_H, pressure_V) ){
@@ -315,7 +295,7 @@ void	calcCohAcoustPress(settings_t* settings){
 							}
 							break;
 						case ARRAY_TYPE__LINEAR:
-							for(j=0; j<settings->output.nArrayR; j++){
+							for(j=0; j<dimR; j++){
 								rHyd = settings->output.arrayR[j];
 								if ( rHyd >= ray[i].rMin	&&	rHyd < ray[i].rMax){
 									if ( ray[i].iReturn == FALSE){
@@ -354,79 +334,20 @@ void	calcCohAcoustPress(settings_t* settings){
 				
 				case CALC_TYPE__COH_ACOUS_PRESS:
 					switch(settings->output.arrayType){
-						case ARRAY_TYPE__HORIZONTAL:
-							for(j=0; j<settings->output.nArrayR; j++){
-								rHyd = settings->output.arrayR[j];
-								
-								//check whether the hydrophone is within the range coordinates of the ray:
-								if ( rHyd >= ray[i].rMin	&&	rHyd < ray[i].rMax){
-									
-									//Check if the ray is returning back or not;
-									//if not we can bracket it without problems, otherwise we need to know how many
-									//times it passed by the given array range: 
-									if ( ray[i].iReturn == FALSE){
-										//find the index of the ray coordinate that brackets the hydrophone
-										bracket(ray[i].nCoords, ray[i].r, rHyd, &iHyd);
-										getRayPressure( settings, &ray[i], iHyd, q0, rHyd, zHyd,	&pressure);
-										
-										settings->output.pressure1D[j] += pressure;
-									}else{
-										eBracket(ray[i].nCoords, ray[i].r, rHyd, &nRet, iRet);
-										for(jj=0; jj<nRet; jj++){
-											getRayPressure( settings, &ray[i], iRet[jj], q0, rHyd, zHyd,	&pressure);
-											
-											settings->output.pressure1D[j] += pressure;
-										}
-									}
-								}
-							}
-							break;
-						
-						case ARRAY_TYPE__VERTICAL:
-							DEBUG(3,"Array type: Vertical\n");
-							rHyd = settings->output.arrayR[0];
-							
-
-							if ( rHyd >= ray[i].rMin	&&	rHyd < ray[i].rMax	){
-								//Check if the ray is returning back or not;
-								//if not we can bracket it without problems, otherwise we need to know how many times
-								//it passed by the given array range: 
-
-								if (ray[i].iReturn == FALSE){
-									bracket(ray[i].nCoords, ray[i].r, rHyd, &iHyd);
-									
-									for(j=0; j<settings->output.nArrayZ; j++){
-										zHyd = settings->output.arrayZ[j];
-										getRayPressure(settings, &ray[i], iHyd, q0, rHyd, zHyd, &pressure);
-										settings->output.pressure1D[j] = pressure;
-									}
-								}else{
-									eBracket(ray[i].nCoords, ray[i].r, rHyd, &nRet, iRet);
-									for(jj=0; jj<nRet; jj++){
-										for(j=0; j<settings->output.nArrayZ; j++){
-											zHyd = settings->output.arrayZ[j];
-
-											getRayPressure(settings, &ray[i], iRet[jj], q0, rHyd, zHyd, &pressure);
-											settings->output.pressure1D[j] += pressure;	//TODO make sure this value is initialized
-										}
-									}
-								}
-							}
-							break;
-							
 						case ARRAY_TYPE__LINEAR:
+							//NOTE: in linear arrays, nArrayR and nArrayZ have to be equal (this is checked in readIn.c when reading the file)
 							DEBUG(3,"Array type: Linear\n");
 							
-							for(j=0; j<settings->output.nArrayZ; j++){
+							for(j=0; j<dimZ; j++){
 								rHyd = settings->output.arrayR[j];
 								zHyd = settings->output.arrayZ[j];
-
+								
 								if (	rHyd >= ray[i].rMin	&&	rHyd < ray[i].rMax	){
-
+									
 									if (ray[i].iReturn == FALSE){
 										bracket(ray[i].nCoords, ray[i].r, rHyd, &iHyd);
 										getRayPressure(settings, &ray[i], iHyd, q0, rHyd, zHyd, &pressure);
-										settings->output.pressure1D[j] += pressure;
+										settings->output.pressure2D[0][j] += pressure;
 										
 									}else{
 										eBracket(ray[i].nCoords, ray[i].r, rHyd, &nRet, iRet);
@@ -434,10 +355,10 @@ void	calcCohAcoustPress(settings_t* settings){
 										for(jj=0; jj<nRet; jj++){
 											
 											//if the ray returns we have to check all hydrophone depths:
-											for(k=0; k<settings->output.nArrayZ; k++){
+											for(k=0; k<dimZ; k++){
 												zHyd = settings->output.arrayZ[k];
 												getRayPressure(settings, &ray[i], iRet[jj], q0, rHyd, zHyd, &pressure);
-												settings->output.pressure1D[j] += pressure;	//TODO make sure this value is initialized
+												settings->output.pressure2D[0][j] += pressure;	//TODO make sure this value is initialized
 											}
 										}
 									}
@@ -445,11 +366,13 @@ void	calcCohAcoustPress(settings_t* settings){
 							}
 							break;
 						
+						case ARRAY_TYPE__HORIZONTAL:
+						case ARRAY_TYPE__VERTICAL:
 						case ARRAY_TYPE__RECTANGULAR:
-							DEBUG(3,"Array type: Rectangular\n");
-							DEBUG(4,"nArrayR: %u, nArrayZ: %u\n", (uint32_t)settings->output.nArrayR, (uint32_t)settings->output.nArrayZ );
+							DEBUG(3,"Array type: Rectangular/Horizontal/Vertical\n");
+							DEBUG(4,"nArrayR: %u, nArrayZ: %u\n", (uint32_t)dimR, (uint32_t)dimZ );
 							//TODO invert indices, so that the innermost loop loops over the rightmost index of pressure2D
-							for(j=0; j<settings->output.nArrayR; j++){
+							for(j=0; j<dimR; j++){
 								rHyd = settings->output.arrayR[j];
 								
 								//Start by checking if the array range is inside the min and max ranges of the ray:
@@ -457,23 +380,23 @@ void	calcCohAcoustPress(settings_t* settings){
 									
 									if (ray[i].iReturn == FALSE){
 										bracket(ray[i].nCoords, ray[i].r, rHyd, &iHyd);
-										for(k=0; k<settings->output.nArrayZ; k++){
+										for(k=0; k<dimZ; k++){
 											
 											zHyd = settings->output.arrayZ[k];
 											getRayPressure(settings, &ray[i], iHyd, q0, rHyd, zHyd, &pressure);
-											settings->output.pressure2D[k][j] += pressure;	//verify if initialization is necessary. Done -makes no difference.
+											settings->output.pressure2D[j][k] += pressure;	//verify if initialization is necessary. Done -makes no difference.
 											DEBUG(4, "k: %u; j: %u; pressure2D[k][j]: %e + j*%e\n", (uint32_t)k, (uint32_t)j, creal(settings->output.pressure2D[k][j]), cimag(settings->output.pressure2D[k][j]));
 											DEBUG(4, "rHyd: %lf; zHyd: %lf \n", rHyd, zHyd);
 										}
 									
 									}else{
 										eBracket(ray[i].nCoords, ray[i].r, rHyd, &nRet, iRet);
-										for(k=0; k<settings->output.nArrayZ; k++){
+										for(k=0; k<dimZ; k++){
 											zHyd = settings->output.arrayZ[k];
 											
 											for(jj=0; jj<nRet; jj++){
 												getRayPressure(settings, &ray[i], iRet[jj], q0, rHyd, zHyd, &pressure);
-												settings->output.pressure2D[k][j] += pressure;
+												settings->output.pressure2D[j][k] += pressure;
 											}
 										}
 									}
@@ -485,6 +408,7 @@ void	calcCohAcoustPress(settings_t* settings){
 							fatal("calcCohAcoustPress(): unknown array type.");
 							break;
 					}
+					break;
 				default:
 					fatal("calcCohAcoustPress(): Unknown output type.");
 					break;
@@ -493,66 +417,53 @@ void	calcCohAcoustPress(settings_t* settings){
 	}//for(i=0; i<settings->source.nThetas; i++
 	
 	DEBUG(3,"Rays and pressure calculated\n");
-	/*
+	/*********************************************
 	 * Write Acoustic pressure to file, if needed.
+	 * When the desired output is only the Coherent Acoustic Pressure,
+	 * then the pressure1D and pressure2D variables are used.
+	 * When calculating Coherent Acoustic Pressure and Particle Velocity,
+	 * the acoustic pressure is obtained from the center elements of pressure_H and pressure_V.
 	 */
-	if(settings->output.calcType == CALC_TYPE__COH_ACOUS_PRESS){
-		if (settings->output.arrayType != ARRAY_TYPE__RECTANGULAR){
-			dim = (uintptr_t)max((double)settings->output.nArrayR, (double)settings->output.nArrayZ);
-			temp2D_a = mallocDouble2D(2, dim);
-			//In the fortran version there were problems when passing complex matrices to Matlab; 
-			//therefore the real and complex parts will be saved separately: TODO correct this
-			for(j=0; j<dim; j++){
-				temp2D_a[0][j] = creal( settings->output.pressure1D[j]);
-				temp2D_a[1][j] = cimag( settings->output.pressure1D[j]);
-			}
-			
-			pPressure_a = mxCreateDoubleMatrix((MWSIZE)2, (MWSIZE)dim, mxREAL);
-			if(pPressure_a == NULL){
-				fatal("Memory alocation error.");
-			}
-			copyDoubleToPtr2D(temp2D_a, mxGetPr(pPressure_a), dim, 2);
-			matPutVariable(matfile, "p", pPressure_a);
-			mxDestroyArray(pPressure_a);
-
-			freeDouble2D(temp2D_a, 2);
-		}else{
-			
-			DEBUG(3,"Writing pressure output of rectangular array to file:\n");
-			//In the fortran version there were problems when passing complex matrices to Matlab; 
-			//therefore the real and complex parts will be saved separately: TODO correct this
-			temp2D_a = mallocDouble2D(settings->output.nArrayZ, settings->output.nArrayR);
-			temp2D_b = mallocDouble2D(settings->output.nArrayZ, settings->output.nArrayR);
-			for(i=0; i<settings->output.nArrayZ; i++){
-				for(j=0; j<settings->output.nArrayR; j++){
-					temp2D_a[i][j] = creal( settings->output.pressure2D[i][j]);
-					temp2D_b[i][j] = cimag( settings->output.pressure2D[i][j]);
+	if(	settings->output.calcType == CALC_TYPE__COH_ACOUS_PRESS ||
+		settings->output.calcType == CALC_TYPE__COH_ACOUS_PRESS_PART_VEL){
+		
+		if( settings->output.calcType == CALC_TYPE__COH_ACOUS_PRESS_PART_VEL ){
+			//obtain acoustic pressure from center elements of directional components
+			for(j=0; j<dimR; j++){
+				for(i=0; i<dimZ; i++){
+					settings->output.pressure2D[j][i] = settings->output.pressure_H[j][i][CENTER];
 				}
 			}
-			
-			//write the real part to the mat-file:
-			pPressure_a = mxCreateDoubleMatrix((MWSIZE)settings->output.nArrayZ, (MWSIZE)settings->output.nArrayR, mxREAL);
-			if(pPressure_a == NULL){
-				fatal("Memory alocation error.");
-			}
-			copyDoubleToPtr2D(temp2D_a, mxGetPr(pPressure_a), settings->output.nArrayR, settings->output.nArrayZ);
-			matPutVariable(matfile, "rp", pPressure_a);
-			mxDestroyArray(pPressure_a);
-			
-			//write the imaginary part to the mat-file:
-			pPressure_b = mxCreateDoubleMatrix((MWSIZE)settings->output.nArrayZ, (MWSIZE)settings->output.nArrayR, mxREAL);
-			if(pPressure_b == NULL){
-				fatal("Memory alocation error.");
-			}
-			copyDoubleToPtr2D(temp2D_b, mxGetPr(pPressure_b), settings->output.nArrayR, settings->output.nArrayZ);
-			matPutVariable(matfile, "ip", pPressure_b);
-			mxDestroyArray(pPressure_b);
-			
-			freeDouble2D(temp2D_a, settings->output.nArrayZ);
-			freeDouble2D(temp2D_b, settings->output.nArrayZ);
 		}
+		//create mxArray
+		p = mxCreateDoubleMatrix((MWSIZE)dimZ, (MWSIZE)dimR, mxCOMPLEX);
+		
+		//verify if memory allocation was successfull:
+		if( p == NULL){
+			fatal("Memory alocation error.");
+		}
+		
+		//copy pressure to mxArray:
+		switch(	settings->output.arrayType){
+			case ARRAY_TYPE__LINEAR:
+				/*
+				copyComplexToPtr(settings->output.pressure1D, p, dimZ);
+				break;
+				*/
+			
+			case ARRAY_TYPE__VERTICAL:
+			case ARRAY_TYPE__HORIZONTAL:
+			case ARRAY_TYPE__RECTANGULAR:
+				//Note: the output for rectangular arrays has to be transposed.
+				copyComplexToPtr2D_transposed(settings->output.pressure2D, p, dimZ, dimR);
+				break;
+		}
+		
+		//write mxArray to matfile:
+		matPutVariable(matfile, "p", p);
+		mxDestroyArray(p);
 	}
-
+	
 	//free memory for pressure, only if not needed for calculating Transmission Loss (or others):
 	//this is now done at the end of cTraceo.c, using freeSettings() from tools.c
 	

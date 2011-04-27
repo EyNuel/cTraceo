@@ -466,7 +466,7 @@ void		freeSettings(settings_t* settings){
 					
 				if (settings->output.arrayType == ARRAY_TYPE__RECTANGULAR){
 					if(settings->output.pressure2D != NULL){
-						freeComplex2D(settings->output.pressure2D, settings->output.nArrayZ);
+						freeComplex2D(settings->output.pressure2D, settings->output.nArrayR);
 					}
 				}else{
 					freeComplex(settings->output.pressure1D);

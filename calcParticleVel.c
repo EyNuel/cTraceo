@@ -47,8 +47,15 @@ void calcParticleVel(settings_t* settings){
 	complex double**	dP_dR2D = NULL;
 	complex double**	dP_dZ2D = NULL;
 
-
-	matfile		= matOpen("pvl.mat", "u");		//open file in "update" mode
+	//open the correct matfile for output:
+	switch(settings->output.calcType){
+		case CALC_TYPE__PART_VEL:
+			matfile		= matOpen("pvl.mat", "u");		//open file in "update" mode
+			break;
+		case CALC_TYPE__COH_ACOUS_PRESS_PART_VEL:
+			matfile		= matOpen("pav.mat", "u");
+			break;
+	}
 	
 	//write title to matfile:
 	pTitle = mxCreateString("TRACEO: Coherent Acoustic Pressure");

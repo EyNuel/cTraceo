@@ -155,7 +155,8 @@ int main(int argc, char **argv){
 		case CALC_TYPE__COH_ACOUS_PRESS_PART_VEL:
 			printf("Calculating coherent acoustic pressure and particle velocity.\n");
 			fprintf(logFile, "Coherent acoustic pressure and particle velocity.\n");
-			fatal("WIP");
+			calcCohAcoustPress(settings);
+			calcParticleVel(settings);
 			break;
 			
 		default:
