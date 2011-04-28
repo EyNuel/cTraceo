@@ -105,6 +105,9 @@ void	calcCohAcoustPress(settings_t* settings){
 		case CALC_TYPE__COH_ACOUS_PRESS_PART_VEL:
 			matfile		= matOpen("pav.mat", "w");
 			break;
+		case CALC_TYPE__COH_TRANS_LOSS:
+			matfile		= matOpen("ctl.mat", "w");
+			break;
 		default:
 			fatal("Uh-oh - calcCohAcoustPress(): unknown output type.");
 			break;
@@ -210,7 +213,8 @@ void	calcCohAcoustPress(settings_t* settings){
 			}
 		}
 	}
-	if( settings->output.calcType == CALC_TYPE__COH_ACOUS_PRESS ||
+	if( settings->output.calcType == CALC_TYPE__COH_ACOUS_PRESS	||
+		settings->output.calcType == CALC_TYPE__COH_TRANS_LOSS	||
 		settings->output.calcType == CALC_TYPE__COH_ACOUS_PRESS_PART_VEL){
 			/**
 			 * when calculating only the Acoustic Pressure only need memory the simple pressure, no H/V components.
@@ -333,6 +337,7 @@ void	calcCohAcoustPress(settings_t* settings){
 					break;
 				
 				case CALC_TYPE__COH_ACOUS_PRESS:
+				case CALC_TYPE__COH_TRANS_LOSS:
 					switch(settings->output.arrayType){
 						case ARRAY_TYPE__LINEAR:
 							//NOTE: in linear arrays, nArrayR and nArrayZ have to be equal (this is checked in readIn.c when reading the file)
@@ -419,14 +424,15 @@ void	calcCohAcoustPress(settings_t* settings){
 	DEBUG(3,"Rays and pressure calculated\n");
 	/*********************************************
 	 * Write Acoustic pressure to file, if needed.
-	 * When the desired output is only the Coherent Acoustic Pressure,
-	 * then the pressure1D and pressure2D variables are used.
-	 * When calculating Coherent Acoustic Pressure and Particle Velocity,
-	 * the acoustic pressure is obtained from the center elements of pressure_H and pressure_V.
 	 */
 	if(	settings->output.calcType == CALC_TYPE__COH_ACOUS_PRESS ||
 		settings->output.calcType == CALC_TYPE__COH_ACOUS_PRESS_PART_VEL){
 		
+		/* -- When the desired output is only the Coherent Acoustic Pressure,
+		 * 	  then the values from pressure2D are used.
+		 * -- When calculating Coherent Acoustic Pressure and Particle Velocity,
+		 * 	  the acoustic pressure is obtained from the center elements of pressure_H and pressure_V.
+		 */
 		if( settings->output.calcType == CALC_TYPE__COH_ACOUS_PRESS_PART_VEL ){
 			//obtain acoustic pressure from center elements of directional components
 			for(j=0; j<dimR; j++){
