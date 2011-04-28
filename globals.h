@@ -236,7 +236,7 @@ typedef struct output{
 	uint32_t			nArrayR, nArrayZ;	//"nra", "nza"	Array sizes in R and Z
 	double*				arrayR;				//"nra"			Array R (ranges)
 	double*				arrayZ;				//"nrz"			Array Z (depths)
-	complex double*		pressure1D;			//will contain coherent acoustic pressure at each array element (1D), calculated in "calcCohAcoustPress.c"
+	//complex double*		pressure1D;			//will contain coherent acoustic pressure at each array element (1D), calculated in "calcCohAcoustPress.c"
 	complex double**	pressure2D;			//will contain coherent acoustic pressure at each array element (2D), calculated in "calcCohAcoustPress.c"
 	complex double		(**pressure_H)[3];		//used when calculating particle velocity (pressure at left, center, right)
 	complex double		(**pressure_V)[3];		//used when calculating particle velocity (pressure at top, center, bottom)

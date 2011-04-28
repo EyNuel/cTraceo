@@ -24,7 +24,7 @@
  * 				none:		Writes to file "ctl.mat".							*
  * 	Note:																		*
  * 		This function requires that the coherent acoustic pressure has been		*
- * 		calculated (by calcCohAcoustPress) and will of no use otherwise.		*
+ * 		calculated (by calcCohAcoustPress) and will be of no use otherwise.		*
  * 																				*
  *******************************************************************************/
 
@@ -37,60 +37,63 @@
 void calcCohTransLoss(settings_t*);
 
 void calcCohTransLoss(settings_t* settings){
-	uint32_t	i, j, jj;
+	uint32_t	i, j, dim;
 	double*		tl		= NULL;
 	double**	tl2D	= NULL;
 	MATFile*	matfile	= NULL;
 	mxArray*	ptl		= NULL;
 	mxArray*	ptl2D		= NULL;
 
-	matfile		= matOpen("ctl.mat", "w");
+	matfile		= matOpen("ctl.mat", "u");
 	if(matfile == NULL){
 		fatal("Memory alocation error.");
 	}
 	
-	if (settings->output.arrayType != ARRAY_TYPE__RECTANGULAR){
-		/*
-		 * This will apply to horizontal, vertical and linear hydrophone arrays.
-		 */
-		jj = (uint32_t)max((double)settings->output.nArrayR, (double)settings->output.nArrayZ);
-		tl = mallocDouble(jj);
-		
-		for(j=0; j<jj; j++){
-			tl[j] = -20.0*log10( cabs( settings->output.pressure1D[j] ) );
-			DEBUG(8, "|p|: %lf, tl: %lf\n", cabs( settings->output.pressure1D[j] ), tl[j]);
-		}
-		
-		ptl = mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)jj, mxREAL);
-		if(ptl == NULL){
-			fatal("Memory alocation error.");
-		}
-		copyDoubleToPtr(tl, mxGetPr(ptl), jj);
-		matPutVariable(matfile,"tl",ptl);
-		mxDestroyArray(ptl);
-
-		free(tl);
-	}else{
-		/*
-		 * Rectangular hydrophone arrays.
-		 */
-		tl2D = mallocDouble2D(settings->output.nArrayZ, settings->output.nArrayR);
-		
-		for(i=0; i<settings->output.nArrayZ; i++){
-			for(j=0; j<settings->output.nArrayR; j++){
-				tl2D[i][j] = -20.0*log10( cabs( settings->output.pressure2D[i][j] ) );
+	switch(settings->output.arrayType){
+		case ARRAY_TYPE__RECTANGULAR:
+		case ARRAY_TYPE__HORIZONTAL:
+		case ARRAY_TYPE__VERTICAL:
+			/*
+			 * horizontal and vertical arrays are special cases of Rectangular hydrophone arrays,
+			 * so all of them can be handled by the same code.
+			 */
+			tl2D = mallocDouble2D(settings->output.nArrayR, settings->output.nArrayZ);
+			
+			for(i=0; i<settings->output.nArrayR; i++){
+				for(j=0; j<settings->output.nArrayZ; j++){
+					tl2D[i][j] = -20.0*log10( cabs( settings->output.pressure2D[i][j] ) );
+				}
 			}
-		}
-		
-		ptl2D = mxCreateDoubleMatrix((MWSIZE)settings->output.nArrayZ, (MWSIZE)settings->output.nArrayR, mxREAL);
-		if(ptl2D == NULL){
-			fatal("Memory alocation error.");
-		}
-		copyDoubleToPtr2D(tl2D, mxGetPr(ptl2D), settings->output.nArrayR, settings->output.nArrayZ);
-		matPutVariable(matfile,"tl",ptl2D);
-		mxDestroyArray(ptl2D);
-		
-		freeDouble2D(tl2D, settings->output.nArrayZ);
+			
+			ptl2D = mxCreateDoubleMatrix((MWSIZE)settings->output.nArrayZ, (MWSIZE)settings->output.nArrayR, mxREAL);
+			if(ptl2D == NULL){
+				fatal("Memory alocation error.");
+			}
+			copyDoubleToPtr2D_transposed(tl2D, ptl2D, settings->output.nArrayZ, settings->output.nArrayR);
+			matPutVariable(matfile,"tl",ptl2D);
+			mxDestroyArray(ptl2D);
+			
+			freeDouble2D(tl2D, settings->output.nArrayR);
+			break;
+			
+		case ARRAY_TYPE__LINEAR:
+			dim = (uint32_t)max((double)settings->output.nArrayR, (double)settings->output.nArrayZ);
+			tl = mallocDouble(dim);
+			
+			for(j=0; j<dim; j++){
+				tl[j] = -20.0*log10( cabs( settings->output.pressure2D[0][j] ) );
+				DEBUG(8, "|p|: %lf, tl: %lf\n", cabs( settings->output.pressure2D[0][j] ), tl[j]);
+			}
+			
+			ptl = mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)dim, mxREAL);
+			if(ptl == NULL){
+				fatal("Memory alocation error.");
+			}
+			copyDoubleToPtr(tl, mxGetPr(ptl), dim);
+			matPutVariable(matfile,"tl",ptl);
+			mxDestroyArray(ptl);
+			
+			free(tl);
+			break;
 	}
-	
 }

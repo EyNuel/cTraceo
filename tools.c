@@ -64,6 +64,7 @@ void			reallocRayMembers(ray_t*, uintptr_t);
 
 void			copyDoubleToPtr(double*, double*, uintptr_t);
 void			copyDoubleToPtr2D(double**, double*, uintptr_t, uintptr_t);
+void			copyDoubleToPtr2D_transposed(double**, mxArray*, uintptr_t, uintptr_t);
 void			copyComplexToPtr(complex double*, mxArray*, uintptr_t);
 void			copyComplexToPtr2D(complex double**, mxArray*, uintptr_t, uintptr_t);
 void			copyComplexToPtr2D_transposed(complex double**, mxArray*, uintptr_t, uintptr_t);
@@ -84,7 +85,7 @@ uint32_t isnan_d(double x){
 	}
 }
 
-double	min(double a, double b){
+double		min(double a, double b){
 	if( a <= b){
 		return a;
 	}else{
@@ -92,7 +93,7 @@ double	min(double a, double b){
 	}
 }
 
-double max(double a, double b){
+double		max(double a, double b){
 	if( a > b){
 		return a;
 	}else{
@@ -100,7 +101,7 @@ double max(double a, double b){
 	}
 }
 
-void fatal(const char* message){
+void 		fatal(const char* message){
 	/*
 		Prints a message and exits terminates the program.
 		Closes all open i/o streams befre exiting.
@@ -346,7 +347,7 @@ void		freeComplex2D(complex double** greenMile, uintptr_t items){
 	free(greenMile);
 }
 
-settings_t* 	mallocSettings(void){
+settings_t*	mallocSettings(void){
 	/*
 		Allocate memory for a settings structure.
 		Return pointer in case o success, exit with error code otherwise.
@@ -457,7 +458,8 @@ void		freeSettings(settings_t* settings){
 			if (settings->output.nArrayZ > 0){
 				freeDouble(settings->output.arrayZ);
 			}
-			
+
+			//TODO this is no longer corrrect => adapt to new layout of pressure2D
 			//Acoustic pressure is only calculated for some types of output
 			if(	settings->output.calcType == CALC_TYPE__COH_ACOUS_PRESS	||
 				settings->output.calcType == CALC_TYPE__COH_TRANS_LOSS	||
@@ -469,7 +471,7 @@ void		freeSettings(settings_t* settings){
 						freeComplex2D(settings->output.pressure2D, settings->output.nArrayR);
 					}
 				}else{
-					freeComplex(settings->output.pressure1D);
+					//freeComplex(settings->output.pressure1D);
 				}
 			}
 		}
@@ -975,6 +977,19 @@ void		copyDoubleToPtr2D(double** origin, double* dest, uintptr_t rowSize, uintpt
 	}
 }
 
+void		copyDoubleToPtr2D_transposed(double** origin, mxArray* dest, uintptr_t dimZ, uintptr_t dimR){
+	uintptr_t	i,j;
+	double*	destReal = NULL;
+	
+	destReal = mxGetData(dest);
+	
+	for( j=0; j<dimR; j++ ){
+		for(i=0; i<dimZ; i++){
+			destReal[j*dimZ + i] = origin[j][i];
+		}
+	}
+}
+
 void		copyComplexToPtr(complex double* origin, mxArray* dest, uintptr_t nItems){
 	uintptr_t	i;
 	double*	destImag = NULL;
@@ -1009,8 +1024,8 @@ void		copyComplexToPtr2D(complex double** origin, mxArray* dest, uintptr_t dimZ,
 
 void		copyComplexToPtr2D_transposed(complex double** origin, mxArray* dest, uintptr_t dimZ, uintptr_t dimR){
 	uintptr_t	i,j;
-	double*	destImag = NULL;
-	double*	destReal = NULL;
+	double*		destImag = NULL;
+	double*		destReal = NULL;
 	
 	//get a pointer to the real and imaginary parts of the destination:
 	destReal = mxGetData(dest);
