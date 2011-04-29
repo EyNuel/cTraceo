@@ -1,6 +1,6 @@
 /********************************************************************************
- *  tools.c																		*
- * 	Collection of utility functions.											*
+ *  toolsMemory.c																		*
+ * 	Collection of utility functions for  handling memory.						*
  *	All memory allocation functions in this file check for allocation errors.	*
  *																				*
  *	Written by:		Emanuel Ey													*
@@ -15,22 +15,16 @@
 #include	<stdlib.h>
 #include 	<stdio.h>
 #include	<string.h>
-#include	<sys/time.h>		//for struct time_t
-#include	<sys/resource.h>	//for getrusage()
-#include	<matrix.h>			//for matlab functions (used in copyComplexToPtr and copyComplexToPtr2D)
+#include	"toolsMisc.c"
 
 /** NOTE: the memory reallocation functions contained in this file are mostly not in use du to random occurences of "bus error".                       
  */
 
 
-/****************************
- *	Function prototypes		*
- ***************************/
-uint32_t		isnan_d(double);
-double			min(double, double);
-double			max(double, double);
-void 			fatal(const char*);
-FILE*			openFile(const char* , const char[4]);
+///Prototypes:
+
+
+
 char*			mallocChar(uintptr_t);
 uint32_t*		mallocUint(uintptr_t);
 uint32_t*		reallocUint(uint32_t*, uintptr_t);
@@ -46,6 +40,7 @@ complex double*	reallocComplex(complex double*, uintptr_t);
 void			freeComplex(complex double*);
 complex double** mallocComplex2D(uintptr_t, uintptr_t);
 void			freeComplex2D(complex double**, uintptr_t);
+
 settings_t*		mallocSettings(void);
 void			freeInterface(interface_t*);
 void			freeObject(object_t*);
@@ -54,90 +49,16 @@ vector_t*		mallocVector(uintptr_t);
 vector_t*		reallocVector(vector_t*, uintptr_t);
 point_t*		mallocPoint(uintptr_t);
 point_t*		reallocPoint(point_t*, uintptr_t);
-double 			readDouble(FILE*);
-int32_t			readInt(FILE*);
-char*			readStringN(FILE*, uint32_t);
-void			skipLine(FILE*);
 void			printSettings(settings_t*);
 ray_t*			makeRay(uintptr_t);
 void			reallocRayMembers(ray_t*, uintptr_t);
 
-void			copyDoubleToPtr(double*, double*, uintptr_t);
-void			copyDoubleToPtr2D(double**, double*, uintptr_t, uintptr_t);
-void			copyDoubleToPtr2D_transposed(double**, mxArray*, uintptr_t, uintptr_t);
-void			copyComplexToPtr(complex double*, mxArray*, uintptr_t);
-void			copyComplexToPtr2D(complex double**, mxArray*, uintptr_t, uintptr_t);
-void			copyComplexToPtr2D_transposed(complex double**, mxArray*, uintptr_t, uintptr_t);
-void			printCpuTime(FILE*);
-
-/****************************
- *	Actual Functions		*
- ***************************/
 
 
-uint32_t isnan_d(double x){
-	//Note that isnan() is only defined for the float data type, and not for doubles
-	//NANs are never equal to anything -even themselves:
-	if (x!=x){
-		return TRUE;
-	}else{
-		return FALSE;
-	}
-}
+///Functions:
 
-double		min(double a, double b){
-	if( a <= b){
-		return a;
-	}else{
-		return b;
-	}
-}
 
-double		max(double a, double b){
-	if( a > b){
-		return a;
-	}else{
-		return b;
-	}
-}
-
-void 		fatal(const char* message){
-	/*
-		Prints a message and exits terminates the program.
-		Closes all open i/o streams befre exiting.
-	*/
-	printf("%s\n", message);
-	fflush(NULL);				//flushes all i/o streams.
-	exit(EXIT_FAILURE);
-}
-
-FILE* 		openFile(const char *filename, const char mode[4]) {
-	/* 
-		Opens a file and returns a filepointer in case of success, exits with error code otherwise.
-		Input values:
-			filename	A string containing a full or relative path to the file.
-			mode		A string containg the file acces mode.
-		
-		Return Value:
-			A FILE pointer.
-	*/
-	
-	FILE *temp;
-	if (VERBOSE)
-		printf("Accessing file: %s... ", filename);
-		
-	temp=fopen(filename, mode);
-	if(temp==NULL) {
-		fatal("Error while opening file.\n");
-		exit(EXIT_FAILURE);		//this is redundant but avoids "control may reach end of non-void function" warning
-	} else {
-		if (VERBOSE)
-			printf("Ok.\n");
-		return temp;
-	}
-}
-
-char*		mallocChar(uintptr_t numChars){
+char*				mallocChar(uintptr_t numChars){
 	/*
 		Allocates a char string and returns a pointer to it in case of success,
 		exits with error code otherwise.
@@ -151,7 +72,7 @@ char*		mallocChar(uintptr_t numChars){
 	return temp;
 }
 
-uint32_t*	mallocUint(uintptr_t numUints){
+uint32_t*			mallocUint(uintptr_t numUints){
 	/*
 		Allocates a char string and returns a pointer to it in case of success,
 		exits with error code otherwise.
@@ -162,7 +83,7 @@ uint32_t*	mallocUint(uintptr_t numUints){
 	return temp;
 }
 
-uint32_t*	reallocUint(uint32_t* old, uintptr_t numUints){
+uint32_t*			reallocUint(uint32_t* old, uintptr_t numUints){
 	/*
 		Allocates an uint array and returns a pointer to it in case of success,
 		exits with error code otherwise.
@@ -182,7 +103,7 @@ uint32_t*	reallocUint(uint32_t* old, uintptr_t numUints){
 	return new;
 }
 
-int32_t*	mallocInt(uintptr_t numInts){
+int32_t*			mallocInt(uintptr_t numInts){
 	/*
 		Allocates a char string and returns a pointer to it in case of success,
 		exits with error code otherwise.
@@ -193,7 +114,7 @@ int32_t*	mallocInt(uintptr_t numInts){
 	return temp;
 }
 
-int32_t*	reallocInt(int32_t* old, uintptr_t numInts){
+int32_t*			reallocInt(int32_t* old, uintptr_t numInts){
 	/*
 		Allocates a char string and returns a pointer to it in case of success,
 		exits with error code otherwise.
@@ -211,7 +132,7 @@ int32_t*	reallocInt(int32_t* old, uintptr_t numInts){
 	return new;
 }
 
-double*		mallocDouble(uintptr_t numDoubles){
+double*				mallocDouble(uintptr_t numDoubles){
 	/*
 		Allocates an array of doubles and returns a pointer to it in case of success,
 		Exits with error code otherwise.
@@ -225,8 +146,8 @@ double*		mallocDouble(uintptr_t numDoubles){
 	DEBUG(9,"out\n");
 	return temp;
 }
-
-double*		reallocDouble(double* old, uintptr_t numDoubles){
+	
+double*				reallocDouble(double* old, uintptr_t numDoubles){
 	DEBUG(10,"in\n");
 	double*		new = NULL;
 	
@@ -241,14 +162,14 @@ double*		reallocDouble(double* old, uintptr_t numDoubles){
 	DEBUG(10,"out\n");
 	return new;
 }
-
-void		freeDouble(double* greenMile){
+	
+void				freeDouble(double* greenMile){
 	if(greenMile != NULL){
 		free(greenMile);
 	}
 }
-
-double**	mallocDouble2D(uintptr_t numRows, uintptr_t numCols){
+	
+double**			mallocDouble2D(uintptr_t numRows, uintptr_t numCols){
 	/*
 	 * Returns a pointer to an array of pointer do doubles.
 	 * Or:
@@ -269,7 +190,7 @@ double**	mallocDouble2D(uintptr_t numRows, uintptr_t numCols){
 	return array;
 }
 
-void		freeDouble2D(double** greenMile, uintptr_t items){
+void				freeDouble2D(double** greenMile, uintptr_t items){
 	/*
 	 * frees the memory allocated to a double pointer of type double.
 	 */
@@ -306,7 +227,7 @@ complex double*		reallocComplex(complex double* old, uintptr_t numComplex){
 	return new;
 }
 
-void		freeComplex(complex double* greenMile){
+void				freeComplex(complex double* greenMile){
 	if(greenMile != NULL){
 		free(greenMile);
 	}
@@ -333,7 +254,7 @@ complex double**	mallocComplex2D(uintptr_t numRows, uintptr_t numCols){
 	return array;
 }
 
-void		freeComplex2D(complex double** greenMile, uintptr_t items){
+void				freeComplex2D(complex double** greenMile, uintptr_t items){
 	/*
 	 * frees the memory allocated to a double pointer of type complex double.
 	 */
@@ -347,7 +268,9 @@ void		freeComplex2D(complex double** greenMile, uintptr_t items){
 	free(greenMile);
 }
 
-settings_t*	mallocSettings(void){
+
+
+settings_t*			mallocSettings(void){
 	/*
 		Allocate memory for a settings structure.
 		Return pointer in case o success, exit with error code otherwise.
@@ -375,7 +298,7 @@ settings_t*	mallocSettings(void){
 	return(settings);
 }
 
-void		freeInterface(interface_t* interface){
+void				freeInterface(interface_t* interface){
 	if(interface != NULL){
 		//Note that reallcing to size 0, corresponds to deallocing the memory
 		reallocDouble(interface->r, 0);
@@ -389,7 +312,7 @@ void		freeInterface(interface_t* interface){
 	}
 }
 
-void		freeSettings(settings_t* settings){
+void				freeSettings(settings_t* settings){
 	/*
 	 * Go through all items in a settings struct and free the alocated memory.
 	 */
@@ -481,7 +404,7 @@ void		freeSettings(settings_t* settings){
 	}
 }
 
-vector_t*	mallocVector(uintptr_t	numVectors){
+vector_t*			mallocVector(uintptr_t	numVectors){
 	vector_t*	temp = NULL;
 
 	temp = malloc(numVectors * sizeof(vector_t));
@@ -490,7 +413,7 @@ vector_t*	mallocVector(uintptr_t	numVectors){
 	return temp;
 }
 
-vector_t*	reallocVector(vector_t* old, uintptr_t	numVectors){
+vector_t*			reallocVector(vector_t* old, uintptr_t	numVectors){
 	vector_t*	new = NULL;
 
 	if(numVectors == 0){
@@ -504,7 +427,7 @@ vector_t*	reallocVector(vector_t* old, uintptr_t	numVectors){
 	return new;
 }
 
-point_t*	mallocPoint(uintptr_t	numPoints){
+point_t*			mallocPoint(uintptr_t	numPoints){
 	point_t*	temp = NULL;
 
 	temp = malloc(numPoints * sizeof(point_t));
@@ -513,7 +436,7 @@ point_t*	mallocPoint(uintptr_t	numPoints){
 	return temp;
 }
 
-point_t*	reallocPoint(point_t* old, uintptr_t	numPoints){
+point_t*			reallocPoint(point_t* old, uintptr_t	numPoints){
 	point_t*	new = NULL;
 
 	if(numPoints == 0){
@@ -528,62 +451,7 @@ point_t*	reallocPoint(point_t* old, uintptr_t	numPoints){
 	return new;
 }
 
-double 		readDouble(FILE* infile){
-	/************************************************
-	 *	Reads a double from a file and returns it	*
-	 ***********************************************/
-	 
-	char*	junkString = mallocChar((uintptr_t)(MAX_LINE_LEN + 1));;
-	double 	tempDouble;
-	int32_t	junkInt;
-	
-	junkInt = fscanf(infile, "%s\n", junkString);
-	tempDouble = atof(junkString);
-	free(junkString);
-	
-	return(tempDouble);
-}
-
-int32_t		readInt(FILE* infile){
-	/************************************************
-	 *	Reads a int from a file and returns it		*
-	 ***********************************************/
-	 
-	char*		junkString = mallocChar((uintptr_t)(MAX_LINE_LEN + 1));
-	int32_t 	tempInt;
-	int32_t		junkInt;
-	
-	junkInt = fscanf(infile, "%s\n", junkString);
-	tempInt = (int32_t)atol(junkString);
-	free(junkString);
-	
-	return(tempInt);
-}
-
-char*		readStringN(FILE* infile, uint32_t length){
-	/********************************************************************
-	 *	Reads a <lenght> chars from a filestream.						*
-	 *******************************************************************/
-	char*		outputString = mallocChar((uintptr_t)(MAX_LINE_LEN + 1));;
-	char*		junkChar;
-
-	junkChar = fgets(outputString, (int32_t)length, infile);
-	return(outputString);
-}
-
-void		skipLine(FILE* infile){
-	/************************************************
-	 *	Reads a int from a file and returns it		*
-	 ***********************************************/
-	char*		junkString = mallocChar((uintptr_t)(MAX_LINE_LEN + 1));
-	char*		junkChar;
-	
-	junkChar = fgets(junkString, MAX_LINE_LEN+1, infile);
-
-	free(junkString);
-}
-
-void		printSettings(settings_t*	settings){
+void				printSettings(settings_t*	settings){
 	/************************************************
 	 *	Outputs a settings structure to stdout.		*
 	 ***********************************************/
@@ -900,7 +768,7 @@ void		printSettings(settings_t*	settings){
 	DEBUG(1, "out\n");
 }
 
-ray_t*		makeRay(uintptr_t numRays){
+ray_t*				makeRay(uintptr_t numRays){
 	/*
 	 * allocates rays and initializes its members
 	 */
@@ -933,7 +801,7 @@ ray_t*		makeRay(uintptr_t numRays){
 	return tempRay;
 }
 
-void		reallocRayMembers(ray_t* ray, uintptr_t numRayCoords){
+void				reallocRayMembers(ray_t* ray, uintptr_t numRayCoords){
 	/*
 	 * resizes all ray members.
 	 */
@@ -959,93 +827,5 @@ void		reallocRayMembers(ray_t* ray, uintptr_t numRayCoords){
 	DEBUG(5,"reallocRayMembers(), \t out\n");
 }
 
-void		copyDoubleToPtr(double* origin, double* dest, uintptr_t nItems){
-	uintptr_t	i;
 
-	for( i=0; i<nItems; i++ ){
-		dest[i] = origin[i];
-	}
-}
 
-void		copyDoubleToPtr2D(double** origin, double* dest, uintptr_t rowSize, uintptr_t colSize){
-	uintptr_t	i,j;
-
-	for( j=0; j<colSize; j++ ){
-		for(i=0; i<rowSize; i++){
-			dest[i*colSize +j] = origin[j][i];
-		}
-	}
-}
-
-void		copyDoubleToPtr2D_transposed(double** origin, mxArray* dest, uintptr_t dimZ, uintptr_t dimR){
-	uintptr_t	i,j;
-	double*	destReal = NULL;
-	
-	destReal = mxGetData(dest);
-	
-	for( j=0; j<dimR; j++ ){
-		for(i=0; i<dimZ; i++){
-			destReal[j*dimZ + i] = origin[j][i];
-		}
-	}
-}
-
-void		copyComplexToPtr(complex double* origin, mxArray* dest, uintptr_t nItems){
-	uintptr_t	i;
-	double*	destImag = NULL;
-	double*	destReal = NULL;
-	
-	//get a pointer to the real and imaginary parts of the destination:
-	destReal = mxGetData(dest);
-	destImag = mxGetImagData(dest);
-	
-	for( i=0; i<nItems; i++ ){
-		destReal[i] = creal(origin[i]);
-		destImag[i] = cimag(origin[i]);
-	}
-}
-
-void		copyComplexToPtr2D(complex double** origin, mxArray* dest, uintptr_t dimZ, uintptr_t dimR){
-	uintptr_t	i,j;
-	double*	destImag = NULL;
-	double*	destReal = NULL;
-	
-	//get a pointer to the real and imaginary parts of the destination:
-	destReal = mxGetData(dest);
-	destImag = mxGetImagData(dest);
-	
-	for( j=0; j<dimR; j++ ){
-		for(i=0; i<dimZ; i++){
-			destReal[j + i*dimR] = creal(origin[j][i]);
-			destImag[j + i*dimR] = cimag(origin[j][i]);
-		}
-	}
-}
-
-void		copyComplexToPtr2D_transposed(complex double** origin, mxArray* dest, uintptr_t dimZ, uintptr_t dimR){
-	uintptr_t	i,j;
-	double*		destImag = NULL;
-	double*		destReal = NULL;
-	
-	//get a pointer to the real and imaginary parts of the destination:
-	destReal = mxGetData(dest);
-	destImag = mxGetImagData(dest);
-	
-	for( j=0; j<dimR; j++ ){
-		for(i=0; i<dimZ; i++){
-			destReal[j*dimZ + i] = creal(origin[j][i]);
-			destImag[j*dimZ + i] = cimag(origin[j][i]);
-		}
-	}
-}
-
-void		printCpuTime(FILE* stream){
-	/*
-	 * prints total cpu time used by process.
-	 */
-	struct rusage	usage;
-
-	getrusage(RUSAGE_SELF, &usage);
-	fprintf(stream, "%ld.%06ld seconds user CPU time,\n", usage.ru_utime.tv_sec, usage.ru_utime.tv_usec);
-	fprintf(stream, "%ld.%06ld seconds system CPU time used.\n", usage.ru_stime.tv_sec, usage.ru_stime.tv_usec);
-}

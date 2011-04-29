@@ -31,7 +31,7 @@
  ***********************************************************************************/
 
 #include "globals.h"
-#include "tools.c"
+#include "tools.h"
 #include <math.h>
 
 void convertUnits(double*, double*, double*, uint32_t*, double*);

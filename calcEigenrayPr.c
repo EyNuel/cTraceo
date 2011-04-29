@@ -28,7 +28,7 @@
 #pragma  once
 #include <complex.h>
 #include "globals.h"
-#include "tools.c"
+#include "tools.h"
 #include "solveDynamicEq.c"
 #include "solveEikonalEq.c"
 #include <mat.h>

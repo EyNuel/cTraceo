@@ -30,7 +30,7 @@
 
 #pragma  once
 #include "globals.h"
-#include "tools.c"
+#include "tools.h"
 #include <complex.h>
 #include <math.h>
 #include "csValues.c"
@@ -874,7 +874,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 					"If you need a high number or reflections per ray, you may also try changing MEM_FACTOR (in globals.h) to a higher value and recompile.\n"
 					"Aborting...");
 			//double the memory allocated for the ray:
-			//TODO find bus error that happens on realloc when realloccing to a larger value (tools.c".)
+			//TODO find bus error that happens on realloc when realloccing to a larger value (toolsMemory.c".)
 			//reallocRay(ray, ray->nCoords * 2);		//TODO disabled as this sometimes results in "bus error".
 			
 		}

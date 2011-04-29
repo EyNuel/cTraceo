@@ -28,7 +28,7 @@
 
 #include <stdio.h>
 #include <inttypes.h>		//contains definitions of integer data types that are inequivocal.
-#include "tools.c"			
+#include "tools.h"			
 #include "globals.h"		//Include global variables
 #include <math.h>
 

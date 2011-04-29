@@ -28,7 +28,7 @@
 #pragma  once
 #include <mat.h>
 #include "matrix.h"
-#include "tools.c"
+#include "tools.h"
 #include <math.h>
 #include "solveEikonalEq.c"
 

@@ -471,7 +471,7 @@ void	calcCohAcoustPress(settings_t* settings){
 	}
 	
 	//free memory for pressure, only if not needed for calculating Transmission Loss (or others):
-	//this is now done at the end of cTraceo.c, using freeSettings() from tools.c
+	//this is now done at the end of cTraceo.c, using freeSettings() from toolsMemory.c
 	
 	//free ray memory.
 	for(i=0; i<settings->source.nThetas; i++){

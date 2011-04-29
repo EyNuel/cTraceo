@@ -32,7 +32,7 @@
  ***********************************************************************************/
 #pragma once
 #include "globals.h"
-#include "tools.c"
+#include "tools.h"
 #include "lineLineIntersec.c"
 #include "linearSpaced.c"
 

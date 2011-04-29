@@ -81,6 +81,5 @@ discuss:	#list discussion points from all files
 		
 dist:	#
 		@tar -czf ./packages/cTraceo.tgz $(ALLFILES)
-#@tar -czf ./packages/cTraceo.tgz calcAllRayInfo.c intBarycParab1D.c readIn.c Makefile intBarycParab2D.c reflectionCorr.c calcRayCoords.c rkf45.c boundaryInterpolation.c convertUnits.c intLinear1D.c solveDynamicEq.c boundaryReflectionCoeff.c csValues.c interpolation.h solveEikonalEq.c bracket.c dotProduct.c lineLineIntersec.c specularReflection.c cTraceo.c linearSpaced.c cValues1D.c globals.h thorpe.c cValues2D.c intBarycCubic1D.c rayBoundaryIntersection.c tools.c
 		
 

@@ -37,7 +37,7 @@
 #include "globals.h"
 #include "interpolation.h"
 #include <complex.h>
-#include "tools.c"
+#include "tools.h"
 
 void	getRayParameters(ray_t*, uintptr_t, double, double, double*, double*, double*, double complex*, double*, double*);
 

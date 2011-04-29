@@ -33,7 +33,7 @@
 #include "csValues.c"
 #include "thorpe.c"
 #include "globals.h"
-#include "tools.c"
+#include "tools.h"
 #include "dotProduct.c"
 #include <complex.h>
 #include "reflectionCorr.c"

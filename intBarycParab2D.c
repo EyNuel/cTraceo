@@ -34,7 +34,7 @@
  * 																		*
  ************************************************************************/
 
-#include "tools.c"
+#include "tools.h"
 
 void intBarycParab2D(double*, double*, double**, double, double, double*, double*, double*, double*, double*, double*);
 

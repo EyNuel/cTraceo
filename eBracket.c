@@ -34,7 +34,7 @@
  *******************************************************************************/
 
 #pragma		once
-#include	"tools.c"
+#include	"tools.h"
 
 void	eBracket(uintptr_t, double*, double, uintptr_t*, uintptr_t*);
 
