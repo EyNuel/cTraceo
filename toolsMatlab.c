@@ -16,7 +16,9 @@
 ///Prototypes:
  
 void			copyDoubleToPtr(double*, double*, uintptr_t);
+void			copyDoubleToMxArray(double* origin, mxArray* dest, uintptr_t nItems);
 void			copyDoubleToPtr2D(double**, double*, uintptr_t, uintptr_t);
+void			copyDoubleToMxArray2D(double**, mxArray*, uintptr_t, uintptr_t);
 void			copyDoubleToPtr2D_transposed(double**, mxArray*, uintptr_t, uintptr_t);
 void			copyComplexToPtr(complex double*, mxArray*, uintptr_t);
 void			copyComplexToPtr2D(complex double**, mxArray*, uintptr_t, uintptr_t);
@@ -27,19 +29,45 @@ void			copyComplexToPtr2D_transposed(complex double**, mxArray*, uintptr_t, uint
 ///Functions:
 
 void		copyDoubleToPtr(double* origin, double* dest, uintptr_t nItems){
+	//TODO replace all uses of this function with copyToMxArray()
 	uintptr_t	i;
-
+	
 	for( i=0; i<nItems; i++ ){
 		dest[i] = origin[i];
 	}
 }
 
+void		copyDoubleToMxArray(double* origin, mxArray* dest, uintptr_t nItems){
+	uintptr_t	i;
+	double*	destReal = NULL;
+	
+	destReal = mxGetData(dest);
+	
+	for( i=0; i<nItems; i++ ){
+		destReal[i] = origin[i];
+	}
+}
+
 void		copyDoubleToPtr2D(double** origin, double* dest, uintptr_t rowSize, uintptr_t colSize){
+	//TODO replace all uses of this function with copyToMxArray2D()
 	uintptr_t	i,j;
 
 	for( j=0; j<colSize; j++ ){
 		for(i=0; i<rowSize; i++){
 			dest[i*colSize +j] = origin[j][i];
+		}
+	}
+}
+
+void		copyDoubleToMxArray2D(double** origin, mxArray* dest, uintptr_t rowSize, uintptr_t colSize){
+	uintptr_t	i,j;
+	double*	destReal = NULL;
+	
+	destReal = mxGetData(dest);
+
+	for( j=0; j<colSize; j++ ){
+		for(i=0; i<rowSize; i++){
+			destReal[i*colSize +j] = origin[j][i];
 		}
 	}
 }
