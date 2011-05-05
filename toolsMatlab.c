@@ -20,9 +20,10 @@ void			copyDoubleToMxArray(double* origin, mxArray* dest, uintptr_t nItems);
 void			copyDoubleToPtr2D(double**, double*, uintptr_t, uintptr_t);
 void			copyDoubleToMxArray2D(double**, mxArray*, uintptr_t, uintptr_t);
 void			copyDoubleToPtr2D_transposed(double**, mxArray*, uintptr_t, uintptr_t);
-void			copyComplexToPtr(complex double*, mxArray*, uintptr_t);
-void			copyComplexToPtr2D(complex double**, mxArray*, uintptr_t, uintptr_t);
-void			copyComplexToPtr2D_transposed(complex double**, mxArray*, uintptr_t, uintptr_t);
+
+void			copyComplexToMxArray(complex double*, mxArray*, uintptr_t);
+void			copyComplexToMxArray2D(complex double**, mxArray*, uintptr_t, uintptr_t);
+void			copyComplexToMxArray2D_transposed(complex double**, mxArray*, uintptr_t, uintptr_t);
 
 
 
@@ -85,7 +86,7 @@ void		copyDoubleToPtr2D_transposed(double** origin, mxArray* dest, uintptr_t dim
 	}
 }
 
-void		copyComplexToPtr(complex double* origin, mxArray* dest, uintptr_t nItems){
+void		copyComplexToMxArray(complex double* origin, mxArray* dest, uintptr_t nItems){
 	uintptr_t	i;
 	double*	destImag = NULL;
 	double*	destReal = NULL;
@@ -100,7 +101,7 @@ void		copyComplexToPtr(complex double* origin, mxArray* dest, uintptr_t nItems){
 	}
 }
 
-void		copyComplexToPtr2D(complex double** origin, mxArray* dest, uintptr_t dimZ, uintptr_t dimR){
+void		copyComplexToMxArray2D(complex double** origin, mxArray* dest, uintptr_t dimZ, uintptr_t dimR){
 	uintptr_t	i,j;
 	double*	destImag = NULL;
 	double*	destReal = NULL;
@@ -117,7 +118,7 @@ void		copyComplexToPtr2D(complex double** origin, mxArray* dest, uintptr_t dimZ,
 	}
 }
 
-void		copyComplexToPtr2D_transposed(complex double** origin, mxArray* dest, uintptr_t dimZ, uintptr_t dimR){
+void		copyComplexToMxArray2D_transposed(complex double** origin, mxArray* dest, uintptr_t dimZ, uintptr_t dimR){
 	uintptr_t	i,j;
 	double*		destImag = NULL;
 	double*		destReal = NULL;

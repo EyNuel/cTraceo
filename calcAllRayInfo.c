@@ -37,18 +37,23 @@ void	calcAllRayInfo(settings_t*);
 
 void	calcAllRayInfo(settings_t* settings){
 	DEBUG(1,"in\n");
-	MATFile*	matfile	= NULL;
-	mxArray*	pThetas	= NULL;
-	mxArray*	pTitle	= NULL;
-	mxArray*	pRay	= NULL;
-	mxArray*	pRefrac	= NULL;
-	mxArray*	pRayInfo= NULL;
-	double		thetai, ctheta;
-	ray_t*		ray		= NULL;
-	double**	temp2D 	= NULL;
-	double**	rayInfo = mallocDouble2D(5,settings->source.nThetas);
-	uintptr_t	i, j;
-	char* 		string	= mallocChar(10);
+	MATFile*			matfile		= NULL;
+	mxArray*			pThetas		= NULL;
+	mxArray*			pTitle		= NULL;
+	mxArray*			mxR			= NULL;
+	mxArray*			mxZ			= NULL;
+	mxArray*			mxTau		= NULL;
+	mxArray*			mxAmp		= NULL;
+	mxArray*			mxRayStruct	= NULL;
+	const char*			fieldNames[]= {"r", "z", "tau", "amp"};	//names of the fields contained in mxRayStruct
+	mxArray*			pRefrac		= NULL;
+	mxArray*			pRayInfo	= NULL;
+	double				thetai, ctheta;
+	ray_t*				ray			= NULL;
+	double**	temp2D 		= NULL;
+	double**			rayInfo 	= mallocDouble2D(5,settings->source.nThetas);
+	uintptr_t			i, j;
+	char* 				string	= mallocChar(10);
 
 
 	matfile = matOpen("ari.mat", "w");
@@ -72,6 +77,15 @@ void	calcAllRayInfo(settings_t* settings){
 	matPutVariable(matfile, "caseTitle", pTitle);
 	mxDestroyArray(pTitle);
 	
+	//create mxStructArray:
+	mxRayStruct = mxCreateStructMatrix(	(MWSIZE)settings->source.nThetas,	//number of rows
+										(MWSIZE)1,		//number of columns
+										4,				//number of fields in each element
+										fieldNames);	//list of field names
+	if( mxRayStruct == NULL ) {
+		fatal("Memory Alocation error.");
+	}
+	
 	//allocate memory for the rays:
 	ray = makeRay(settings->source.nThetas);
 	
@@ -89,38 +103,42 @@ void	calcAllRayInfo(settings_t* settings){
 			DEBUG(4, "Equations solved.\n");
 			
 			///prepare to write ray to matfile:
-			temp2D 		= malloc(5*sizeof(uintptr_t));
-			temp2D[0]	= ray[i].r;
-			temp2D[1]	= ray[i].z;
-			temp2D[2]	= ray[i].tau;
-			temp2D[3]	= mallocDouble(ray[i].nCoords);
-			temp2D[4]	= mallocDouble(ray[i].nCoords);
-			for(j=0; j<ray[i].nCoords; j++){
-				temp2D[3][j] = creal( ray[i].amp[j] );
-				temp2D[4][j] = cimag( ray[i].amp[j] );
-			}
-			DEBUG(4, "Created temporary variables for ray.\n");
+			/*NOTE:	when writing a mxArray to a mxStructArray, the mxArray cannot simply be reused after it was
+			 *		copied to the mxStructArray, otherwise data corruption will occur.
+			 *		Because of this, the variables mxR, mxZ, mxTau, mxAmp have to be allocated again at each pass.
+			 *		Also note that these mxArrays shall not be deallocated, otherwise their content will be lost
+			 * 		(even after they have been copied to the mxStruct.
+			 */
 			
-			//copy data to mxArray and write ray to file:
-			pRay = mxCreateDoubleMatrix((MWSIZE)5, (MWSIZE)ray[i].nCoords, mxREAL);
-			if(pRay == NULL){
+			//create mxArrays:
+			mxR	= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)ray[i].nCoords, mxREAL);
+			mxZ	= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)ray[i].nCoords, mxREAL);
+			mxTau= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)ray[i].nCoords, mxREAL);
+			mxAmp= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)ray[i].nCoords, mxCOMPLEX);
+			if(	mxR == NULL || mxZ == NULL || mxTau == NULL || mxAmp == NULL){
 				fatal("Memory alocation error.");
 			}
-			copyDoubleToPtr2D(temp2D, mxGetPr(pRay), ray[i].nCoords,5);
-			DEBUG(4, "Copied ray to matlab array.\n");
-
-			sprintf(string, "ray%u", (uint32_t)(i+1));
-			matPutVariable(matfile, (const char*)string, pRay);
-			DEBUG(4, "Wrote ray to matfile.\n");
-
-			//free memory
-			mxDestroyArray(pRay);
-			free(temp2D[3]);
-			free(temp2D[4]);
-			free(temp2D);
-			DEBUG(4, "Freed temporary variables.\n");
+			
+			//copy data to mxArrays:
+			copyDoubleToMxArray(ray[i].r,	mxR,	ray[i].nCoords);
+			copyDoubleToMxArray(ray[i].z,	mxZ, 	ray[i].nCoords);
+			copyDoubleToMxArray(ray[i].tau,	mxTau,	ray[i].nCoords);
+			copyComplexToMxArray(ray[i].amp,mxAmp,	ray[i].nCoords);
+			
+			//copy mxArrays to mxRayStruct
+			mxSetFieldByNumber(	mxRayStruct,		//pointer to the mxStruct
+								(MWINDEX)i,			//index of the element (number of ray)
+								0,					//position of the field (in this case, field 0 is "r"
+								mxR);		//the mxArray we want to copy into the mxStruct
+			mxSetFieldByNumber(	mxRayStruct, (MWINDEX)i, 1, mxZ);
+			mxSetFieldByNumber(	mxRayStruct, (MWINDEX)i, 2, mxTau);
+			mxSetFieldByNumber(	mxRayStruct, (MWINDEX)i, 3, mxAmp);
+			
+			//copy struct to file:
+			matPutVariable(matfile, "rays", mxRayStruct);
+			
 			///ray has been written to matfile
-
+/* TODO
 			///save ray information:
 			rayInfo[0][i] = (double)ray[i].iReturn;
 			rayInfo[1][i] = ray[i].sRefl;
@@ -128,7 +146,7 @@ void	calcAllRayInfo(settings_t* settings){
 			rayInfo[3][i] = ray[i].oRefl;
 			rayInfo[4][i] = (double)ray[i].nRefrac;
 			DEBUG(4, "Created temporary variables for reflections counters.\n");
-
+*/
 			if (ray[i].nRefrac > 0){
 				temp2D 		= malloc(2*sizeof(uintptr_t));
 				temp2D[0]	= mallocDouble(ray[i].nRefrac);

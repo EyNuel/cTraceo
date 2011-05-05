@@ -461,7 +461,7 @@ void	calcCohAcoustPress(settings_t* settings){
 			case ARRAY_TYPE__HORIZONTAL:
 			case ARRAY_TYPE__RECTANGULAR:
 				//Note: the output for rectangular arrays has to be transposed.
-				copyComplexToPtr2D_transposed(settings->output.pressure2D, p, dimZ, dimR);
+				copyComplexToMxArray2D_transposed(settings->output.pressure2D, p, dimZ, dimR);
 				break;
 		}
 		

@@ -28,6 +28,9 @@
 #define MWSIZE				int32_t		//matlab R14 uses int32
 //#define MWSIZE			mwSize		//matlab R2008b and others use mwSize, defined in "matrix.h"
 
+#define	MWINDEX				int32_t
+//#define MWINDEX			mwIndex
+
 /** Usefull: **/
 #define	TRUE	1
 #define FALSE	0

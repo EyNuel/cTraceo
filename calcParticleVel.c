@@ -193,7 +193,7 @@ void calcParticleVel(settings_t* settings){
 			if( pu2D == NULL){
 				fatal("Memory alocation error.");
 			}
-			copyComplexToPtr2D_transposed(dP_dR2D, pu2D, dimZ, dimR);
+			copyComplexToMxArray2D_transposed(dP_dR2D, pu2D, dimZ, dimR);
 			matPutVariable(matfile, "u", pu2D);
 			mxDestroyArray(pu2D);
 
@@ -202,7 +202,7 @@ void calcParticleVel(settings_t* settings){
 			if( pw2D == NULL){
 				fatal("Memory alocation error.");
 			}
-			copyComplexToPtr2D_transposed(dP_dZ2D, pw2D, dimZ, dimR);
+			copyComplexToMxArray2D_transposed(dP_dZ2D, pw2D, dimZ, dimR);
 			matPutVariable(matfile, "w", pw2D);
 			mxDestroyArray(pw2D);
 			break;
@@ -216,7 +216,7 @@ void calcParticleVel(settings_t* settings){
 			if( pu2D == NULL){
 				fatal("Memory alocation error.");
 			}
-			copyComplexToPtr2D(dP_dR2D, pu2D, dimZ, dimR);
+			copyComplexToMxArray2D(dP_dR2D, pu2D, dimZ, dimR);
 			matPutVariable(matfile, "u", pu2D);
 			mxDestroyArray(pu2D);
 
@@ -225,7 +225,7 @@ void calcParticleVel(settings_t* settings){
 			if( pw2D == NULL){
 				fatal("Memory alocation error.");
 			}
-			copyComplexToPtr2D(dP_dZ2D, pw2D, dimZ, dimR);
+			copyComplexToMxArray2D(dP_dZ2D, pw2D, dimZ, dimR);
 			matPutVariable(matfile, "w", pw2D);
 			mxDestroyArray(pw2D);
 			break;
