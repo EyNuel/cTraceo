@@ -82,7 +82,7 @@ typedef struct	ray{
 	uintptr_t		iKill;		//indicates if ray has been "killed"
 	double			theta;		//launching angle of the ray
 	double			rMin, rMax;	//used to determine if a ray "turns back"
-	uintptr_t		iReturn;	//indicates if a ray "turns back"
+	uint32_t		iReturn;	//indicates if a ray "turns back"
 	double*			r;			//range of ray at index
 	double*			z;			//depth of ray at index
 	double*			c;			//speed of sound at index
@@ -98,8 +98,10 @@ typedef struct	ray{
 	double*			ic;			//see Chapter 3 of Traceo Manual
 	vector_t*		boundaryTg;	//"tbdry" a boundary's tangent vector
 	int32_t*		boundaryJ;	//"jbdry",	indicates at what boundary a ray is (-1 => above surface; 1 => below bottom)
-	uintptr_t		nRefrac;	//"nrefr", number of refraction points
-	point_t*		refrac;		//"rrefr, zrefr", coordinates of refraction points. used in "solveEikonalEq.c"
+	uint32_t		nRefrac;	//"nrefr", number of refraction points
+	//point_t*		refrac;		//"rrefr, zrefr", coordinates of refraction points. used in "solveEikonalEq.c"
+	double*			rRefrac;
+	double*			zRefrac;
 
 	double*			p;			//used in solveDynamicEq
 	double*			q;			//used in solveDynamicEq

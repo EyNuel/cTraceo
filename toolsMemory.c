@@ -792,7 +792,8 @@ ray_t*				makeRay(uintptr_t numRays){
 		tempRay[i].ic 			= NULL;
 		tempRay[i].boundaryTg	= NULL;
 		tempRay[i].boundaryJ	= NULL;
-		tempRay[i].refrac		= NULL;
+		tempRay[i].rRefrac		= NULL;
+		tempRay[i].zRefrac		= NULL;
 		tempRay[i].p 			= NULL;
 		tempRay[i].q 			= NULL;
 		tempRay[i].caustc		= NULL;
@@ -818,8 +819,9 @@ void				reallocRayMembers(ray_t* ray, uintptr_t numRayCoords){
 	ray->ic			= reallocDouble(	ray->ic,		numRayCoords);
 	ray->boundaryTg	= reallocVector(	ray->boundaryTg,numRayCoords);
 	ray->boundaryJ	= reallocInt(		ray->boundaryJ,	numRayCoords);
-	ray->nRefrac	= numRayCoords;
-	ray->refrac		= reallocPoint(		ray->refrac,	numRayCoords);
+	ray->nRefrac	= (uint32_t)numRayCoords;
+	ray->rRefrac	= reallocDouble(	ray->rRefrac,	numRayCoords);
+	ray->zRefrac	= reallocDouble(	ray->zRefrac,	numRayCoords);
 	ray->p			= reallocDouble(	ray->p,			numRayCoords);
 	ray->q			= reallocDouble(	ray->q,			numRayCoords);
 	ray->caustc		= reallocDouble(	ray->caustc,	numRayCoords);

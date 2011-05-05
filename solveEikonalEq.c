@@ -931,8 +931,8 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 		
 		if ( (prod < 0) && (ray->iRefl[i] != 1) ){
 			ray->nRefrac++;
-			ray->refrac[ray->nRefrac - 1].r = ray->r[i];
-			ray->refrac[ray->nRefrac - 1].z = ray->z[i];
+			ray->rRefrac[ray->nRefrac - 1] = ray->r[i];
+			ray->zRefrac[ray->nRefrac - 1] = ray->z[i];
 		}
 		
 		prod = ( ray->r[i+1]-ray->r[i] )*( ray->r[i]-ray->r[i-1] );
@@ -955,7 +955,8 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 	prod = 0.0;
 	
 	//clip allocated memory for refractions
-	ray->refrac = reallocPoint(ray->refrac, ray->nRefrac);
+	ray->rRefrac = reallocDouble(ray->rRefrac, ray->nRefrac);
+	ray->zRefrac = reallocDouble(ray->zRefrac, ray->nRefrac);
 	
 	//free memory
 	free(yOld);
