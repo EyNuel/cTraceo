@@ -48,7 +48,18 @@ void	calcEigenrayRF(settings_t* settings){
 	mxArray*		pHydArrayR	= NULL;
 	mxArray*		pHydArrayZ	= NULL;
 	mxArray*		pnEigenRays	= NULL;
-	mxArray*		pRay		= NULL;
+	mxArray*		mxTheta		= NULL;
+	mxArray*		mxR			= NULL;
+	mxArray*		mxZ			= NULL;
+	mxArray*		mxTau		= NULL;
+	mxArray*		mxAmp		= NULL;
+	mxArray*		mxRayStruct	= NULL;
+	const char*		fieldNames[]= {	"theta",
+									"r",
+									"z",
+									"tau",
+									"amp"};		//the names of the fields contained in mxRayStruct
+	
 	double*			thetas		= NULL;
 	double 			thetai, ctheta;
 	double**		depths		= NULL;
@@ -65,24 +76,24 @@ void	calcEigenrayRF(settings_t* settings){
 	uint32_t		nTrial;
 	ray_t*			tempRay = NULL;
 	double			theta0, f0;
-	double**		temp2D = NULL;
-	char* 			string	= mallocChar(10);
 	uint32_t		success = FALSE;
-
-
+	
+	
+	//Open matfile for output:
 	matfile 	= matOpen("eig.mat", "w");
+	
+	
+	//write ray launching angles to matfile:
 	pThetas		= mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)settings->source.nThetas, mxREAL);
 	if(matfile == NULL || pThetas == NULL){
 		fatal("Memory alocation error.");
 	}
-
 	//copy angles in cArray to mxArray:
-	copyDoubleToPtr(	settings->source.thetas,
-						mxGetPr(pThetas),
-						settings->source.nThetas);
+	copyDoubleToMxArray(	settings->source.thetas, pThetas , settings->source.nThetas);
 	matPutVariable(matfile, "thetas", pThetas);
 	mxDestroyArray(pThetas);
-
+	
+	
 	//write title to matfile:
 	pTitle = mxCreateString("TRACEO: EIGenrays (by Regula Falsi)");
 	if(pTitle == NULL){
@@ -91,44 +102,39 @@ void	calcEigenrayRF(settings_t* settings){
 	matPutVariable(matfile, "caseTitle", pTitle);
 	mxDestroyArray(pTitle);
 	
+	
 	//write hydrophone array ranges to file:
-	pHydArrayR			= mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)settings->output.nArrayR, mxREAL);
+	pHydArrayR = mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)settings->output.nArrayR, mxREAL);
 	if(pHydArrayR == NULL){
 		fatal("Memory alocation error.");
 	}
-	copyDoubleToPtr(	settings->output.arrayR,
-						mxGetPr(pHydArrayR),
-						(uintptr_t)settings->output.nArrayR);
-	//move mxArray to file and free memory:
+	copyDoubleToMxArray( settings->output.arrayR, pHydArrayR, (uintptr_t)settings->output.nArrayR);
 	matPutVariable(matfile, "rarray", pHydArrayR);
 	mxDestroyArray(pHydArrayR);
-
-
+	
+	
 	//write hydrophone array depths to file:
 	pHydArrayZ			= mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)settings->output.nArrayZ, mxREAL);
 	if(pHydArrayZ == NULL){
 		fatal("Memory alocation error.");
 	}
-	copyDoubleToPtr(	settings->output.arrayZ,
-						mxGetPr(pHydArrayZ),
-						(uintptr_t)settings->output.nArrayZ);
-	//move mxArray to file and free memory:
+	copyDoubleToMxArray( settings->output.arrayZ, pHydArrayZ, (uintptr_t)settings->output.nArrayZ);
 	matPutVariable(matfile, "zarray", pHydArrayZ);
 	mxDestroyArray(pHydArrayZ);
-
-
-	//allocate memory for the rays:
-	thetas = mallocDouble(settings->source.nThetas);
-	depths = mallocDouble2D(settings->source.nThetas, settings->output.nArrayR);
+	
+	
+	//allocate memory for rays and auxiliary variables:
 	ray = makeRay(settings->source.nThetas);
 	
-	/*******************************************************************************************************************
-	 * 	1)	Create a set of arrays (thetas[], depths[][]) that relate the launching angles of the rays with their depth
-	 *		at each of the hydrophone array's depths:
+	/**********************************************************************************************
+	 * 	1)	Create a set of arrays (thetas[], depths[][]) that relate the launching angles of the 
+	 *		rays with their depth at each of the hydrophone array's depths:
 	 */
+	thetas = mallocDouble(settings->source.nThetas);
+	depths = mallocDouble2D(settings->source.nThetas, settings->output.nArrayR);
 	DEBUG(2,"Calculting preliminary rays:\n");
 	nRays = 0;
-
+	
 	for(i=0; i<settings->source.nThetas; i++){
 		DEBUG(3, "--\n\t\tRay Launching angle: %lf\n", settings->source.thetas[i]);
 		thetai = -settings->source.thetas[i]*M_PI/180.0;
@@ -236,16 +242,26 @@ void	calcEigenrayRF(settings_t* settings){
 				}
 				if (nPossibleEigenRays > nRays){
 					//this should not be possible. TODO replace by assertion?
-					fatal("Number of possible eigenrays exceeds number of calculated rays.\nAborting.");
+					fatal("The impossible happened.\nNumber of possible eigenrays exceeds number of calculated rays.\nAborting.");
 				}
 			}
-
+			
 			//Time to find eigenrays; either we are lucky or we need to apply regula falsi:
 			/** We now know how many possible eigenrays this hydrophone has (nPossibleEigenRays),
 			 *	and for each of them we have the bracketing launching angles.
 			 *	It is now time to determine the "exact" launching angle of each eigenray.
 			 */
 			DEBUG(3, "nPossibleEigenRays: %u\n", (uint32_t)nPossibleEigenRays);
+			
+			//create mxStructArray:
+			mxRayStruct = mxCreateStructMatrix(	(MWSIZE)nPossibleEigenRays,	//number of rows
+												(MWSIZE)1,					//number of columns
+												5,							//number of fields in each element
+												fieldNames);				//list of field names
+			if( mxRayStruct == NULL ) {
+				fatal("Memory Alocation error.");
+			}
+			
 			tempRay = makeRay(1);
 			nFoundEigenRays = 0;
 			for(l=0; l<nPossibleEigenRays; l++){		//Note that if nPossibleEigenRays = 0 this loop will not be executed:
@@ -337,61 +353,61 @@ void	calcEigenrayRF(settings_t* settings){
 				}
 				//DEBUG(3,"iFail: %u\n", (uint32_t)iFail);
 				if (success == TRUE){
-
+					
 					//finally: get the coordinates and amplitudes of the eigenray
 					tempRay[0].theta = theta0;
 					solveEikonalEq(settings, tempRay);
 					solveDynamicEq(settings, tempRay);
-
-					///prepare to write ray to matfile:
-					temp2D 		= malloc(5*sizeof(uintptr_t));
-					temp2D[0]	= tempRay[0].r;
-					temp2D[1]	= tempRay[0].z;
-					temp2D[2]	= tempRay[0].tau;
-					temp2D[3]	= mallocDouble(tempRay[0].nCoords);
-					temp2D[4]	= mallocDouble(tempRay[0].nCoords);
-					for(k=0; k<tempRay[0].nCoords; k++){
-						temp2D[3][k] = creal( tempRay[0].amp[k] );
-						temp2D[4][k] = cimag( tempRay[0].amp[k] );
-					}
-
-					//copy data to mxArray and write ray to file:
-					pRay = mxCreateDoubleMatrix((MWSIZE)5, (MWSIZE)tempRay[0].nCoords, mxREAL);
-					if(pRay == NULL){
+					
+					
+					///prepare to save ray to mxStructArray:
+					//create mxArrays:
+					mxTheta	= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)1,					mxREAL);
+					mxR		= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)(tempRay->nCoords),	mxREAL);
+					mxZ		= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)(tempRay->nCoords),	mxREAL);
+					mxTau	= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)(tempRay->nCoords),	mxREAL);
+					mxAmp	= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)(tempRay->nCoords),	mxCOMPLEX);
+					if(	mxTheta == NULL || mxR == NULL || mxZ == NULL || mxTau == NULL || mxAmp == NULL){
 						fatal("Memory alocation error.");
 					}
-					copyDoubleToPtr2D(temp2D, mxGetPr(pRay), tempRay[0].nCoords,5);
-
-					sprintf(string, "ray%u", (uint32_t)(nFoundEigenRays));
-					matPutVariable(matfile, (const char*)string, pRay);
-
-					//reset the ray members to zero:
-					reallocRayMembers(tempRay, 0);
-					//free memory:
-					mxDestroyArray(pRay);
-					free(temp2D[3]);
-					free(temp2D[4]);
-					free(temp2D);
-					///ray has been written to matfile
+					
+					//copy data to mxArrays:
+					copyDoubleToMxArray(&tempRay[0].theta,	mxTheta,1);
+					copyDoubleToMxArray(tempRay->r,			mxR,	tempRay->nCoords);
+					copyDoubleToMxArray(tempRay->z,			mxZ, 	tempRay->nCoords);
+					copyDoubleToMxArray(tempRay->tau,		mxTau,	tempRay->nCoords);
+					copyComplexToMxArray(tempRay->amp,		mxAmp,	tempRay->nCoords);
+					
+					//copy mxArrays to mxRayStruct
+					mxSetFieldByNumber(	mxRayStruct,				//pointer to the mxStruct
+										(MWINDEX)(nFoundEigenRays-1),	//index of the element (number of ray)
+										0,							//position of the field (in this case, field 0 is "r"
+										mxTheta);					//the mxArray we want to copy into the mxStruct
+					mxSetFieldByNumber(	mxRayStruct, (MWINDEX)(nFoundEigenRays-1), 1, mxR);
+					mxSetFieldByNumber(	mxRayStruct, (MWINDEX)(nFoundEigenRays-1), 2, mxZ);
+					mxSetFieldByNumber(	mxRayStruct, (MWINDEX)(nFoundEigenRays-1), 3, mxTau);
+					mxSetFieldByNumber(	mxRayStruct, (MWINDEX)(nFoundEigenRays-1), 4, mxAmp);
+					///ray has been saved to mxStructArray
 				}
 			}
 			DEBUG(3, "nFoundEigenRays: %u\n", (uint32_t)nFoundEigenRays);
 		}
 	}
-
+	
 	///Write number of eigenrays to matfile:
 	pnEigenRays = mxCreateDoubleMatrix((MWSIZE)1,(MWSIZE)1,mxREAL);
 	junkDouble = (double)nFoundEigenRays;
-	copyDoubleToPtr(	&junkDouble,
-						mxGetPr(pnEigenRays),
-						1);
+	copyDoubleToMxArray( &junkDouble, pnEigenRays, 1);
 	matPutVariable(matfile, "nerays", pnEigenRays);
 	mxDestroyArray(pnEigenRays);
 	DEBUG(3, "nFoundEigenRays: %u\n", (uint32_t)nFoundEigenRays);
 	
+	///Write Eigenrays to matfile:
+	matPutVariable(matfile, "rays", mxRayStruct);
+	
 	//Free memory
 	matClose(matfile);
-	free(string);
+	mxDestroyArray(mxRayStruct);
 	free(dz);
 	DEBUG(1,"out\n");
 }
