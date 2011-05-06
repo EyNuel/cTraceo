@@ -95,6 +95,7 @@ void	calcAllRayInfo(settings_t* settings){
 	matPutVariable(matfile, "caseTitle", pTitle);
 	mxDestroyArray(pTitle);
 	
+	
 	//create mxStructArray:
 	mxRayStruct = mxCreateStructMatrix(	(MWSIZE)settings->source.nThetas,	//number of rows
 										(MWSIZE)1,		//number of columns
