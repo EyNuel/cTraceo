@@ -122,12 +122,12 @@ void	calcRayCoords(settings_t* settings){
 			copyDoubleToMxArray(ray[i].z,					mxZ, 	ray[i].nCoords);
 			
 			//copy mxArrays to mxRayStruct
-			mxSetFieldByNumber(	mxRayStruct,		//pointer to the mxStruct
-								(MWINDEX)i,			//index of the element (number of ray)
-								0,					//position of the field (in this case, field 0 is "r"
-								mxTheta);			//the mxArray we want to copy into the mxStruct
-			mxSetFieldByNumber(	mxRayStruct, (MWINDEX)i, 1, mxR);
-			mxSetFieldByNumber(	mxRayStruct, (MWINDEX)i, 2, mxZ);
+			mxSetFieldByNumber(	mxRayStruct,						//pointer to the mxStruct
+								(MWINDEX)i,							//index of the element (number of ray)
+								0,									//position of the field (in this case, field 0 is "theta"
+								mxTheta);							//the mxArray we want to copy into the mxStruct
+			mxSetFieldByNumber(	mxRayStruct, (MWINDEX)i, 1, mxR);	// "r"
+			mxSetFieldByNumber(	mxRayStruct, (MWINDEX)i, 2, mxZ);	// "z"
 			///ray has been saved to mxStructArray
 			
 			if(KEEP_RAYS_IN_MEM == FALSE){

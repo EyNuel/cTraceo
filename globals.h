@@ -3,18 +3,15 @@
  *	Defines global variables needed by cTraceo.
 */
 #pragma once
-#include <stdint.h>	//needed for inequivocal type qualifiers
+#include <stdint.h>		//needed for inequivocal type qualifiers as defined in C99
 #include <complex.h>
 #include <matrix.h>		//needed for matlab matrix dimensions (mwSize)
-/*
-	NOTE:	The actual value defined is not important, as it will never be use -only its name will.
-*/
 
 /********************************************************************************
  * Configuration:																*
  *******************************************************************************/
 #ifndef VERBOSE
-	#define VERBOSE				0	//when set to 1, more information will be shown.
+	#define VERBOSE			0	//when set to 1, more information will be shown.
 #endif
 #define VERBOSITY			1	//verbosity level (0-10). High levels will make the code impractically slow (seriously!)
 #define MAX_LINE_LEN		256	//Maximum number of chars to read at once from a file (\n not included)
@@ -145,7 +142,7 @@ typedef struct interface{
 	uint32_t				numSurfaceCoords;		//formerly "nati"
 }interface_t;
 
-//possible values for surfaceType (see page 38, TraceO manual):
+//possible values for surfaceType (see page 38, Traceo manual):
 #define SURFACE_TYPE__ABSORVENT	1	//formerly "A"
 #define SURFACE_TYPE__ELASTIC	2	//formerly "E"
 #define	SURFACE_TYPE__RIGID		3	//formerly "R"
