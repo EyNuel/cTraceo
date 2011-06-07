@@ -164,6 +164,7 @@ int main(int argc, char **argv){
 			break;
 	}
 
+	//finish up the log:
 	fprintf(logFile, "%s\n", line);
 	fprintf(logFile, "Done.\n");
 	

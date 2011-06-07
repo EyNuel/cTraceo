@@ -3,7 +3,7 @@
  *	Defines global variables needed by cTraceo.
 */
 #pragma once
-#include <inttypes.h>	//needed for inequivocal type qualifiers
+#include <stdint.h>	//needed for inequivocal type qualifiers
 #include <complex.h>
 #include <matrix.h>		//needed for matlab matrix dimensions (mwSize)
 /*
@@ -47,10 +47,10 @@
 #if VERBOSE == 1
 	#define WHERESTR				"[%s,\tline %d]:\t"
 	#define WHEREARG				__FILE__, __LINE__
-	#define DEBUG(level, ...)		if(VERBOSE == TRUE && VERBOSITY >= level){fprintf(stderr, WHERESTR, WHEREARG);fprintf(stderr, __VA_ARGS__);}
+	#define DEBUG(level, ...)		if(VERBOSITY >= level){fprintf(stderr, WHERESTR, WHEREARG);fprintf(stderr, __VA_ARGS__);}
 #else
 	//this should be optimized away nicely by the compiler:
-	#define DEBUG(level, ...)		do {} while (0)
+	#define DEBUG(level, ...)		{}
 #endif
 
 
@@ -126,20 +126,6 @@ typedef struct source{
 	double*		thetas;			//the array that will actually contain the launching angles (is allocated in "readin.c")
 }source_t;
 
-/** TODO can safely be removed
-typedef struct interfaceProperties{
-	*
-	 * Contains the properties of the surface or bottom interfaces. used in "interface" structs
-	 * See page 39 of "Traceo" manual.
-	 *
-	double		cp;		//"cpati",	compressional speed
-	double		cs;		//"csati",	shear speed
-	double		rho;	//"rhoati",	density
-	double		ap;		//"apati",	compressional attenuation
-	double		as;		//"asati"	shear attenuation
-}interfaceProperties_t;
-*/
-
 typedef struct interface{
 	/*
 		Used for both the "bathymetry" as well as "altimetry" block
@@ -187,7 +173,7 @@ typedef struct interface{
 typedef struct soundSpeed{
 	uint32_t	cDist;			//"cdist", type of sound speed distribution -profile or field (i.e. range dependent)
 	uint32_t	cClass;			//"cclass", class of sound speed
-	uint32_t	nr, nz;		//"nr0,nz0", number of points in range and depth
+	uint32_t	nr, nz;			//"nr0,nz0", number of points in range and depth
 	double*		z;				//"z0",	depth
 	double*		r;				//"r0", range
 	double*		c1D;			//"c0", sound speed at (z0)
