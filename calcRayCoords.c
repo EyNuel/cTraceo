@@ -137,6 +137,10 @@ void	calcRayCoords(settings_t* settings){
 		}//if (ctheta > 1.0e-7)
 	}//for(i=0; i<settings->source.nThetas; i++)
 	
+	/// Write all ray information to matfile:
+	matPutVariable(matfile, "rays", mxRayStruct);
+	
+	/// Finish up
 	matClose(matfile);
 	free(ray);
 	DEBUG(1,"out\n");
