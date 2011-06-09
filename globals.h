@@ -9,29 +9,47 @@
 
 /********************************************************************************
  * Configuration:																*
- *******************************************************************************/
+ ********************************************************************************/
 #ifndef VERBOSE
-	#define VERBOSE			0	//when set to 1, more information will be shown.
-#endif
-#define VERBOSITY			1	//verbosity level (0-10). High levels will make the code impractically slow (seriously!)
-#define MAX_LINE_LEN		256	//Maximum number of chars to read at once from a file (\n not included)
-#define MEM_FACTOR			20	//The memory allocated for each ray is determined like so: ( abs(rbox2-rbox1)/dsi )* MEM_FACTOR
-								//NOTE:	for deepwater cases, values between 3-5 are ok.
-								//		for shallow water, or other cases with a lot of reflections,
-								//		values of 15-25 may be adequate
-#define KEEP_RAYS_IN_MEM	0	//[boolean] determines whether a rays coordinates are kept in memory after being written to the .mat file. (mat become usefull for multiprocessing)
+	#define VERBOSE					0		//when set to 1, more information will be shown.
+#endif				
+#define VERBOSITY					1		//verbosity level (0-10). High levels will make the code impractically slow (seriously!)
+#define MAX_LINE_LEN				256		//Maximum number of chars to read at once from a file (\n not included)
+#define MEM_FACTOR					20		//The memory allocated for each ray is determined like so: ( abs(rbox2-rbox1)/dsi )* MEM_FACTOR
+											//NOTE:	for deepwater cases, values between 3-5 are ok.
+											//		for shallow water, or other cases with a lot of reflections,
+											//		values of 15-25 may be adequate
+#define KEEP_RAYS_IN_MEM			0		//[boolean] determines whether a rays coordinates are kept in memory after being written to the .mat file. (mat become usefull for multiprocessing)
+#define MIN_REFLECTION_COEFFICIENT	1.0e-5	//used in solveEikonalEq(). When a rays reflection coeff is below this threshold, it is killed.
+
+
+
+/********************************************************************************
+ * Some data types vary between matlab versions, so we have to define			*
+ * their type according to the matlab version used during compilation.			*
+ *******************************************************************************/
+#define MATLAB_VERSION		R14		//allowable options are: R14, R2007A, R2007B, R2008A, R2008B
+
 
 //When writing matlab-matrixes to matfiles, the data type varies between matlab versions.
-#define MWSIZE				int32_t		//matlab R14 uses int32
-//#define MWSIZE			mwSize		//matlab R2008b and others use mwSize, defined in "matrix.h"
+#if MATLAB_VERSION == R14
+	//matlab R14 uses int32
+	#define MWSIZE			int32_t
+	#define	MWINDEX			int32_t
+#elif	MATLAB_VERSION == R2007A || MATLAB_VERSION == R2007B || MATLAB_VERSION ==  R2008A || MATLAB_VERSION ==  R2008B
+	//matlab R2008b and others use mwSize and mwIndex which defined in "matrix.h"
+	#define MWSIZE			mwSize		
+	#define MWINDEX			mwIndex
+#endif
 
-#define	MWINDEX				int32_t
-//#define MWINDEX			mwIndex
 
-/** Usefull: **/
+/********************************************************************************
+ * Some utilities																*
+ ********************************************************************************/
 #define	TRUE	1
 #define FALSE	0
-//the following 4 lines are used to simplify access to star pressure elements (for particle velocity)
+
+//the following 5 lines are used to simplify access to star pressure elements (for particle velocity)
 #define LEFT	0
 #define CENTER	1
 #define RIGHT	2
@@ -39,8 +57,7 @@
 #define TOP		0
 #define	BOTTOM	2
 
-
-//debugging help:
+//functin macro used for showing debugging information:
 #if VERBOSE == 1
 	#define WHERESTR				"[%s,\tline %d]:\t"
 	#define WHEREARG				__FILE__, __LINE__
@@ -53,7 +70,7 @@
 
 /********************************************************************************
  * Minor data structures.														*
- *******************************************************************************/
+ ********************************************************************************/
 
 //TODO this seems somewhat redundant...
 typedef struct	vector{
@@ -125,7 +142,7 @@ typedef struct source{
 
 typedef struct interface{
 	/*
-		Used for both the "bathymetry" as well as "altimetry" block
+		Used for both the "batimetry" as well as "altimetry" block
 	*/
 	//See #defines following this block for possible values
 	uint32_t				surfaceType;			//formerly "atype"
