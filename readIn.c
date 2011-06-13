@@ -75,8 +75,7 @@ void	readIn(settings_t* settings, const char* filename){
 
 	/*	Source validation	*/
 	if(settings->source.ds == 0.0 ){
-		settings->source.ds = fabs(	settings->source.rbox2 -
-											settings->source.rbox1)/100;
+		settings->source.ds = fabs(	settings->source.rbox2 - settings->source.rbox1)/1000;
 	}
 	if(	(settings->source.rx < settings->source.rbox1) ||
 		(settings->source.rx > settings->source.rbox2)){

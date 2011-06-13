@@ -88,7 +88,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 	
 	//set parameters:
 	rho1 = 1.0;			//density of water.
-
+	
 	//define initial conditions:
 	ray->iKill	= FALSE;
 	iUp			= FALSE;
@@ -136,7 +136,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 	ray->tau[0]	= 0;
 	ray->s[0]	= 0;
 	ray->ic[0]	= 0;
-
+	
 	//prepare for Runge-Kutta-Fehlberg integration
 	yOld[0] = settings->source.rx;
 	yOld[1] = settings->source.zx;
@@ -146,9 +146,9 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 	fOld[1] = es.z;
 	fOld[2] = slowness.r;
 	fOld[3] = slowness.z;
-
-
-
+	
+	
+	
 	/************************************************************************
 	 *	Start tracing the ray:												*
 	 ***********************************************************************/
@@ -168,7 +168,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 				fatal("Runge-Kutta integration: failure in step convergence.\nAborting...");
 			}
 			rkf45(settings, &dsi, yOld, fOld, yNew, fNew, &ds4, &ds5);
-
+			
 			numRungeKutta++;
 			stepError = fabs( ds4 - ds5) / (0.5 * (ds4 + ds5));
 			dsi *= 0.5;
@@ -178,7 +178,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 		es.z = fNew[1];
 		ri = yNew[0];
 		zi = yNew[1];
-
+		
 		/**
 		 * Check for boundary intersections:
 		 ***/
@@ -227,7 +227,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 				
 				DEBUG(7, "Calculate surface reflection: \n");
 				specularReflection(&normal, &es, &tauR, &thetaRefl);
-
+				
 				DEBUG(7, "Check if the ray is 'digging in' beyond the surface: \n");
 				//before we check if the next step's depth is above the surface, we need to check if it's range is withing the rangebox:
 				DEBUG(8, "Testing step: ri+settings->source.ds*tauR.r: %lf\n", ri+settings->source.ds*tauR.r);
@@ -363,12 +363,6 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 				rayBoundaryIntersection(&(settings->batimetry), &pointA, &pointB, &pointIsect);
 				ri = pointIsect.r;
 				zi = pointIsect.z;
-				//verify if the intersection point is identical to the first point:
-				/*
-				if(pointIsect.r == pointA.r && pointIsect.z == pointA.z){
-					fatal("points coincide.");
-				}
-				*/
 				
 				DEBUG(8,"ri: %lf, zi: %lf\n", ri, zi);
 				boundaryInterpolation(	&(settings->batimetry), ri, &batInterpolatedZ, &tauB, &normal);
@@ -529,7 +523,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 			fNew[2] = slowness.r;
 			fNew[3] = slowness.z;
 		}	//if ((ray->iKill == FALSE ) && (zi < altInterpolatedZ || zi > batInterpolatedZ))
-
+		
 		/*************************
 		 *  Object reflection:
 		 *************************/
@@ -537,7 +531,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 		if (settings->objects.numObjects > 0){
  			for(j=0; j<settings->objects.numObjects; j++){
 				nObjCoords = settings->objects.object[j].nCoords;
-
+				
 				DEBUG(7, "For each object detect if the ray is inside the object range: \n");
 				if (	(ri >=	settings->objects.object[j].r[0] ) &&
 						(ri <	settings->objects.object[j].r[nObjCoords-1])){
@@ -881,7 +875,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 	}
 
 	/*	Ray coordinates have been computed. Finalizing */
-	//We still need to calculate the exact coords in case the for the last point is outside [rbox1,rbox2], so we add 1
+	//We still need to calculate the exact coords in case the last point is outside [rbox1,rbox2], so we add 1
 	ray -> nCoords	= i+1;
 	//reallocRayMembers(ray, i+1);
 
@@ -946,13 +940,6 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 	ray-> rMin = min( ray->rMin, ray->r[ray->nCoords-1] );
 	ray-> rMax = max( ray->rMax, ray->r[ray->nCoords-1] );
 	i++;
-/*
-	prod = ( ray->r[i+1]-ray->r[i] )*( ray->r[i]-ray->r[i-1] );
-	if ( prod < 0 ){
-		ray->iReturn = TRUE;
-	}
-*/
-	prod = 0.0;
 	
 	//clip allocated memory for refractions
 	ray->rRefrac = reallocDouble(ray->rRefrac, ray->nRefrac);

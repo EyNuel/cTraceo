@@ -61,7 +61,7 @@ DEBUG(5,"[n-1]: %e\n",	x[n-1]);
 		printf("xi: %e\n",		xi);
 		printf("x[0]: %e\n",	x[0]);
 		printf("[n-1]: %e\n",	x[n-1]);
-		fatal("Bounding error in bracket().\nAborting."); //TODO uncomment!
+		fatal("Bounding error in bracket().\nAborting.");
 		*/
 		//now it will return 0, thus indicating a bounding error
 		return 0;

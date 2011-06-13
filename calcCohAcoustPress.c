@@ -173,7 +173,7 @@ void	calcCohAcoustPress(settings_t* settings){
 	
 
 	/**
-	 * Allocate memory for pressure and some other case specific initialization
+	 * Allocate memory for pressure and do some other case specific initialization
 	 */
 	if( settings->output.calcType == CALC_TYPE__PART_VEL ||
 		settings->output.calcType == CALC_TYPE__COH_ACOUS_PRESS_PART_VEL){
@@ -217,7 +217,7 @@ void	calcCohAcoustPress(settings_t* settings){
 		settings->output.calcType == CALC_TYPE__COH_TRANS_LOSS	||
 		settings->output.calcType == CALC_TYPE__COH_ACOUS_PRESS_PART_VEL){
 			/**
-			 * when calculating only the Acoustic Pressure only need memory the simple pressure, no H/V components.
+			 * when calculating only the Acoustic Pressure we only need memory the simple pressure, no H/V components.
 			 * when calculating both Acoustic Pressure and Particle Velocity, pressure2D is used as a temporary
 			 * variable at the end of the file to obtain the simple pressure from the center elements of
 			 * star pressure contributions.
@@ -376,7 +376,7 @@ void	calcCohAcoustPress(settings_t* settings){
 						case ARRAY_TYPE__RECTANGULAR:
 							DEBUG(3,"Array type: Rectangular/Horizontal/Vertical\n");
 							DEBUG(4,"nArrayR: %u, nArrayZ: %u\n", (uint32_t)dimR, (uint32_t)dimZ );
-							//TODO invert indices, so that the innermost loop loops over the rightmost index of pressure2D
+							
 							for(j=0; j<dimR; j++){
 								rHyd = settings->output.arrayR[j];
 								

@@ -73,7 +73,7 @@ void	cValues1D(uintptr_t n, double* xTable, double* cTable, double xi, double* c
 							xi, ci, cxi, cxxi);
 		
 	}else{
-		fatal("in cValues1D(): This should not be possible.");		//TODO replace with assertion?
+		fatal("in cValues1D(): This should not be possible.");
 	}
 	DEBUG(10,"Leaving cValues1D.\n");
 }
