@@ -483,8 +483,8 @@ void	calcCohAcoustPress(settings_t* settings){
 	if( settings->output.calcType == CALC_TYPE__PART_VEL ||
 		settings->output.calcType == CALC_TYPE__COH_ACOUS_PRESS_PART_VEL){
 		for(i=0; i<dimR; i++){
-			free(settings->output.pressure_H[i];
-			free(settings->output.pressure_V[i];
+			free(settings->output.pressure_H[i]);
+			free(settings->output.pressure_V[i]);
 		}
 		free(settings->output.pressure_H);
 		free(settings->output.pressure_V);
