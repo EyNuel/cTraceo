@@ -25,6 +25,7 @@
 
 
 /********************************************************************************
+ * ------------------------------ MATLAB --------------------------------------	*
  * Some data types vary between matlab versions, so we have to define			*
  * their type according to the matlab version used during compilation.			*
  *******************************************************************************/
@@ -283,4 +284,12 @@ typedef struct settings {
 	interface_t		batimetry;
 	output_t		output;
 }settings_t;
+
+
+typedef struct arrivals{
+	double			nArrivals;
+	mxArray*		mxArrivalStruct;
+}arrivals_t;
+	
+
 

@@ -34,6 +34,287 @@
 void calcAmpDelPr(settings_t*);
 
 void calcAmpDelPr(settings_t* settings){
-	//TODO write something like Bellhop's .arr file, containing only the actual amplitudes and delays of the eigenrays.
-	calcEigenrayPr(settings);
+	//NOTE: the code below is practically identical to calcEigenrayPr.c, the only difference being the file output
+	DEBUG(1,"in\n");
+	
+	double			thetai, ctheta;
+	double			junkDouble;
+	ray_t*			ray			= NULL;
+	double			nEigenRays = 0;
+	uintptr_t		i, j, jj, l;
+	double 			rHyd, zHyd, zRay, tauRay;
+	complex	double	junkComplex, ampRay; 
+	double			dz;
+	uintptr_t		nRet, iHyd;
+	uintptr_t		iRet[51];
+	
+	MATFile*		matfile				= NULL;
+	mxArray*		pThetas				= NULL;
+	mxArray*		pTitle				= NULL;
+	mxArray*		pHydArrayR			= NULL;
+	mxArray*		pHydArrayZ			= NULL;
+	mxArray*		pnEigenRays			= NULL;
+	mxArray*		mxTheta				= NULL;
+	mxArray*		mxR					= NULL;
+	mxArray*		mxZ					= NULL;
+	mxArray*		mxTau				= NULL;
+	mxArray*		mxAmp				= NULL;
+	mxArray*		mxAadStruct			= NULL;		//contains the arrivals at a single hydrophone
+	mxArray*		mxNumArrivals		= NULL;
+	//mxArray*		mxArrivalStruct		= NULL;		//contains the the arrivals for all the hydrophones
+	const char*		aadFieldNames[]		= {	"nArrivals", "arrival" };
+	const char*		arrivalFieldNames[]	= {	"theta",
+											"r",
+											"z",
+											"tau",
+											"amp"};	//the names of the fields contained in mxArrivalStruct
+	MWINDEX			index[2];						//used for accessing a specific element in the mxAadStruct
+	//uintptr_t		nArrivals[settings->output.nArrayR][settings->output.nArrayZ];
+	arrivals_t		arrivals[settings->output.nArrayR][settings->output.nArrayZ];
+	//initialize to 0
+	for (j=0; j<settings->output.nArrayR; j++){
+		for (jj=0; jj<settings->output.nArrayZ; jj++){
+			arrivals[j][jj].nArrivals = 0;
+			arrivals[j][jj].mxArrivalStruct = mxCreateStructMatrix(	(MWSIZE)settings->source.nThetas,		//number of rows
+																	(MWSIZE)1,								//number of columns
+																	5,										//number of fields in each element
+																	arrivalFieldNames);						//list of field names
+			if( arrivals[j][jj].mxArrivalStruct == NULL ){
+				fatal("Memory Alocation error.");
+			}
+		}
+	}
+	
+	#if 1
+	//open matfile for output
+	matfile 	= matOpen("aad.mat", "w");
+	
+	//write launching angles to file
+	pThetas		= mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)settings->source.nThetas, mxREAL);
+	if(matfile == NULL || pThetas == NULL){
+		fatal("Memory alocation error.");
+	}
+	//copy angles in cArray to mxArray:
+	copyDoubleToMxArray(settings->source.thetas, pThetas, settings->source.nThetas);
+	//move mxArray to file and free memory:
+	matPutVariable(matfile, "thetas", pThetas);
+	mxDestroyArray(pThetas);
+	
+	
+	//write title to matfile:
+	pTitle = mxCreateString("TRACEO: EIGenrays (by proximity)");
+	if(pTitle == NULL){
+		fatal("Memory alocation error.");
+	}
+	matPutVariable(matfile, "caseTitle", pTitle);
+	mxDestroyArray(pTitle);
+	
+	
+	//write hydrophone array ranges to file:
+	pHydArrayR			= mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)settings->output.nArrayR, mxREAL);
+	if(pHydArrayR == NULL){
+		fatal("Memory alocation error.");
+	}
+	copyDoubleToMxArray(	settings->output.arrayR, pHydArrayR, (uintptr_t)settings->output.nArrayR);
+	matPutVariable(matfile, "rarray", pHydArrayR);
+	mxDestroyArray(pHydArrayR);
+	
+	
+	//write hydrophone array depths to file:
+	pHydArrayZ			= mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)settings->output.nArrayZ, mxREAL);
+	if(pHydArrayZ == NULL){
+		fatal("Memory alocation error.");
+	}
+	copyDoubleToMxArray(	settings->output.arrayZ, pHydArrayZ, (uintptr_t)settings->output.nArrayZ);
+	matPutVariable(matfile, "zarray", pHydArrayZ);
+	mxDestroyArray(pHydArrayZ);
+	
+
+	//allocate memory for the rays:
+	ray = makeRay(settings->source.nThetas);
+	#endif
+	
+	/** Trace the rays:  */
+	
+	for(i=0; i<settings->source.nThetas; i++){
+		thetai = -settings->source.thetas[i] * M_PI/180.0;
+		ray[i].theta = thetai;
+		ctheta = fabs( cos(thetai));
+		
+		//Trace a ray as long as it is neither at 90 nor -90:
+		if (ctheta > 1.0e-7){
+			solveEikonalEq(settings, &ray[i]);
+			solveDynamicEq(settings, &ray[i]);
+			
+			//test for proximity of ray to each hydrophone 
+			//(yes, this is slow, can you figure out a better way to do it?)
+			for(j=0; j<settings->output.nArrayR; j++){
+				rHyd = settings->output.arrayR[j];
+				
+				if ( (rHyd >= ray[i].rMin) && (rHyd <= ray[i].rMax)){
+					
+					//	Check if the ray is returning back or not;
+					//	if not:		we can bracket it without problems,
+					//	otherwise:	we need to know how many times it passed by the given array range 
+					if (ray[i].iReturn == FALSE){
+						
+						//get the index of the lower bracketing element:
+						bracket(ray[i].nCoords,	ray[i].r, rHyd, &iHyd);
+						DEBUG(3,"non-returning ray: nCoords: %u, iHyd:%u\n", (uint32_t)ray[i].nCoords, (uint32_t)iHyd);
+						
+						//from index interpolate the rays' depth:
+						intLinear1D(		&ray[i].r[iHyd], &ray[i].z[iHyd],	rHyd, &zRay,	&junkDouble);
+						
+						//for every hydrophone check distance to ray
+						for(jj=0; jj<settings->output.nArrayZ; jj++){
+							zHyd = settings->output.arrayZ[jj];
+							dz = fabs(zRay-zHyd);
+							DEBUG(4, "dz: %e\n", dz);
+							
+							if (dz < settings->output.miss){
+								DEBUG(3, "Eigenray found\n");
+								
+								//from index interpolate the rays' travel time and amplitude:
+								intLinear1D(		&ray[i].r[iHyd], &ray[i].tau[iHyd],	rHyd, &tauRay,	&junkDouble);
+								intComplexLinear1D(	&ray[i].r[iHyd], &ray[i].amp[iHyd],	rHyd, &ampRay,	&junkComplex);
+								
+								///prepare to write arrival to matfile:
+								//create mxArrays:
+								mxTheta	= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)1,	mxREAL);
+								mxR		= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)1,	mxREAL);
+								mxZ		= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)1,	mxREAL);
+								mxTau	= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)1,	mxREAL);
+								mxAmp	= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)1,	mxCOMPLEX);
+								if(	mxTheta == NULL || mxR == NULL || mxZ == NULL || mxTau == NULL || mxAmp == NULL){
+									fatal("Memory alocation error.");
+								}
+								
+								//copy data to mxArrays:
+								copyDoubleToMxArray(&settings->source.thetas[i],mxTheta,1);
+								copyDoubleToMxArray(&rHyd,						mxR,	1);
+								copyDoubleToMxArray(&zRay,						mxZ, 	1);
+								copyDoubleToMxArray(&tauRay,					mxTau,	1);
+								copyComplexToMxArray(&ampRay,					mxAmp,	1);
+								
+								//copy mxArrays to mxArrivalStruct
+								mxSetFieldByNumber(	arrivals[j][jj].mxArrivalStruct,	//pointer to the mxStruct
+													(MWINDEX)arrivals[j][jj].nArrivals,	//index of the element
+													0,									//position of the field (in this case, field 0 is "theta"
+													mxTheta);							//the mxArray we want to copy into the mxStruct
+								mxSetFieldByNumber(	arrivals[j][jj].mxArrivalStruct, (MWINDEX)arrivals[j][jj].nArrivals, 1, mxR);
+								mxSetFieldByNumber(	arrivals[j][jj].mxArrivalStruct, (MWINDEX)arrivals[j][jj].nArrivals, 2, mxZ);
+								mxSetFieldByNumber(	arrivals[j][jj].mxArrivalStruct, (MWINDEX)arrivals[j][jj].nArrivals, 3, mxTau);
+								mxSetFieldByNumber(	arrivals[j][jj].mxArrivalStruct, (MWINDEX)arrivals[j][jj].nArrivals, 4, mxAmp);
+								///Arrival has been saved to mxAadStruct
+								
+								arrivals[j][jj].nArrivals += 1;
+								//nEigenRays += 1;
+							}//	if (dz settings->output.miss)
+						}//	for(jj=1; jj<=settings->output.nArrayZ; jj++)
+						
+					}else{// if (ray[i].iReturn == FALSE)
+						
+						DEBUG(3,"returning ray: nCoords: %u, iHyd:%u\n", (uint32_t)ray[i].nCoords, (uint32_t)iHyd);
+						//get the indexes of the bracketing points.
+						eBracket(ray[i].nCoords, ray[i].r, rHyd, &nRet, iRet);
+						
+						//for each index where the ray passes at the hydrophone, interpolate the rays' depth:
+						for(l=0; l<nRet; l++){
+							DEBUG(4, "nRet=%u, iRet[%u]= %u\n", (uint32_t)nRet, (uint32_t)l, (uint32_t)iRet[l]);
+							intLinear1D(		&ray[i].r[iRet[l]], &ray[i].z[iRet[l]],		rHyd, &zRay,	&junkDouble);
+							
+							//for every hydrophone check if the ray is close enough to be considered an eigenray:
+							for(jj=0;jj<settings->output.nArrayZ; jj++){
+								zHyd = settings->output.arrayZ[jj];
+								dz = fabs( zRay - zHyd );
+								
+								if (dz < settings->output.miss){
+									
+									//interpolate the ray's travel time and amplitude:
+									intLinear1D(		&ray[i].r[iRet[l]], &ray[i].tau[iRet[l]],	rHyd, &tauRay,	&junkDouble);
+									intComplexLinear1D(	&ray[i].r[iRet[l]], &ray[i].amp[iRet[l]],	(complex double)rHyd, &ampRay,	&junkComplex);
+									
+									///prepare to write arrival to matfile:
+									//create mxArrays:
+									mxTheta	= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)1,	mxREAL);
+									mxR		= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)1,	mxREAL);
+									mxZ		= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)1,	mxREAL);
+									mxTau	= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)1,	mxREAL);
+									mxAmp	= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)1,	mxCOMPLEX);
+									if(	mxTheta == NULL || mxR == NULL || mxZ == NULL || mxTau == NULL || mxAmp == NULL){
+										fatal("Memory alocation error.");
+									}
+									
+									//copy data to mxArrays:
+									copyDoubleToMxArray(&settings->source.thetas[i],mxTheta,1);
+									copyDoubleToMxArray(&rHyd,						mxR,	1);
+									copyDoubleToMxArray(&zRay,						mxZ, 	1);
+									copyDoubleToMxArray(&tauRay,					mxTau,	1);
+									copyComplexToMxArray(&ampRay,					mxAmp,	1);
+									
+									//copy mxArrays to mxArrivalStruct
+									mxSetFieldByNumber(	arrivals[j][jj].mxArrivalStruct,	//pointer to the mxStruct
+														(MWINDEX)arrivals[j][jj].nArrivals,	//index of the element
+														0,									//position of the field (in this case, field 0 is "theta"
+														mxTheta);							//the mxArray we want to copy into the mxStruct
+									mxSetFieldByNumber(	arrivals[j][jj].mxArrivalStruct, (MWINDEX)arrivals[j][jj].nArrivals, 1, mxR);
+									mxSetFieldByNumber(	arrivals[j][jj].mxArrivalStruct, (MWINDEX)arrivals[j][jj].nArrivals, 2, mxZ);
+									mxSetFieldByNumber(	arrivals[j][jj].mxArrivalStruct, (MWINDEX)arrivals[j][jj].nArrivals, 3, mxTau);
+									mxSetFieldByNumber(	arrivals[j][jj].mxArrivalStruct, (MWINDEX)arrivals[j][jj].nArrivals, 4, mxAmp);
+									///Arrival has been saved to mxAadStruct
+									
+									arrivals[j][jj].nArrivals += 1;
+									//nEigenRays += 1;
+								}
+							}
+						}
+					}//	if (ray[i].iReturn == FALSE)
+				}//if ( (rHyd >= ray[i].rMin) && (rHyd < ray[i].rMax))
+			}//for(j=0; j<settings->output.nArrayR; j++){
+			if(KEEP_RAYS_IN_MEM == FALSE){
+				//free the ray's memory
+				reallocRayMembers(&ray[i],0);
+			}
+		}//if (ctheta > 1.0e-7)
+	}//for(i=0; i<settings->source.nThetas; i++)
+	
+	//copy arrival data to mxAadStruct:
+	mxAadStruct = mxCreateStructMatrix(	(MWSIZE)settings->output.nArrayZ,	//number of rows
+										(MWSIZE)settings->output.nArrayR,	//number of columns
+										2,				//number of fields in each element
+										aadFieldNames);	//list of field names
+	if( mxAadStruct == NULL ) {
+		fatal("Memory Alocation error.");
+	}
+	for (j=0; j<settings->output.nArrayR; j++){
+		for (jj=0; jj<settings->output.nArrayZ; jj++){
+			mxNumArrivals = mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)1,	mxREAL);
+			copyDoubleToMxArray(&arrivals[j][jj].nArrivals, mxNumArrivals,1);
+			
+			index[0] = (MWINDEX)jj;
+			index[1] = (MWINDEX)j;
+			//printf("j: %d, jj:%d => Index: %d\n",(int32_t)j,(int32_t)jj, (int32_t)mxCalcSingleSubscript(mxAadStruct,   2, index));
+			mxSetFieldByNumber(	mxAadStruct,									//pointer to the mxStruct
+								mxCalcSingleSubscript(mxAadStruct,   2, index),	//index of the element
+								0,												//position of the field (in this case, field 0 is "theta"
+								mxNumArrivals);									//the mxArray we want to copy into the mxStruct
+			
+			mxSetFieldByNumber(	mxAadStruct,									//pointer to the mxStruct
+								mxCalcSingleSubscript(mxAadStruct,   2, index),	//index of the element
+								1,												//position of the field (in this case, field 0 is "theta"
+								arrivals[j][jj].mxArrivalStruct);				//the mxArray we want to copy into the mxStruct
+		}
+	}
+	
+	
+	
+	///Write Eigenrays to matfile:
+	matPutVariable(matfile, "arrivals", mxAadStruct);
+	
+	matClose(matfile);
+	mxDestroyArray(mxAadStruct);
+	
+	reallocRayMembers(ray, 0);
+	free(ray);
+	DEBUG(1,"out\n");
 }

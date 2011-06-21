@@ -260,8 +260,7 @@ void	calcEigenrayPr(settings_t* settings){
 								dz = fabs( zRay - zHyd );
 								
 								if (dz < settings->output.miss){
-									nEigenRays += 1;
-
+									
 									//interpolate the ray's travel time and amplitude:
 									intLinear1D(		&ray[i].r[iRet[l]], &ray[i].tau[iRet[l]],	rHyd, &tauRay,	&junkDouble);
 									intComplexLinear1D(	&ray[i].r[iRet[l]], &ray[i].amp[iRet[l]],	(complex double)rHyd, &ampRay,	&junkComplex);
