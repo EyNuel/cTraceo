@@ -29,7 +29,14 @@
  *******************************************************************************/
 
 #include "globals.h"
-#include "calcEigenrayPr.c"
+#include "tools.h"
+#include "solveDynamicEq.c"
+#include "solveEikonalEq.c"
+#include <mat.h>
+#include "matrix.h"
+#include "interpolation.h"
+#include "bracket.c"
+#include "eBracket.c"
 
 void calcAmpDelPr(settings_t*);
 
@@ -39,21 +46,19 @@ void calcAmpDelPr(settings_t* settings){
 	
 	double			thetai, ctheta;
 	double			junkDouble;
-	ray_t*			ray			= NULL;
-	double			nEigenRays = 0;
 	uintptr_t		i, j, jj, l;
 	double 			rHyd, zHyd, zRay, tauRay;
 	complex	double	junkComplex, ampRay; 
 	double			dz;
 	uintptr_t		nRet, iHyd;
 	uintptr_t		iRet[51];
+	ray_t*			ray					= NULL;
 	
 	MATFile*		matfile				= NULL;
 	mxArray*		pThetas				= NULL;
 	mxArray*		pTitle				= NULL;
 	mxArray*		pHydArrayR			= NULL;
 	mxArray*		pHydArrayZ			= NULL;
-	mxArray*		pnEigenRays			= NULL;
 	mxArray*		mxTheta				= NULL;
 	mxArray*		mxR					= NULL;
 	mxArray*		mxZ					= NULL;
@@ -61,16 +66,11 @@ void calcAmpDelPr(settings_t* settings){
 	mxArray*		mxAmp				= NULL;
 	mxArray*		mxAadStruct			= NULL;		//contains the arrivals at a single hydrophone
 	mxArray*		mxNumArrivals		= NULL;
-	//mxArray*		mxArrivalStruct		= NULL;		//contains the the arrivals for all the hydrophones
 	const char*		aadFieldNames[]		= {	"nArrivals", "arrival" };
-	const char*		arrivalFieldNames[]	= {	"theta",
-											"r",
-											"z",
-											"tau",
-											"amp"};	//the names of the fields contained in mxArrivalStruct
+	const char*		arrivalFieldNames[]	= {	"theta", "r", "z", "tau", "amp"};	//the names of the fields contained in mxArrivalStruct
 	MWINDEX			index[2];						//used for accessing a specific element in the mxAadStruct
-	//uintptr_t		nArrivals[settings->output.nArrayR][settings->output.nArrayZ];
 	arrivals_t		arrivals[settings->output.nArrayR][settings->output.nArrayZ];
+	
 	//initialize to 0
 	for (j=0; j<settings->output.nArrayR; j++){
 		for (jj=0; jj<settings->output.nArrayZ; jj++){
@@ -135,7 +135,6 @@ void calcAmpDelPr(settings_t* settings){
 	#endif
 	
 	/** Trace the rays:  */
-	
 	for(i=0; i<settings->source.nThetas; i++){
 		thetai = -settings->source.thetas[i] * M_PI/180.0;
 		ray[i].theta = thetai;
@@ -208,7 +207,6 @@ void calcAmpDelPr(settings_t* settings){
 								///Arrival has been saved to mxAadStruct
 								
 								arrivals[j][jj].nArrivals += 1;
-								//nEigenRays += 1;
 							}//	if (dz settings->output.miss)
 						}//	for(jj=1; jj<=settings->output.nArrayZ; jj++)
 						
@@ -264,7 +262,6 @@ void calcAmpDelPr(settings_t* settings){
 									///Arrival has been saved to mxAadStruct
 									
 									arrivals[j][jj].nArrivals += 1;
-									//nEigenRays += 1;
 								}
 							}
 						}
@@ -293,7 +290,6 @@ void calcAmpDelPr(settings_t* settings){
 			
 			index[0] = (MWINDEX)jj;
 			index[1] = (MWINDEX)j;
-			//printf("j: %d, jj:%d => Index: %d\n",(int32_t)j,(int32_t)jj, (int32_t)mxCalcSingleSubscript(mxAadStruct,   2, index));
 			mxSetFieldByNumber(	mxAadStruct,									//pointer to the mxStruct
 								mxCalcSingleSubscript(mxAadStruct,   2, index),	//index of the element
 								0,												//position of the field (in this case, field 0 is "theta"
