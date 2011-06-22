@@ -284,7 +284,7 @@ void calcAmpDelPr(settings_t* settings){
 	//copy arrival data to mxAadStruct:
 	mxAadStruct = mxCreateStructMatrix(	(MWSIZE)settings->output.nArrayZ,	//number of rows
 										(MWSIZE)settings->output.nArrayR,	//number of columns
-										2,				//number of fields in each element
+										4,				//number of fields in each element
 										aadFieldNames);	//list of field names
 	if( mxAadStruct == NULL ) {
 		fatal("Memory Alocation error.");
