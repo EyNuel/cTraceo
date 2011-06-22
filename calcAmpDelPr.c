@@ -66,11 +66,17 @@ void calcAmpDelPr(settings_t* settings){
 	mxArray*		mxAmp				= NULL;
 	mxArray*		mxAadStruct			= NULL;		//contains the arrivals at a single hydrophone
 	mxArray*		mxNumArrivals		= NULL;
-	const char*		aadFieldNames[]		= {	"nArrivals", "arrival" };
+	mxArray*		mxRHyd				= NULL;
+	mxArray*		mxZHyd				= NULL;
+	const char*		aadFieldNames[]		= {	"nArrivals", "rHyd", "zHyd", "arrival" };
 	const char*		arrivalFieldNames[]	= {	"theta", "r", "z", "tau", "amp"};	//the names of the fields contained in mxArrivalStruct
 	MWINDEX			index[2];						//used for accessing a specific element in the mxAadStruct
-	arrivals_t		arrivals[settings->output.nArrayR][settings->output.nArrayZ];
 	
+	arrivals_t		arrivals[settings->output.nArrayR][settings->output.nArrayZ];
+	/*
+	 * arrivals[][] is an array with the dimensions of the hydrophone array and will contain the
+	 * actual arrival information before it is written to a matlab structure at the end of the file.
+	 */
 	//initialize to 0
 	for (j=0; j<settings->output.nArrayR; j++){
 		for (jj=0; jj<settings->output.nArrayZ; jj++){
@@ -285,19 +291,34 @@ void calcAmpDelPr(settings_t* settings){
 	}
 	for (j=0; j<settings->output.nArrayR; j++){
 		for (jj=0; jj<settings->output.nArrayZ; jj++){
-			mxNumArrivals = mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)1,	mxREAL);
-			copyDoubleToMxArray(&arrivals[j][jj].nArrivals, mxNumArrivals,1);
+			mxNumArrivals	= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)1,	mxREAL);
+			mxRHyd 			= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)1,	mxREAL);
+			mxZHyd			= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)1,	mxREAL);
+			
+			copyDoubleToMxArray(&arrivals[j][jj].nArrivals,		mxNumArrivals,1);
+			copyDoubleToMxArray(&settings->output.arrayR[j],	mxRHyd,1);
+			copyDoubleToMxArray(&settings->output.arrayZ[jj],	mxZHyd,1);
 			
 			index[0] = (MWINDEX)jj;
 			index[1] = (MWINDEX)j;
 			mxSetFieldByNumber(	mxAadStruct,									//pointer to the mxStruct
-								mxCalcSingleSubscript(mxAadStruct,   2, index),	//index of the element
+								mxCalcSingleSubscript(mxAadStruct,	2, index),	//index of the element
 								0,												//position of the field (in this case, field 0 is "theta"
 								mxNumArrivals);									//the mxArray we want to copy into the mxStruct
 			
+			mxSetFieldByNumber(	mxAadStruct,						//pointer to the mxStruct
+								mxCalcSingleSubscript(mxAadStruct,	2, index),	//index of the element
+								1,											//position of the field (in this case, field 0 is "theta"
+								mxRHyd);									//the mxArray we want to copy into the mxStruct
+			
+			mxSetFieldByNumber(	mxAadStruct,						//pointer to the mxStruct
+								mxCalcSingleSubscript(mxAadStruct,	2, index),	//index of the element
+								2,											//position of the field (in this case, field 0 is "theta"
+								mxZHyd);									//the mxArray we want to copy into the mxStruct
+			
 			mxSetFieldByNumber(	mxAadStruct,									//pointer to the mxStruct
-								mxCalcSingleSubscript(mxAadStruct,   2, index),	//index of the element
-								1,												//position of the field (in this case, field 0 is "theta"
+								mxCalcSingleSubscript(mxAadStruct,	2, index),	//index of the element
+								3,												//position of the field (in this case, field 0 is "theta"
 								arrivals[j][jj].mxArrivalStruct);				//the mxArray we want to copy into the mxStruct
 		}
 	}
