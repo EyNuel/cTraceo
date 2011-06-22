@@ -42,43 +42,63 @@ void 	calcEigenrayRF(settings_t*);
 
 void	calcEigenrayRF(settings_t* settings){
 	DEBUG(1,"in\n");
-	MATFile*		matfile		= NULL;
-	mxArray*		pThetas		= NULL;
-	mxArray*		pTitle		= NULL;
-	mxArray*		pHydArrayR	= NULL;
-	mxArray*		pHydArrayZ	= NULL;
-	mxArray*		pnEigenRays	= NULL;
-	mxArray*		mxTheta		= NULL;
-	mxArray*		mxR			= NULL;
-	mxArray*		mxZ			= NULL;
-	mxArray*		mxTau		= NULL;
-	mxArray*		mxAmp		= NULL;
-	mxArray*		mxRayStruct	= NULL;
-	const char*		fieldNames[]= {	"theta",
-									"r",
-									"z",
-									"tau",
-									"amp"};		//the names of the fields contained in mxRayStruct
-	
-	double*			thetas		= NULL;
 	double 			thetai, ctheta;
-	double**		depths		= NULL;
 	uintptr_t		i, j, k, l, nRays, iHyd;
 	uintptr_t		nPossibleEigenRays, nFoundEigenRays;
 	double			zRay, zHyd, rHyd;
-	ray_t*			ray = NULL;
-	double*			dz = NULL;
-	//used for root-finding in actual Regula-Falsi Method:
-	double			fl, fr, prod;
-	double*			thetaL = NULL;
-	double*			thetaR = NULL;
 	double			junkDouble;
 	uint32_t		nTrial;
-	ray_t*			tempRay = NULL;
 	double			theta0, f0;
-	uint32_t		success = FALSE;
+	//used for root-finding in actual Regula-Falsi Method:
+	double			fl, fr, prod;
+	double*			thetaL 				= NULL;
+	double*			thetaR 				= NULL;
+	ray_t*			tempRay 			= NULL;
+	uint32_t		success 			= FALSE;
+	double*			thetas				= NULL;
+	double**		depths				= NULL;
+	ray_t*			ray					= NULL;
+	double*			dz 					= NULL;
 	
+	MATFile*		matfile				= NULL;
+	mxArray*		pThetas				= NULL;
+	mxArray*		pTitle				= NULL;
+	mxArray*		pHydArrayR			= NULL;
+	mxArray*		pHydArrayZ			= NULL;
+	mxArray*		pnEigenRays			= NULL;
+	mxArray*		mxTheta				= NULL;
+	mxArray*		mxR					= NULL;
+	mxArray*		mxZ					= NULL;
+	mxArray*		mxTau				= NULL;
+	mxArray*		mxAmp				= NULL;
+	mxArray*		mxAllEigenraysStruct= NULL;		//contains all the eigenrays at all hydrophones
+	mxArray*		mxNumEigenrays		= NULL;
+	mxArray*		mxRHyd				= NULL;
+	mxArray*		mxZHyd				= NULL;
+	const char*		AllEigenrayFieldNames[]= {	"nEigenrays", "rHyd", "zHyd", "eigenray" };
+	const char*		eigenrayFieldNames[]= {	"theta", "r", "z", "tau", "amp"};		//the names of the fields contained in mxRayStruct
+	MWINDEX			index[2];			//used for accessing a specific element in the mxAllEigenrayStruct
 	
+	eigenrays_t		eigenrays[settings->output.nArrayR][settings->output.nArrayZ];
+	/*
+	 * arrivals[][] is an array with the dimensions of the hydrophone array and will contain the
+	 * actual arrival information before it is written to a matlab structure at the end of the file.
+	 */
+	//initialize to 0
+	for (i=0; i<settings->output.nArrayR; i++){
+		for (j=0; j<settings->output.nArrayZ; j++){
+			eigenrays[i][j].nEigenrays = 0;
+			eigenrays[i][j].mxEigenrayStruct = mxCreateStructMatrix(	(MWSIZE)settings->source.nThetas,		//number of rows
+																		(MWSIZE)1,								//number of columns
+																		5,										//number of fields in each element
+																		eigenrayFieldNames);						//list of field names
+			if( eigenrays[i][j].mxEigenrayStruct == NULL ){
+				fatal("Memory Alocation error.");
+			}
+		}
+	}
+	
+	#if 1
 	//Open matfile for output:
 	matfile 	= matOpen("eig.mat", "w");
 	
@@ -125,6 +145,7 @@ void	calcEigenrayRF(settings_t* settings){
 	
 	//allocate memory for rays and auxiliary variables:
 	ray = makeRay(settings->source.nThetas);
+	#endif
 	
 	/**********************************************************************************************
 	 * 	1)	Create a set of arrays (thetas[], depths[][]) that relate the launching angles of the 
@@ -140,7 +161,7 @@ void	calcEigenrayRF(settings_t* settings){
 		thetai = -settings->source.thetas[i]*M_PI/180.0;
 		ray[i].theta = thetai;
 		ctheta = fabs( cos( thetai ) );
-
+		
 		//	Trace a ray as long as it is neither 90 nor -90:
 		if (ctheta > 1.0e-7){
 			thetas[nRays] = thetai;
@@ -193,7 +214,7 @@ void	calcEigenrayRF(settings_t* settings){
 	//	iterate over....
 	for (i=0; i<settings->output.nArrayR; i++){
 		rHyd = settings->output.arrayR[i];
-		//	...the entire array:
+		//	...the entire hydrophone array:
 		for(j=0; j<settings->output.nArrayZ; j++){
 			zHyd = settings->output.arrayZ[j];
 			DEBUG(3, "i: %u; j: %u; rHyd:%lf, zHyd:%lf\n",(uint32_t)i, (uint32_t)j, rHyd, zHyd );
@@ -253,6 +274,8 @@ void	calcEigenrayRF(settings_t* settings){
 			 */
 			DEBUG(3, "nPossibleEigenRays: %u\n", (uint32_t)nPossibleEigenRays);
 			
+			#if 0
+			/*
 			//create mxStructArray:
 			mxRayStruct = mxCreateStructMatrix(	(MWSIZE)nPossibleEigenRays,	//number of rows
 												(MWSIZE)1,					//number of columns
@@ -261,6 +284,8 @@ void	calcEigenrayRF(settings_t* settings){
 			if( mxRayStruct == NULL ) {
 				fatal("Memory Alocation error.");
 			}
+			*/
+			#endif
 			
 			tempRay = makeRay(1);
 			nFoundEigenRays = 0;
@@ -281,7 +306,7 @@ void	calcEigenrayRF(settings_t* settings){
 				fr = tempRay[0].z[tempRay[0].nCoords-1] - zHyd;
 				//reset the ray members to zero:
 				reallocRayMembers(tempRay, 0);	
-
+				
 				//check if either the "left" or "right" ray pass at a distance within the defined threshold
 				if (fabs(fl) <= settings->output.miss){
 					DEBUG(3, "\"left\" is eigenray.\n");
@@ -294,7 +319,7 @@ void	calcEigenrayRF(settings_t* settings){
 					theta0 = thetaR[l];
 					nFoundEigenRays++;
 					success = TRUE;
-
+				
 				//if not, try to find the "exact" launching angle
 				}else{
 					DEBUG(3, "Neither \"left\" nor \"right\" ray are close enough to be eigenrays.\nApplying Regula-Falsi...\n");
@@ -379,15 +404,17 @@ void	calcEigenrayRF(settings_t* settings){
 					copyComplexToMxArray(tempRay->amp,		mxAmp,	tempRay->nCoords);
 					
 					//copy mxArrays to mxRayStruct
-					mxSetFieldByNumber(	mxRayStruct,				//pointer to the mxStruct
-										(MWINDEX)(nFoundEigenRays-1),	//index of the element (number of ray)
-										0,							//position of the field (in this case, field 0 is "r"
-										mxTheta);					//the mxArray we want to copy into the mxStruct
-					mxSetFieldByNumber(	mxRayStruct, (MWINDEX)(nFoundEigenRays-1), 1, mxR);
-					mxSetFieldByNumber(	mxRayStruct, (MWINDEX)(nFoundEigenRays-1), 2, mxZ);
-					mxSetFieldByNumber(	mxRayStruct, (MWINDEX)(nFoundEigenRays-1), 3, mxTau);
-					mxSetFieldByNumber(	mxRayStruct, (MWINDEX)(nFoundEigenRays-1), 4, mxAmp);
+					mxSetFieldByNumber(	eigenrays[i][j].mxEigenrayStruct,				//pointer to the mxStruct
+										(MWINDEX)eigenrays[i][j].nEigenrays,			//index of the element (number of ray)
+										0,												//position of the field (in this case, field 0 is "r"
+										mxTheta);										//the mxArray we want to copy into the mxStruct
+					mxSetFieldByNumber(	eigenrays[i][j].mxEigenrayStruct, (MWINDEX)eigenrays[i][j].nEigenrays, 1, mxR);
+					mxSetFieldByNumber(	eigenrays[i][j].mxEigenrayStruct, (MWINDEX)eigenrays[i][j].nEigenrays, 2, mxZ);
+					mxSetFieldByNumber(	eigenrays[i][j].mxEigenrayStruct, (MWINDEX)eigenrays[i][j].nEigenrays, 3, mxTau);
+					mxSetFieldByNumber(	eigenrays[i][j].mxEigenrayStruct, (MWINDEX)eigenrays[i][j].nEigenrays, 4, mxAmp);
 					///ray has been saved to mxStructArray
+					
+					eigenrays[i][j].nEigenrays += 1;
 				}
 			}
 			DEBUG(3, "nFoundEigenRays: %u\n", (uint32_t)nFoundEigenRays);
@@ -398,16 +425,59 @@ void	calcEigenrayRF(settings_t* settings){
 	pnEigenRays = mxCreateDoubleMatrix((MWSIZE)1,(MWSIZE)1,mxREAL);
 	junkDouble = (double)nFoundEigenRays;
 	copyDoubleToMxArray( &junkDouble, pnEigenRays, 1);
-	matPutVariable(matfile, "nerays", pnEigenRays);
+	matPutVariable(matfile, "nEigenrays", pnEigenRays);
 	mxDestroyArray(pnEigenRays);
 	DEBUG(3, "nFoundEigenRays: %u\n", (uint32_t)nFoundEigenRays);
 	
 	///Write Eigenrays to matfile:
-	matPutVariable(matfile, "rays", mxRayStruct);
+	//copy arrival data to mxAllEigenraysStruct:
+	mxAllEigenraysStruct = mxCreateStructMatrix((MWSIZE)settings->output.nArrayZ,	//number of rows
+												(MWSIZE)settings->output.nArrayR,	//number of columns
+												4,									//number of fields in each element
+												AllEigenrayFieldNames);				//list of field names
+	if( mxAllEigenraysStruct == NULL ){
+		fatal("Memory Alocation error.");
+	}
+	for (i=0; i<settings->output.nArrayR; i++){
+		for (j=0; j<settings->output.nArrayZ; j++){
+			mxNumEigenrays	= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)1,	mxREAL);
+			mxRHyd 			= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)1,	mxREAL);
+			mxZHyd			= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)1,	mxREAL);
+			
+			copyDoubleToMxArray(&eigenrays[i][j].nEigenrays,	mxNumEigenrays,1);
+			copyDoubleToMxArray(&settings->output.arrayR[i],	mxRHyd,1);
+			copyDoubleToMxArray(&settings->output.arrayZ[j],	mxZHyd,1);
+			
+			index[0] = (MWINDEX)j;
+			index[1] = (MWINDEX)i;
+			mxSetFieldByNumber(	mxAllEigenraysStruct,									//pointer to the mxStruct
+								mxCalcSingleSubscript(mxAllEigenraysStruct,	2, index),//index of the element
+								0,														//position of the field (in this case, field 0 is "theta"
+								mxNumEigenrays);										//the mxArray we want to copy into the mxStruct
+			
+			mxSetFieldByNumber(	mxAllEigenraysStruct,									//pointer to the mxStruct
+								mxCalcSingleSubscript(mxAllEigenraysStruct,	2, index),	//index of the element
+								1,														//position of the field (in this case, field 0 is "theta"
+								mxRHyd);												//the mxArray we want to copy into the mxStruct
+			
+			mxSetFieldByNumber(	mxAllEigenraysStruct,									//pointer to the mxStruct
+								mxCalcSingleSubscript(mxAllEigenraysStruct,	2, index),	//index of the element
+								2,														//position of the field (in this case, field 0 is "theta"
+								mxZHyd);												//the mxArray we want to copy into the mxStruct
+			
+			mxSetFieldByNumber(	mxAllEigenraysStruct,									//pointer to the mxStruct
+								mxCalcSingleSubscript(mxAllEigenraysStruct,	2, index),	//index of the element
+								3,														//position of the field (in this case, field 0 is "theta"
+								eigenrays[i][j].mxEigenrayStruct);						//the mxArray we want to copy into the mxStruct
+		}
+	}
+	
+	///Write Eigenrays to matfile:
+	matPutVariable(matfile, "eigenrays", mxAllEigenraysStruct);
 	
 	//Free memory
 	matClose(matfile);
-	mxDestroyArray(mxRayStruct);
+	mxDestroyArray(mxAllEigenraysStruct);
 	free(dz);
 	DEBUG(1,"out\n");
 }
