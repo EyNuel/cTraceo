@@ -46,6 +46,7 @@ void calcAmpDelPr(settings_t* settings){
 	
 	double			thetai, ctheta;
 	double			junkDouble;
+	double 			maxNumArrivals=0;		//keeps track of the highest number of arrivals
 	uintptr_t		i, j, jj, l;
 	double 			rHyd, zHyd, zRay, tauRay;
 	complex	double	junkComplex, ampRay; 
@@ -59,6 +60,7 @@ void calcAmpDelPr(settings_t* settings){
 	mxArray*		pTitle				= NULL;
 	mxArray*		pHydArrayR			= NULL;
 	mxArray*		pHydArrayZ			= NULL;
+	mxArray*		pSourceZ			= NULL;
 	mxArray*		mxTheta				= NULL;
 	mxArray*		mxR					= NULL;
 	mxArray*		mxZ					= NULL;
@@ -122,7 +124,7 @@ void calcAmpDelPr(settings_t* settings){
 		fatal("Memory alocation error.");
 	}
 	copyDoubleToMxArray(	settings->output.arrayR, pHydArrayR, (uintptr_t)settings->output.nArrayR);
-	matPutVariable(matfile, "rarray", pHydArrayR);
+	matPutVariable(matfile, "arrayR", pHydArrayR);
 	mxDestroyArray(pHydArrayR);
 	
 	
@@ -132,10 +134,20 @@ void calcAmpDelPr(settings_t* settings){
 		fatal("Memory alocation error.");
 	}
 	copyDoubleToMxArray(	settings->output.arrayZ, pHydArrayZ, (uintptr_t)settings->output.nArrayZ);
-	matPutVariable(matfile, "zarray", pHydArrayZ);
+	matPutVariable(matfile, "arrayZ", pHydArrayZ);
 	mxDestroyArray(pHydArrayZ);
 	
-
+	
+	//write source dept to file:
+	pSourceZ			= mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)1, mxREAL);
+	if(pSourceZ == NULL){
+		fatal("Memory alocation error.");
+	}
+	copyDoubleToMxArray(&settings->source.zx, pSourceZ, 1);
+	matPutVariable(matfile, "sourceZ", pSourceZ);
+	mxDestroyArray(pSourceZ);
+	
+	
 	//allocate memory for the rays:
 	ray = makeRay(settings->source.nThetas);
 	#endif
@@ -213,6 +225,7 @@ void calcAmpDelPr(settings_t* settings){
 								///Arrival has been saved to mxAadStruct
 								
 								arrivals[j][jj].nArrivals += 1;
+								maxNumArrivals = max(arrivals[j][jj].nArrivals, maxNumArrivals);
 							}//	if (dz settings->output.miss)
 						}//	for(jj=1; jj<=settings->output.nArrayZ; jj++)
 						
@@ -268,6 +281,7 @@ void calcAmpDelPr(settings_t* settings){
 									///Arrival has been saved to mxAadStruct
 									
 									arrivals[j][jj].nArrivals += 1;
+									maxNumArrivals = max(arrivals[j][jj].nArrivals, maxNumArrivals);
 								}
 							}
 						}
@@ -280,6 +294,13 @@ void calcAmpDelPr(settings_t* settings){
 			}
 		}//if (ctheta > 1.0e-7)
 	}//for(i=0; i<settings->source.nThetas; i++)
+	
+	
+	//write "maximum number of arrivals at any single hydrophone" to matfile:
+	mxNumArrivals = mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)1, mxREAL);
+	copyDoubleToMxArray(&maxNumArrivals, mxNumArrivals, 1);
+	matPutVariable(matfile, "maxNumArrivals", mxNumArrivals);
+	
 	
 	//copy arrival data to mxAadStruct:
 	mxAadStruct = mxCreateStructMatrix(	(MWSIZE)settings->output.nArrayZ,	//number of rows
@@ -322,7 +343,6 @@ void calcAmpDelPr(settings_t* settings){
 								arrivals[j][jj].mxArrivalStruct);				//the mxArray we want to copy into the mxStruct
 		}
 	}
-	
 	
 	
 	///Write Eigenrays to matfile:
