@@ -355,7 +355,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 				reflDecay *= reflCoeff;
 				
 				DEBUG(7, "Kill the ray if the reflection coefficient is too small: \n");
-				if ( cabs(reflCoeff) < MIN_REFLECTION_COEFFICIENT ){
+				if ( cabs(reflDecay) < MIN_REFLECTION_COEFFICIENT ){
 					ray->iKill = TRUE;
 				}
 			//	end of "ray above surface?"
@@ -506,7 +506,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 				
 				DEBUG(7,"decay: %lf, abs(reflDecay): %lf, reflCoeff: %lf\n", cabs(ray->decay[i]), cabs(reflDecay), cabs(reflCoeff));
 				//Kill the ray if the reflection coefficient is too small: 
-				if ( cabs(reflCoeff) < MIN_REFLECTION_COEFFICIENT ){
+				if ( cabs(reflDecay) < MIN_REFLECTION_COEFFICIENT ){
 					ray->iKill = TRUE;
 					DEBUG(2, "Ray killed ( abs(reflCoeff) < 1e-5 )\n");
 				}
@@ -770,7 +770,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 						DEBUG(7, "Object: Reflection decay calculated: %lf +j* %lf\n", creal(reflDecay), cimag(reflDecay));
 
 						//Kill the ray if the reflection coefficient is too small: 
-						if ( cabs(reflCoeff) < MIN_REFLECTION_COEFFICIENT ){
+						if ( cabs(reflDecay) < MIN_REFLECTION_COEFFICIENT ){
 							ray->iKill = TRUE;
 						}
 						
@@ -867,6 +867,8 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 				matClose(matfile);
 				freeDouble2D(temp2D, 2);
 			#endif
+			DEBUG(1, "ReflCoeff: %lf\n",cabs(reflDecay));
+			DEBUG(1, "Total number of reflections: %u\n", (uint32_t)(sRefl +bRefl +oRefl));
 			fatal(	"Ray step too small, number of points in ray coordinates exceeds allocated memory.\n"
 					"Note that in cases where neither surface nor bottom have attenuation, rays can be endlessly reflected up and down and become \"trapped\".\n"
 					"If you need a high number or reflections per ray, you may also try changing MEM_FACTOR (in globals.h) to a higher value and recompile.\n"
