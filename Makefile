@@ -6,7 +6,7 @@
 CFLAGS := 	-Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align \
 			-Wwrite-strings -Wmissing-prototypes -Wmissing-declarations \
 			-Wredundant-decls -Wnested-externs -Winline -Wno-long-long \
-			-Wconversion -Wstrict-prototypes -std=gnu99 \
+			-Wstrict-prototypes -std=gnu99 \
 			-I /usr/local/matlabr2008b/extern/include \
 			-I /usr/local/matlab2008a/extern/include \
 			-I /usr/local/matlabr14/extern/include \
@@ -24,7 +24,7 @@ LFLAGS := 	-L /usr/local/matlabr14/bin/glnxa64 \
 #another case 64b case:
 #LFLAGS :=	-L /usr/local/matlab2008a/bin/glnxa64 \
 #			-lm -leng -lmat -lmex -lut \
-#			-Wl,-rpath /usr/local/matlab2008a/bin/glnx86 \
+#			-Wl,-rpath /usr/local/matlab2008a/bin/glnxa64 \
 
 
 # Define the compiler and linker comands to use:
