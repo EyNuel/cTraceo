@@ -43,8 +43,8 @@ void 	calcEigenrayRF(settings_t*);
 void	calcEigenrayRF(settings_t* settings){
 	DEBUG(1,"in\n");
 	double 			thetai, ctheta;
-	uintptr_t		i, j, k, l, nRays, iHyd;
-	uintptr_t		nPossibleEigenRays, nFoundEigenRays;
+	uintptr_t		i, j, k, l, nRays, iHyd = 0;
+	uintptr_t		nPossibleEigenRays, nFoundEigenRays = 0;
 	double			zRay, zHyd, rHyd;
 	double			junkDouble;
 	uint32_t		nTrial;

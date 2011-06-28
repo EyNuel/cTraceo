@@ -51,7 +51,7 @@ void calcAmpDelPr(settings_t* settings){
 	double 			rHyd, zHyd, zRay, tauRay;
 	complex	double	junkComplex, ampRay; 
 	double			dz;
-	uintptr_t		nRet, iHyd;
+	uintptr_t		nRet, iHyd = 0;
 	uintptr_t		iRet[51];
 	ray_t*			ray					= NULL;
 	

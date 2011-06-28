@@ -48,8 +48,8 @@ void	calcCohAcoustPress(settings_t* settings){
 	mxArray*			pHydArrayZ	= NULL;
 	mxArray*			p	= NULL;
 	double				omega, lambda;
-	uintptr_t			i, j, jj, k, l, iHyd;
-	uintptr_t			dimR, dimZ;
+	uintptr_t			i, j, jj, k, l, iHyd = 0;
+	uintptr_t			dimR = 0, dimZ = 0;
 	ray_t*				ray = NULL;
 	double 				ctheta, thetai, cx, q0;
 	double 				junkDouble;

@@ -45,7 +45,7 @@ void boundaryInterpolationExplicit(uint32_t* numSurfaceCoords, double* r, double
 		
 	double		zri = 0;	//1st derivative of z at ri
 	double		zrri;	//2nd derivative of z at ri
-	uintptr_t	i;
+	uintptr_t	i = 0;
 	
 	switch(*surfaceInterpolation){
 		case SURFACE_INTERPOLATION__FLAT:

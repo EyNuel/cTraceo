@@ -39,7 +39,7 @@ void calcParticleVel(settings_t* settings){
 	mxArray*			pu2D;
 	mxArray*			pw2D;
 	uintptr_t			j, k;
-	uintptr_t			dimR, dimZ;
+	uintptr_t			dimR=0, dimZ=0;
 	double				rHyd, zHyd;
 	double				xp[3];
 	double 				dr, dz;		//used locally to make code more efficient (and more readable)
