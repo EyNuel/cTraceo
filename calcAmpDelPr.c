@@ -72,7 +72,7 @@ void calcAmpDelPr(settings_t* settings){
 	mxArray*		mxZHyd				= NULL;
 	const char*		aadFieldNames[]		= {	"nArrivals", "rHyd", "zHyd", "arrival" };
 	const char*		arrivalFieldNames[]	= {	"theta", "r", "z", "tau", "amp"};	//the names of the fields contained in mxArrivalStruct
-	MWINDEX			index[2];						//used for accessing a specific element in the mxAadStruct
+	MWINDEX			idx[2];						//used for accessing a specific element in the mxAadStruct
 	
 	arrivals_t		arrivals[settings->output.nArrayR][settings->output.nArrayZ];
 	/*
@@ -320,25 +320,25 @@ void calcAmpDelPr(settings_t* settings){
 			copyDoubleToMxArray(&settings->output.arrayR[j],	mxRHyd,1);
 			copyDoubleToMxArray(&settings->output.arrayZ[jj],	mxZHyd,1);
 			
-			index[0] = (MWINDEX)jj;
-			index[1] = (MWINDEX)j;
+			idx[0] = (MWINDEX)jj;
+			idx[1] = (MWINDEX)j;
 			mxSetFieldByNumber(	mxAadStruct,									//pointer to the mxStruct
-								mxCalcSingleSubscript(mxAadStruct,	2, index),	//index of the element
+								mxCalcSingleSubscript(mxAadStruct,	2, idx),	//index of the element
 								0,												//position of the field (in this case, field 0 is "theta"
 								mxNumArrivals);									//the mxArray we want to copy into the mxStruct
 			
 			mxSetFieldByNumber(	mxAadStruct,						//pointer to the mxStruct
-								mxCalcSingleSubscript(mxAadStruct,	2, index),	//index of the element
+								mxCalcSingleSubscript(mxAadStruct,	2, idx),	//index of the element
 								1,											//position of the field (in this case, field 0 is "theta"
 								mxRHyd);									//the mxArray we want to copy into the mxStruct
 			
 			mxSetFieldByNumber(	mxAadStruct,						//pointer to the mxStruct
-								mxCalcSingleSubscript(mxAadStruct,	2, index),	//index of the element
+								mxCalcSingleSubscript(mxAadStruct,	2, idx),	//index of the element
 								2,											//position of the field (in this case, field 0 is "theta"
 								mxZHyd);									//the mxArray we want to copy into the mxStruct
 			
 			mxSetFieldByNumber(	mxAadStruct,									//pointer to the mxStruct
-								mxCalcSingleSubscript(mxAadStruct,	2, index),	//index of the element
+								mxCalcSingleSubscript(mxAadStruct,	2, idx),	//index of the element
 								3,												//position of the field (in this case, field 0 is "theta"
 								arrivals[j][jj].mxArrivalStruct);				//the mxArray we want to copy into the mxStruct
 		}

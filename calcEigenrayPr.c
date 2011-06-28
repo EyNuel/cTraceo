@@ -68,7 +68,7 @@ void	calcEigenrayPr(settings_t* settings){
 	mxArray*		mxZHyd				= NULL;
 	const char*		eigenrayFieldNames[]= {	"nEigenrays", "rHyd", "zHyd", "eigenray" };
 	const char*		arrivalFieldNames[]	= {	"theta", "r", "z", "tau", "amp"};	//the names of the fields contained in mxEigenrayStruct
-	MWINDEX			index[2];						//used for accessing a specific element in the mxAadStruct
+	MWINDEX			idx[2];							//used for accessing a specific element in the mxAadStruct
 	
 	eigenrays_t		eigenrays[settings->output.nArrayR][settings->output.nArrayZ];
 	/*
@@ -339,25 +339,25 @@ void	calcEigenrayPr(settings_t* settings){
 			copyDoubleToMxArray(&settings->output.arrayR[j],	mxRHyd,1);
 			copyDoubleToMxArray(&settings->output.arrayZ[jj],	mxZHyd,1);
 			
-			index[0] = (MWINDEX)jj;
-			index[1] = (MWINDEX)j;
+			idx[0] = (MWINDEX)jj;
+			idx[1] = (MWINDEX)j;
 			mxSetFieldByNumber(	mxAllEigenraysStruct,						//pointer to the mxStruct
-								mxCalcSingleSubscript(mxAllEigenraysStruct,	2, index),	//index of the element
+								mxCalcSingleSubscript(mxAllEigenraysStruct,	2, idx),	//index of the element
 								0,											//position of the field (in this case, field 0 is "theta"
 								mxNumEigenrays);							//the mxArray we want to copy into the mxStruct
 			
 			mxSetFieldByNumber(	mxAllEigenraysStruct,						//pointer to the mxStruct
-								mxCalcSingleSubscript(mxAllEigenraysStruct,	2, index),	//index of the element
+								mxCalcSingleSubscript(mxAllEigenraysStruct,	2, idx),	//index of the element
 								1,											//position of the field (in this case, field 0 is "theta"
 								mxRHyd);									//the mxArray we want to copy into the mxStruct
 			
 			mxSetFieldByNumber(	mxAllEigenraysStruct,						//pointer to the mxStruct
-								mxCalcSingleSubscript(mxAllEigenraysStruct,	2, index),	//index of the element
+								mxCalcSingleSubscript(mxAllEigenraysStruct,	2, idx),	//index of the element
 								2,											//position of the field (in this case, field 0 is "theta"
 								mxZHyd);									//the mxArray we want to copy into the mxStruct
 			
 			mxSetFieldByNumber(	mxAllEigenraysStruct,						//pointer to the mxStruct
-								mxCalcSingleSubscript(mxAllEigenraysStruct,  2, index),	//index of the element
+								mxCalcSingleSubscript(mxAllEigenraysStruct,  2, idx),	//index of the element
 								3,											//position of the field (in this case, field 0 is "theta"
 								eigenrays[j][jj].mxEigenrayStruct);			//the mxArray we want to copy into the mxStruct
 		}
