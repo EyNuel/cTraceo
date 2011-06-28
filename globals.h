@@ -29,7 +29,7 @@
  * Some data types vary between matlab versions, so we have to define			*
  * their type according to the matlab version used during compilation.			*
  *******************************************************************************/
-#define MATLAB_VERSION		R14		//allowable options are: R14, R2007A, R2007B, R2008A, R2008B
+#define MATLAB_VERSION		R14		//allowable options are: R14, R2007A, R2007B, R2008A, R2008B, R2010B
 
 
 //When writing matlab-matrixes to matfiles, the data type varies between matlab versions.
@@ -37,7 +37,7 @@
 	//matlab R14 uses int32
 	#define MWSIZE			int32_t
 	#define	MWINDEX			int32_t
-#elif	MATLAB_VERSION == R2007A || MATLAB_VERSION == R2007B || MATLAB_VERSION ==  R2008A || MATLAB_VERSION ==  R2008B
+#elif	MATLAB_VERSION == R2007A || MATLAB_VERSION == R2007B || MATLAB_VERSION ==  R2008A || MATLAB_VERSION ==  R2008B || MATLAB_VERSION ==  R2010B
 	//matlab R2008b and others use mwSize and mwIndex which defined in "matrix.h"
 	#define MWSIZE			mwSize		
 	#define MWINDEX			mwIndex
