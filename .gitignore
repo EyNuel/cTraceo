@@ -6,13 +6,19 @@
 # except foo.html which is maintained by hand.
 #!foo.html
 # Ignore objects and archives.
+bin/
 *.tgz
 *.bin
 *.exe
-*.m
+
+#Ignore matlab output files:
 *.mat
-bin/
-M-Files/
+#except transect.mat, as this contains the bathymetry of the sletvik waveguide
+!transect.mat
+
+*.log
+*~
+*.in
 testing/
 *.for
 
