@@ -1,8 +1,9 @@
 %==================================================================
 %  
-%  Traceo: Pekeris block waveguide example.
-%  Gambelas, Tue Dec  7 15:29:34 WET 2010
-%  Written by Tordar 
+%  cTraceo: Pekeris block waveguide example.
+%  
+%  Written by Tordar	Gambelas, Tue Dec  7 15:29:34 WET 2010
+%  Revised by Emanuel Ey    :29/06/2011
 %  
 %==================================================================
 
