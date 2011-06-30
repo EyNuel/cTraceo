@@ -271,30 +271,30 @@ void	calcEigenrayPr(settings_t* settings){
 									intLinear1D(		&ray[i].r[iRet[l]], &ray[i].tau[iRet[l]],	rHyd, &tauRay,	&junkDouble);
 									intComplexLinear1D(	&ray[i].r[iRet[l]], &ray[i].amp[iRet[l]],	(complex double)rHyd, &ampRay,	&junkComplex);
 									
-									
+									DEBUG(1, "i: %u, iHyd: %u, nCoords: %u\n", (uint32_t)i, (uint32_t)iHyd,(uint32_t)ray[i].nCoords);
 									//adjust the ray's last set of coordinates so that it matches up with the hydrophone
-									ray[i].r[iHyd+1]	= rHyd;
-									ray[i].z[iHyd+1]	= zRay;
-									ray[i].tau[iHyd+1]	= tauRay;
-									ray[i].amp[iHyd+1]	= ampRay;
+									ray[i].r[iRet[l]+1]	= rHyd;
+									ray[i].z[iRet[l]+1]	= zRay;
+									ray[i].tau[iRet[l]+1]	= tauRay;
+									ray[i].amp[iRet[l]+1]	= ampRay;
 									
 									///prepare to write arrival to matfile:
 									//create mxArrays:
 									mxTheta	= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)1,			mxREAL);
-									mxR		= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)(iHyd+2),	mxREAL);
-									mxZ		= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)(iHyd+2),	mxREAL);
-									mxTau	= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)(iHyd+2),	mxREAL);
-									mxAmp	= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)(iHyd+2),	mxCOMPLEX);
+									mxR		= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)(iRet[l]+2),	mxREAL);
+									mxZ		= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)(iRet[l]+2),	mxREAL);
+									mxTau	= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)(iRet[l]+2),	mxREAL);
+									mxAmp	= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)(iRet[l]+2),	mxCOMPLEX);
 									if(	mxTheta == NULL || mxR == NULL || mxZ == NULL || mxTau == NULL || mxAmp == NULL){
 										fatal("Memory alocation error.");
 									}
 									
 									//copy data to mxArrays:
 									copyDoubleToMxArray(&settings->source.thetas[i],mxTheta,1);
-									copyDoubleToMxArray(ray[i].r,					mxR,	iHyd+2);
-									copyDoubleToMxArray(ray[i].z,					mxZ, 	iHyd+2);
-									copyDoubleToMxArray(ray[i].tau,					mxTau,	iHyd+2);
-									copyComplexToMxArray(ray[i].amp,				mxAmp,	iHyd+2);
+									copyDoubleToMxArray(ray[i].r,					mxR,	iRet[l]+2);
+									copyDoubleToMxArray(ray[i].z,					mxZ, 	iRet[l]+2);
+									copyDoubleToMxArray(ray[i].tau,					mxTau,	iRet[l]+2);
+									copyComplexToMxArray(ray[i].amp,				mxAmp,	iRet[l]+2);
 									
 									//copy mxArrays to mxEigenrayStruct
 									mxSetFieldByNumber(	eigenrays[j][jj].mxEigenrayStruct,	//pointer to the mxStruct
