@@ -70,7 +70,7 @@ uintptr_t	pressureMStar( settings_t* settings, ray_t* ray, double rHyd, double z
 	rRight	= rHyd + settings->output.dr;
 	zBottom	= zHyd - settings->output.dz;
 	zTop	= zHyd + settings->output.dz;
-
+	
 	//we have to check that these points are within the rBox:
 	if(	rLeft	<	settings->source.rbox1 ||
 		rRight	>=	settings->source.rbox2 ){
@@ -80,8 +80,7 @@ uintptr_t	pressureMStar( settings_t* settings, ray_t* ray, double rHyd, double z
 	
 	//set pressure contributions to 0;
 	for(i=0; i<3; i++){
-		pressure_H[i] = 0;
-		pressure_V[i] = 0;
+		tempPressure[i] = 0;
 	}
 	
 	//if(eBracket(ray->nCoords, ray[i].r, rLeft, &nRet, iRet)){

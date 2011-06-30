@@ -80,7 +80,7 @@ void	calcCohAcoustPress(settings_t* settings){
 			* 	The pressure components will be written to the rightmost index
 			* 	of the 2d-array.
 			*/
-			dimR = 1;
+			dimR = settings->output.nArrayR;
 			dimZ = settings->output.nArrayZ;	//this should be equal to nArrayR
 			break;
 			
@@ -249,7 +249,7 @@ void	calcCohAcoustPress(settings_t* settings){
 							DEBUG(3,"Array type: Horizontal/Rectangular\n");
 							DEBUG(4,"nArrayR: %u, nArrayZ: %u\n", (uint32_t)settings->output.nArrayR, (uint32_t)settings->output.nArrayZ );
 							
-							for(j=0; j<settings->output.nArrayR; j++){
+							for(j=0; j<dimR; j++){
 								rHyd = settings->output.arrayR[j];
 								
 								//check whether the hydrophone is within the range coordinates of the ray:
@@ -302,25 +302,30 @@ void	calcCohAcoustPress(settings_t* settings){
 							for(j=0; j<dimR; j++){
 								rHyd = settings->output.arrayR[j];
 								if ( rHyd >= ray[i].rMin	&&	rHyd < ray[i].rMax){
+									zHyd = settings->output.arrayZ[j];
+									
 									if ( ray[i].iReturn == FALSE){
-											zHyd = settings->output.arrayZ[j];
-											
-											if( pressureStar( settings, &ray[i], rHyd, zHyd, q0, pressure_H, pressure_V) ){
-												DEBUG(1, "i=%u: (j,k)=(%u,%u): \n",(uint32_t)i, (uint32_t)j, (uint32_t)k);
-												DEBUG(1, "in>>  (rH,zH)=(%.2lf,%.2lf), nCoords: %u, q0: %e\n", rHyd, zHyd, (uint32_t)ray[i].nCoords, q0);
-												DEBUG(1, "out>> pL: %e,  pU, %e,  pR: %e,  pD: %e,  pC:%e\n\n", cabs(pressure_H[LEFT]), cabs(pressure_V[TOP]), cabs(pressure_H[RIGHT]), cabs(pressure_V[BOTTOM]), cabs(pressure_H[CENTER]));
-															
-												for (l=0; l<3; l++){
-													settings->output.pressure_H[0][j][l] += pressure_H[l];
-													settings->output.pressure_V[0][j][l] += pressure_V[l];
-												}
-											}
-											//DEBUG(4, "k: %u; j: %u; pressure2D[k][j]: %e + j*%e\n", (uint32_t)k, (uint32_t)j, creal(settings->output.pressure2D[k][j]), cimag(settings->output.pressure2D[k][j]));
-											//DEBUG(4, "rHyd: %lf; zHyd: %lf \n", rHyd, zHyd);
-									}else{
-										zHyd = settings->output.arrayZ[j];
 										
+										if( pressureStar( settings, &ray[i], rHyd, zHyd, q0, pressure_H, pressure_V) ){
+											DEBUG(3, "i=%u: (j,k)=(%u,%u): \n",(uint32_t)i, (uint32_t)j, (uint32_t)k);
+											DEBUG(3, "in>>  (rH,zH)=(%.2lf,%.2lf), nCoords: %u, q0: %e\n", rHyd, zHyd, (uint32_t)ray[i].nCoords, q0);
+											DEBUG(3, "out>> pL: %e,  pU, %e,  pR: %e,  pD: %e,  pC:%e\n\n", cabs(pressure_H[LEFT]), cabs(pressure_V[TOP]), cabs(pressure_H[RIGHT]), cabs(pressure_V[BOTTOM]), cabs(pressure_H[CENTER]));
+											
+											for (l=0; l<3; l++){
+												settings->output.pressure_H[0][j][l] += pressure_H[l];
+												settings->output.pressure_V[0][j][l] += pressure_V[l];
+											}
+										}
+										//DEBUG(4, "k: %u; j: %u; pressure2D[k][j]: %e + j*%e\n", (uint32_t)k, (uint32_t)j, creal(settings->output.pressure2D[k][j]), cimag(settings->output.pressure2D[k][j]));
+										//DEBUG(4, "rHyd: %lf; zHyd: %lf \n", rHyd, zHyd);
+									}else{
+										DEBUG(5, "Ray returns\n");
 										if( pressureMStar( settings, &ray[i], rHyd, zHyd, q0, pressure_H, pressure_V) ){
+											DEBUG(3, "pL: %e, pU: %e, pR: %e, pD: %e, pC: %e\n",
+													cabs(pressure_H[LEFT]),
+													cabs(pressure_V[TOP]), cabs(pressure_H[RIGHT]),
+													cabs(pressure_V[BOTTOM]), cabs(pressure_H[CENTER]));
+											
 											for (l=0; l<3; l++){
 												settings->output.pressure_H[0][j][l] += pressure_H[l];
 												settings->output.pressure_V[0][j][l] += pressure_V[l];
