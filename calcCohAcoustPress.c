@@ -479,7 +479,10 @@ void	calcCohAcoustPress(settings_t* settings){
 	}
 	free(ray);
 	
-	//TODO free H/V pressure components
+	/*
+	 * NOTE: H/V pressure components will be required for depermining particle velocity later
+	 */
+	/*
 	if( settings->output.calcType == CALC_TYPE__PART_VEL ||
 		settings->output.calcType == CALC_TYPE__COH_ACOUS_PRESS_PART_VEL){
 		for(i=0; i<dimR; i++){
@@ -489,7 +492,7 @@ void	calcCohAcoustPress(settings_t* settings){
 		free(settings->output.pressure_H);
 		free(settings->output.pressure_V);
 	}
-	
+	*/
 	matClose(matfile);
 	DEBUG(1,"out\n");
 }
