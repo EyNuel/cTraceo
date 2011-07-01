@@ -17,7 +17,7 @@ Dmax        = 100;
 zs          = 25;
 rs          = 0;
 thetamax    = 20;
-np2         = 51;
+np2         = 501;
 m           = 21;
 ranges      = linspace(0,Rmaxhry,m);
 n           = 1;
@@ -160,11 +160,17 @@ load eig
 
 figure(1), hold on
 plot(rs,zs,'ko',rs,zs,'m*','MarkerSize',16)
-for h = 1:length(ranges)  %iterate over hydrophones
-    for i = 1:eigenrays(h).nEigenrays   %iterate over eigenrays of hydrphone
-        plot(eigenrays(h).eigenray(i).r,eigenrays(h).eigenray(i).z)   
+
+[a, b] = size(eigenrays);
+
+for rHyd = 1:a  %iterate over hydrophone ranges
+    for zHyd = 1:b  %iterate over hydrophone depths
+        for i = 1:eigenrays(a,b).nEigenrays   %iterate over eigenrays of hydrphone
+            plot(eigenrays(a,b).eigenray(i).r, eigenrays(a,b).eigenray(i).z)   
+        end
     end
 end
+
 fill(xobj1(1,:),xobj1(2,:),'k')
 fill(xobj1(1,:),xobj1(3,:),'k')
 fill(xobj2(1,:),xobj2(2,:),'k')

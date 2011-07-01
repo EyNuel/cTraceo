@@ -138,9 +138,13 @@ nthetas = length( thetas );
 figure(1), hold on
 plot(rs,zs,'ko',rs,zs,'m*','MarkerSize',16)
 
-for h = 1:length(ranges)  %iterate over hydrophones
-    for i = 1:eigenrays(h).nEigenrays   %iterate over eigenrays of hydrphone
-        plot(eigenrays(h).eigenray(i).r,eigenrays(h).eigenray(i).z)   
+[a, b] = size(eigenrays);   %get dimensions of hydrophone array
+
+for rHyd = 1:a  %iterate over hydrophone ranges
+    for zHyd = 1:b  %iterate over hydrophone depths
+        for i = 1:eigenrays(a,b).nEigenrays   %iterate over eigenrays of hydrphone
+            plot(eigenrays(a,b).eigenray(i).r,eigenrays(a,b).eigenray(i).z)   
+        end
     end
 end
 
