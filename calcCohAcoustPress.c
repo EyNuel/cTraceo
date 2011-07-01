@@ -479,17 +479,6 @@ void	calcCohAcoustPress(settings_t* settings){
 	}
 	free(ray);
 	
-	//TODO free H/V pressure components
-	if( settings->output.calcType == CALC_TYPE__PART_VEL ||
-		settings->output.calcType == CALC_TYPE__COH_ACOUS_PRESS_PART_VEL){
-		for(i=0; i<dimR; i++){
-			free(settings->output.pressure_H[i];
-			free(settings->output.pressure_V[i];
-		}
-		free(settings->output.pressure_H);
-		free(settings->output.pressure_V);
-	}
-	
 	matClose(matfile);
 	DEBUG(1,"out\n");
 }
