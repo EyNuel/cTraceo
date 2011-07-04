@@ -608,7 +608,7 @@ void	readIn(settings_t* settings, const char* filename){
 	}
 	
 	/************************************************************************
-	 * Read and validate array info:										*
+	 * Read and validate hydrophone array info:								*
 	 ***********************************************************************/
 	 DEBUG(2, "Reading array info.\n");
 	skipLine(infile);
