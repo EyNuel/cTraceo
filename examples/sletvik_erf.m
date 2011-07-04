@@ -166,6 +166,7 @@ load eig
 
 figure, hold on;
 
+
 [a, b] = size(eigenrays);
 
 for rHyd = 1:a  %iterate over hydrophone ranges
@@ -175,6 +176,9 @@ for rHyd = 1:a  %iterate over hydrophone ranges
         end
     end
 end
+
+%the eigenrays can also be plotted using the included function:
+%plotEigenrays(eigenrays)
 
 %draw acoustic source
 plot(rs,zs,'ko',rs,zs,'m*','MarkerSize',16) 
