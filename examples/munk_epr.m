@@ -150,6 +150,9 @@ for rHyd = 1:a  %iterate over hydrophone ranges
     end
 end
 
+%the eigenrays can also be plotted using the included function:
+%plotEigenrays(eigenrays)
+
 plot(ranges,depths, 'm*');
 plot( altimetry(1,:), altimetry(2,:),'b')
 plot(bathymetry(1,:),bathymetry(2,:),'k')

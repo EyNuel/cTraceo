@@ -168,6 +168,9 @@ for rHyd = 1:a  %iterate over hydrophone ranges
     end
 end
 
+%the eigenrays can also be plotted using the included function:
+%plotEigenrays(eigenrays)
+
 fill(xobj1(1,:),xobj1(2,:),'k')
 fill(xobj1(1,:),xobj1(3,:),'k')
 fill(xobj2(1,:),xobj2(2,:),'k')

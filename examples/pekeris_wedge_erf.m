@@ -129,6 +129,10 @@ plot(rs,zs,'ko',rs,zs,'m*','MarkerSize',16)
 for i = 1:eigenrays.nEigenrays
     plot(eigenrays.eigenray(i).r,eigenrays.eigenray(i).z)
 end
+
+%the eigenrays can also be plotted using the included function:
+%plotEigenrays(eigenrays)
+
 plot(bathymetry(1,:),bathymetry(2,:))
 grid on, box on
 axis([0 Rmax 0 Dmax])

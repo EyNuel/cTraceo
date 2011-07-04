@@ -141,6 +141,9 @@ for rHyd = 1:a  %iterate over hydrophone ranges
     end
 end
 
+%the eigenrays can also be plotted using the included function:
+%plotEigenrays(eigenrays)
+
 plot(ranges,depths, 'm*');
 grid on, box on
 axis([0 Rmax 0 Dmax])
