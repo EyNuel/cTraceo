@@ -61,22 +61,29 @@ void	calcEigenrayPr(settings_t* settings){
 	mxArray*		mxZ					= NULL;
 	mxArray*		mxTau				= NULL;
 	mxArray*		mxAmp				= NULL;
-	mxArray*		mxEigenrayStruct	= NULL;		//contains the arrivals at a single hydrophone
-	mxArray*		mxNumArrivals		= NULL;
-	const char*		eigenrayFieldNames[]= {	"nEigenrays", "eigenray" };
-	const char*		arrivalFieldNames[]	= {	"theta", "r", "z", "tau", "amp"};	//the names of the fields contained in mxArrivalStruct
+	mxArray*		mxEigenrayStruct	= NULL;		//contains the eigenrays at a single hydrophone
+	mxArray*		mxAllEigenraysStruct= NULL;		//contains all the eigenrays at all hydrophones
+	mxArray*		mxNumEigenrays		= NULL;
+	mxArray*		mxRHyd				= NULL;
+	mxArray*		mxZHyd				= NULL;
+	const char*		eigenrayFieldNames[]= {	"nEigenrays", "rHyd", "zHyd", "eigenray" };
+	const char*		arrivalFieldNames[]	= {	"theta", "r", "z", "tau", "amp"};	//the names of the fields contained in mxEigenrayStruct
 	MWINDEX			index[2];						//used for accessing a specific element in the mxAadStruct
-	arrivals_t		arrivals[settings->output.nArrayR][settings->output.nArrayZ];
 	
+	eigenrays_t		eigenrays[settings->output.nArrayR][settings->output.nArrayZ];
+	/*
+	 * eigenrays[][] is an array with the dimensions of the hydrophone array and will contain the
+	 * actual arrival information before it is written to a matlab structure at the end of the file.
+	 */
 	//initialize to 0
 	for (j=0; j<settings->output.nArrayR; j++){
 		for (jj=0; jj<settings->output.nArrayZ; jj++){
-			arrivals[j][jj].nArrivals = 0;
-			arrivals[j][jj].mxArrivalStruct = mxCreateStructMatrix(	(MWSIZE)settings->source.nThetas,		//number of rows
+			eigenrays[j][jj].nEigenrays = 0;
+			eigenrays[j][jj].mxEigenrayStruct = mxCreateStructMatrix(	(MWSIZE)settings->source.nThetas,		//number of rows
 																	(MWSIZE)1,								//number of columns
 																	5,										//number of fields in each element
 																	arrivalFieldNames);						//list of field names
-			if( arrivals[j][jj].mxArrivalStruct == NULL ){
+			if( eigenrays[j][jj].mxEigenrayStruct == NULL ){
 				fatal("Memory Alocation error.");
 			}
 		}
@@ -227,18 +234,18 @@ void	calcEigenrayPr(settings_t* settings){
 								copyDoubleToMxArray(ray[i].tau,					mxTau,	iHyd+2);
 								copyComplexToMxArray(ray[i].amp,				mxAmp,	iHyd+2);
 								
-								//copy mxArrays to mxArrivalStruct
-								mxSetFieldByNumber(	arrivals[j][jj].mxArrivalStruct,	//pointer to the mxStruct
-													(MWINDEX)arrivals[j][jj].nArrivals,	//index of the element
+								//copy mxArrays to mxEigenrayStruct
+								mxSetFieldByNumber(	eigenrays[j][jj].mxEigenrayStruct,	//pointer to the mxStruct
+													(MWINDEX)eigenrays[j][jj].nEigenrays,	//index of the element
 													0,									//position of the field (in this case, field 0 is "theta"
 													mxTheta);							//the mxArray we want to copy into the mxStruct
-								mxSetFieldByNumber(	arrivals[j][jj].mxArrivalStruct, (MWINDEX)arrivals[j][jj].nArrivals, 1, mxR);
-								mxSetFieldByNumber(	arrivals[j][jj].mxArrivalStruct, (MWINDEX)arrivals[j][jj].nArrivals, 2, mxZ);
-								mxSetFieldByNumber(	arrivals[j][jj].mxArrivalStruct, (MWINDEX)arrivals[j][jj].nArrivals, 3, mxTau);
-								mxSetFieldByNumber(	arrivals[j][jj].mxArrivalStruct, (MWINDEX)arrivals[j][jj].nArrivals, 4, mxAmp);
+								mxSetFieldByNumber(	eigenrays[j][jj].mxEigenrayStruct, (MWINDEX)eigenrays[j][jj].nEigenrays, 1, mxR);
+								mxSetFieldByNumber(	eigenrays[j][jj].mxEigenrayStruct, (MWINDEX)eigenrays[j][jj].nEigenrays, 2, mxZ);
+								mxSetFieldByNumber(	eigenrays[j][jj].mxEigenrayStruct, (MWINDEX)eigenrays[j][jj].nEigenrays, 3, mxTau);
+								mxSetFieldByNumber(	eigenrays[j][jj].mxEigenrayStruct, (MWINDEX)eigenrays[j][jj].nEigenrays, 4, mxAmp);
 								///Arrival has been saved to mxAadStruct
 								
-								arrivals[j][jj].nArrivals += 1;
+								eigenrays[j][jj].nEigenrays += 1;
 							}//	if (dz settings->output.miss)
 						}//	for(jj=1; jj<=settings->output.nArrayZ; jj++)
 						
@@ -289,18 +296,18 @@ void	calcEigenrayPr(settings_t* settings){
 									copyDoubleToMxArray(ray[i].tau,					mxTau,	iHyd+2);
 									copyComplexToMxArray(ray[i].amp,				mxAmp,	iHyd+2);
 									
-									//copy mxArrays to mxArrivalStruct
-									mxSetFieldByNumber(	arrivals[j][jj].mxArrivalStruct,	//pointer to the mxStruct
-														(MWINDEX)arrivals[j][jj].nArrivals,	//index of the element
+									//copy mxArrays to mxEigenrayStruct
+									mxSetFieldByNumber(	eigenrays[j][jj].mxEigenrayStruct,	//pointer to the mxStruct
+														(MWINDEX)eigenrays[j][jj].nEigenrays,	//index of the element
 														0,									//position of the field (in this case, field 0 is "theta"
 														mxTheta);							//the mxArray we want to copy into the mxStruct
-									mxSetFieldByNumber(	arrivals[j][jj].mxArrivalStruct, (MWINDEX)arrivals[j][jj].nArrivals, 1, mxR);
-									mxSetFieldByNumber(	arrivals[j][jj].mxArrivalStruct, (MWINDEX)arrivals[j][jj].nArrivals, 2, mxZ);
-									mxSetFieldByNumber(	arrivals[j][jj].mxArrivalStruct, (MWINDEX)arrivals[j][jj].nArrivals, 3, mxTau);
-									mxSetFieldByNumber(	arrivals[j][jj].mxArrivalStruct, (MWINDEX)arrivals[j][jj].nArrivals, 4, mxAmp);
+									mxSetFieldByNumber(	eigenrays[j][jj].mxEigenrayStruct, (MWINDEX)eigenrays[j][jj].nEigenrays, 1, mxR);
+									mxSetFieldByNumber(	eigenrays[j][jj].mxEigenrayStruct, (MWINDEX)eigenrays[j][jj].nEigenrays, 2, mxZ);
+									mxSetFieldByNumber(	eigenrays[j][jj].mxEigenrayStruct, (MWINDEX)eigenrays[j][jj].nEigenrays, 3, mxTau);
+									mxSetFieldByNumber(	eigenrays[j][jj].mxEigenrayStruct, (MWINDEX)eigenrays[j][jj].nEigenrays, 4, mxAmp);
 									///Arrival has been saved to mxAadStruct
 									
-									arrivals[j][jj].nArrivals += 1;
+									eigenrays[j][jj].nEigenrays += 1;
 								}
 							}
 						}
@@ -314,37 +321,50 @@ void	calcEigenrayPr(settings_t* settings){
 		}//if (ctheta > 1.0e-7)
 	}//for(i=0; i<settings->source.nThetas; i++)
 	
-	//copy arrival data to mxAadStruct:
-	mxEigenrayStruct = mxCreateStructMatrix(	(MWSIZE)settings->output.nArrayZ,	//number of rows
+	//copy arrival data to mxAllEigenraysStruct:
+	mxAllEigenraysStruct = mxCreateStructMatrix(	(MWSIZE)settings->output.nArrayZ,	//number of rows
 												(MWSIZE)settings->output.nArrayR,	//number of columns
-												2,									//number of fields in each element
+												4,									//number of fields in each element
 												eigenrayFieldNames);				//list of field names
-	if( mxEigenrayStruct == NULL ) {
+	if( mxAllEigenraysStruct == NULL ) {
 		fatal("Memory Alocation error.");
 	}
 	for (j=0; j<settings->output.nArrayR; j++){
 		for (jj=0; jj<settings->output.nArrayZ; jj++){
-			mxNumArrivals = mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)1,	mxREAL);
-			copyDoubleToMxArray(&arrivals[j][jj].nArrivals, mxNumArrivals,1);
+			mxNumEigenrays	= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)1,	mxREAL);
+			mxRHyd 			= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)1,	mxREAL);
+			mxZHyd			= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)1,	mxREAL);
+			
+			copyDoubleToMxArray(&eigenrays[j][jj].nEigenrays,	mxNumEigenrays,1);
+			copyDoubleToMxArray(&settings->output.arrayR[j],	mxRHyd,1);
+			copyDoubleToMxArray(&settings->output.arrayZ[jj],	mxZHyd,1);
 			
 			index[0] = (MWINDEX)jj;
 			index[1] = (MWINDEX)j;
-			mxSetFieldByNumber(	mxEigenrayStruct,									//pointer to the mxStruct
-								mxCalcSingleSubscript(mxEigenrayStruct,   2, index),	//index of the element
-								0,												//position of the field (in this case, field 0 is "theta"
-								mxNumArrivals);									//the mxArray we want to copy into the mxStruct
+			mxSetFieldByNumber(	mxAllEigenraysStruct,						//pointer to the mxStruct
+								mxCalcSingleSubscript(mxAllEigenraysStruct,	2, index),	//index of the element
+								0,											//position of the field (in this case, field 0 is "theta"
+								mxNumEigenrays);							//the mxArray we want to copy into the mxStruct
 			
-			mxSetFieldByNumber(	mxEigenrayStruct,									//pointer to the mxStruct
-								mxCalcSingleSubscript(mxEigenrayStruct,   2, index),	//index of the element
-								1,												//position of the field (in this case, field 0 is "theta"
-								arrivals[j][jj].mxArrivalStruct);				//the mxArray we want to copy into the mxStruct
+			mxSetFieldByNumber(	mxAllEigenraysStruct,						//pointer to the mxStruct
+								mxCalcSingleSubscript(mxAllEigenraysStruct,	2, index),	//index of the element
+								1,											//position of the field (in this case, field 0 is "theta"
+								mxRHyd);									//the mxArray we want to copy into the mxStruct
+			
+			mxSetFieldByNumber(	mxAllEigenraysStruct,						//pointer to the mxStruct
+								mxCalcSingleSubscript(mxAllEigenraysStruct,	2, index),	//index of the element
+								2,											//position of the field (in this case, field 0 is "theta"
+								mxZHyd);									//the mxArray we want to copy into the mxStruct
+			
+			mxSetFieldByNumber(	mxAllEigenraysStruct,						//pointer to the mxStruct
+								mxCalcSingleSubscript(mxAllEigenraysStruct,  2, index),	//index of the element
+								3,											//position of the field (in this case, field 0 is "theta"
+								eigenrays[j][jj].mxEigenrayStruct);			//the mxArray we want to copy into the mxStruct
 		}
 	}
 	
-	
-	
 	///Write Eigenrays to matfile:
-	matPutVariable(matfile, "arrivals", mxEigenrayStruct);
+	matPutVariable(matfile, "eigenrays", mxAllEigenraysStruct);
 	
 	matClose(matfile);
 	mxDestroyArray(mxEigenrayStruct);

@@ -287,9 +287,22 @@ typedef struct settings {
 
 
 typedef struct arrivals{
+	/*
+	 * Used in calcAmpDelxx to temporarily contain arrivals before they are written to 
+	 * a matlab structure at the end of the function.
+	 */
 	double			nArrivals;
 	mxArray*		mxArrivalStruct;
 }arrivals_t;
+
+typedef struct eigenrays{
+	/*
+	 * Similar to the above, but used in calcEigenrayXX.
+	 * Only difference is in variable naming.
+	 */
+	double			nEigenrays;
+	mxArray*		mxEigenrayStruct;
+}eigenrays_t;
 	
 
 
