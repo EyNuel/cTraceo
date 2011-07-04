@@ -34,11 +34,13 @@
 void calcParticleVel(settings_t*);
 
 void calcParticleVel(settings_t* settings){
+	DEBUG(1, "\tin\n");
+	
 	MATFile*			matfile	= NULL;
 	mxArray*			pTitle	= NULL;
 	mxArray*			pu2D;
 	mxArray*			pw2D;
-	uintptr_t			j, k;
+	uintptr_t			i, j, k;
 	uintptr_t			dimR=0, dimZ=0;
 	double				rHyd, zHyd;
 	double				xp[3];
@@ -100,13 +102,13 @@ void calcParticleVel(settings_t* settings){
 			fatal("calcCohAcoustPress(): unknown array type.\nAborting.");
 			break;
 	}
-
+	
 	//alocate memory for output:
 	dP_dR2D = mallocComplex2D(dimR, dimZ);
 	dP_dZ2D = mallocComplex2D(dimR, dimZ);
-
-
-
+	
+	
+	
 	/**
 	 *	Horizontal and vertical pressure components where calculated in calcCohAcoustpress.
 	 *	We can now use this to calculate the actual particle velocity components:
@@ -196,7 +198,7 @@ void calcParticleVel(settings_t* settings){
 			copyComplexToMxArray2D_transposed(dP_dR2D, pu2D, dimZ, dimR);
 			matPutVariable(matfile, "u", pu2D);
 			mxDestroyArray(pu2D);
-
+			
 			/// write the W-component to the mat-file:
 			pw2D = mxCreateDoubleMatrix((MWSIZE)dimZ, (MWSIZE)dimR, mxCOMPLEX);
 			if( pw2D == NULL){
@@ -219,7 +221,7 @@ void calcParticleVel(settings_t* settings){
 			copyComplexToMxArray2D(dP_dR2D, pu2D, dimZ, dimR);
 			matPutVariable(matfile, "u", pu2D);
 			mxDestroyArray(pu2D);
-
+			
 			/// write the W-component to the mat-file:
 			pw2D = mxCreateDoubleMatrix((MWSIZE)dimR, (MWSIZE)dimZ, mxCOMPLEX);
 			if( pw2D == NULL){
@@ -233,6 +235,15 @@ void calcParticleVel(settings_t* settings){
 	
 	//free memory
 	matClose(matfile);
+	
+	for(i=0; i<dimR; i++){
+		free(settings->output.pressure_H[i]);
+		free(settings->output.pressure_V[i]);
+	}
+	free(settings->output.pressure_H);
+	free(settings->output.pressure_V);
+	
 	freeComplex2D(dP_dR2D, dimR);
 	freeComplex2D(dP_dZ2D, dimR);
+	DEBUG(1, "\tout\n");
 }

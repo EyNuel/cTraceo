@@ -13,13 +13,13 @@
 #ifndef VERBOSE
 	#define VERBOSE					0		//when set to 1, more information will be shown.
 #endif				
-#define VERBOSITY					1		//verbosity level (0-10). High levels will make the code impractically slow (seriously!)
+#define VERBOSITY					3		//verbosity level (0-10). High levels will make the code impractically slow (seriously!)
 #define MAX_LINE_LEN				256		//Maximum number of chars to read at once from a file (\n not included)
 #define MEM_FACTOR					20		//The memory allocated for each ray is determined like so: ( abs(rbox2-rbox1)/dsi )* MEM_FACTOR
 											//NOTE:	for deepwater cases, values between 3-5 are ok.
 											//		for shallow water, or other cases with a lot of reflections,
 											//		values of 15-25 may be adequate
-#define KEEP_RAYS_IN_MEM			0		//[boolean] determines whether a rays coordinates are kept in memory after being written to the .mat file. (mat become usefull for multiprocessing)
+#define KEEP_RAYS_IN_MEM			0		//[boolean] determines whether a ray's coordinates are kept in memory after being written to the .mat file. (mat become usefull for multiprocessing)
 #define MIN_REFLECTION_COEFFICIENT	1.0e-5	//used in solveEikonalEq(). When a rays reflection coeff is below this threshold, it is killed.
 
 
