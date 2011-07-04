@@ -38,7 +38,7 @@ void	cValues1D(uintptr_t n, double* xTable, double* cTable, double xi, double* c
 	DEBUG(10,"Entering cValues1D().\n");
 	uintptr_t	i = 0;
 
-	//Note: the case that occurs most frequently is listed at top, so as to eliminate uneeded comparinson operations.
+	//Note: the case that occurs most frequently is listed at top, so as to eliminate uneeded comparison operations.
 
 	if(	xi >= xTable[2]	&&	xi <xTable[n-3]){
 		//for all other cases do barycentric cubic interpolation

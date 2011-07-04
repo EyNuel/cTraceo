@@ -2,25 +2,26 @@
  *	cTraceo.c		 																*
  * 	(formerly "trace0.for")															*
  * 	The main cTraceo file. This is where the story begins.							*
+ *	NOTE:	cTraceo is a research code under active development.					*
+ * 			Changes are frequent and there may be bugs.								*
  * 																					*
  *	originally written in FORTRAN by:												*
- *  						Orlando Camargo Rodriguez:								*
- *							Copyright (C) 2010										*
- * 							Orlando Camargo Rodriguez								*
- *							orodrig@ualg.pt											*
- *							Universidade do Algarve									*
- *							Physics Department										*
- *							Signal Processing Laboratory							*
+ *  		Orlando Camargo Rodriguez:												*
+ *			Copyright (C) 2010														*
+ * 			Orlando Camargo Rodriguez												*
+ *			orodrig@ualg.pt															*
+ *			Universidade do Algarve													*
+ *			Physics Department														*
+ *			Signal Processing Laboratory											*
  *																					*
- *	Ported to C by:			Emanuel Ey												*
- *							emanuel.ey@gmail.com									*
- *							Signal Processing Laboratory							*
- *							Universidade do Algarve									*
+ *	Ported to C by:																	*
+ * 			Emanuel Ey																*
+ *			emanuel.ey@gmail.com													*
+ *			Signal Processing Laboratory											*
+ *			Universidade do Algarve													*
  *																					*
- *	Inputs:																			*
- * 				None																*
- * 	Outputs:																		*
- * 				None:																*
+ *	Command line arguments:															*
+ * 			(TODO)
  ***********************************************************************************/
 
 #include <stdio.h>
@@ -40,14 +41,16 @@
 #include <sys/resource.h>	//for getrusage()
 #include <string.h>
 
-void	printUsage(void);
+void	printHelp(void);
 int 	main(int, char**);
 
-void	printUsage(void){
-	printf("Line 1\n"
-	"Line 2\n"
-	"Line %d\n",
-	3);
+void	printHelp(void){
+	/*
+	 * Print help
+	 */
+	//TODO
+	printf("Wouldn't it be great to get some usefull info?\n"
+	"And yet someone's gotta write it first!\n");
 	
 }
 
@@ -68,7 +71,7 @@ int main(int argc, char **argv){
 		inFileName = strcat(inFileName, ".in");
 	}else{
 		//otherwise, complain and quit
-		printUsage();
+		printHelp();
 		fatal("No input file provided.\nAborting...");
 	}
 

@@ -57,7 +57,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 	uint32_t		jRefl;						//TODO huh?!
 	uint32_t		numRungeKutta;				//counts the number o RKF45 iterations
 	uint32_t		i, j;
-	complex double	refl, reflDecay;
+	complex double	reflCoeff, reflDecay;
 	vector_t		es = {0,0};				//ray's tangent vector
 	vector_t		e1 = {0,0};				//ray's normal vector
 	vector_t		slowness = {0,0};
@@ -242,20 +242,21 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 					}
 				}
 				
+				// calculate the reflection coefficient, depending of interface type:
 				DEBUG(7, "Get the reflection coefficient (kill the ray if the surface is an absorver): \n");
 				switch(settings->altimetry.surfaceType){
 					
 					case SURFACE_TYPE__ABSORVENT:	//"A"
-						refl = 0 +0*I;
+						reflCoeff = 0 +0*I;
 						ray->iKill = TRUE;
 						break;
 						
 					case SURFACE_TYPE__RIGID:		//"R"
-						refl = 1 +0*I;
+						reflCoeff = 1 +0*I;
 						break;
 						
 					case SURFACE_TYPE__VACUUM:		//"V"
-						refl = -1 +0*I;
+						reflCoeff = -1 +0*I;
 						break;
 						
 					case SURFACE_TYPE__ELASTIC:		//"E"
@@ -283,7 +284,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 												&tempDouble
 											);
 								as		= tempDouble;
-								boundaryReflectionCoeff(&rho1, &rho2, &ci, &cp2, &cs2, &ap, &as, &thetaRefl, &refl);
+								boundaryReflectionCoeff(&rho1, &rho2, &ci, &cp2, &cs2, &ap, &as, &thetaRefl, &reflCoeff);
 								break;
 							
 							case SURFACE_PROPERTY_TYPE__NON_HOMOGENEOUS:	//"N"
@@ -339,7 +340,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 								lambda = cs2/settings->source.freqx;
 								convertUnits(&as, &lambda, &settings->source.freqx, &settings->altimetry.surfaceAttenUnits, &tempDouble);
 								as = tempDouble;
-								boundaryReflectionCoeff(&rho1, &rho2, &ci, &cp2, &cs2, &ap, &as, &thetaRefl, &refl);
+								boundaryReflectionCoeff(&rho1, &rho2, &ci, &cp2, &cs2, &ap, &as, &thetaRefl, &reflCoeff);
 								break;
 							default:
 								fatal("Unknown surface properties (neither H or N).\nAborting...");
@@ -350,10 +351,11 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 						fatal("Unknown surface type (neither A,E,R or V).\nAborting...");
 						break;
 				}
-				reflDecay = reflDecay * refl;
-
+				//apply the reflection coefficient:
+				reflDecay *= reflCoeff;
+				
 				DEBUG(7, "Kill the ray if the reflection coefficient is too small: \n");
-				if ( cabs(refl) < 1.0e-5 ){
+				if ( cabs(reflCoeff) < MIN_REFLECTION_COEFFICIENT ){
 					ray->iKill = TRUE;
 				}
 			//	end of "ray above surface?"
@@ -395,16 +397,16 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 				switch(settings->batimetry.surfaceType){
 					
 					case SURFACE_TYPE__ABSORVENT:	//"A"
-						refl = 0 +0*I;
+						reflCoeff = 0 +0*I;
 						ray->iKill = TRUE;
 						break;
 						
 					case SURFACE_TYPE__RIGID:		//"R"
-						refl = 1 +0*I;
+						reflCoeff = 1 +0*I;
 						break;
 						
 					case SURFACE_TYPE__VACUUM:		//"V"
-						refl = -1 +0*I;
+						reflCoeff = -1 +0*I;
 						break;
 						
 					case SURFACE_TYPE__ELASTIC:		//"E"
@@ -432,7 +434,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 												&tempDouble
 											);
 								as		= tempDouble;
-								boundaryReflectionCoeff(&rho1, &rho2, &ci, &cp2, &cs2, &ap, &as, &thetaRefl, &refl);
+								boundaryReflectionCoeff(&rho1, &rho2, &ci, &cp2, &cs2, &ap, &as, &thetaRefl, &reflCoeff);
 								break;
 							
 							case SURFACE_PROPERTY_TYPE__NON_HOMOGENEOUS:	//"N"
@@ -488,7 +490,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 								lambda = cs2/settings->source.freqx;
 								convertUnits(&as, &lambda, &settings->source.freqx, &settings->batimetry.surfaceAttenUnits, &tempDouble);
 								as = tempDouble;
-								boundaryReflectionCoeff(&rho1, &rho2, &ci, &cp2, &cs2, &ap, &as, &thetaRefl, &refl);
+								boundaryReflectionCoeff(&rho1, &rho2, &ci, &cp2, &cs2, &ap, &as, &thetaRefl, &reflCoeff);
 								break;
 							default:
 								fatal("Unknown surface properties (neither H or N).\nAborting...");
@@ -500,12 +502,13 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 						break;
 				}//switch(settings->batimetry.surfaceType)
 				
-				reflDecay = reflDecay * refl;
-				DEBUG(7,"decay: %lf, abs(reflDecay): %lf, refl: %lf\n", cabs(ray->decay[i]), cabs(reflDecay), cabs(refl));
+				reflDecay *= reflCoeff;
+				
+				DEBUG(7,"decay: %lf, abs(reflDecay): %lf, reflCoeff: %lf\n", cabs(ray->decay[i]), cabs(reflDecay), cabs(reflCoeff));
 				//Kill the ray if the reflection coefficient is too small: 
-				if ( cabs(refl) < 0.00001 ){
+				if ( cabs(reflCoeff) < MIN_REFLECTION_COEFFICIENT ){
 					ray->iKill = TRUE;
-					DEBUG(2, "Ray killed ( abs(refl) < 1e-5 )\n");
+					DEBUG(2, "Ray killed ( abs(reflCoeff) < 1e-5 )\n");
 				}
 			}	//if (zi > batInterpolatedZ) (	Ray below bottom?)
 
@@ -716,18 +719,18 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 						switch(settings->objects.object[j].surfaceType){
 							case SURFACE_TYPE__ABSORVENT:	//"A"
 								DEBUG(5, "Object: SURFACE_TYPE__ABSORVENT\n");
-								refl = 0 +0*I;
+								reflCoeff = 0 +0*I;
 								ray->iKill = TRUE;
 								break;
 						
 							case SURFACE_TYPE__RIGID:		//"R"
 								DEBUG(5, "Object: SURFACE_TYPE__RIGID\n");
-								refl = 1 +0*I;
+								reflCoeff = 1 +0*I;
 								break;
 								
 							case SURFACE_TYPE__VACUUM:		//"V"
 								DEBUG(5, "Object: SURFACE_TYPE__VACUUM\n");
-								refl = -1 +0*I;
+								reflCoeff = -1 +0*I;
 								break;
 								
 							case SURFACE_TYPE__ELASTIC:		//"E"
@@ -754,7 +757,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 											);
 								as		= tempDouble;
 								DEBUG(6, "Calculating reflection coefficient...\n");
-								boundaryReflectionCoeff(&rho1, &rho2, &ci, &cp2, &cs2, &ap, &as, &thetaRefl, &refl);
+								boundaryReflectionCoeff(&rho1, &rho2, &ci, &cp2, &cs2, &ap, &as, &thetaRefl, &reflCoeff);
 								DEBUG(6, "Reflection coefficient calculated\n");
 								break;
 							
@@ -762,11 +765,12 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 								fatal("Unknown object boundary type (neither A,E,R or V).\nAborting...");
 								break;
 						}
-						reflDecay = reflDecay * refl;
+						
+						reflDecay *= reflCoeff;
 						DEBUG(7, "Object: Reflection decay calculated: %lf +j* %lf\n", creal(reflDecay), cimag(reflDecay));
 
 						//Kill the ray if the reflection coefficient is too small: 
-						if ( cabs(refl) < 1.0e-5 ){
+						if ( cabs(reflCoeff) < MIN_REFLECTION_COEFFICIENT ){
 							ray->iKill = TRUE;
 						}
 						
@@ -821,7 +825,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 		ray->boundaryTg[i+1].z	= tauB.z;
 
 		if (jRefl == 1){	//TODO huh?!
-			ray->phase[i+1] = ray->phase[i] - atan2( cimag(refl), creal(refl) );
+			ray->phase[i+1] = ray->phase[i] - atan2( cimag(reflCoeff), creal(reflCoeff) );
 		}else{
 			ray->phase[i+1] = ray->phase[i];
 		}

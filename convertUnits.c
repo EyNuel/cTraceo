@@ -1,7 +1,7 @@
 /************************************************************************************
  *	convertUnits.c																	*
  *	(formerly "cnvnts.for")															*
- *	Convert between several atenuation units.										*
+ *	Convert from several atenuation units to dB/lambda.								*
  * 																					*
  *	originally written in FORTRAN by:												*
  *						Orlando Camargo Rodriguez:									*
@@ -35,8 +35,9 @@
 #include <math.h>
 
 void convertUnits(double*, double*, double*, uint32_t*, double*);
-	
+
 void convertUnits(double* aIn, double* lambda, double* freq, uint32_t* units, double* aOut){
+	//TODO add support for "parameter loss", 'L' option from Bellhop's option1(3)
 	
 	double c1 = 8.68588963806504;
 	
