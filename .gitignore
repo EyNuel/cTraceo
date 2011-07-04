@@ -14,7 +14,7 @@ bin/
 #Ignore matlab output files:
 *.mat
 #except transect.mat, as this contains the bathymetry of the sletvik waveguide
-!transect.mat
+!sletvik_transect.mat
 
 *.log
 *~

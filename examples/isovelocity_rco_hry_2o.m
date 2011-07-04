@@ -147,7 +147,7 @@ disp('Calling TRACEO...')
 disp('Reading the output data...')
 load rco
 
-figure(1), hold on
+figure, hold on
 plot(rs,zs,'ko',rs,zs,'m*','MarkerSize',16) 
 for i = 1:length(rays)
     plot(rays(i).r, rays(i).z)
@@ -179,7 +179,7 @@ disp('Reading the output data...')
 
 load rco
 
-figure(1), hold on
+figure, hold on
 plot(rs,zs,'ko',rs,zs,'m*','MarkerSize',16) 
 for i = 1:length(thetas)
     eval(['ray = ray' num2str(i) ';']);

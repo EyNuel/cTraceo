@@ -147,15 +147,12 @@ output_data.miss        = 0.5;
 %==================================================================
 
 disp('Writing TRACEO waveguide input file...')
-
 wtraceoinfil('flat.in',case_title,source_data,surface_data,ssp_data,object_data,bottom_data,output_data);
 
 disp('Calling cTRACEO...')
-
 !ctraceo flat
 
 disp('Reading the output data...')
-
 load eig 
 
 figure(1), hold on
@@ -176,6 +173,7 @@ fill(xobj1(1,:),xobj1(3,:),'k')
 fill(xobj2(1,:),xobj2(2,:),'k')
 fill(xobj2(1,:),xobj2(3,:),'k')
 
+%plot hydrophones
 plot(ranges, depths, 's')
  
 grid on, box on
