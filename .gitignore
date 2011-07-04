@@ -22,3 +22,5 @@ bin/
 testing/
 *.for
 
+#ignore temporary files:
+.gitk-tmp*
