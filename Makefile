@@ -38,7 +38,7 @@ COMPLINK 	:= $(CC) $(CFLAGS) $(LFLAGS) -o $@
 AUXFILES := Makefile
 
 # A list of directories that belong to the project
-PROJDIRS := . M-Files
+PROJDIRS := . M-Files examples
 	#functions includes internals
 
 # Recursively create a list of files that are inside the project
