@@ -1,9 +1,9 @@
 %==================================================================
 %  
-%  cTraceo: Pekeris block waveguide example.
+%  cTraceo: Pekeris waveguide with block example.
 %  
-%  Written by Tordar	Gambelas, Tue Dec  7 15:29:34 WET 2010
-%  Revised by Emanuel Ey    :29/06/2011
+%  Written by Tordar        Gambelas, Tue Dec  7 15:29:34 WET 2010
+%  Revised by Emanuel Ey    29/06/2011
 %  
 %==================================================================
 
@@ -11,7 +11,7 @@ clear all, close all
 
 imunit = sqrt( -1 ); 
 
-case_title = '''RRY''';
+case_title = '''Pekeris waveguide with block example''';
 freq       =  100;
 Rmaxboxkm  = 5.1; Rmaxbox = Rmaxboxkm*1000;
 Rmaxhrykm  = 5.0; Rmaxhry = Rmaxhrykm*1000;
@@ -122,25 +122,29 @@ output_data.miss        = 0.5;
 %==================================================================
 
 disp('Writing TRACEO waveguide input file...')
+wtraceoinfil('block_cpr_rry.in',case_title,source_data,surface_data,ssp_data,object_data,bottom_data,output_data);
+%{
+disp('Calling fTRACEO...')
+!traceo block_cpr_rry
 
-wtraceoinfil('block.in',case_title,source_data,surface_data,ssp_data,object_data,bottom_data,output_data);
-
-disp('Calling cTRACEO...')
-
-!traceo block
-
-%disp('Reading and displaying the result...')
-
+disp('Reading and displaying the result...')
 load cpr
 
 p = rp + imunit*ip;
 tl = -20*log10( abs( p ) ); 
+%}
 
-counter = 0; 
+disp('Calling cTRACEO...')
+!ctraceo block_cpr_rry
+
+disp('Reading and displaying the result...')
+load cpr
+
+tl = -20*log10( abs( p ) ); 
 
 tej = flipud( jet( 256 ) );
 
-counter = counter + 1; figure(counter), hold on
+figure, hold on
 plot(rs,zs,'ko',rs,zs,'m*','MarkerSize',16) 
 pcolor(rarray,zarray,-20*log10( abs(p) )), shading interp, colormap( tej ), caxis([30 80]), colorbar
 plot(bathymetry(1,:),bathymetry(2,:),'k','LineWidth',1)
