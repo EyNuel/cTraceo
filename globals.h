@@ -29,12 +29,13 @@
  * Some data types vary between matlab versions, so we have to define			*
  * their type according to the matlab version used during compilation.			*
  *******************************************************************************/
-#define R14		0
-#define R2007A	1
-#define R2007B	2
-#define R2008A	3
-#define R2008B	4
-#define R2010B	5
+#define R12		0
+#define R14		1
+#define R2007A	2
+#define R2007B	3
+#define R2008A	4
+#define R2008B	5
+#define R2010B	6
 
 
 //When writing matlab-matrixes to matfiles, the data type varies between matlab versions.
