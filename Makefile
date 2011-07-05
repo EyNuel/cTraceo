@@ -57,20 +57,20 @@ ALLFILES := $(SRCFILES) $(HDRFILES) $(AUXFILES) $(MFILES)
 # Disable checking for files with the folowing names:
 .PHONY: all todo cTraceo.exe discuss 32b pg dist
 
-all:	#cTraceo.exe
+all:	dirs
 		@$(CC) $(CFLAGS) $(LFLAGS) -D VERBOSE=0 -O3 -o bin/cTraceo-64b.bin cTraceo.c
 
 
-32b:	#cTraceo.exe
+32b:	dirs
 		@$(CC) $(CFLAGS) $(LFLAGS) -D VERBOSE=0 -O3 -march=i686 -m32 -o bin/cTraceo-32b.bin cTraceo.c
 
-pg:		#
+pg:		dirs
 		@gcc $(CFLAGS) $(LFLAGS) -D VERBOSE=0 -O3 -pg -o bin/cTraceo-64b.bin cTraceo.c
 
-debug:	#
+debug:	dirs
 		@gcc $(CFLAGS) $(LFLAGS) -D VERBOSE=0 -O0 -g -o bin/cTraceo-64b.bin cTraceo.c
 		
-verbose:#
+verbose:dirs
 		@$(CC) $(CFLAGS) $(LFLAGS) -D VERBOSE=1 -O0 -g -o bin/cTraceo-64b.bin cTraceo.c
 
 todo:	#list todos from all files
@@ -82,4 +82,5 @@ discuss:	#list discussion points from all files
 dist:	#
 		@tar -czf ./packages/cTraceo.tgz $(ALLFILES)
 		
-
+dirs:	#creates 'bin/' directory if it doesn't exist
+		@if [ ! -d "bin" ]; then mkdir bin; fi
