@@ -1,82 +1,91 @@
+## ================================================================
+## Configuration
+## Change the values in this section to match your system.
+## ================================================================
 
-#see: 	http://wiki.osdev.org/Makefile
-#		http://www.xs4all.nl/~evbergen/nonrecursive-make.html
+## The base directory of your matlab installation:
+MATLAB_DIR := /usr/local/matlabr14/
+#MATLAB_DIR := /usr/local/MATLAB/R2010b/
+#MATLAB_DIR := /usr/local/matlab2008a/
 
-# Compiler and linker flags:
+## Your Matlab Version:
+## Allowable options are: R14, R2007A, R2007B, R2008A, R2008B, R2010B
+MATLAB_VERSION	:= R14
+
+## The architecture for which you are compiling:
+## Allowable options are: 64b, 32b
+ARCH := 64b
+
+## Choose a compiler
+CC 			:= clang
+#CC 			:= gcc
+
+
+## ================================================================
+## Do not edit below this point unless you know what you are doing:
+## ================================================================
+
+## Compiler flags:
 CFLAGS := 	-Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align \
 			-Wwrite-strings -Wmissing-prototypes -Wmissing-declarations \
 			-Wredundant-decls -Wnested-externs -Winline -Wno-long-long \
 			-Wstrict-prototypes -std=gnu99 \
-			-I /usr/local/matlabr2008b/extern/include \
-			-I /usr/local/matlab2008a/extern/include \
-			-I /usr/local/matlabr14/extern/include \
+			-I $(MATLAB_DIR)extern/include 
 
-# The following 3 lines are for compilation on siplab 64b machines:
-LFLAGS := 	-L /usr/local/matlabr14/bin/glnxa64 \
-			-lm -leng -lmat -lmex -lut \
-			-Wl,-rpath,/usr/local/matlabr14/bin/glnxa64
+## Linker Flags:
+LFLAGS := -lm -leng -lmat -lmex -lut -Wl,
 
-# The following 3 lines are a case for compilation on a 32b machine:
-#LFLAGS :=	-L /usr/local/matlabr2008b/bin/glnx86 \
-#			-lm -leng -lmat -lmex -lut \
-#			-Wl,-rpath,/usr/local/matlabr2008b/bin/glnx86 \
+## Generate path to matlab libraries according to configuration
+ifeq ($(ARCH),32b)
+	LPATH := $(MATLAB_DIR)bin/glnx86
+	CFLAGS := $(CFLAGS) -march=i686 -m32
+endif
+ifeq ($(ARCH),64b)
+	LPATH := $(MATLAB_DIR)bin/glnxa64
+endif
 
-#another case 64b case:
-#LFLAGS :=	-L /usr/local/matlab2008a/bin/glnxa64 \
-#			-lm -leng -lmat -lmex -lut \
-#			-Wl,-rpath /usr/local/matlab2008a/bin/glnxa64 \
+## Finalize linker flags
+LFLAGS := $(LFLAGS)-rpath,$(LPATH) -L $(LPATH)
 
-
-# Define the compiler and linker comands to use:
-CC 			:= clang
-#CC 			:= gcc
-
+## Define the compiler and linker comands to use:
 LINK 		:= $(CC) $(LFLAGS) -o 
 COMPLINK 	:= $(CC) $(CFLAGS) $(LFLAGS) -o $@
 
-# A list of all non-source files that are part of the distribution.
-AUXFILES := Makefile
+## A list of all non-source files that are part of the distribution.
+AUXFILES := Makefile readme.txt
 
-# A list of directories that belong to the project
+## A list of directories that belong to the project
 PROJDIRS := . M-Files examples
-	#functions includes internals
 
-# Recursively create a list of files that are inside the project
+## Recursively create a list of files that are inside the project
 SRCFILES := $(shell find $(PROJDIRS) -mindepth 0 -maxdepth 1 -name "*.c")
 HDRFILES := $(shell find $(PROJDIRS) -mindepth 0 -maxdepth 1 -name "*.h")
 OBJFILES := $(patsubst %.c,%.o,$(SRCFILES))
 MFILES   := $(shell find $(PROJDIRS) -mindepth 1 -maxdepth 1 -name "*.m")
 
-# Automatically create dependency files for every file in the project
-#DEPFILES := $(patsubst %.c, %.d,$(SRCFILES))
-#-include $(DEPFILES)
-
-# A list of all files that should end up in a distribuition tarball
+## A list of all files that should end up in a distribuition tarball
 ALLFILES := $(SRCFILES) $(HDRFILES) $(AUXFILES) $(MFILES)
 
-# Disable checking for files with the folowing names:
+## Disable checking for files with the folowing names:
 .PHONY: all todo cTraceo.exe discuss 32b pg dist
 
+## Build targets:
 all:	dirs
-		@$(CC) $(CFLAGS) $(LFLAGS) -D VERBOSE=0 -O3 -o bin/cTraceo-64b.bin cTraceo.c
-
-
-32b:	dirs
-		@$(CC) $(CFLAGS) $(LFLAGS) -D VERBOSE=0 -O3 -march=i686 -m32 -o bin/cTraceo-32b.bin cTraceo.c
+		@$(CC) $(CFLAGS) $(LFLAGS) -D VERBOSE=0 -D MATLAB_VERSION=$(MATLAB_VERSION) -O3 -o bin/cTraceo-$(ARCH).bin cTraceo.c
 
 pg:		dirs
-		@gcc $(CFLAGS) $(LFLAGS) -D VERBOSE=0 -O3 -pg -o bin/cTraceo-64b.bin cTraceo.c
+		@gcc $(CFLAGS) $(LFLAGS) -D VERBOSE=0 -D MATLAB_VERSION=$(MATLAB_VERSION) -O3 -pg -o bin/cTraceo-$(ARCH).bin cTraceo.c
 
 debug:	dirs
-		@gcc $(CFLAGS) $(LFLAGS) -D VERBOSE=0 -O0 -g -o bin/cTraceo-64b.bin cTraceo.c
+		@gcc $(CFLAGS) $(LFLAGS) -D VERBOSE=0 -D MATLAB_VERSION=$(MATLAB_VERSION) -O0 -g -o bin/cTraceo-$(ARCH).bin cTraceo.c
 		
 verbose:dirs
-		@$(CC) $(CFLAGS) $(LFLAGS) -D VERBOSE=1 -O0 -g -o bin/cTraceo-64b.bin cTraceo.c
+		@$(CC) $(CFLAGS) $(LFLAGS) -D VERBOSE=1 -D MATLAB_VERSION=$(MATLAB_VERSION) -O0 -g -o bin/cTraceo-$(ARCH).bin cTraceo.c
 
 todo:	#list todos from all files
 		@for file in $(ALLFILES); do fgrep -H -e TODO $$file; done; true
 
-discuss:	#list discussion points from all files
+discuss:#list discussion points from all files
 		@for file in $(ALLFILES); do fgrep -H -e DISCUSS $$file; done; true
 		
 dist:	#
