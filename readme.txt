@@ -62,7 +62,7 @@ TODO
 ## Makefile Configuration
    To compile this model the user will have to adapt the included
    makefile to match the target system.
-   Although the options in the Makefile of mostly self-explanatory,
+   Although the options in the Makefile are mostly self-explanatory,
    a brief overview will be presented here:
    
 # The "MATLAB_DIR" variable
