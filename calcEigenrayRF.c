@@ -384,20 +384,20 @@ void	calcEigenrayRF(settings_t* settings){
 					///prepare to save ray to mxStructArray:
 					//create mxArrays:
 					mxTheta	= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)1,					mxREAL);
-					mxR		= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)(tempRay->nCoords),	mxREAL);
-					mxZ		= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)(tempRay->nCoords),	mxREAL);
-					mxTau	= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)(tempRay->nCoords),	mxREAL);
-					mxAmp	= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)(tempRay->nCoords),	mxCOMPLEX);
+					mxR		= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)(tempRay->nCoords-1),	mxREAL);
+					mxZ		= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)(tempRay->nCoords-1),	mxREAL);
+					mxTau	= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)(tempRay->nCoords-1),	mxREAL);
+					mxAmp	= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)(tempRay->nCoords-1),	mxCOMPLEX);
 					if(	mxTheta == NULL || mxR == NULL || mxZ == NULL || mxTau == NULL || mxAmp == NULL){
 						fatal("Memory alocation error.");
 					}
 					
 					//copy data to mxArrays:
 					copyDoubleToMxArray(&tempRay[0].theta,	mxTheta,1);
-					copyDoubleToMxArray(tempRay->r,			mxR,	tempRay->nCoords);
-					copyDoubleToMxArray(tempRay->z,			mxZ, 	tempRay->nCoords);
-					copyDoubleToMxArray(tempRay->tau,		mxTau,	tempRay->nCoords);
-					copyComplexToMxArray(tempRay->amp,		mxAmp,	tempRay->nCoords);
+					copyDoubleToMxArray(tempRay->r,			mxR,	tempRay->nCoords-1);
+					copyDoubleToMxArray(tempRay->z,			mxZ, 	tempRay->nCoords-1);
+					copyDoubleToMxArray(tempRay->tau,		mxTau,	tempRay->nCoords-1);
+					copyComplexToMxArray(tempRay->amp,		mxAmp,	tempRay->nCoords-1);
 					
 					//copy mxArrays to mxRayStruct
 					mxSetFieldByNumber(	eigenrays[i][j].mxEigenrayStruct,				//pointer to the mxStruct
