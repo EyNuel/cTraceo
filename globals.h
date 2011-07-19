@@ -20,7 +20,7 @@
 											//		for shallow water, or other cases with a lot of reflections,
 											//		values of 15-25 may be adequate
 #define KEEP_RAYS_IN_MEM			0		//[boolean] determines whether a ray's coordinates are kept in memory after being written to the .mat file. (mat become usefull for multiprocessing)
-#define MIN_REFLECTION_COEFFICIENT	1.0e-5	//used in solveEikonalEq(). When a rays reflection coeff is below this threshold, it is killed.
+#define MIN_REFLECTION_COEFFICIENT	1.0e-15	//used in solveEikonalEq(). When a rays reflection coeff is below this threshold, it is killed.
 
 
 
