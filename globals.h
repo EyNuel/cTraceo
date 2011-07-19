@@ -28,7 +28,8 @@
  * ------------------------------ MATLAB --------------------------------------	*
  * Some data types vary between matlab versions, so we have to define			*
  * their type according to the matlab version used during compilation.			*
- *******************************************************************************/
+ * NOTE: To choose a specific matlab version for compilatio, edit the Makefile.	*
+ ********************************************************************************/
 #define R12		0
 #define R14		1
 #define R2007A	2
@@ -39,7 +40,7 @@
 
 
 //When writing matlab-matrixes to matfiles, the data type varies between matlab versions.
-#if MATLAB_VERSION == R14
+#if MATLAB_VERSION == R12 || MATLAB_VERSION == R14
 	//matlab R14 uses int32
 	#define MWSIZE			int32_t
 	#define	MWINDEX			int32_t

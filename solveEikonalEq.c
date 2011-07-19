@@ -356,6 +356,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 				
 				DEBUG(7, "Kill the ray if the reflection coefficient is too small: \n");
 				if ( cabs(reflDecay) < MIN_REFLECTION_COEFFICIENT ){
+					DEBUG(2, "Ray killed. abs(reflCoeff) = %e < 1e-5 )\n", cabs(reflDecay));
 					ray->iKill = TRUE;
 				}
 			//	end of "ray above surface?"
@@ -508,7 +509,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 				//Kill the ray if the reflection coefficient is too small: 
 				if ( cabs(reflDecay) < MIN_REFLECTION_COEFFICIENT ){
 					ray->iKill = TRUE;
-					DEBUG(2, "Ray killed ( abs(reflCoeff) < 1e-5 )\n");
+					DEBUG(2, "Ray killed. abs(reflCoeff) = %e < 1e-5 )\n", cabs(reflDecay));
 				}
 			}	//if (zi > batInterpolatedZ) (	Ray below bottom?)
 
@@ -771,6 +772,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 
 						//Kill the ray if the reflection coefficient is too small: 
 						if ( cabs(reflDecay) < MIN_REFLECTION_COEFFICIENT ){
+							DEBUG(2, "Ray killed. abs(reflCoeff) = %e < 1e-5 )\n", cabs(reflDecay));
 							ray->iKill = TRUE;
 						}
 						

@@ -333,7 +333,6 @@ void	calcEigenrayRF(settings_t* settings){
 						if (nTrial > 21){
 							printf("(rHyd,zHyd)= %e, %e\n", rHyd, zHyd);
 							printf("Eigenray search failure, skipping to next case...\n");
-							//iFail = TRUE;
 							break;
 						}
 						
@@ -352,7 +351,6 @@ void	calcEigenrayRF(settings_t* settings){
 						
 						//check if the new rays is close enough to the hydrophone to be considered and eigenray:
 						if (fabs(f0) < settings->output.miss){
-//							iFail = FALSE
 							DEBUG(3, "Found eigenray by applying Regula-Falsi.\n");
 							success = TRUE;
 							nFoundEigenRays++;
@@ -374,9 +372,7 @@ void	calcEigenrayRF(settings_t* settings){
 							}
 						}
 					}//while()
-					//DEBUG(3, "iFail: %u\n", iFail);
 				}
-				//DEBUG(3,"iFail: %u\n", (uint32_t)iFail);
 				if (success == TRUE){
 					
 					//finally: get the coordinates and amplitudes of the eigenray
@@ -451,7 +447,7 @@ void	calcEigenrayRF(settings_t* settings){
 			idx[0] = (MWINDEX)j;
 			idx[1] = (MWINDEX)i;
 			mxSetFieldByNumber(	mxAllEigenraysStruct,									//pointer to the mxStruct
-								mxCalcSingleSubscript(mxAllEigenraysStruct,	2, idx),//index of the element
+								mxCalcSingleSubscript(mxAllEigenraysStruct,	2, idx),	//index of the element
 								0,														//position of the field (in this case, field 0 is "theta"
 								mxNumEigenrays);										//the mxArray we want to copy into the mxStruct
 			
