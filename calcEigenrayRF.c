@@ -290,7 +290,7 @@ void	calcEigenrayRF(settings_t* settings){
 			tempRay = makeRay(1);
 			nFoundEigenRays = 0;
 			for(l=0; l<nPossibleEigenRays; l++){		//Note that if nPossibleEigenRays = 0 this loop will not be executed:
-				settings->source.rbox2 = rHyd;
+				settings->source.rbox2 = rHyd + 1e-3;	
 				DEBUG(3,"l: %u\n", (uint32_t)l);
 				
 				//Determine "left" ray's depth at rHyd:
@@ -384,20 +384,20 @@ void	calcEigenrayRF(settings_t* settings){
 					///prepare to save ray to mxStructArray:
 					//create mxArrays:
 					mxTheta	= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)1,					mxREAL);
-					mxR		= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)(tempRay->nCoords-1),	mxREAL);
-					mxZ		= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)(tempRay->nCoords-1),	mxREAL);
-					mxTau	= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)(tempRay->nCoords-1),	mxREAL);
-					mxAmp	= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)(tempRay->nCoords-1),	mxCOMPLEX);
+					mxR		= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)(tempRay->nCoords),	mxREAL);
+					mxZ		= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)(tempRay->nCoords),	mxREAL);
+					mxTau	= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)(tempRay->nCoords),	mxREAL);
+					mxAmp	= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)(tempRay->nCoords),	mxCOMPLEX);
 					if(	mxTheta == NULL || mxR == NULL || mxZ == NULL || mxTau == NULL || mxAmp == NULL){
 						fatal("Memory alocation error.");
 					}
 					
 					//copy data to mxArrays:
 					copyDoubleToMxArray(&tempRay[0].theta,	mxTheta,1);
-					copyDoubleToMxArray(tempRay->r,			mxR,	tempRay->nCoords-1);
-					copyDoubleToMxArray(tempRay->z,			mxZ, 	tempRay->nCoords-1);
-					copyDoubleToMxArray(tempRay->tau,		mxTau,	tempRay->nCoords-1);
-					copyComplexToMxArray(tempRay->amp,		mxAmp,	tempRay->nCoords-1);
+					copyDoubleToMxArray(tempRay->r,			mxR,	tempRay->nCoords);
+					copyDoubleToMxArray(tempRay->z,			mxZ, 	tempRay->nCoords);
+					copyDoubleToMxArray(tempRay->tau,		mxTau,	tempRay->nCoords);
+					copyComplexToMxArray(tempRay->amp,		mxAmp,	tempRay->nCoords);
 					
 					//copy mxArrays to mxRayStruct
 					mxSetFieldByNumber(	eigenrays[i][j].mxEigenrayStruct,				//pointer to the mxStruct
