@@ -46,32 +46,35 @@ void	cValues1D(uintptr_t n, double* xTable, double* cTable, double xi, double* c
 		intBarycCubic1D(	&xTable[i-1],
 							&cTable[i-1],
 							xi, ci, cxi, cxxi);
-	}else if( xi < xTable[1]){
+	
+	}else if( xi < xTable[2]){
 		//if xi is in first interval of xTable, do linear interpolation
 		intLinear1D(	&xTable[0],
 						&cTable[0],
 						xi, ci, cxi);
 		*cxxi = 0.0;
-		
+	
+	}else if( xi >= xTable[1]  &&  xi < xTable[2]){
+		//if xi is in second interval of xTable, do linear interpolation
+		intLinear1D(	&xTable[1],
+						&cTable[1],
+						xi, ci, cxi);
+		*cxxi = 0.0;
+	
 	}else if( xi >= xTable[n-2]){
 		//if xi is in last interval of xTable, do linear interpolation
 		intLinear1D(	&xTable[n-2],
 						&cTable[n-2],
 						xi, ci, cxi);
 		*cxxi = 0.0;
-		
-	}else if( xi >= xTable[1]  &&  xi < xTable[2]){
-		//if xi is in second interval of xTable, do barycentric parabolic interpolation
-		intBarycParab1D(	&xTable[0],
-							&cTable[0],
-							xi, ci, cxi, cxxi);
-		
+	
 	}else if( xi >= xTable[n-3]  &&  xi < xTable[n-2] ){
-		//if xi is in second to last interval of xTable, do barycentric parabolic interpolation
-		intBarycParab1D(	&xTable[n-3],
-							&cTable[n-3],
-							xi, ci, cxi, cxxi);
-		
+		//if xi is in second to last interval of xTable, do linear interpolation
+		intLinear1D(	&xTable[n-3],
+						&cTable[n-3],
+						xi, ci, cxi);
+		*cxxi = 0.0;
+	
 	}else{
 		fatal("in cValues1D(): This should not be possible.");
 	}
