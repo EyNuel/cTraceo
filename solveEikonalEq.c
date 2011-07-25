@@ -65,7 +65,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 	vector_t		normal = {0,0};
 	vector_t		tauB = {0,0};
 	vector_t		tauR = {0,0};
-	double*			yOld			= mallocDouble(4);
+	double*			yOld			= mallocDouble(4);	//TODO replace with array? might improve performance.
 	double*			fOld 			= mallocDouble(4);
 	double*			yNew 			= mallocDouble(4);
 	double*			fNew 			= mallocDouble(4);
@@ -83,6 +83,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 	double			ziDown, ziUp;	//"zidn, ziup", interpolated height of upper/lower boundary of an object
 
 	//allocate memory for ray components:
+	//TODO move memory allocation up one level -this should improve performance
 	initialMemorySize = (uintptr_t)(fabs((settings->source.rbox2 - settings->source.rbox1)/settings->source.ds))*MEM_FACTOR;
 	reallocRayMembers(ray, initialMemorySize);
 	
@@ -142,6 +143,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 	yOld[1] = settings->source.zx;
 	yOld[2] = sigmaR;
 	yOld[3] = sigmaZ;
+	
 	fOld[0] = es.r;
 	fOld[1] = es.z;
 	fOld[2] = slowness.r;
@@ -835,6 +837,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 		jRefl			= 0;
 		ibdry			= 0;
 		numRungeKutta	= 0;
+		
 		tauB.r			= 0.0;
 		tauB.z			= 0.0;
 		ray->decay[i+1] = reflDecay;
@@ -894,9 +897,9 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 	ray->nRefl = sRefl + bRefl + oRefl;
 	
 	//Cut the ray at box exit:
-	dr	= ray->r[ray->nCoords - 1] - ray->r[ray->nCoords-2];
-	dz	= ray->z[ray->nCoords - 1] - ray->z[ray->nCoords-2];
-	dIc	= ray->ic[ray->nCoords - 1] -ray->ic[ray->nCoords-2];
+	dr	= ray->r[ray->nCoords -1] - ray->r[ray->nCoords-2];
+	dz	= ray->z[ray->nCoords -1] - ray->z[ray->nCoords-2];
+	dIc	= ray->ic[ray->nCoords-1] - ray->ic[ray->nCoords-2];
 
 	if (ray->r[ray->nCoords-1] > settings->source.rbox2){
 		//ray has exited rangebox at right edge
@@ -905,6 +908,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 		ray->r[ray->nCoords-1]	= settings->source.rbox2;
 		
 		//adjust memory size of the ray (we don't need more memory than nCoords)
+		//TODO remove memmory reallocation -performance!
 		reallocRayMembers(ray, ray->nCoords);
 		
 	}else if (ray->r[ray->nCoords-1] < settings->source.rbox1){
@@ -914,11 +918,12 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 		ray->r[ray->nCoords-1]	= settings->source.rbox1;
 		
 		//adjust memory size of the ray (we don't need more memory than nCoords)
+		//TODO remove memmory reallocation -performance!
 		reallocRayMembers(ray, ray->nCoords);
 		
 	}else{
 		//the last coordinate isn't outside the rangebox, so we clip the extra coordinate
-		reallocRayMembers(ray, ray->nCoords-1);
+		//reallocRayMembers(ray, ray->nCoords-1);
 	}
 
 	
@@ -932,9 +937,9 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 		prod = ( ray->z[i+1] - ray->z[i] )*( ray->z[i] - ray->z[i-1] );
 		
 		if ( (prod < 0) && (ray->iRefl[i] != 1) ){
+			ray->rRefrac[ray->nRefrac] = ray->r[i];
+			ray->zRefrac[ray->nRefrac] = ray->z[i];
 			ray->nRefrac++;
-			ray->rRefrac[ray->nRefrac - 1] = ray->r[i];
-			ray->zRefrac[ray->nRefrac - 1] = ray->z[i];
 		}
 		
 		prod = ( ray->r[i+1]-ray->r[i] )*( ray->r[i]-ray->r[i-1] );
@@ -950,6 +955,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 	i++;
 	
 	//clip allocated memory for refractions
+	//TODO remove memmory reallocation -performance!
 	ray->rRefrac = reallocDouble(ray->rRefrac, ray->nRefrac);
 	ray->zRefrac = reallocDouble(ray->zRefrac, ray->nRefrac);
 	
