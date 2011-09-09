@@ -28,8 +28,17 @@
  * 																				*
  *******************************************************************************/
 
+#pragma  once
+#include <complex.h>
 #include "globals.h"
-#include "calcEigenrayRF.c"
+#include "tools.h"
+#include "solveDynamicEq.c"
+#include "solveEikonalEq.c"
+#include <mat.h>
+#include "matrix.h"
+#include "interpolation.h"
+#include "bracket.c"
+#include "eBracket.c"
 
 void calcAmpDelRF(settings_t*);
 
@@ -37,9 +46,10 @@ void calcAmpDelRF(settings_t* settings){
 		DEBUG(1,"in\n");
 	double 			thetai, ctheta;
 	uintptr_t		i, j, k, l, nRays, iHyd = 0;
-	uintptr_t		nPossibleEigenRays, nFoundEigenRays = 0;
+	uintptr_t		nPossibleArrivals, nFoundArrivals = 0;
 	double			zRay, zHyd, rHyd;
 	double			junkDouble;
+	double 			maxNumArrivals=0;		//keeps track of the highest number of arrivals
 	uint32_t		nTrial;
 	double			theta0, f0;
 	//used for root-finding in actual Regula-Falsi Method:
@@ -58,21 +68,21 @@ void calcAmpDelRF(settings_t* settings){
 	mxArray*		pTitle				= NULL;
 	mxArray*		pHydArrayR			= NULL;
 	mxArray*		pHydArrayZ			= NULL;
-	mxArray*		pnEigenRays			= NULL;
+	mxArray*		pSourceZ			= NULL;
 	mxArray*		mxTheta				= NULL;
 	mxArray*		mxR					= NULL;
 	mxArray*		mxZ					= NULL;
 	mxArray*		mxTau				= NULL;
 	mxArray*		mxAmp				= NULL;
-	mxArray*		mxAllEigenraysStruct= NULL;		//contains all the eigenrays at all hydrophones
-	mxArray*		mxNumEigenrays		= NULL;
+	mxArray*		mxAadStruct			= NULL;		//contains the arrivals at a single hydrophone
+	mxArray*		mxNumArrivals		= NULL;
 	mxArray*		mxRHyd				= NULL;
 	mxArray*		mxZHyd				= NULL;
-	const char*		AllEigenrayFieldNames[]= {	"nEigenrays", "rHyd", "zHyd", "eigenray" };
-	const char*		eigenrayFieldNames[]= {	"theta", "r", "z", "tau", "amp"};		//the names of the fields contained in mxRayStruct
-	MWINDEX			idx[2];			//used for accessing a specific element in the mxAllEigenrayStruct
+	const char*		aadFieldNames[]		= {	"nArrivals", "rHyd", "zHyd", "arrival" };
+	const char*		arrivalFieldNames[]	= {	"theta", "r", "z", "tau", "amp"};	//the names of the fields contained in mxArrivalStruct
+	MWINDEX			idx[2];						//used for accessing a specific element in the mxAadStruct
 	
-	eigenrays_t		eigenrays[settings->output.nArrayR][settings->output.nArrayZ];
+	arrivals_t		arrivals[settings->output.nArrayR][settings->output.nArrayZ];
 	/*
 	 * arrivals[][] is an array with the dimensions of the hydrophone array and will contain the
 	 * actual arrival information before it is written to a matlab structure at the end of the file.
@@ -80,12 +90,12 @@ void calcAmpDelRF(settings_t* settings){
 	//initialize to 0
 	for (i=0; i<settings->output.nArrayR; i++){
 		for (j=0; j<settings->output.nArrayZ; j++){
-			eigenrays[i][j].nEigenrays = 0;
-			eigenrays[i][j].mxEigenrayStruct = mxCreateStructMatrix(	(MWSIZE)settings->source.nThetas,		//number of rows
+			arrivals[i][j].nArrivals = 0;
+			arrivals[i][j].mxArrivalStruct = mxCreateStructMatrix(	(MWSIZE)settings->source.nThetas,		//number of rows
 																		(MWSIZE)1,								//number of columns
 																		5,										//number of fields in each element
-																		eigenrayFieldNames);						//list of field names
-			if( eigenrays[i][j].mxEigenrayStruct == NULL ){
+																		arrivalFieldNames);						//list of field names
+			if( arrivals[i][j].mxArrivalStruct == NULL ){
 				fatal("Memory Alocation error.");
 			}
 		}
@@ -93,7 +103,7 @@ void calcAmpDelRF(settings_t* settings){
 	
 	#if 1
 	//Open matfile for output:
-	matfile 	= matOpen("eig.mat", "w");
+	matfile 	= matOpen("aad.mat", "w");
 	
 	
 	//write ray launching angles to matfile:
@@ -121,8 +131,8 @@ void calcAmpDelRF(settings_t* settings){
 	if(pHydArrayR == NULL){
 		fatal("Memory alocation error.");
 	}
-	copyDoubleToMxArray( settings->output.arrayR, pHydArrayR, (uintptr_t)settings->output.nArrayR);
-	matPutVariable(matfile, "rarray", pHydArrayR);
+	copyDoubleToMxArray(	settings->output.arrayR, pHydArrayR, (uintptr_t)settings->output.nArrayR);
+	matPutVariable(matfile, "arrayR", pHydArrayR);
 	mxDestroyArray(pHydArrayR);
 	
 	
@@ -131,9 +141,19 @@ void calcAmpDelRF(settings_t* settings){
 	if(pHydArrayZ == NULL){
 		fatal("Memory alocation error.");
 	}
-	copyDoubleToMxArray( settings->output.arrayZ, pHydArrayZ, (uintptr_t)settings->output.nArrayZ);
-	matPutVariable(matfile, "zarray", pHydArrayZ);
+	copyDoubleToMxArray(	settings->output.arrayZ, pHydArrayZ, (uintptr_t)settings->output.nArrayZ);
+	matPutVariable(matfile, "arrayZ", pHydArrayZ);
 	mxDestroyArray(pHydArrayZ);
+	
+	
+	//write source depth to file:
+	pSourceZ			= mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)1, mxREAL);
+	if(pSourceZ == NULL){
+		fatal("Memory alocation error.");
+	}
+	copyDoubleToMxArray(&settings->source.zx, pSourceZ, 1);
+	matPutVariable(matfile, "sourceZ", pSourceZ);
+	mxDestroyArray(pSourceZ);
 	
 	
 	//allocate memory for rays and auxiliary variables:
@@ -219,11 +239,11 @@ void calcAmpDelRF(settings_t* settings){
 			}
 			
 			/** By looking at sign variations (or zero values) of dz[]:
-			 *		:: determine the number of possible eigenrays 
+			 *		:: determine the number of possible arrivals 
 			 * 		:: find the launching angles of adjacent rays that pass above and below (named L and R) a hydrophone
 			 * 			(which implies that there may be an intermediate launching angle that corresponds to an eigenray.
 			 */
-			nPossibleEigenRays = 0;
+			nPossibleArrivals = 0;
 			for(k=0; k<nRays-1; k++){
 				fl = dz[k];
 				fr = dz[k+1];
@@ -235,42 +255,42 @@ void calcAmpDelRF(settings_t* settings){
 					DEBUG(3, "Not a NAN\n");
 					
 					if(	(fl == 0.0) && (fr != 0.0)){
-						thetaL[nPossibleEigenRays] = thetas[k];
-						thetaR[nPossibleEigenRays] = thetas[k+1];
-						nPossibleEigenRays++;
+						thetaL[nPossibleArrivals] = thetas[k];
+						thetaR[nPossibleArrivals] = thetas[k+1];
+						nPossibleArrivals++;
 					
 					}else if(	(fr == 0.0) && (fl != 0.0)){
-						thetaL[nPossibleEigenRays] = thetas[k];
-						thetaR[nPossibleEigenRays] = thetas[k+1];
-						nPossibleEigenRays++;
+						thetaL[nPossibleArrivals] = thetas[k];
+						thetaR[nPossibleArrivals] = thetas[k+1];
+						nPossibleArrivals++;
 					
 					}else if(prod < 0.0){
-						thetaL[nPossibleEigenRays] = thetas[k];
-						thetaR[nPossibleEigenRays] = thetas[k+1];
-						nPossibleEigenRays++;
+						thetaL[nPossibleArrivals] = thetas[k];
+						thetaR[nPossibleArrivals] = thetas[k+1];
+						nPossibleArrivals++;
 					
 					}
-					DEBUG(3, "thetaL: %e, thetaR: %e\n", thetaL[nPossibleEigenRays-1], thetaR[nPossibleEigenRays-1]);
+					DEBUG(3, "thetaL: %e, thetaR: %e\n", thetaL[nPossibleArrivals-1], thetaR[nPossibleArrivals-1]);
 				}else{
 					DEBUG(4, "Its a NAN\n");
 				}
-				if (nPossibleEigenRays > nRays){
+				if (nPossibleArrivals > nRays){
 					//this should not be possible. TODO replace by assertion?
 					fatal("The impossible happened.\nNumber of possible eigenrays exceeds number of calculated rays.\nAborting.");
 				}
 			}
 			
-			//Time to find eigenrays; either we are lucky or we need to apply regula falsi:
-			/** We now know how many possible eigenrays this hydrophone has (nPossibleEigenRays),
+			//Time to find arrivals; either we are lucky or we need to apply regula falsi:
+			/** We now know how many possible arrivals this hydrophone has (nPossibleArrivals),
 			 *	and for each of them we have the bracketing launching angles.
 			 *	It is now time to determine the "exact" launching angle of each eigenray.
 			 */
-			DEBUG(3, "nPossibleEigenRays: %u\n", (uint32_t)nPossibleEigenRays);
+			DEBUG(3, "nPossibleArrivals: %u\n", (uint32_t)nPossibleArrivals);
 			
 			#if 0
 			/*
 			//create mxStructArray:
-			mxRayStruct = mxCreateStructMatrix(	(MWSIZE)nPossibleEigenRays,	//number of rows
+			mxRayStruct = mxCreateStructMatrix(	(MWSIZE)nPossibleArrivals,	//number of rows
 												(MWSIZE)1,					//number of columns
 												5,							//number of fields in each element
 												fieldNames);				//list of field names
@@ -281,9 +301,9 @@ void calcAmpDelRF(settings_t* settings){
 			#endif
 			
 			tempRay = makeRay(1);
-			nFoundEigenRays = 0;
-			for(l=0; l<nPossibleEigenRays; l++){		//Note that if nPossibleEigenRays = 0 this loop will not be executed:
-				settings->source.rbox2 = rHyd;
+			nFoundArrivals = 0;
+			for(l=0; l<nPossibleArrivals; l++){		//Note that if nPossibleArrivals = 0 this loop will not be executed:
+				settings->source.rbox2 = rHyd + 1;
 				DEBUG(3,"l: %u\n", (uint32_t)l);
 				
 				//Determine "left" ray's depth at rHyd:
@@ -304,13 +324,13 @@ void calcAmpDelRF(settings_t* settings){
 				if (fabs(fl) <= settings->output.miss){
 					DEBUG(3, "\"left\" is eigenray.\n");
 					theta0 = thetaL[l];
-					nFoundEigenRays++;
+					nFoundArrivals++;
 					success = TRUE;
 				
 				}else if (fabs(fr) <= settings->output.miss){
 					DEBUG(3, "\"right\" is eigenray.\n");
 					theta0 = thetaR[l];
-					nFoundEigenRays++;
+					nFoundArrivals++;
 					success = TRUE;
 				
 				//if not, try to find the "exact" launching angle
@@ -326,7 +346,6 @@ void calcAmpDelRF(settings_t* settings){
 						if (nTrial > 21){
 							printf("(rHyd,zHyd)= %e, %e\n", rHyd, zHyd);
 							printf("Eigenray search failure, skipping to next case...\n");
-							//iFail = TRUE;
 							break;
 						}
 						
@@ -345,10 +364,9 @@ void calcAmpDelRF(settings_t* settings){
 						
 						//check if the new rays is close enough to the hydrophone to be considered and eigenray:
 						if (fabs(f0) < settings->output.miss){
-//							iFail = FALSE
 							DEBUG(3, "Found eigenray by applying Regula-Falsi.\n");
 							success = TRUE;
-							nFoundEigenRays++;
+							nFoundArrivals++;
 							break;
 						
 						//if the root wasn't found, do another Regula-Falsi iterarion:
@@ -372,7 +390,7 @@ void calcAmpDelRF(settings_t* settings){
 				//DEBUG(3,"iFail: %u\n", (uint32_t)iFail);
 				if (success == TRUE){
 					
-					//finally: get the coordinates and amplitudes of the eigenray
+					//finally: get arrivals from the coordinates and amplitudes of the eigenray
 					tempRay[0].theta = theta0;
 					solveEikonalEq(settings, tempRay);
 					solveDynamicEq(settings, tempRay);
@@ -397,80 +415,83 @@ void calcAmpDelRF(settings_t* settings){
 					copyComplexToMxArray(&tempRay->amp[tempRay->nCoords - 1],	mxAmp,	1);
 					
 					//copy mxArrays to mxRayStruct
-					mxSetFieldByNumber(	eigenrays[i][j].mxEigenrayStruct,				//pointer to the mxStruct
-										(MWINDEX)eigenrays[i][j].nEigenrays,			//index of the element (number of ray)
+					mxSetFieldByNumber(	arrivals[i][j].mxArrivalStruct,					//pointer to the mxStruct
+										(MWINDEX)arrivals[i][j].nArrivals,				//index of the element (number of ray)
 										0,												//position of the field (in this case, field 0 is "r"
 										mxTheta);										//the mxArray we want to copy into the mxStruct
-					mxSetFieldByNumber(	eigenrays[i][j].mxEigenrayStruct, (MWINDEX)eigenrays[i][j].nEigenrays, 1, mxR);
-					mxSetFieldByNumber(	eigenrays[i][j].mxEigenrayStruct, (MWINDEX)eigenrays[i][j].nEigenrays, 2, mxZ);
-					mxSetFieldByNumber(	eigenrays[i][j].mxEigenrayStruct, (MWINDEX)eigenrays[i][j].nEigenrays, 3, mxTau);
-					mxSetFieldByNumber(	eigenrays[i][j].mxEigenrayStruct, (MWINDEX)eigenrays[i][j].nEigenrays, 4, mxAmp);
-					///ray has been saved to mxStructArray
+					mxSetFieldByNumber(	arrivals[i][j].mxArrivalStruct, (MWINDEX)arrivals[i][j].nArrivals, 1, mxR);
+					mxSetFieldByNumber(	arrivals[i][j].mxArrivalStruct, (MWINDEX)arrivals[i][j].nArrivals, 2, mxZ);
+					mxSetFieldByNumber(	arrivals[i][j].mxArrivalStruct, (MWINDEX)arrivals[i][j].nArrivals, 3, mxTau);
+					mxSetFieldByNumber(	arrivals[i][j].mxArrivalStruct, (MWINDEX)arrivals[i][j].nArrivals, 4, mxAmp);
+					///arrival has been saved to mxStructArray
 					
-					eigenrays[i][j].nEigenrays += 1;
+					arrivals[i][j].nArrivals += 1;
+					maxNumArrivals = max(arrivals[i][j].nArrivals, maxNumArrivals);
 				}
 			}
-			DEBUG(3, "nFoundEigenRays: %u\n", (uint32_t)nFoundEigenRays);
+			DEBUG(3, "nFoundArrivals: %u\n", (uint32_t)nFoundArrivals);
 		}
 	}
 	
-	///Write number of eigenrays to matfile:
-	pnEigenRays = mxCreateDoubleMatrix((MWSIZE)1,(MWSIZE)1,mxREAL);
-	junkDouble = (double)nFoundEigenRays;
-	copyDoubleToMxArray( &junkDouble, pnEigenRays, 1);
-	matPutVariable(matfile, "nEigenrays", pnEigenRays);
-	mxDestroyArray(pnEigenRays);
-	DEBUG(3, "nFoundEigenRays: %u\n", (uint32_t)nFoundEigenRays);
 	
-	///Write Eigenrays to matfile:
-	//copy arrival data to mxAllEigenraysStruct:
-	mxAllEigenraysStruct = mxCreateStructMatrix((MWSIZE)settings->output.nArrayZ,	//number of rows
-												(MWSIZE)settings->output.nArrayR,	//number of columns
-												4,									//number of fields in each element
-												AllEigenrayFieldNames);				//list of field names
-	if( mxAllEigenraysStruct == NULL ){
+	//write "maximum number of arrivals at any single hydrophone" to matfile:
+	mxNumArrivals = mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)1, mxREAL);
+	copyDoubleToMxArray(&maxNumArrivals, mxNumArrivals, 1);
+	matPutVariable(matfile, "maxNumArrivals", mxNumArrivals);
+	
+	
+	//copy arrival data to mxAadStruct:
+	mxAadStruct = mxCreateStructMatrix(	(MWSIZE)settings->output.nArrayZ,	//number of rows
+										(MWSIZE)settings->output.nArrayR,	//number of columns
+										4,				//number of fields in each element
+										aadFieldNames);	//list of field names
+	if( mxAadStruct == NULL ) {
 		fatal("Memory Alocation error.");
 	}
 	for (i=0; i<settings->output.nArrayR; i++){
 		for (j=0; j<settings->output.nArrayZ; j++){
-			mxNumEigenrays	= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)1,	mxREAL);
+			mxNumArrivals	= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)1,	mxREAL);
 			mxRHyd 			= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)1,	mxREAL);
 			mxZHyd			= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)1,	mxREAL);
 			
-			copyDoubleToMxArray(&eigenrays[i][j].nEigenrays,	mxNumEigenrays,1);
+			copyDoubleToMxArray(&arrivals[i][j].nArrivals,	mxNumArrivals,1);
 			copyDoubleToMxArray(&settings->output.arrayR[i],	mxRHyd,1);
 			copyDoubleToMxArray(&settings->output.arrayZ[j],	mxZHyd,1);
 			
 			idx[0] = (MWINDEX)j;
 			idx[1] = (MWINDEX)i;
-			mxSetFieldByNumber(	mxAllEigenraysStruct,									//pointer to the mxStruct
-								mxCalcSingleSubscript(mxAllEigenraysStruct,	2, idx),	//index of the element
-								0,														//position of the field (in this case, field 0 is "theta"
-								mxNumEigenrays);										//the mxArray we want to copy into the mxStruct
+			mxSetFieldByNumber(	mxAadStruct,									//pointer to the mxStruct
+								mxCalcSingleSubscript(mxAadStruct,	2, idx),	//index of the element
+								0,												//position of the field (in this case, field 0 is "theta"
+								mxNumArrivals);									//the mxArray we want to copy into the mxStruct
 			
-			mxSetFieldByNumber(	mxAllEigenraysStruct,									//pointer to the mxStruct
-								mxCalcSingleSubscript(mxAllEigenraysStruct,	2, idx),	//index of the element
-								1,														//position of the field (in this case, field 0 is "theta"
-								mxRHyd);												//the mxArray we want to copy into the mxStruct
+			mxSetFieldByNumber(	mxAadStruct,									//pointer to the mxStruct
+								mxCalcSingleSubscript(mxAadStruct,	2, idx),	//index of the element
+								1,												//position of the field (in this case, field 0 is "theta"
+								mxRHyd);										//the mxArray we want to copy into the mxStruct
 			
-			mxSetFieldByNumber(	mxAllEigenraysStruct,									//pointer to the mxStruct
-								mxCalcSingleSubscript(mxAllEigenraysStruct,	2, idx),	//index of the element
-								2,														//position of the field (in this case, field 0 is "theta"
-								mxZHyd);												//the mxArray we want to copy into the mxStruct
+			mxSetFieldByNumber(	mxAadStruct,						//pointer to the mxStruct
+								mxCalcSingleSubscript(mxAadStruct,	2, idx),	//index of the element
+								2,											//position of the field (in this case, field 0 is "theta"
+								mxZHyd);									//the mxArray we want to copy into the mxStruct
 			
-			mxSetFieldByNumber(	mxAllEigenraysStruct,									//pointer to the mxStruct
-								mxCalcSingleSubscript(mxAllEigenraysStruct,	2, idx),	//index of the element
+			mxSetFieldByNumber(	mxAadStruct,									//pointer to the mxStruct
+								mxCalcSingleSubscript(mxAadStruct,	2, idx),	//index of the element
 								3,														//position of the field (in this case, field 0 is "theta"
-								eigenrays[i][j].mxEigenrayStruct);						//the mxArray we want to copy into the mxStruct
+								arrivals[i][j].mxArrivalStruct);						//the mxArray we want to copy into the mxStruct
 		}
 	}
 	
+	
 	///Write Eigenrays to matfile:
-	matPutVariable(matfile, "eigenrays", mxAllEigenraysStruct);
+	matPutVariable(matfile, "arrivals", mxAadStruct);
 	
 	//Free memory
 	matClose(matfile);
-	mxDestroyArray(mxAllEigenraysStruct);
+	mxDestroyArray(mxAadStruct);
+	
+	reallocRayMembers(tempRay, 0);
+	free(tempRay);
 	free(dz);
 	DEBUG(1,"out\n");
 }
