@@ -290,7 +290,7 @@ void	calcEigenrayRF(settings_t* settings){
 			tempRay = makeRay(1);
 			nFoundEigenRays = 0;
 			for(l=0; l<nPossibleEigenRays; l++){		//Note that if nPossibleEigenRays = 0 this loop will not be executed:
-				settings->source.rbox2 = rHyd + 1e-3;	
+				settings->source.rbox2 = rHyd;	//TODO: change this to "rbox2 = rHyd + ds" and verify results.
 				DEBUG(3,"l: %u\n", (uint32_t)l);
 				
 				//Determine "left" ray's depth at rHyd:
