@@ -149,7 +149,7 @@ void	solveDynamicEq(settings_t* settings, ray_t* ray){
 
 	//Amplitude calculation:
 	DEBUG(10, "amp[10]:%lf, cxc:%lf, cnn:%e\n", cabs(ray->amp[10]), cxc, cnn);
-	for(i=1; i<ray->nCoords -1; i++){
+	for(i=1; i<ray->nCoords; i++){
 		ap_aq		= (complex double)( ray->c[0] * cos(ray->theta) * ray->c[i] / ( ray->ic[i] * ray->q[i] ));
 		DEBUG(7, "i:%u, ap_aq:%e, c: %lf, ic:%lf, q:%e\n", (uint32_t)i, (double)cabs(ap_aq), ray->c[i], ray->ic[i], ray->q[i]);
 		ray->amp[i]	= csqrt( ap_aq ) * ray->decay[i] * exp( -alpha * ray->s[i] );
@@ -160,5 +160,8 @@ void	solveDynamicEq(settings_t* settings, ray_t* ray){
 		*/
 	}
 	ray->amp[0] = NAN;
+	DEBUG(1, "decay[n-3]: %e +i*%e, s[n-3]: %e, amp[n-3]: %e +j*%e, p[n-3]: %e +j*%e, q[n-3]: %e +j*%e, c[n-3]: %e\n", creal(ray->decay[ray->nCoords-3]), cimag(ray->decay[ray->nCoords-3]), ray->s[ray->nCoords-3], creal(ray->amp[ray->nCoords-3]), cimag(ray->amp[ray->nCoords-3]), creal(ray->p[ray->nCoords-3]), cimag(ray->p[ray->nCoords-3]), creal(ray->q[ray->nCoords-3]), cimag(ray->q[ray->nCoords-3]), ray->c[ray->nCoords-3]);
+	DEBUG(1, "decay[n-2]: %e +i*%e, s[n-2]: %e, amp[n-2]: %e +j*%e, p[n-2]: %e +j*%e, q[n-2]: %e +j*%e, c[n-2]: %e\n", creal(ray->decay[ray->nCoords-2]), cimag(ray->decay[ray->nCoords-2]), ray->s[ray->nCoords-2], creal(ray->amp[ray->nCoords-2]), cimag(ray->amp[ray->nCoords-2]), creal(ray->p[ray->nCoords-2]), cimag(ray->p[ray->nCoords-2]), creal(ray->q[ray->nCoords-2]), cimag(ray->q[ray->nCoords-2]), ray->c[ray->nCoords-2]);
+	DEBUG(1, "decay[n-1]: %e +i*%e, s[n-1]: %e, amp[n-1]: %e +j*%e, p[n-1]: %e +j*%e, q[n-1]: %e +j*%e, c[n-1]: %e\n", creal(ray->decay[ray->nCoords-1]), cimag(ray->decay[ray->nCoords-1]), ray->s[ray->nCoords-1], creal(ray->amp[ray->nCoords-1]), cimag(ray->amp[ray->nCoords-1]), creal(ray->p[ray->nCoords-1]), cimag(ray->p[ray->nCoords-1]), creal(ray->q[ray->nCoords-1]), cimag(ray->q[ray->nCoords-1]), ray->c[ray->nCoords-1]);
 	DEBUG(3, "out\n");
 }

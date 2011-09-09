@@ -925,7 +925,8 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 		//the last coordinate isn't outside the rangebox, so we clip the extra coordinate
 		//reallocRayMembers(ray, ray->nCoords-1);
 	}
-
+	
+	DEBUG(1, "r: %lf, z: %lf, IC: %lf\n", ray->r[ray->nCoords -1], ray->z[ray->nCoords -1], ray->ic[ray->nCoords -1]);
 	
 	/* Search for refraction points (refraction angles are zero!), rMin, rMax and twisting(returning) of rays:	*/
 	//NOTE: We are assuming (safely) that there can't be more refraction points than the ray has coordinates,
