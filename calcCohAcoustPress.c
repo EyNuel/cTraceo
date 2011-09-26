@@ -142,7 +142,7 @@ void	calcCohAcoustPress(settings_t* settings){
 						mxGetPr(pHydArrayR),
 						(uintptr_t)settings->output.nArrayR);
 	//move mxArray to file and free memory:
-	matPutVariable(matfile, "rarray", pHydArrayR);
+	matPutVariable(matfile, "arrayR", pHydArrayR);
 	mxDestroyArray(pHydArrayR);
 
 
@@ -155,7 +155,7 @@ void	calcCohAcoustPress(settings_t* settings){
 						mxGetPr(pHydArrayZ),
 						(uintptr_t)settings->output.nArrayZ);
 	//move mxArray to file and free memory:
-	matPutVariable(matfile, "zarray", pHydArrayZ);
+	matPutVariable(matfile, "arrayZ", pHydArrayZ);
 	mxDestroyArray(pHydArrayZ);
 	
 	
