@@ -24,3 +24,13 @@ testing/
 
 #ignore temporary files:
 .gitk-tmp*
+
+#ignore bellhop output files:
+*.arr
+*.env
+*.prt
+*.shd
+*.ssp
+
+#ignore "bughunt/" subdirectory
+bughunt/*
