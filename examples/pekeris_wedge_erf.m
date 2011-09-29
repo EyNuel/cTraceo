@@ -7,6 +7,8 @@
 %  
 %==================================================================
 
+addpath('../M-Files/');
+addpath('../bin/');
 clear all, close all 
 
 case_title = '''Pekeris waveguide & eigenrays''';
@@ -140,6 +142,6 @@ view(0,-90)
 hold off 
 xlabel('Range (m)')
 ylabel('Depth (m)')
-title('cTRACEO - Pekeris waveguide, Eigenrays by Regula Falsi')
+title('cTraceo - Pekeris waveguide, Eigenrays by Regula Falsi')
 
 disp('done.')

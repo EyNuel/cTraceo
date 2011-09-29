@@ -7,7 +7,10 @@
 %  
 %==================================================================
 
+addpath('../M-Files/');
+addpath('../bin/');
 clear all%, close all 
+
 case_title = '''Ray Coordinates in a Pekeris flat waveguide with 2 objects.''';
 
 imunit = sqrt( -1 ); 
@@ -139,7 +142,7 @@ output_data.miss        = 0.5;
 disp('Writing TRACEO waveguide input file...')
 wtraceoinfil('rco.in',case_title,source_data,surface_data,ssp_data,object_data,bottom_data,output_data);
 
-disp('Calling cTRACEO...')
+disp('Calling cTraceo...')
 !ctraceo rco
 
 disp('Reading the output data...')
@@ -160,6 +163,6 @@ view(0,-90)
 hold off 
 xlabel('Range (m)')
 ylabel('Depth (m)')
-title('cTRACEO - Pekeris waveguide, ray coordinates')
+title('cTraceo - Pekeris waveguide, ray coordinates')
 
 disp('done.')

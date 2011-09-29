@@ -7,6 +7,8 @@
 %  
 %==================================================================
 
+addpath('../M-Files/');
+addpath('../bin/');
 clear all%, close all 
 
 case_title = '''Ray coordinates, Horizontal Array, 2 objects''';

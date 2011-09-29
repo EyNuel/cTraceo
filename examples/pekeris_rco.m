@@ -7,6 +7,8 @@
 %  
 %==================================================================
 
+addpath('../M-Files/');
+addpath('../bin/');
 clear all%, close all 
 
 case_title = '''Pekeris waveguide & ray coordinates''';
@@ -120,7 +122,7 @@ output_data.miss        = 1;
 disp('Writing TRACEO waveguide input file...')
 wtraceoinfil('flat.in',case_title,source_data,surface_data,ssp_data,object_data,bottom_data,output_data);
 
-disp('Calling cTRACEO...')
+disp('Calling cTraceo...')
 !ctraceo flat
 
 disp('Reading the output data...')
@@ -137,6 +139,6 @@ view(0,-90)
 hold off 
 xlabel('Range (m)')
 ylabel('Depth (m)')
-title('cTRACEO - Pekeris waveguide, ray coordinates')
+title('cTraceo - Pekeris waveguide, ray coordinates')
 
 disp('done.')

@@ -8,7 +8,10 @@
 % 
 %==================================================================
 
+addpath('../M-Files/');
+addpath('../bin/');
 clear all%, close all 
+
 disp('Deep water examples:') 
 case_title = '''Munk profile & variable boundaries''';
 
@@ -114,7 +117,7 @@ ranges = Rmax; depths = Dmax;
 m = length( ranges );
 n = length( depths );
 
-output_data.ctype       = '''RCO''';
+output_data.ctype       = '''EPR''';
 output_data.array_shape = '''RRY''';
 output_data.r           = ranges;
 output_data.z           = depths;
@@ -129,7 +132,7 @@ output_data.miss        = 0.5;
 disp('Writing TRACEO waveguide input file...')
 wtraceoinfil('munk.in',case_title,source_data,surface_data,ssp_data,object_data,bottom_data,output_data);
 
-disp('Calling cTRACEO...')
+disp('Calling cTraceo...')
 !ctraceo munk
 
 disp('Reading the output data...')

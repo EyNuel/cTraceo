@@ -1,9 +1,9 @@
 %==================================================================
 % 
-% cTraceo - Munk Profile, Deep Water, Coherent Acoustic Pressure along
-%           a Horizontal Array
+% cTraceo - Munk Profile, Deep Water, Particle velocity  along
+%           a Rectangular Array
 % 
-% Written by Emanuel Ey,    30/06/2011
+% Written by Emanuel Ey,    16/09/2011
 % Based on previous work by Orlando Rodriguez
 %
 %==================================================================
@@ -13,7 +13,7 @@ addpath('../bin/');
 clear all%, close all 
 
 disp('Deep water examples:') 
-case_title = '''Munk Profile, Deep Water, Coherent Acoustic Pressure along a Horizontal Array''';
+case_title = '''Munk Profile, Deep Water, Particle velocity  along a Rectangular Array''';
 
 imunit = sqrt( -1 ); 
 
@@ -32,7 +32,7 @@ Dmax   =  5000;
 ray_step = Rmax/1000; 
 
 zs = 1000; rs = 0;
-np2 = 3500; thetamax = 14; la = linspace(-thetamax,thetamax,np2);
+np2 = 101; thetamax = 14; la = linspace(-thetamax,thetamax,np2);
 
 source_data.ds       = ray_step;
 source_data.position = [rs zs];
@@ -113,10 +113,10 @@ bottom_data.properties = [1550.0 600.0 2.0 0.1 0.0]; % Bottom properties (speed,
 
 %disp('Defining output options...')
 
-output_data.ctype       = '''CPR''';
-output_data.array_shape = '''HRY''';
-output_data.r           = linspace(0,100*1000,501);
-output_data.z           = 800;
+output_data.ctype       = '''PVL''';
+output_data.array_shape = '''RRY''';
+output_data.r           = linspace(0,100*1000,300);
+output_data.z           = linspace(0,5000,150);
 output_data.miss        = 0.5;
 
 %==================================================================
@@ -154,37 +154,58 @@ title('fTraceo.')
 %% --
 
 disp('Calling cTraceo...')
-!ctraceo munk
+!traceo munk
 
 disp('Reading the output data...')
-load cpr
+load pvl
 
-%calculating transmission loss from Acoustic Pressure.
-tl = -20*log10( abs(p) ); 
-size(tl)
+%%
+disp('Calculating horizontal component of particle velocity')
+tlu = 20.0*log10( abs(u) ); 
+
+minTL = 0;
+maxTL = 0;
+minTL = min( minTL, min(min(tlu(isfinite(tlu)))));
+maxTL = max( maxTL, max(max(tlu(isfinite(tlu)))));
 
 figure
-plot(arrayR,tl)
-axis([0 100*1000 60 120])
-view(0,-90)
+%subplot(2,1,2)
+pcolor(arrayR,arrayZ,tlu), shading interp, %caxis([-20 -5]),
+colorbar
+hold on
+plot(rs,zs,'ko',rs,zs,'m*','MarkerSize',16)
+
+%fill(robj,zup,'k')
+%fill(robj,zdn,'k')
+plot(bathymetry(1,:),bathymetry(2,:),'k') 
 grid on, box on
-xlabel('Range (m)')
-ylabel('TL (dB)')
-title('cTraceo.')
-
-%{
-load kraken_tlr.dat
-
-kr  = 1000*kraken_tlr(:,1); 
-ktl =      kraken_tlr(:,2); 
-
-figure(1)
-plot(arrayR,tl,'--',kr,ktl)
-axis([0 100*1000 60 120])
+axis([0 Rmax 0 Dmax])
 view(0,-90)
-grid on, box on
+hold off 
 xlabel('Range (m)')
-ylabel('TL (dB)')
-title('TRACEO vs. KRAKEN')
-%}
+ylabel('Depth (m)')
+title('cTraceo - Sletvik waveguide, horizontal component of particle velocity with 1 object.')
+caxis([minTL maxTL])
+
+
+disp('Calculating vertical component of particle velocity')
+tlw = 20.0*log10( abs(w) ); 
+figure
+%subplot(2,1,2)
+pcolor(arrayR,arrayZ,tlw), shading interp, %caxis([-20 -5]),
+colorbar
+hold on
+plot(rs,zs,'ko',rs,zs,'m*','MarkerSize',16)
+
+%fill(robj,zup,'k')
+%fill(robj,zdn,'k')
+plot(bathymetry(1,:),bathymetry(2,:),'k') 
+grid on, box on
+axis([0 Rmax 0 Dmax])
+view(0,-90)
+hold off 
+xlabel('Range (m)')
+ylabel('Depth (m)')
+title('cTraceo - Sletvik waveguide, horizontal component of particle velocity with 1 object.')
+caxis([minTL maxTL])
 disp('done.')

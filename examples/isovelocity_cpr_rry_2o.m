@@ -7,6 +7,8 @@
 %
 %==================================================================
 
+addpath('../M-Files/');
+addpath('../bin/');
 clear all%, close all 
 imunit = sqrt( -1 );
 
@@ -152,7 +154,7 @@ disp('Writing TRACEO waveguide input file...')
 
 wtraceoinfil('flat.in',case_title,source_data,surface_data,ssp_data,object_data,bottom_data,output_data);
 
-disp('Calling cTRACEO...')
+disp('Calling cTraceo...')
 
 !ctraceo flat
 
@@ -164,7 +166,7 @@ tej = flipud( jet( 256 ) );
 counter = 0; 
 
 figure
-pcolor(rarray,zarray,tl), shading interp, %caxis([-20 -5]),
+pcolor(arrayR,arrayZ,tl), shading interp, %caxis([-20 -5]),
 colorbar
 hold on
 plot(rs,zs,'ko',rs,zs,'m*','MarkerSize',16)

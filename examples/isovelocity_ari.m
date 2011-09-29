@@ -7,6 +7,8 @@
 %
 %==================================================================
 
+addpath('../M-Files/');
+addpath('../bin/');
 clear all%, close all 
 
 imunit = sqrt( -1 );
@@ -122,7 +124,7 @@ disp('Writing TRACEO waveguide input file...')
 wtraceoinfil('flat_ari.in',case_title,source_data,surface_data,ssp_data,object_data,bottom_data,output_data);
 
 
-disp('Calling cTRACEO...')
+disp('Calling cTraceo...')
 
 
 !ctraceo flat_ari
@@ -143,7 +145,7 @@ plot(bathymetry(1,:),bathymetry(2,:),'k')
 box on, grid on 
 xlabel('Range (m)')
 ylabel('Depth (m)')
-title('cTRACEO - Munk profile, variable boundaries')
+title('cTraceo - Munk profile, variable boundaries')
 axis([0 Rmax 0 Dmax])
 view(0,-90)
 hold off

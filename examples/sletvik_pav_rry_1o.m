@@ -1,7 +1,7 @@
 %==================================================================
 %  
-%  cTraceo - Coherent Transmission Loss in Sletvik (Hopavagen) waveguide
-%            with 1 object, with a rectangular array
+%  cTraceo - Coherent Acoustic Pressure in Sletvik (Hopavagen) waveguide
+%            with 1 object.
 %
 %  Written by Tordar 		:Gambelas, Fri Feb 18 15:37:44 WET 2011
 %  Revised by Emanuel Ey	:04/07/2011
@@ -16,7 +16,7 @@ imunit = sqrt( -1 );
 minTL = 0;
 maxTL = 0;
 
-case_title = '''Sletvik waveguide & ray coordinates''';
+case_title = '''Coherent Acoustic Pressure and Particle Velocity in Sletvik (Hopavagen) waveguide with 1 object.''';
 
 object_ranges =  [5:1:110]; mo = length( object_ranges );
 object_depths = [2:0.5:24]; no = length( object_depths );
@@ -42,7 +42,7 @@ ray_step = Rmax/1000;
 zs = 3; 
 rs = 0;
  
-thetamax = 30; np2 = 201; la = linspace(-thetamax,thetamax,np2);
+thetamax = 30; np2 = 501; la = linspace(-thetamax,thetamax,np2);
 
 source_data.ds       = ray_step;
 source_data.position = [rs zs];
@@ -83,6 +83,7 @@ c = mackenzie( z , T , S );
 dz = 0.5; zc = [0:dz:25]; c = interp1(z,c,zc);
 ssp_data.cdist = '''c(z,z)'''; % Sound speed profile
 ssp_data.cclass = '''TABL'''; % Tabulated sound speed
+
 ssp_data.z   = zc(:);
 ssp_data.r   = [];
 ssp_data.c   =  c(:);
@@ -94,7 +95,9 @@ ssp_data.c   =  c(:);
 %==================================================================
 
 object_data.nobjects = 1; % Number of objects
+
 cobjp = 2000.0; cobjs = 200.0; rhoo = 5.0; alphao = 0.0;
+
 npo = 50; R0 = 1; factor = 1;
 
 [mo no i j];
@@ -142,10 +145,11 @@ bottom_data.properties = [1700 0.0 1.7 0.7 0]; % [cp cs rho ap as]
 
 %disp('Defining output options...')
 
-output_data.ctype       = '''CTL'''; 
+
+output_data.ctype       = '''PAV'''; 
 output_data.array_shape = '''RRY''';
-m = 501; ranges = linspace(0,Rmax-1,m);
-n = 201; depths = linspace(0,Dmax-1,n);
+m = 960; ranges = linspace(0,Rmax-1,m);
+n = 360; depths = linspace(0,Dmax-1,n);
 output_data.r           = ranges;
 output_data.z           = depths;
 output_data.miss        = 0.5;
@@ -164,15 +168,21 @@ wtraceoinfil('sletvik.in',case_title,source_data,surface_data,ssp_data,object_da
 %%
 %{
 disp('Calling fTraceo...')
+
 !traceo sletvik
 
 disp('Reading the output data...')
-load ctl 
+
+load cpr 
+p = rp + imunit*ip; 
+p_fTraceo = p;
+tl = 20.0*log10( abs(p) ); 
         
-minTL = min( minTL, min(min(tl(isfinite(tl)))));
-maxTL = max( maxTL, max(max(tl(isfinite(tl)))));
+%minTL = min( minTL, min(min(tl(isfinite(tl)))));
+%maxTL = max( maxTL, max(max(tl(isfinite(tl)))));
         
 %%
+%figure
 subplot(2,1,1)
 pcolor(arrayR,arrayZ,tl), shading interp, %caxis([-20 -5]),
 colorbar
@@ -192,40 +202,110 @@ title('fTraceo - Sletvik waveguide, Coherent TL (from Acoustic Pressure) with 1 
 caxis([minTL maxTL])
 colorbar
 %}
-%%
 disp('Calling cTraceo...')
+
 !ctraceo sletvik
 
 disp('Reading the output data...')
-load ctl
+load pav 
 
-%make TL representable by removing any non-finite elements
+p_cTraceo = p;
+
+disp('Calculating TL from Acoustic Pressure')
+tl = 20.0*log10( abs(p) ); 
+
 minTL = min( minTL, min(min(tl(isfinite(tl)))));
 maxTL = max( maxTL, max(max(tl(isfinite(tl)))));
 
+%%
 figure
 %subplot(2,1,2)
-%draw transmission loss
 pcolor(arrayR,arrayZ,tl), shading interp, %caxis([-20 -5]),
 colorbar
 hold on
-
-%draw acoustic source
 plot(rs,zs,'ko',rs,zs,'m*','MarkerSize',16)
 
-%draw objects
 fill(robj,zup,'k')
 fill(robj,zdn,'k')
-
-%draw bathymetry
 plot(bathymetry(1,:),bathymetry(2,:),'k') 
-
 grid on, box on
 axis([0 Rmax 0 Dmax])
 view(0,-90)
 hold off 
 xlabel('Range (m)')
 ylabel('Depth (m)')
-title('cTraceo - Sletvik waveguide, Coherent TL with 1 object.')
+title('cTraceo - Sletvik waveguide, Coherent TL (from Acoustic Pressure) with 1 object.')
 caxis([minTL maxTL])
 
+%%
+disp('Calculating horizontal component of particle velocity')
+tlu = 20.0*log10( abs(u) ); 
+figure
+%subplot(2,1,2)
+pcolor(arrayR,arrayZ,tlu), shading interp, %caxis([-20 -5]),
+colorbar
+hold on
+plot(rs,zs,'ko',rs,zs,'m*','MarkerSize',16)
+
+fill(robj,zup,'k')
+fill(robj,zdn,'k')
+plot(bathymetry(1,:),bathymetry(2,:),'k') 
+grid on, box on
+axis([0 Rmax 0 Dmax])
+view(0,-90)
+hold off 
+xlabel('Range (m)')
+ylabel('Depth (m)')
+title('cTraceo - Sletvik waveguide, horizontal component of particle velocity with 1 object.')
+caxis([minTL maxTL])
+
+
+disp('Calculating vertical component of particle velocity')
+tlw = 20.0*log10( abs(w) ); 
+figure
+%subplot(2,1,2)
+pcolor(arrayR,arrayZ,tlw), shading interp, %caxis([-20 -5]),
+colorbar
+hold on
+plot(rs,zs,'ko',rs,zs,'m*','MarkerSize',16)
+
+fill(robj,zup,'k')
+fill(robj,zdn,'k')
+plot(bathymetry(1,:),bathymetry(2,:),'k') 
+grid on, box on
+axis([0 Rmax 0 Dmax])
+view(0,-90)
+hold off 
+xlabel('Range (m)')
+ylabel('Depth (m)')
+title('cTraceo - Sletvik waveguide, horizontal component of particle velocity with 1 object.')
+caxis([minTL maxTL])
+%% Compute differences:
+%{
+differ = (abs(p_fTraceo) - abs(p_cTraceo))./abs(p_fTraceo)*100;
+differ(~isfinite(differ)) = 0;  %set inf and nan to zero
+figure
+pcolor(arrayR,arrayZ,differ), shading interp, caxis([min(min(differ)) max(max(differ))]),
+colorbar
+axis([0 Rmax 0 Dmax])
+view(0,-90)
+hold off 
+xlabel('Range (m)')
+ylabel('Depth (m)')
+title('cTraceo vs fTraceo - relative amplitude difference (%).')
+
+%differ = (angle(p_fTraceo) - angle(p_cTraceo))./angle(p_fTraceo)*100;
+differ = (convang(angle(p_fTraceo), 'rad', 'deg') - convang(angle(p_cTraceo), 'rad', 'deg'))./convang(angle(p_fTraceo), 'rad', 'deg')*100;
+differ(~isfinite(differ)) = 0;  %set inf and nan to zero
+figure
+pcolor(arrayR,arrayZ,differ), shading interp, caxis([min(min(differ)) max(max(differ))]),
+colorbar
+axis([0 Rmax 0 Dmax])
+view(0,-90)
+hold off 
+xlabel('Range (m)')
+ylabel('Depth (m)')
+title('cTraceo vs fTraceo - relative phase difference (%).')
+
+disp('done.')
+%}

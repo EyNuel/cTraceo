@@ -7,7 +7,9 @@
 %  
 %==================================================================
 
-%clear all, close all 
+addpath('../M-Files/');
+addpath('../bin/');
+clear all%, close all 
 imunit = sqrt(-1);
 
 case_title = '''All Ray Information with 2 objects''';
@@ -146,7 +148,7 @@ disp('Writing TRACEO waveguide input file...')
 
 wtraceoinfil('flat.in',case_title,source_data,surface_data,ssp_data,object_data,bottom_data,output_data);
 
-disp('Calling cTRACEO...')
+disp('Calling cTraceo...')
 !ctraceo flat
 
 disp('Reading the output data...')

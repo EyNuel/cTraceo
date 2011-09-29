@@ -7,7 +7,9 @@
 %
 %==================================================================
 
-clear all, close all 
+addpath('../M-Files/');
+addpath('../bin/');
+clear all%, close all 
 
 case_title  = '''Eigenrays by Proximity, Horizontal Array and 2 objects''';
 freq        = 100;
@@ -149,7 +151,7 @@ output_data.miss        = 0.5;
 disp('Writing TRACEO waveguide input file...')
 wtraceoinfil('flat.in',case_title,source_data,surface_data,ssp_data,object_data,bottom_data,output_data);
 
-disp('Calling cTRACEO...')
+disp('Calling cTraceo...')
 !ctraceo flat
 
 disp('Reading the output data...')

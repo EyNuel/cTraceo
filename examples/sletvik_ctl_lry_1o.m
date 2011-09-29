@@ -8,6 +8,8 @@
 %
 %==================================================================
 
+addpath('../M-Files/');
+addpath('../bin/');
 clear all%, close all 
 
 imunit = sqrt( -1 );
@@ -175,7 +177,7 @@ maxTL = max( maxTL, max(max(tl(isfinite(tl)))));
         
 %%
 subplot(2,1,1)
-imagesc(rarray,zarray,tl)%, shading interp, %caxis([-20 -5]),
+imagesc(arrayR,arrayZ,tl)%, shading interp, %caxis([-20 -5]),
 colorbar
 hold on
 plot(rs,zs,'ko',rs,zs,'m*','MarkerSize',16)
@@ -207,7 +209,7 @@ maxTL = max( maxTL, max(max(tl(isfinite(tl)))));
 
 %subplot(2,1,2)
 %draw the transmission loss
-imagesc(rarray,zarray,tl)%, shading interp, %caxis([-20 -5]),
+imagesc(arrayR,arrayZ,tl)%, shading interp, %caxis([-20 -5]),
 colorbar
 hold on
 

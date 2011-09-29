@@ -7,7 +7,10 @@
 %  
 %==================================================================
 
+addpath('../M-Files/');
+addpath('../bin/');
 clear all%, close all 
+
 case_title = '''Amplitudes and Arrival Times by Proximity in a Pekeris flat waveguide.''';
 imunit = sqrt( -1 ); 
 
@@ -27,7 +30,7 @@ ray_step = Rmax/1000;
 zs       = 25;
 rs       = 0;
 thetamax = 30;
-np2      = 501;
+np2      = 2001;
 la       = linspace(-thetamax,thetamax,np2);
 
 source_data.ds       = ray_step;
@@ -109,7 +112,7 @@ output_data.ctype       = '''ADP''';
 output_data.array_shape = '''RRY''';
 output_data.r           = ranges;
 output_data.z           = depths;
-output_data.miss        = 0.5;
+output_data.miss        = 1;
 
 %==================================================================
 %  
@@ -120,7 +123,7 @@ output_data.miss        = 0.5;
 disp('Writing TRACEO waveguide input file...')
 wtraceoinfil('flat.in',case_title,source_data,surface_data,ssp_data,object_data,bottom_data,output_data);
 
-disp('Calling cTRACEO...')
+disp('Calling cTraceo...')
 !ctraceo flat
 
 disp('Reading the output data...')
@@ -136,7 +139,7 @@ figure
 stem(tau,abs(a)), box on, grid on
 xlabel('Travel time (s)')
 ylabel('Ray amplitude')
-title('cTRACEO - Amplitudes and Arrival Times by Proximity in a Pekeris flat waveguide.')
+title('cTraceo - Amplitudes and Arrival Times by Proximity in a Pekeris flat waveguide.')
 
 
 %{

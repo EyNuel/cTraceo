@@ -7,7 +7,9 @@
 %  
 %==================================================================
 
-clear all, close all 
+addpath('../M-Files/');
+addpath('../bin/');
+clear all%, close all 
 
 imunit = sqrt( -1 ); 
 
@@ -134,7 +136,7 @@ p = rp + imunit*ip;
 tl = -20*log10( abs( p ) ); 
 %}
 
-disp('Calling cTRACEO...')
+disp('Calling cTraceo...')
 !ctraceo block_cpr_rry
 
 disp('Reading and displaying the result...')
@@ -146,13 +148,13 @@ tej = flipud( jet( 256 ) );
 
 figure, hold on
 plot(rs,zs,'ko',rs,zs,'m*','MarkerSize',16) 
-pcolor(rarray,zarray,-20*log10( abs(p) )), shading interp, colormap( tej ), caxis([30 80]), colorbar
+pcolor(arrayR,arrayZ,-20*log10( abs(p) )), shading interp, colormap( tej ), caxis([30 80]), colorbar
 plot(bathymetry(1,:),bathymetry(2,:),'k','LineWidth',1)
 axis([-Rmaxhry Rmaxhry 0 Dmax])
 hold off
 view(0,-90)
 xlabel('Range (m)')
 ylabel('Depth (m)')
-title('cTRACEO - Block case')
+title('cTraceo - Block case')
 
 disp('done.')
