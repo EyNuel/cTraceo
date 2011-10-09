@@ -4,22 +4,25 @@
 ## ================================================================
 
 ## The base directory of your matlab installation:
-MATLAB_DIR := /usr/local/matlabr14/
+#MATLAB_DIR := /usr/local/matlabr14/
 #MATLAB_DIR := /usr/local/MATLAB/R2010b/
-#MATLAB_DIR := /usr/local/matlab2008a/
+MATLAB_DIR := /usr/local/matlab2008a/
 
 ## Your Matlab Version:
 ## Allowable options are: R12, R14, R2007A, R2007B, R2008A, R2008B, R2010B
-MATLAB_VERSION	:= R14
+MATLAB_VERSION	:= R2008B
 
 ## The architecture for which you are compiling:
 ## Allowable options are: 64b, 32b
 ARCH := 64b
 
-## Choose a compiler:
-CC 			:= clang
-#CC 			:= gcc
+## Choose a compiler command:
+CC 	:= clang
+#CC 	:= gcc
 
+## Set Operating system:
+## Allowable values are: WINDOWS, LINUX
+OS	:= LINUX
 
 ## ================================================================
 ## Do not edit below this point unless you know what you are doing:
@@ -92,4 +95,9 @@ dist:	#
 		@tar -czf ./packages/cTraceo.tgz $(ALLFILES)
 		
 dirs:	#creates 'bin/' directory if it doesn't exist
-		@if [ ! -d "bin" ]; then mkdir bin; fi
+		ifeq ($(OS),LINUX)
+			@if [ ! -d "bin" ]; then mkdir bin; fi
+		endif
+		ifeq ($(OS),WINDOWS)
+			mkdir bin
+		endif
