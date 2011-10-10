@@ -56,25 +56,3 @@ void intComplexBarycParab1D(double* x, complex double* f, complex double xi, com
 	*fxi	= 			a1*sx1	+a2*sx2;
 	*fxxi	=			a1*2	+a2*2;
 }
-
-/*
-       x1 = x(1)
-       x2 = x(2)
-       x3 = x(3)
-
-       px(1) = ( x2 - x1 )*( x2 - x3 )
-       px(2) = ( x3 - x1 )*( x3 - x2 )
-       
-       a(1) = ( z(2) - z(1) )/px(1)
-       a(2) = ( z(3) - z(1) )/px(2)
-
-       px(1) = ( xi - x1 )*( xi - x3 )
-       px(2) = ( xi - x1 )*( xi - x2 )
-       
-       sx(1) = 2.0*xi - x1 - x3
-       sx(2) = 2.0*xi - x1 - x2
-       
-       zi   = z(1) + a(1)*px(1) +     a(2)*px(2)
-       zxi  =        a(1)*sx(1) +     a(2)*sx(2)
-       zxxi =    2.0*a(1)       + 2.0*a(2)
-*/
