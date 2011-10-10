@@ -89,6 +89,7 @@ discuss:#list discussion points from all files
 		@for file in $(ALLFILES); do fgrep -H -e DISCUSS $$file; done; true
 		
 dist:	#
+		@if [ ! -d "packages" ]; then mkdir packages; fi
 		@tar -czf ./packages/cTraceo.tgz $(ALLFILES)
 		
 dirs:	#creates 'bin/' directory if it doesn't exist
