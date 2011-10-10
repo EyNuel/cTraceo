@@ -71,12 +71,30 @@ void	calcEigenrayRF(settings_t* settings){
 	mxArray*		mxZ					= NULL;
 	mxArray*		mxTau				= NULL;
 	mxArray*		mxAmp				= NULL;
+	mxArray*		iReturns			= NULL;
+	mxArray*		nSurRefl			= NULL;
+	mxArray*		nBotRefl			= NULL;
+	mxArray*		nObjRefl			= NULL;
+	mxArray*		nRefrac				= NULL;
+	mxArray*		mxRefrac_r			= NULL;
+	mxArray*		mxRefrac_z			= NULL;
 	mxArray*		mxAllEigenraysStruct= NULL;		//contains all the eigenrays at all hydrophones
 	mxArray*		mxNumEigenrays		= NULL;
 	mxArray*		mxRHyd				= NULL;
 	mxArray*		mxZHyd				= NULL;
 	const char*		AllEigenrayFieldNames[]= {	"nEigenrays", "rHyd", "zHyd", "eigenray" };
-	const char*		eigenrayFieldNames[]= {	"theta", "r", "z", "tau", "amp"};		//the names of the fields contained in mxRayStruct
+	const char*		eigenrayFieldNames[]= {	"theta",
+											"r",
+											"z",
+											"tau",
+											"amp",
+											"iReturns",
+											"nSurRefl",
+											"nBotRefl",
+											"nObjRefl",
+											"nRefrac",
+											"refrac_r",
+											"refrac_z"};		//the names of the fields contained in mxRayStruct
 	MWINDEX			idx[2];			//used for accessing a specific element in the mxAllEigenrayStruct
 	
 	eigenrays_t		eigenrays[settings->output.nArrayR][settings->output.nArrayZ];
@@ -90,7 +108,7 @@ void	calcEigenrayRF(settings_t* settings){
 			eigenrays[i][j].nEigenrays = 0;
 			eigenrays[i][j].mxEigenrayStruct = mxCreateStructMatrix(	(MWSIZE)settings->source.nThetas,		//number of rows
 																		(MWSIZE)1,								//number of columns
-																		5,										//number of fields in each element
+																		12,										//number of fields in each element
 																		eigenrayFieldNames);						//list of field names
 			if( eigenrays[i][j].mxEigenrayStruct == NULL ){
 				fatal("Memory Alocation error.");
@@ -409,6 +427,38 @@ void	calcEigenrayRF(settings_t* settings){
 					mxSetFieldByNumber(	eigenrays[i][j].mxEigenrayStruct, (MWINDEX)eigenrays[i][j].nEigenrays, 3, mxTau);
 					mxSetFieldByNumber(	eigenrays[i][j].mxEigenrayStruct, (MWINDEX)eigenrays[i][j].nEigenrays, 4, mxAmp);
 					///ray has been saved to mxStructArray
+					
+					///now lets save some aditional ray information:
+					iReturns	= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)1, mxREAL);
+					nSurRefl	= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)1, mxREAL);
+					nBotRefl	= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)1, mxREAL);
+					nObjRefl	= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)1, mxREAL);
+					nRefrac		= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)1, mxREAL);
+					
+					copyUInt32ToMxArray(	&tempRay->iReturn,	iReturns, 	1);
+					copyUInt32ToMxArray(	&tempRay->sRefl,	nSurRefl, 	1);
+					copyUInt32ToMxArray(	&tempRay->bRefl,	nBotRefl, 	1);
+					copyUInt32ToMxArray(	&tempRay->oRefl,	nObjRefl, 	1);
+					copyUInt32ToMxArray(	&tempRay->nRefrac,	nRefrac, 	1);
+					
+					mxSetFieldByNumber(	eigenrays[i][j].mxEigenrayStruct, (MWINDEX)i, 5, iReturns);
+					mxSetFieldByNumber(	eigenrays[i][j].mxEigenrayStruct, (MWINDEX)i, 6, nSurRefl);
+					mxSetFieldByNumber(	eigenrays[i][j].mxEigenrayStruct, (MWINDEX)i, 7, nBotRefl);
+					mxSetFieldByNumber(	eigenrays[i][j].mxEigenrayStruct, (MWINDEX)i, 8, nObjRefl);
+					mxSetFieldByNumber(	eigenrays[i][j].mxEigenrayStruct, (MWINDEX)i, 9, nRefrac);
+					///aditional information has been saved
+					
+					///save refraction coordinates to structure:
+					if (tempRay->nRefrac > 0){
+						mxRefrac_r = mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)ray[i].nRefrac, mxREAL);
+						mxRefrac_z = mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)ray[i].nRefrac, mxREAL);
+						
+						copyDoubleToMxArray(tempRay->rRefrac,	mxRefrac_r,	ray[i].nRefrac);
+						copyDoubleToMxArray(tempRay->zRefrac,	mxRefrac_z, ray[i].nRefrac);
+						
+						mxSetFieldByNumber(	eigenrays[i][j].mxEigenrayStruct, (MWINDEX)i, 10, mxRefrac_r);
+						mxSetFieldByNumber(	eigenrays[i][j].mxEigenrayStruct, (MWINDEX)i, 11, mxRefrac_z);
+					}
 					
 					eigenrays[i][j].nEigenrays += 1;
 				}
