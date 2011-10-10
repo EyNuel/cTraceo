@@ -61,7 +61,10 @@ void	calcCohAcoustPress(settings_t* settings){
 	uintptr_t			nRet;
 	uintptr_t			iRet[51];
 	double				dr, dz;	//used for star pressure contributions (for particle velocity)
-
+	#if VERBOSE
+		//indexing variables used to output the pressure2D variable during debugging:
+		uintptr_t			rr,zz;
+	#endif
 	//get dimensions of hydrophone array:
 	switch(settings->output.arrayType){
 		case ARRAY_TYPE__HORIZONTAL:
@@ -94,7 +97,7 @@ void	calcCohAcoustPress(settings_t* settings){
 			break;
 	}
 	
-	//open the corresponding file:
+	//open the corresponding output file:
 	switch(settings->output.calcType){
 		case CALC_TYPE__COH_ACOUS_PRESS:
 			matfile		= matOpen("cpr.mat", "w");
@@ -394,6 +397,8 @@ void	calcCohAcoustPress(settings_t* settings){
 											
 											zHyd = settings->output.arrayZ[k];
 											getRayPressure(settings, &ray[i], iHyd, q0, rHyd, zHyd, &pressure);
+											DEBUG(1, "ray: %d, hyd(j,k)=(%d,%d) : pressure: %lf +%lf*i\n", (int32_t)i, (int32_t)j, (int32_t)k, creal(pressure), cimag(pressure));
+											
 											settings->output.pressure2D[j][k] += pressure;	//verify if initialization is necessary. Done -makes no difference.
 											DEBUG(4, "k: %u; j: %u; pressure2D[k][j]: %e + j*%e\n", (uint32_t)k, (uint32_t)j, creal(settings->output.pressure2D[k][j]), cimag(settings->output.pressure2D[k][j]));
 											DEBUG(4, "rHyd: %lf; zHyd: %lf \n", rHyd, zHyd);
@@ -425,6 +430,16 @@ void	calcCohAcoustPress(settings_t* settings){
 			}//switch(settings->output.calcType){
 		}//if (ctheta > 1.0e-7)
 	}//for(i=0; i<settings->source.nThetas; i++
+	
+	//if verbosity is enabled, print out the entire pressure2D array:
+	#if VERBOSE
+		DEBUG(1, "Printing entire pressure2D array (r x z)=(%ldx%ld):\n", dimR, dimZ);
+		for(rr=0; rr<dimR; rr++){
+			for (zz=0; zz<dimZ; zz++){
+				DEBUG(1, "Pressure2D[%d,%d]: %e + %ei;\n", (uint32_t)rr, (uint32_t)zz, creal(settings->output.pressure2D[rr][zz]), cimag(settings->output.pressure2D[rr][zz]));
+			}
+		}
+	#endif
 	
 	DEBUG(3,"Rays and pressure calculated\n");
 	/*********************************************
