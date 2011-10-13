@@ -10,7 +10,7 @@
 ##          Universidade do Algarve                           ##
 ##          Signal Processing Laboratory                      ##
 ##                                                            ##
-##  Originally implemented in FORTRAN 77 by:                  ##
+##  Based on previous work by:                  ##
 ##          Orlando Camargo Rodriguez                         ##
 ##          Copyright (C) 2010                                ##
 ##          orodrig@ualg.pt                                   ##

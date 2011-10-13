@@ -1,6 +1,6 @@
 /************************************************************************************
  *	solveDynamicEq.c		 														*
- * 	(formerly "seikeq.for")															*
+ * 	(formerly "sdyneq.for")															*
  * 	A raytracing subroutine for cylindrical simmetry.								*
  * 																					*
  *	originally written in FORTRAN by:												*
