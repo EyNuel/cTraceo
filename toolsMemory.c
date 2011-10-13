@@ -206,10 +206,16 @@ void				freeDouble2D(double** greenMile, uintptr_t items){
 
 complex double*		mallocComplex(uintptr_t numComplex){
 	complex double*	temp = NULL;
+	uintptr_t		i;
 	
 	temp = malloc(numComplex * sizeof(complex double));
 	if(temp == NULL)
 		fatal("Memory alocation error.");
+	//Initialize to zero:
+	for (i=0; i<numComplex; i++){
+		temp[i] = 0 + 0*I;
+	}
+	
 	return temp;
 }
 
