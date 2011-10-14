@@ -412,7 +412,7 @@ void calcAmpDelRF(settings_t* settings){
 					copyDoubleToMxArray(&tempRay->r[tempRay->nCoords - 1],		mxR,	1);
 					copyDoubleToMxArray(&tempRay->z[tempRay->nCoords - 1],		mxZ, 	1);
 					copyDoubleToMxArray(&tempRay->tau[tempRay->nCoords - 1],	mxTau,	1);
-					copyComplexToMxArray(&tempRay->amp[tempRay->nCoords - 1],	mxAmp,	1);
+					copyComplexToMxArray(&tempRay->amp[tempRay->nCoords - 2],	mxAmp,	1);		//TODO: correct this
 					
 					//copy mxArrays to mxRayStruct
 					mxSetFieldByNumber(	arrivals[i][j].mxArrivalStruct,					//pointer to the mxStruct
