@@ -5,47 +5,12 @@
 #include "toolsFileAccess.c"
 #include <string.h>
 #include <stdio.h>
+#include "toolsMatlabOut.h"
+
 
 /*
- * Definitions for matlab data types
+ * Function prototypes;
  */
-#define MATLAB_DATATYPE__miINT8		1
-#define MATLAB_DATATYPE__miUINT8	2
-#define MATLAB_DATATYPE__miINT16	3
-#define MATLAB_DATATYPE__miUINT16	4
-#define MATLAB_DATATYPE__miINT32	5
-#define MATLAB_DATATYPE__miUINT32	6
-#define MATLAB_DATATYPE__miSINGLE	7
-#define MATLAB_DATATYPE__miDOUBLE	9
-#define MATLAB_DATATYPE__miINT64	12
-#define MATLAB_DATATYPE__miUINT64	13
-#define MATLAB_DATATYPE__miMATRIX	14
-
-/*
- * Definitions for matlab Array types (classes)
- */
-#define MATLAB_ARRAYTYPE__mxCELL_CLASS		1
-#define MATLAB_ARRAYTYPE__mxSTRUCT_CLASS	2
-#define MATLAB_ARRAYTYPE__mxOBJECT_CLASS	3
-#define MATLAB_ARRAYTYPE__mxCHAR_CLASS		4
-#define MATLAB_ARRAYTYPE__mxSPARSE_CLASS	5
-#define MATLAB_ARRAYTYPE__mxDOUBLE_CLASS	6
-#define MATLAB_ARRAYTYPE__mxSINGLE_CLASS	7
-#define MATLAB_ARRAYTYPE__mxINT8_CLASS		8
-#define MATLAB_ARRAYTYPE__mxUINT8_CLASS		9
-#define MATLAB_ARRAYTYPE__mxINT16_CLASS		10
-#define MATLAB_ARRAYTYPE__mxUINT16_CLASS	11
-#define MATLAB_ARRAYTYPE__mxINT32_CLASS		12
-#define MATLAB_ARRAYTYPE__mxUINT32_CLASS	13
-
-/*
- * Definitions for matlab numeric data types_
- */
- #define MATLAB_NUMERICTYPE__COMPLEX		1
- #define MATLAB_NUMERICTYPE__GLOBAL			2
- #define MATLAB_NUMERICTYPE__LOGICAL		3
-
-
 
 FILE*	writeMatfileHeader(FILE* outfile, const char descriptiveText[124]);
 ///FILE*	writeMatfileData(FILE* outfile);
