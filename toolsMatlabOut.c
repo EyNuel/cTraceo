@@ -101,6 +101,7 @@ void writeDataElement(FILE* outfile, uint32_t dataType, void* data, size_t dataI
 	 * TODO: documentation
 	 * TODO: verify successfull write
 	 */
+	uint8_t		tempUInt8;
 	uint32_t	nBytes;
 	uint32_t	paddingBytes = 0;
 	uintptr_t	i;
@@ -111,11 +112,28 @@ void writeDataElement(FILE* outfile, uint32_t dataType, void* data, size_t dataI
 	
 	//write the number of data bytes to the data element's tag:
 	nBytes	= dataItemSize * nDataItems;
+	if (dataType == MATLAB_ARRAYTYPE__mxCHAR_CLASS){
+		//mxCHAR_CLASS is strange: altough the data is 8bit, it is written as 16bit uints,
+		//making this just abit trickier
+		nBytes *= 2;
+	}
+	
 	fwrite(&nBytes, sizeof(uint32_t), 1, outfile);
 	
 	
 	// write the data
-	fwrite(data, dataItemSize, nDataItems, outfile);
+	if (dataType == MATLAB_ARRAYTYPE__mxCHAR_CLASS){
+		//Again, because mxCharClass is strange, we have to write one char
+		//at a time, each followed by a null byte
+		tempUInt8 = 0x00;
+		for (int i=0; i<strlen(data); i++){
+			fwrite(&data[i], sizeof(char), 1, outfile);
+			fwrite(&tempUInt8, sizeof(char), 1, outfile);
+		}
+		
+	}else{
+		fwrite(data, dataItemSize, nDataItems, outfile);
+	}
 	
 	/*
 	 * padding may be required to ensure 64b boundaries between
@@ -154,18 +172,11 @@ uintptr_t	writeArray(MATFile* outfile, const char* arrayName, mxArray* inArray){
 	 * writes an array to an open matfile.
 	 */
 	
-	//uint32_t	numericType	= MATLAB_NUMERICTYPE__COMPLEX;	//TODO: make this an input parameter
-	uint8_t		mxClass		= MATLAB_ARRAYTYPE__mxDOUBLE_CLASS;	//TODO get this from incomming mxArray (need to adapt mxArray first)
+	//uint8_t		mxClass		= MATLAB_ARRAYTYPE__mxDOUBLE_CLASS;	//TODO get this from incomming mxArray (need to adapt mxArray first)
+	uint8_t		mxClass		= inArray->mxCLASS;
 	uint8_t		flags;
 	uint16_t	tempUInt16	= 0x00;
 	uint32_t	tempUInt32	= 0x00;;
-	/*
-	int32_t		dims[2]		= {1,4};
-	char*		arrayName	= "someReallyLongVariableName";
-	double 		dataReal[]	= {1.1, 2.0, 3.0, 4.0};
-	double 		dataImag[]	= {1.1, 0.0, 0.0, 0.0};
-	uint32_t	nArrayElements = dims[0] * dims[1];
-	*/
 	uint32_t	nArrayElements = inArray->dims[0] * inArray->dims[1];
 	uint32_t	nArrayBytes;
 	
@@ -177,9 +188,14 @@ uintptr_t	writeArray(MATFile* outfile, const char* arrayName, mxArray* inArray){
 	
 	nArrayBytes = 4*8;
 	nArrayBytes += dataElementSize(sizeof(char), strlen(arrayName));
-	nArrayBytes += dataElementSize(sizeof(double), inArray->dims[0]*inArray->dims[1]);		//TODO: adapt to other data types
+	if (inArray->mxCLASS == MATLAB_ARRAYTYPE__mxCHAR_CLASS){
+		//NOTE: mxCHAR_CLASS is strange: although datatype is 'char' 2B are written per character
+		nArrayBytes += dataElementSize(2*sizeof(char), inArray->dims[0]*inArray->dims[1]);		//TODO: adapt to other data types
+	}else{
+		nArrayBytes += dataElementSize(inArray->dataElementSize, inArray->dims[0]*inArray->dims[1]);		//TODO: adapt to other data types
+	}
 	if (inArray->numericType == MATLAB_NUMERICTYPE__COMPLEX){
-		nArrayBytes += dataElementSize(sizeof(double), inArray->dims[0]*inArray->dims[1]);		//TODO: adapt to other data types
+		nArrayBytes += dataElementSize(inArray->dataElementSize, inArray->dims[0]*inArray->dims[1]);		//TODO: adapt to other data types
 	}
 	
 	fwrite(&nArrayBytes, sizeof(uint32_t), 1, outfile);
@@ -192,7 +208,7 @@ uintptr_t	writeArray(MATFile* outfile, const char* arrayName, mxArray* inArray){
 	 * 		 the matfile reference manual, it does not follow the rules
 	 * 		 for actual 'data elements'. the datatype is defined as
 	 * 		 miUINT32, but is written as chars. Because of this
-	 * 		 this block is written manuall (without using the
+	 * 		 this block is written manually (without using the
 	 * 		 writeDataElement() function.
 	 */
 	 
@@ -242,7 +258,7 @@ uintptr_t	writeArray(MATFile* outfile, const char* arrayName, mxArray* inArray){
 	/*
 	 * write data element containing real part of array 
 	 */
-	writeDataElement(outfile, MATLAB_DATATYPE__miDOUBLE, inArray->pr, sizeof(double), nArrayElements);
+	writeDataElement(outfile, inArray->mxCLASS, inArray->pr, inArray->dataElementSize, nArrayElements);
 	
 	
 	/*
@@ -328,20 +344,22 @@ mxArray* mxCreateDoubleMatrix(uintptr_t nRows, uintptr_t nCols, uintptr_t numeri
 	}
 	
 	// initialize variables
-	outArray->pr 			= NULL;
-	outArray->pi 			= NULL;
-	outArray->dims[0]		= nRows;
-	outArray->dims[1]		= nCols;
-	outArray->numericType	= numericType;
-	outArray->isStruct		= false;
-	outArray->nFields		= 0;
-	outArray->fieldNames	= NULL;
+	outArray->mxCLASS			= MATLAB_ARRAYTYPE__mxDOUBLE_CLASS;
+	outArray->dataElementSize	= sizeof(double);
+	outArray->pr 				= NULL;
+	outArray->pi 				= NULL;
+	outArray->dims[0]			= nRows;
+	outArray->dims[1]			= nCols;
+	outArray->numericType		= numericType;
+	outArray->isStruct			= false;
+	outArray->nFields			= 0;
+	outArray->fieldNames		= NULL;
 	
 	// allocate memory for structure members
 	// NOTE: mallocDouble already checks for succesfull allocation
-	outArray->pr 	=	mallocDouble(nRows*nCols);
+	outArray->pr 	=	(void*)mallocDouble(nRows*nCols);
 	if (numericType	==	MATLAB_NUMERICTYPE__COMPLEX){
-		outArray->pi=	mallocDouble(nRows*nCols);
+		outArray->pi=	(void*)mallocDouble(nRows*nCols);
 	}
 	
 	return outArray;
@@ -390,12 +408,38 @@ double* mxGetImagData(mxArray* array){
 	return NULL;
 }
 
-mxArray* mxCreateString(const char *string){
-	//TODO
-	return NULL;
+mxArray* mxCreateString(const char *inString){
+	// allocate memory for struct
+	mxArray*	outArray = malloc(sizeof(mxArray));
+	if (outArray == NULL){
+		fatal("mxCreateString(): memory allocation error.");
+	}
+	
+	// initialize variables
+	outArray->mxCLASS			= MATLAB_ARRAYTYPE__mxCHAR_CLASS;
+	outArray->dataElementSize	= sizeof(char);
+	outArray->pr 				= NULL;
+	outArray->pi 				= NULL;
+	outArray->dims[0]			= 1;
+	outArray->dims[1]			= strlen(inString);
+	outArray->numericType		= mxREAL;
+	outArray->isStruct			= false;
+	outArray->nFields			= 0;
+	outArray->fieldNames		= NULL;
+	
+	// allocate memory for string
+	// NOTE: mallocChar already checks for succesfull allocation
+	outArray->pr 	=	(void*)mallocChar(strlen(inString));
+	
+	//Copy string to data pointer
+	//strncpy(char* dst, const char* src, size_t size);
+	strncpy(outArray->pr, inString, strlen(inString));
+	printf("strlen(inString): %u", (uint32_t)strlen(inString));
+	
+	return outArray;
 }
 
-void	mxSetFieldByNumber(	mxArray*	mxRayStruct,	//pointer to the mxStruct
+void	mxSetFieldByNumber(	mxArray*	mxStruct,	//pointer to the mxStruct
 							uint32_t	index,			//linear index of the element (if arrays is multidimensional this must be calculated: remember matlab matrixes are column-major order)
 							uint32_t	iField,			//index of the structure's field which we want to set.
 							mxArray*	inArray){		//the mxArray we want to copy into the mxStruct
@@ -446,4 +490,5 @@ uintptr_t matPutVariable(MATFile* outfile, const char* arrayName, mxArray* inArr
 void matClose(MATFile* file){
 	fclose(file);
 }
+
 
