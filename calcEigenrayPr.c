@@ -177,7 +177,7 @@ void	calcEigenrayPr(settings_t* settings){
 					//	Check if the ray is returning back or not;
 					//	if not:		we can bracket it without problems,
 					//	otherwise:	we need to know how many times it passed by the given array range 
-					if (ray[i].iReturn == FALSE){
+					if (ray[i].iReturn == false){
 						
 						/*
 						//when debugging, save the coordinates of the last ray to a separate matfile before exiting.
@@ -299,7 +299,7 @@ void	calcEigenrayPr(settings_t* settings){
 							}//	if (dz settings->output.miss)
 						}//	for(jj=1; jj<=settings->output.nArrayZ; jj++)
 						
-					}else{// if (ray[i].iReturn == FALSE)
+					}else{// if (ray[i].iReturn == false)
 						
 						DEBUG(3,"returning ray: nCoords: %u, iHyd:%u\n", (uint32_t)ray[i].nCoords, (uint32_t)iHyd);
 						//get the indexes of the bracketing points.
@@ -393,10 +393,10 @@ void	calcEigenrayPr(settings_t* settings){
 								}
 							}
 						}
-					}//	if (ray[i].iReturn == FALSE)
+					}//	if (ray[i].iReturn == false)
 				}//if ( (rHyd >= ray[i].rMin) && (rHyd < ray[i].rMax))
 			}//for(j=0; j<settings->output.nArrayR; j++){
-			if(KEEP_RAYS_IN_MEM == FALSE){
+			if(KEEP_RAYS_IN_MEM == false){
 				//free the ray's memory
 				reallocRayMembers(&ray[i],0);
 			}

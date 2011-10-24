@@ -130,7 +130,7 @@ void	calcRayCoords(settings_t* settings){
 			mxSetFieldByNumber(	mxRayStruct, (MWINDEX)i, 2, mxZ);	// "z"
 			///ray has been saved to mxStructArray
 			
-			if(KEEP_RAYS_IN_MEM == FALSE){
+			if(KEEP_RAYS_IN_MEM == false){
 				//free the ray's memory
 				reallocRayMembers(&ray[i],0);
 			}

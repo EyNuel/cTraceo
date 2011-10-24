@@ -13,15 +13,18 @@
 #include	<string.h>
 #include	<sys/time.h>		//for struct time_t
 #include	<sys/resource.h>	//for getrusage()
+#include	"globals.h"
+#include	<stdbool.h>
+#include	<stdlib.h>
 
 
 ///Prototypes:
 
-uint32_t		isnan_d(double);
-double			min(double, double);
-double			max(double, double);
-void 			fatal(const char*);
-void			printCpuTime(FILE*);
+uint32_t	isnan_d(double);
+double		min(double, double);
+double		max(double, double);
+void 		fatal(const char*);
+void		printCpuTime(FILE*);
 
 
 ///Functions:
@@ -30,9 +33,9 @@ uint32_t isnan_d(double x){
 	//Note that isnan() is only defined for the float data type, and not for doubles
 	//NANs are never equal to anything -even themselves:
 	if (x!=x){
-		return TRUE;
+		return true;
 	}else{
-		return FALSE;
+		return false;
 	}
 }
 

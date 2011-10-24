@@ -189,7 +189,7 @@ void	calcAllRayInfo(settings_t* settings){
 				mxSetFieldByNumber(	mxRayStruct, (MWINDEX)i, 10, mxRefrac_r);
 				mxSetFieldByNumber(	mxRayStruct, (MWINDEX)i, 11, mxRefrac_z);
 			}
-			if(KEEP_RAYS_IN_MEM == FALSE){
+			if(KEEP_RAYS_IN_MEM == false){
 				//free the ray's memory
 				reallocRayMembers(&ray[i],0);
 			}
