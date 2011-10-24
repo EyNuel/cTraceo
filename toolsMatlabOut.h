@@ -13,48 +13,44 @@
 /*
  * Definitions for matlab data types
  */
-#define MATLAB_DATATYPE__miINT8		1
-#define MATLAB_DATATYPE__miUINT8	2
-#define MATLAB_DATATYPE__miINT16	3
-#define MATLAB_DATATYPE__miUINT16	4
-#define MATLAB_DATATYPE__miINT32	5
-#define MATLAB_DATATYPE__miUINT32	6
-#define MATLAB_DATATYPE__miSINGLE	7
-#define MATLAB_DATATYPE__miDOUBLE	9
-#define MATLAB_DATATYPE__miINT64	12
-#define MATLAB_DATATYPE__miUINT64	13
-#define MATLAB_DATATYPE__miMATRIX	14
+#define miINT8		1
+#define miUINT8		2
+#define miINT16		3
+#define miUINT16	4
+#define miINT32		5
+#define miUINT32	6
+#define miSINGLE	7
+#define miDOUBLE	9
+#define miINT64		12
+#define miUINT64	13
+#define miMATRIX	14
 
 /*
  * Definitions for matlab Array types (classes)
  */
-#define MATLAB_ARRAYTYPE__mxCELL_CLASS		1
-#define MATLAB_ARRAYTYPE__mxSTRUCT_CLASS	2
-#define MATLAB_ARRAYTYPE__mxOBJECT_CLASS	3
-#define MATLAB_ARRAYTYPE__mxCHAR_CLASS		4
-#define MATLAB_ARRAYTYPE__mxSPARSE_CLASS	5
-#define MATLAB_ARRAYTYPE__mxDOUBLE_CLASS	6
-#define MATLAB_ARRAYTYPE__mxSINGLE_CLASS	7
-#define MATLAB_ARRAYTYPE__mxINT8_CLASS		8
-#define MATLAB_ARRAYTYPE__mxUINT8_CLASS		9
-#define MATLAB_ARRAYTYPE__mxINT16_CLASS		10
-#define MATLAB_ARRAYTYPE__mxUINT16_CLASS	11
-#define MATLAB_ARRAYTYPE__mxINT32_CLASS		12
-#define MATLAB_ARRAYTYPE__mxUINT32_CLASS	13
+#define mxCELL_CLASS	1
+#define mxSTRUCT_CLASS	2
+#define mxOBJECT_CLASS	3
+#define mxCHAR_CLASS	4
+#define mxSPARSE_CLASS	5
+#define mxDOUBLE_CLASS	6
+#define mxSINGLE_CLASS	7
+#define mxINT8_CLASS	8
+#define mxUINT8_CLASS	9
+#define mxINT16_CLASS	10
+#define mxUINT16_CLASS	11
+#define mxINT32_CLASS	12
+#define mxUINT32_CLASS	13
 
 /*
  * Definitions for matlab numeric data types_
  */
 
- #define MATLAB_NUMERICTYPE__REAL			0
- #define MATLAB_NUMERICTYPE__COMPLEX		1
- #define MATLAB_NUMERICTYPE__GLOBAL			2
- #define MATLAB_NUMERICTYPE__LOGICAL		3
-
  #define mxREAL			0
  #define mxCOMPLEX		1
  #define mxGLOBAL		2
  #define mxLOGICAL		3
+
 
 /*
  * replacement definition for matlab's mxArray and others

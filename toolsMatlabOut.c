@@ -80,7 +80,7 @@ FILE* writeMatfileData(FILE* outfile){
 	float		data[6] = {1,2,3,4,5,6};
 	
 	// write data type:
-	tempUInt32 = MATLAB_DATATYPE__miUINT32;
+	tempUInt32 = miUINT32;
 	fwrite(&tempUInt32, sizeof(uint32_t), 1, outfile);
 	
 	//write number of bytes:
@@ -112,7 +112,7 @@ void writeDataElement(FILE* outfile, uint32_t dataType, void* data, size_t dataI
 	
 	//write the number of data bytes to the data element's tag:
 	nBytes	= dataItemSize * nDataItems;
-	if (dataType == MATLAB_ARRAYTYPE__mxCHAR_CLASS){
+	if (dataType == mxCHAR_CLASS){
 		//mxCHAR_CLASS is strange: altough the data is 8bit, it is written as 16bit uints,
 		//making this just abit trickier
 		nBytes *= 2;
@@ -122,7 +122,7 @@ void writeDataElement(FILE* outfile, uint32_t dataType, void* data, size_t dataI
 	
 	
 	// write the data
-	if (dataType == MATLAB_ARRAYTYPE__mxCHAR_CLASS){
+	if (dataType == mxCHAR_CLASS){
 		//Again, because mxCharClass is strange, we have to write one char
 		//at a time, each followed by a null byte
 		tempUInt8 = 0x00;
@@ -166,13 +166,12 @@ uint32_t	dataElementSize(size_t dataItemSize, uint32_t nDataItems){
 }
 
 
-//FILE* writeArray(FILE* outfile){
 uintptr_t	writeArray(MATFile* outfile, const char* arrayName, mxArray* inArray){
 	/*
 	 * writes an array to an open matfile.
 	 */
 	
-	//uint8_t		mxClass		= MATLAB_ARRAYTYPE__mxDOUBLE_CLASS;	//TODO get this from incomming mxArray (need to adapt mxArray first)
+	//uint8_t		mxClass		= mxDOUBLE_CLASS;	//TODO get this from incomming mxArray (need to adapt mxArray first)
 	uint8_t		mxClass		= inArray->mxCLASS;
 	uint8_t		flags;
 	uint16_t	tempUInt16	= 0x00;
@@ -180,28 +179,30 @@ uintptr_t	writeArray(MATFile* outfile, const char* arrayName, mxArray* inArray){
 	uint32_t	nArrayElements = inArray->dims[0] * inArray->dims[1];
 	uint32_t	nArrayBytes;
 	
-	/*
+	/* *********************************************************
 	 * write miMATRIX tag and total number of bytes in the matrix
+	 * NOTE: total number of bytes does not include the first 8B
+	 * 		 of the file (4B[miMATRIX] +4B[nBytes]).
 	 */
-	tempUInt32	= MATLAB_DATATYPE__miMATRIX;
+	tempUInt32	= miMATRIX;
 	fwrite(&tempUInt32, sizeof(uint32_t), 1, outfile);
 	
 	nArrayBytes = 4*8;
 	nArrayBytes += dataElementSize(sizeof(char), strlen(arrayName));
-	if (inArray->mxCLASS == MATLAB_ARRAYTYPE__mxCHAR_CLASS){
+	if (inArray->mxCLASS == mxCHAR_CLASS){
 		//NOTE: mxCHAR_CLASS is strange: although datatype is 'char' 2B are written per character
 		nArrayBytes += dataElementSize(2*sizeof(char), inArray->dims[0]*inArray->dims[1]);		//TODO: adapt to other data types
 	}else{
 		nArrayBytes += dataElementSize(inArray->dataElementSize, inArray->dims[0]*inArray->dims[1]);		//TODO: adapt to other data types
 	}
-	if (inArray->numericType == MATLAB_NUMERICTYPE__COMPLEX){
+	if (inArray->numericType == mxCOMPLEX){
 		nArrayBytes += dataElementSize(inArray->dataElementSize, inArray->dims[0]*inArray->dims[1]);		//TODO: adapt to other data types
 	}
 	
 	fwrite(&nArrayBytes, sizeof(uint32_t), 1, outfile);
 	
 	
-	/*
+	/* *********************************************************
 	 * generate array flags:
 	 * "undefined"(2B), "flags"(1B), "mxCLASS"(1B), "undefined"(4B)
 	 * NOTE: although the 'array flags' block is called a data element in
@@ -213,20 +214,20 @@ uintptr_t	writeArray(MATFile* outfile, const char* arrayName, mxArray* inArray){
 	 */
 	 
 	//write datatype and number of bytes to element's tag
-	tempUInt32 = MATLAB_DATATYPE__miUINT32;
+	tempUInt32 = miUINT32;
 	fwrite(&tempUInt32, sizeof(uint32_t), 1, outfile);
 	tempUInt32 = 8;
 	fwrite(&tempUInt32,	sizeof(uint32_t), 1, outfile);
 	
 	//write flags and mxClass to the element's data block
 	switch (inArray->numericType){
-		case MATLAB_NUMERICTYPE__COMPLEX:
+		case mxCOMPLEX:
 			flags = 0x08;
 			break;
-		case MATLAB_NUMERICTYPE__GLOBAL:
+		case mxGLOBAL:
 			flags = 0x04;
 			break;
-		case MATLAB_NUMERICTYPE__LOGICAL:
+		case mxLOGICAL:
 			flags = 0x02;
 			break;
 		default:
@@ -243,23 +244,34 @@ uintptr_t	writeArray(MATFile* outfile, const char* arrayName, mxArray* inArray){
 	fwrite(&tempUInt32, sizeof(uint32_t), 1, outfile);
 	
 	
-	/*
+	/* *********************************************************
 	 * write the dimensions element
 	 */
-	writeDataElement(outfile, MATLAB_DATATYPE__miINT32, inArray->dims, sizeof(int32_t), 2);
+	writeDataElement(outfile, miINT32, inArray->dims, sizeof(int32_t), 2);
 	
 	
 	/*
 	 * write the array name element
 	 */
-	writeDataElement(outfile, MATLAB_DATATYPE__miINT8, (void*)arrayName, sizeof(char), strlen(arrayName));
+	writeDataElement(outfile, miINT8, (void*)arrayName, sizeof(char), strlen(arrayName));
 	
 	
-	/*
+	/* *********************************************************
 	 * write data element containing real part of array 
 	 */
 	writeDataElement(outfile, inArray->mxCLASS, inArray->pr, inArray->dataElementSize, nArrayElements);
 	
+	 
+	/* *********************************************************
+	 * write data element containing imaginary part of array (if complex)
+	 */
+	if(inArray->numericType == mxCOMPLEX){
+		writeDataElement(outfile, miDOUBLE, inArray->pi, sizeof(double), nArrayElements);
+	}
+	
+	return 0;
+}
+
 	
 	/*
 	 * write data element containing imaginary part of array (if complex)
@@ -333,7 +345,7 @@ mxArray* mxCreateDoubleMatrix(uintptr_t nRows, uintptr_t nCols, uintptr_t numeri
 	if (nRows == 0 || nCols == 0){
 		fatal("mxCreateDoubleMatrix(): array dimensions may not be null");
 	}
-	if (numericType != MATLAB_NUMERICTYPE__REAL && numericType != MATLAB_NUMERICTYPE__COMPLEX){
+	if (numericType != mxREAL && numericType != mxCOMPLEX){
 		fatal("mxCreateDoubleMatrix(): only 'real' and 'complex' arrays are supported. 'Logical' and 'global' are not implemented.");
 	}
 	
@@ -344,7 +356,7 @@ mxArray* mxCreateDoubleMatrix(uintptr_t nRows, uintptr_t nCols, uintptr_t numeri
 	}
 	
 	// initialize variables
-	outArray->mxCLASS			= MATLAB_ARRAYTYPE__mxDOUBLE_CLASS;
+	outArray->mxCLASS			= mxDOUBLE_CLASS;
 	outArray->dataElementSize	= sizeof(double);
 	outArray->pr 				= NULL;
 	outArray->pi 				= NULL;
@@ -358,7 +370,7 @@ mxArray* mxCreateDoubleMatrix(uintptr_t nRows, uintptr_t nCols, uintptr_t numeri
 	// allocate memory for structure members
 	// NOTE: mallocDouble already checks for succesfull allocation
 	outArray->pr 	=	(void*)mallocDouble(nRows*nCols);
-	if (numericType	==	MATLAB_NUMERICTYPE__COMPLEX){
+	if (numericType	==	mxCOMPLEX){
 		outArray->pi=	(void*)mallocDouble(nRows*nCols);
 	}
 	
@@ -416,7 +428,7 @@ mxArray* mxCreateString(const char *inString){
 	}
 	
 	// initialize variables
-	outArray->mxCLASS			= MATLAB_ARRAYTYPE__mxCHAR_CLASS;
+	outArray->mxCLASS			= mxCHAR_CLASS;
 	outArray->dataElementSize	= sizeof(char);
 	outArray->pr 				= NULL;
 	outArray->pi 				= NULL;
