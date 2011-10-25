@@ -26,7 +26,8 @@ FILE*		writeMatfileHeader(		FILE* outfile, const char descriptiveText[124]);
 void		writeDataElement(		FILE* outfile, uint32_t dataType, void* data, size_t dataItemSize, uint32_t nDataItems);
 uint32_t	dataElementSize(		size_t dataItemSize, uint32_t nDataItems);
 uintptr_t	writeArray(				MATFile* outfile, const char* arrayName, mxArray* inArray);
-//void		newMatfile(				const char* filename);
+uint32_t	structArraySize(		mxArray* inArray);
+uintptr_t	writeStructArray(		MATFile* outfile, const char* arrayName, mxArray* inArray);
 MATFile*	matOpen(				const char* filename, const char* openMode);
 mxArray*	mxCreateDoubleMatrix(	uintptr_t nRows, uintptr_t nCols, uintptr_t numericType);
 double*		mxGetPr(				mxArray* array);
@@ -272,12 +273,125 @@ uintptr_t	writeArray(MATFile* outfile, const char* arrayName, mxArray* inArray){
 	return 0;
 }
 
+uint32_t	structArraySize(mxArray* inArray){
+	/*
+	 * Calculates the total size in Bytes which is required to
+	 * contain a struct array and its children.
+	 * NOTE: this function is recursive, as it will call itself to
+	 * 		 determine the size required by it's children.
+	 */
+	
+	uint32_t	size = 0;
+	
+	if (inArray->isStruct){
+		size += 4*8;	// Array Flags[16B] + Dimensions Array [16B]
+		########################################################
+	}else{
+		fatal("structArraySize(): trying to determine size of an mxArray that isn't a structure array.\n");
+		return size;
+	}
+}
+
+uintptr_t	writeStructArray(MATFile* outfile, const char* arrayName, mxArray* inArray){
+	/*
+	 * writes a structure array to an open matfile.
+	 */
+	
+	uint8_t		mxClass		= inArray->mxCLASS;
+	uint8_t		flags;
+	uint16_t	tempUInt16	= 0x00;
+	uint32_t	tempUInt32	= 0x00;;
+	uint32_t	nArrayElements = inArray->dims[0] * inArray->dims[1];
+	uint32_t	nArrayBytes;
+	
+	/* *********************************************************
+	 * write miMATRIX tag and total number of bytes in the matrix
+	 * NOTE: total number of bytes does not include the first 8B
+	 * 		 of the file (4B[miMATRIX] +4B[nBytes]).
+	 */
+	tempUInt32	= miMATRIX;
+	fwrite(&tempUInt32, sizeof(uint32_t), 1, outfile);
+	
+	nArrayBytes = 4*8;
+	nArrayBytes += dataElementSize(sizeof(char), strlen(arrayName));
+	if (inArray->mxCLASS == mxCHAR_CLASS){
+		//NOTE: mxCHAR_CLASS is strange: although datatype is 'char' 2B are written per character
+		nArrayBytes += dataElementSize(2*sizeof(char), inArray->dims[0]*inArray->dims[1]);		//TODO: adapt to other data types
+	}else{
+		nArrayBytes += dataElementSize(inArray->dataElementSize, inArray->dims[0]*inArray->dims[1]);		//TODO: adapt to other data types
+	}
+	if (inArray->numericType == mxCOMPLEX){
+		nArrayBytes += dataElementSize(inArray->dataElementSize, inArray->dims[0]*inArray->dims[1]);		//TODO: adapt to other data types
+	}
+	
+	fwrite(&nArrayBytes, sizeof(uint32_t), 1, outfile);
+	
+	
+	/* *********************************************************
+	 * generate array flags:
+	 * "undefined"(2B), "flags"(1B), "mxCLASS"(1B), "undefined"(4B)
+	 * NOTE: although the 'array flags' block is called a data element in
+	 * 		 the matfile reference manual, it does not follow the rules
+	 * 		 for actual 'data elements'. the datatype is defined as
+	 * 		 miUINT32, but is written as chars. Because of this
+	 * 		 this block is written manually (without using the
+	 * 		 writeDataElement() function.
+	 */
+	 
+	//write datatype and number of bytes to element's tag
+	tempUInt32 = miUINT32;
+	fwrite(&tempUInt32, sizeof(uint32_t), 1, outfile);
+	tempUInt32 = 8;
+	fwrite(&tempUInt32,	sizeof(uint32_t), 1, outfile);
+	
+	//write flags and mxClass to the element's data block
+	switch (inArray->numericType){
+		case mxCOMPLEX:
+			flags = 0x08;
+			break;
+		case mxGLOBAL:
+			flags = 0x04;
+			break;
+		case mxLOGICAL:
+			flags = 0x02;
+			break;
+		default:
+			flags = 0x00;
+			break;
+	}
+	tempUInt32 =	flags;
+	tempUInt32 <<=	8;	//left shift the flags by one byte
+	tempUInt32 |=	mxClass;
+	fwrite(&tempUInt32, sizeof(uint32_t), 1, outfile);
+	
+	//write 4B of undefined data to element's data block
+	tempUInt32 = 0x00;
+	fwrite(&tempUInt32, sizeof(uint32_t), 1, outfile);
+	
+	
+	/* *********************************************************
+	 * write the dimensions element
+	 */
+	writeDataElement(outfile, miINT32, inArray->dims, sizeof(int32_t), 2);
+	
 	
 	/*
+	 * write the array name element
+	 */
+	writeDataElement(outfile, miINT8, (void*)arrayName, sizeof(char), strlen(arrayName));
+	
+	
+	/* *********************************************************
+	 * write data element containing real part of array 
+	 */
+	writeDataElement(outfile, inArray->mxCLASS, inArray->pr, inArray->dataElementSize, nArrayElements);
+	
+	 
+	/* *********************************************************
 	 * write data element containing imaginary part of array (if complex)
 	 */
-	if(inArray->numericType == MATLAB_NUMERICTYPE__COMPLEX){
-		writeDataElement(outfile, MATLAB_DATATYPE__miDOUBLE, inArray->pi, sizeof(double), nArrayElements);
+	if(inArray->numericType == mxCOMPLEX){
+		writeDataElement(outfile, miDOUBLE, inArray->pi, sizeof(double), nArrayElements);
 	}
 	
 	return 0;
@@ -492,8 +606,7 @@ uintptr_t matPutVariable(MATFile* outfile, const char* arrayName, mxArray* inArr
 		//assume that if it isn't struct, its a matrix
 		writeArray(outfile, arrayName, inArray);
 	}else{
-		//TODO
-		//writeStruct();
+		writeStructArray(outfile, arrayName, inArray);
 	}
 	return 0;
 }
