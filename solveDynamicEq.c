@@ -109,7 +109,7 @@ void	solveDynamicEq(settings_t* settings, ray_t* ray){
 		ci = ray->c[i];
 		cxc = ci*ci;
 
-		if ( ray->iRefl[i+1] == FALSE){
+		if ( ray->iRefl[i+1] == false){
 			DEBUG(9,"Case 1\n");
 			DEBUG(10,"p[0]:%e, p:%e\n", ray->p[0], ray->p[i]);
 			ray->p[i+1] = ray->p[i] - ray->q[i] * (cnn / cxc) * dsi;
@@ -126,7 +126,7 @@ void	solveDynamicEq(settings_t* settings, ray_t* ray){
 				rn		= -( rm * ( 2 * cnj - rm * csj )/cii );
 				ray->p[i+1]	= ray->p[i] + ray->q[i] * rn;
 			}
-		}else if (ray->iRefl[i+1] == TRUE){
+		}else if (ray->iRefl[i+1] == true){
 			DEBUG(9,"Case 2\n");
 			ibdry	= ray->boundaryJ[i+1];
 			tauB.r	= ray->boundaryTg[i+1].r;

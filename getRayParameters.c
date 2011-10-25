@@ -47,7 +47,7 @@ void	getRayParameters(ray_t* ray, uintptr_t iHyd, double q0, double rHyd, double
 	double			junkDouble;
 	double			theta;
 
-	if( ray->iRefl[iHyd+1] == TRUE){
+	if( ray->iRefl[iHyd+1] == true){
 		iHyd = iHyd - 1;
 	}
 

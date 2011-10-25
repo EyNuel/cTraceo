@@ -4,6 +4,7 @@
 */
 #pragma once
 #include <stdint.h>		//needed for inequivocal type qualifiers as defined in C99
+#include <stdbool.h>	//for boolean data type
 #include <complex.h>
 #include <matrix.h>		//needed for matlab matrix dimensions (mwSize)
 
@@ -54,8 +55,10 @@
 /********************************************************************************
  * Some utilities																*
  ********************************************************************************/
-#define	TRUE	1
-#define FALSE	0
+//#define	true	1
+//#define false	0
+//typedef false false
+//typedef true  true
 
 //the following 5 lines are used to simplify access to star pressure elements (for particle velocity)
 #define LEFT	0
@@ -101,14 +104,14 @@ typedef struct	ray{
 	 * NOTE: memory ocupied is 44B overhead + 96B per ray coordinate. TODO recalculate, as this has since become larger
 	 */
 	uintptr_t		nCoords;
-	uintptr_t		iKill;		//indicates if ray has been "killed"
+	bool			iKill;		//indicates if ray has been "killed"
 	double			theta;		//launching angle of the ray
 	double			rMin, rMax;	//used to determine if a ray "turns back"
-	uint32_t		iReturn;	//indicates if a ray "turns back"
+	bool			iReturn;	//indicates if a ray "turns back"
 	double*			r;			//range of ray at index
 	double*			z;			//depth of ray at index
 	double*			c;			//speed of sound at index
-	uint32_t*		iRefl;		//indicates if there is a reflection at a certain index of the ray coordinates.
+	bool*			iRefl;		//indicates if there is a reflection at a certain index of the ray coordinates.
 	uint32_t		sRefl;		//number of surface reflections
 	uint32_t		bRefl;		//number of bottom reflections
 	uint32_t		oRefl;		//number of object reflections

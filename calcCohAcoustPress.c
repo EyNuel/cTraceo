@@ -259,7 +259,7 @@ void	calcCohAcoustPress(settings_t* settings){
 								//if ( (rHyd - dr)>= ray[i].rMin	&&	(rHyd + dr) < ray[i].rMax){
 								if ( rHyd >= ray[i].rMin	&&	rHyd < ray[i].rMax){
 									
-									if ( ray[i].iReturn == FALSE){
+									if ( ray[i].iReturn == false){
 										DEBUG(5, "Ray doesn't return\n");
 										for(k=0; k<dimZ; k++){
 											zHyd = settings->output.arrayZ[k];
@@ -292,7 +292,7 @@ void	calcCohAcoustPress(settings_t* settings){
 													settings->output.pressure_V[j][k][l] += pressure_V[l];
 												}
 											}else{
-												DEBUG(6,"pressureMStar returned FALSE => at least one of the pressure contribution points is outside rBox\n");
+												DEBUG(6,"pressureMStar returned false => at least one of the pressure contribution points is outside rBox\n");
 											}
 										}
 									}
@@ -307,7 +307,7 @@ void	calcCohAcoustPress(settings_t* settings){
 								if ( rHyd >= ray[i].rMin	&&	rHyd < ray[i].rMax){
 									zHyd = settings->output.arrayZ[j];
 									
-									if ( ray[i].iReturn == FALSE){
+									if ( ray[i].iReturn == false){
 										
 										if( pressureStar( settings, &ray[i], rHyd, zHyd, q0, pressure_H, pressure_V) ){
 											DEBUG(3, "i=%u: (j,k)=(%u,%u): \n",(uint32_t)i, (uint32_t)j, (uint32_t)k);
@@ -357,7 +357,7 @@ void	calcCohAcoustPress(settings_t* settings){
 								
 								if (	rHyd >= ray[i].rMin	&&	rHyd < ray[i].rMax	){
 									
-									if (ray[i].iReturn == FALSE){
+									if (ray[i].iReturn == false){
 										bracket(ray[i].nCoords, ray[i].r, rHyd, &iHyd);
 										getRayPressure(settings, &ray[i], iHyd, q0, rHyd, zHyd, &pressure);
 										settings->output.pressure2D[0][j] += pressure;
@@ -391,7 +391,7 @@ void	calcCohAcoustPress(settings_t* settings){
 								//Start by checking if the array range is inside the min and max ranges of the ray:
 								if (	rHyd >= ray[i].rMin	&&	rHyd < ray[i].rMax){
 									
-									if (ray[i].iReturn == FALSE){
+									if (ray[i].iReturn == false){
 										bracket(ray[i].nCoords, ray[i].r, rHyd, &iHyd);
 										for(k=0; k<dimZ; k++){
 											

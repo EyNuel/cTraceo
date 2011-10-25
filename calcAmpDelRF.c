@@ -57,7 +57,7 @@ void calcAmpDelRF(settings_t* settings){
 	double*			thetaL 				= NULL;
 	double*			thetaR 				= NULL;
 	ray_t*			tempRay 			= NULL;
-	uint32_t		success 			= FALSE;
+	bool			success 			= false;
 	double*			thetas				= NULL;
 	double**		depths				= NULL;
 	ray_t*			ray					= NULL;
@@ -182,7 +182,7 @@ void calcAmpDelRF(settings_t* settings){
 			solveEikonalEq(settings, &ray[i]);
 			solveDynamicEq(settings, &ray[i]);
 			
-			if (ray[i].iReturn == TRUE){
+			if (ray[i].iReturn == true){
 				printf("Eigenray search by Regula Falsi detected a returning ray at angle %lf.\n", thetas[i]);
 				fatal("Returning eigenrays can only be determined by Proximity.\nAborting");
 			}
@@ -250,8 +250,8 @@ void calcAmpDelRF(settings_t* settings){
 				prod = fl*fr;
 				DEBUG(3, "k: %u; thetaL: %e; thetaR: %e\n", (uint32_t)k, thetaL[k], thetaR[k]);
 				
-				if(	isnan_d(depths[k][i]) == FALSE	&&
-					isnan_d(depths[k+1][i]) == FALSE	){
+				if(	isnan_d(depths[k][i]) == false	&&
+					isnan_d(depths[k+1][i]) == false	){
 					DEBUG(3, "Not a NAN\n");
 					
 					if(	(fl == 0.0) && (fr != 0.0)){
@@ -325,22 +325,22 @@ void calcAmpDelRF(settings_t* settings){
 					DEBUG(3, "\"left\" is eigenray.\n");
 					theta0 = thetaL[l];
 					nFoundArrivals++;
-					success = TRUE;
+					success = true;
 				
 				}else if (fabs(fr) <= settings->output.miss){
 					DEBUG(3, "\"right\" is eigenray.\n");
 					theta0 = thetaR[l];
 					nFoundArrivals++;
-					success = TRUE;
+					success = true;
 				
 				//if not, try to find the "exact" launching angle
 				}else{
 					DEBUG(3, "Neither \"left\" nor \"right\" ray are close enough to be eigenrays.\nApplying Regula-Falsi...\n");
 					nTrial = 0;
-					success = FALSE;
+					success = false;
 					
 					//here comes the actual Regula-Falsi loop:
-					while(success == FALSE){
+					while(success == false){
 						nTrial++;
 						
 						if (nTrial > 21){
@@ -365,7 +365,7 @@ void calcAmpDelRF(settings_t* settings){
 						//check if the new rays is close enough to the hydrophone to be considered and eigenray:
 						if (fabs(f0) < settings->output.miss){
 							DEBUG(3, "Found eigenray by applying Regula-Falsi.\n");
-							success = TRUE;
+							success = true;
 							nFoundArrivals++;
 							break;
 						
@@ -388,7 +388,7 @@ void calcAmpDelRF(settings_t* settings){
 					//DEBUG(3, "iFail: %u\n", iFail);
 				}
 				//DEBUG(3,"iFail: %u\n", (uint32_t)iFail);
-				if (success == TRUE){
+				if (success == true){
 					
 					//finally: get arrivals from the coordinates and amplitudes of the eigenray
 					tempRay[0].theta = theta0;

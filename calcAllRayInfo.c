@@ -165,7 +165,7 @@ void	calcAllRayInfo(settings_t* settings){
 			nObjRefl	= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)1, mxREAL);
 			nRefrac		= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)1, mxREAL);
 			
-			copyUInt32ToMxArray(	&ray[i].iReturn,	iReturns, 	1);
+			copyBoolToMxArray(		&ray[i].iReturn,	iReturns, 	1);
 			copyUInt32ToMxArray(	&ray[i].sRefl,		nSurRefl, 	1);
 			copyUInt32ToMxArray(	&ray[i].bRefl,		nBotRefl, 	1);
 			copyUInt32ToMxArray(	&ray[i].oRefl,		nObjRefl, 	1);
@@ -189,7 +189,7 @@ void	calcAllRayInfo(settings_t* settings){
 				mxSetFieldByNumber(	mxRayStruct, (MWINDEX)i, 10, mxRefrac_r);
 				mxSetFieldByNumber(	mxRayStruct, (MWINDEX)i, 11, mxRefrac_z);
 			}
-			if(KEEP_RAYS_IN_MEM == FALSE){
+			if(KEEP_RAYS_IN_MEM == false){
 				//free the ray's memory
 				reallocRayMembers(&ray[i],0);
 			}
