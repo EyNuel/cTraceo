@@ -11,6 +11,10 @@
 
 #pragma once
 #include <string.h>
+#include <stdint.h>
+#include "globals.h"
+#include "toolsMisc.c"
+#include "toolsMemory.c"
 
 
 ///Prototypes:
@@ -36,7 +40,7 @@ FILE* 		openFile(const char *filename, const char mode[4]) {
 			A FILE pointer.
 	*/
 	
-	FILE *temp;
+	FILE *temp = NULL;
 	if (VERBOSE)
 		printf("Accessing file: %s... ", filename);
 		
