@@ -270,7 +270,7 @@ void	calcEigenrayPr(settings_t* settings){
 								nObjRefl	= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)1, mxREAL);
 								nRefrac		= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)1, mxREAL);
 								
-								copyUInt32ToMxArray(	&ray[i].iReturn,	iReturns, 	1);
+								copyBoolToMxArray(		&ray[i].iReturn,	iReturns, 	1);
 								copyUInt32ToMxArray(	&ray[i].sRefl,	nSurRefl, 	1);
 								copyUInt32ToMxArray(	&ray[i].bRefl,	nBotRefl, 	1);
 								copyUInt32ToMxArray(	&ray[i].oRefl,	nObjRefl, 	1);
@@ -364,7 +364,7 @@ void	calcEigenrayPr(settings_t* settings){
 									nObjRefl	= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)1, mxREAL);
 									nRefrac		= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)1, mxREAL);
 									
-									copyUInt32ToMxArray(	&ray[i].iReturn,	iReturns, 	1);
+									copyBoolToMxArray(		&ray[i].iReturn,	iReturns, 	1);
 									copyUInt32ToMxArray(	&ray[i].sRefl,	nSurRefl, 	1);
 									copyUInt32ToMxArray(	&ray[i].bRefl,	nBotRefl, 	1);
 									copyUInt32ToMxArray(	&ray[i].oRefl,	nObjRefl, 	1);

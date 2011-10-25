@@ -435,7 +435,7 @@ void	calcEigenrayRF(settings_t* settings){
 					nObjRefl	= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)1, mxREAL);
 					nRefrac		= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)1, mxREAL);
 					
-					copyUInt32ToMxArray(	&tempRay->iReturn,	iReturns, 	1);
+					copyBoolToMxArray(		&tempRay->iReturn,	iReturns, 	1);
 					copyUInt32ToMxArray(	&tempRay->sRefl,	nSurRefl, 	1);
 					copyUInt32ToMxArray(	&tempRay->bRefl,	nBotRefl, 	1);
 					copyUInt32ToMxArray(	&tempRay->oRefl,	nObjRefl, 	1);
