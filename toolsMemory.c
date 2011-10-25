@@ -21,10 +21,7 @@
  */
 
 
-///Prototypes:
-
-
-
+///Function Prototypes:
 char*			mallocChar(uintptr_t);
 uint32_t*		mallocUint(uintptr_t);
 uint32_t*		reallocUint(uint32_t*, uintptr_t);
@@ -65,7 +62,7 @@ char*				mallocChar(uintptr_t numChars){
 	*/
 	
 	char*	temp = NULL;	//temporary pointer
-	temp = malloc((unsigned long)numChars*sizeof(char));
+	temp = malloc((size_t)numChars*sizeof(char));
 	if (temp == NULL){
 		fatal("Memory allocation error.\n");
 	}
