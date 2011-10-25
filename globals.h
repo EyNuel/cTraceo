@@ -6,7 +6,16 @@
 #include <stdint.h>		//needed for inequivocal type qualifiers as defined in C99
 #include <stdbool.h>	//for boolean data type
 #include <complex.h>
-#include <matrix.h>		//needed for matlab matrix dimensions (mwSize)
+/*
+#define USE_MATLAB 0
+
+#if USE_MATLAB == 1
+	#include <matrix.h>		//needed for matlab matrix dimensions (mwSize)
+#else
+	#include "toolsMatlabOut.h"
+#endif
+*/
+#include "toolsMatlabOut.c"
 
 /********************************************************************************
  * Configuration:																*

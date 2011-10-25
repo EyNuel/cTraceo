@@ -10,8 +10,11 @@
  *******************************************************************************/
 
 #pragma once
-#include	<matrix.h>			//for matlab functions (used in copyComplexToPtr and copyComplexToPtr2D)
-
+#ifdef USE_MATLAB
+	#include	<matrix.h>			//for matlab functions (used in copyComplexToPtr and copyComplexToPtr2D)
+#else
+	#include	"toolsMatlabOut.h"
+#endif
 
 ///Prototypes:
  
