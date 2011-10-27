@@ -6,8 +6,8 @@ function plotEigenrays(eigenrays)
 
 for rHyd = 1:a  %iterate over hydrophone ranges
     for zHyd = 1:b  %iterate over hydrophone depths
-        for i = 1:eigenrays(a,b).nEigenrays   %iterate over eigenrays of hydrphone
-            plot(eigenrays(a,b).eigenray(i).r, eigenrays(a,b).eigenray(i).z)   
+        for i = 1:eigenrays(rHyd,zHyd).nEigenrays   %iterate over eigenrays of hydrphone
+            plot(eigenrays(rHyd,zHyd).eigenray(i).r, eigenrays(rHyd,zHyd).eigenray(i).z)   
         end
     end
 end
