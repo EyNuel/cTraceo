@@ -77,7 +77,7 @@ typedef struct{
 	uintptr_t		numericType;	//real, complex, logical or global [don't actually now what global implies...]
 	bool			isStruct;
 	uintptr_t		nFields;
-	const char**	fieldNames;		//something like: {	"theta","r","z"};
+	char**			fieldNames;		//something like: {	"theta","r","z"};
 }mxArray;
 
 

@@ -128,8 +128,8 @@ void writeDataElement(FILE* outfile, uint32_t dataType, void* data, size_t dataI
 		//at a time, each followed by a null byte
 		tempUInt8 = 0x00;
 		for (int i=0; i<strlen(data); i++){
-			fwrite(&data[i], sizeof(char), 1, outfile);
-			fwrite(&tempUInt8, sizeof(char), 1, outfile);
+			fwrite(&data[i], sizeof(uint8_t), 1, outfile);
+			fwrite(&tempUInt8, sizeof(uint8_t), 1, outfile);
 		}
 		
 	}else{
@@ -145,7 +145,7 @@ void writeDataElement(FILE* outfile, uint32_t dataType, void* data, size_t dataI
 	}
 	printf("numBytes: %u, paddingBytes: %u\n", nBytes, paddingBytes);
 	for (i=0; i<paddingBytes; i++){
-		fwrite(&emptyChar, sizeof(char), 1, outfile);
+		fwrite(&emptyChar, sizeof(uint8_t), 1, outfile);
 	}
 }
 
@@ -172,7 +172,6 @@ uintptr_t	writeArray(MATFile* outfile, const char* arrayName, mxArray* inArray){
 	 * writes an array to an open matfile.
 	 */
 	
-	//uint8_t		mxClass		= mxDOUBLE_CLASS;	//TODO get this from incomming mxArray (need to adapt mxArray first)
 	uint8_t		mxClass		= inArray->mxCLASS;
 	uint8_t		flags;
 	uint16_t	tempUInt16	= 0x00;
@@ -285,24 +284,29 @@ uint32_t	structArraySize(mxArray* inArray){
 	
 	if (inArray->isStruct){
 		size += 4*8;	// Array Flags[16B] + Dimensions Array [16B]
-		########################################################
+		//########################################################
 	}else{
 		fatal("structArraySize(): trying to determine size of an mxArray that isn't a structure array.\n");
 		return size;
 	}
+	return 0;
 }
 
 uintptr_t	writeStructArray(MATFile* outfile, const char* arrayName, mxArray* inArray){
 	/*
 	 * writes a structure array to an open matfile.
 	 */
+	uint32_t	tempUInt32;
+	uint16_t	tempUInt16;
+	uint8_t		tempUInt8;
+	uintptr_t	maxLengthFieldname = 0;
+	uintptr_t	nBytes, paddingBytes = 0;
 	
-	uint8_t		mxClass		= inArray->mxCLASS;
-	uint8_t		flags;
-	uint16_t	tempUInt16	= 0x00;
-	uint32_t	tempUInt32	= 0x00;;
-	uint32_t	nArrayElements = inArray->dims[0] * inArray->dims[1];
-	uint32_t	nArrayBytes;
+	
+	///---------------------------------------------------------
+	inArray->dims[0]	= 1;
+	inArray->dims[1]	= 1;
+	///---------------------------------------------------------
 	
 	/* *********************************************************
 	 * write miMATRIX tag and total number of bytes in the matrix
@@ -312,30 +316,14 @@ uintptr_t	writeStructArray(MATFile* outfile, const char* arrayName, mxArray* inA
 	tempUInt32	= miMATRIX;
 	fwrite(&tempUInt32, sizeof(uint32_t), 1, outfile);
 	
-	nArrayBytes = 4*8;
-	nArrayBytes += dataElementSize(sizeof(char), strlen(arrayName));
-	if (inArray->mxCLASS == mxCHAR_CLASS){
-		//NOTE: mxCHAR_CLASS is strange: although datatype is 'char' 2B are written per character
-		nArrayBytes += dataElementSize(2*sizeof(char), inArray->dims[0]*inArray->dims[1]);		//TODO: adapt to other data types
-	}else{
-		nArrayBytes += dataElementSize(inArray->dataElementSize, inArray->dims[0]*inArray->dims[1]);		//TODO: adapt to other data types
-	}
-	if (inArray->numericType == mxCOMPLEX){
-		nArrayBytes += dataElementSize(inArray->dataElementSize, inArray->dims[0]*inArray->dims[1]);		//TODO: adapt to other data types
-	}
-	
-	fwrite(&nArrayBytes, sizeof(uint32_t), 1, outfile);
+	tempUInt32	= 320;
+	fwrite(&tempUInt32, sizeof(uint32_t), 1, outfile);
 	
 	
 	/* *********************************************************
 	 * generate array flags:
+	 * "miUINT32"(4B), "8"(4B)
 	 * "undefined"(2B), "flags"(1B), "mxCLASS"(1B), "undefined"(4B)
-	 * NOTE: although the 'array flags' block is called a data element in
-	 * 		 the matfile reference manual, it does not follow the rules
-	 * 		 for actual 'data elements'. the datatype is defined as
-	 * 		 miUINT32, but is written as chars. Because of this
-	 * 		 this block is written manually (without using the
-	 * 		 writeDataElement() function.
 	 */
 	 
 	//write datatype and number of bytes to element's tag
@@ -345,23 +333,8 @@ uintptr_t	writeStructArray(MATFile* outfile, const char* arrayName, mxArray* inA
 	fwrite(&tempUInt32,	sizeof(uint32_t), 1, outfile);
 	
 	//write flags and mxClass to the element's data block
-	switch (inArray->numericType){
-		case mxCOMPLEX:
-			flags = 0x08;
-			break;
-		case mxGLOBAL:
-			flags = 0x04;
-			break;
-		case mxLOGICAL:
-			flags = 0x02;
-			break;
-		default:
-			flags = 0x00;
-			break;
-	}
-	tempUInt32 =	flags;
-	tempUInt32 <<=	8;	//left shift the flags by one byte
-	tempUInt32 |=	mxClass;
+	//NOTE: for a struct array: flags=0x00
+	tempUInt32 =	mxSTRUCT_CLASS;
 	fwrite(&tempUInt32, sizeof(uint32_t), 1, outfile);
 	
 	//write 4B of undefined data to element's data block
@@ -375,25 +348,75 @@ uintptr_t	writeStructArray(MATFile* outfile, const char* arrayName, mxArray* inA
 	writeDataElement(outfile, miINT32, inArray->dims, sizeof(int32_t), 2);
 	
 	
-	/*
-	 * write the array name element
-	 */
-	writeDataElement(outfile, miINT8, (void*)arrayName, sizeof(char), strlen(arrayName));
-	
-	
 	/* *********************************************************
-	 * write data element containing real part of array 
+	 * write the struct array's name
+	 * "1"(2B), "miINT8"(2B), "X"(1B), "padding"(3B)
 	 */
-	writeDataElement(outfile, inArray->mxCLASS, inArray->pr, inArray->dataElementSize, nArrayElements);
-	
-	 
-	/* *********************************************************
-	 * write data element containing imaginary part of array (if complex)
-	 */
-	if(inArray->numericType == mxCOMPLEX){
-		writeDataElement(outfile, miDOUBLE, inArray->pi, sizeof(double), nArrayElements);
+	tempUInt16	= 0x01;
+	fwrite(&tempUInt16, sizeof(uint16_t), 1, outfile);
+	tempUInt16	= miINT8;
+	fwrite(&tempUInt16, sizeof(uint16_t), 1, outfile);
+	tempUInt8	= 'X';
+	fwrite(&tempUInt8, sizeof(uint8_t), 1, outfile);
+	//write padding at end:
+	for (int i=0; i<3; i++){
+		fwrite(&tempUInt8, sizeof(uint8_t), 1, outfile);
 	}
 	
+	
+	/* *********************************************************
+	 * write the struct's fieldnames
+	 * "4"(2B), "miINT32"(2B), "maxLengthFieldname"(4B)
+	 * n times: "fieldName[i] +NULL"(length of string), "padding" (to get to maxLengthFieldname)
+	 * "padding" (to get to 8B boundary)
+	 */
+	tempUInt32	=	0x04;	//Why 4??
+	tempUInt32	<<=	16;		//left shift by 2B
+	tempUInt32	|=	miINT32;
+	fwrite(&tempUInt32, sizeof(uint32_t), 1, outfile);
+	
+	//get length of longest fieldname
+	for (int i=0; i<inArray->nFields; i++){
+		maxLengthFieldname = max(maxLengthFieldname, strlen(inArray->fieldNames[i]));
+	}
+	maxLengthFieldname += 1;	//need to add one for the string's NULL terminator
+	printf("maxLengthFieldname: %lu\n", maxLengthFieldname);
+	
+	//write length of longest fieldName:
+	fwrite(&maxLengthFieldname, sizeof(uint32_t), 1, outfile);
+	
+	//write fieldnames (with padding at end of each fiedname to reach maxLengthFieldname)
+	tempUInt8	= 0x00;
+	for (int i=0; i<inArray->nFields; i++){
+		//write the fieldName:
+		fwrite(&inArray->fieldNames[i], sizeof(uint8_t), strlen(inArray->fieldNames[i]), outfile);
+		//write individual padding:
+		for (int j=0; j<maxLengthFieldname; j++){
+			fwrite(&tempUInt8, sizeof(uint8_t), 1, outfile);
+		}
+	}
+	
+	//after the fieldNames (which were already zero-padded to have a length of maxLengthFieldnames),
+	//pad some more to reach the 8B boundary
+	nBytes = maxLengthFieldname * inArray->nFields;
+	if (nBytes % 8 > 0){
+		paddingBytes= 8 - nBytes % 8;	//This could probably be neatly rewritten with the ternary operator
+	}
+	for (int i=0; i<paddingBytes; i++){
+		fwrite(&tempUInt8, sizeof(uint8_t), 1, outfile);
+	}
+	
+	
+	/* *********************************************************
+	 * write the structures children to the matfile
+	 * TODO: support for nested structures
+	 */
+	for (int i=0; i<inArray->nFields; i++){
+		writeArray(outfile, inArray->fieldNames[i], (mxArray*)&inArray->pr[i]);
+	}
+	
+	
+	 
 	return 0;
 }
 
@@ -491,6 +514,55 @@ mxArray* mxCreateDoubleMatrix(uintptr_t nRows, uintptr_t nCols, uintptr_t numeri
 	return outArray;
 }
 
+mxArray* mxCreateStructMatrix(uintptr_t nRows, uintptr_t nCols, uintptr_t nFields, const char **fieldNames){
+	/*
+	 * creates a 2D array of structures
+	 */
+	mxArray*	outArray = NULL;
+	
+	
+	// do some input value validation
+	if (nRows == 0 || nCols == 0){
+		fatal("mxCreateStructMatrix(): array dimensions may not be null");
+	}
+	
+	// allocate memory
+	outArray	= malloc(nRows*nCols*sizeof(mxArray));
+	if (outArray == NULL){
+		fatal("mxCreateStructMatrix(): memory allocation error.");
+	}
+	
+	// initialize variables
+	//NOTE: only the first element of outArray will contain the basic struct information
+	outArray[0].mxCLASS			= mxSTRUCT_CLASS;
+	outArray[0].dataElementSize	= sizeof(mxArray);
+	outArray[0].dims[0]			= nRows;
+	outArray[0].dims[1]			= nCols;
+	outArray[0].numericType		= mxREAL;
+	outArray[0].isStruct		= true;
+	outArray[0].nFields			= nFields;
+	outArray[0].fieldNames		= malloc(nFields*sizeof(uintptr_t));
+	
+	//copy fieldnames into struct info
+	for (int iField=0; iField<nFields; iField++){
+		//NOTE: strlen returns the length of a string, not including the terminating NULL character
+		outArray[0].fieldNames[iField] = mallocChar(strlen(fieldNames[iField])+1);	
+		strncpy(outArray[0].fieldNames[iField], fieldNames[iField], strlen(fieldNames[iField])+1);
+	}
+	
+	// allocate memory for structure members (fields)
+	for (int iStruct=0; iStruct<nCols*nRows; iStruct++){
+		outArray[iStruct].pr	= NULL;
+		outArray[iStruct].pi	= NULL;
+		outArray[iStruct].pr	= (mxArray*)malloc(nFields*sizeof(mxArray*));
+		if (outArray[iStruct].pr== NULL){
+			fatal("mxCreateStructMatrix(): memory allocation error.\n");
+		}
+	}
+	
+	return outArray;
+}
+
 double*	mxGetPr(mxArray* array){
 	/*
 	 * Returns pointer to the first element of the mxArray's real data.
@@ -565,30 +637,32 @@ mxArray* mxCreateString(const char *inString){
 	return outArray;
 }
 
-void	mxSetFieldByNumber(	mxArray*	mxStruct,	//pointer to the mxStruct
+void	mxSetFieldByNumber(	mxArray*	mxStruct,		//pointer to the mxStruct
 							uint32_t	index,			//linear index of the element (if arrays is multidimensional this must be calculated: remember matlab matrixes are column-major order)
 							uint32_t	iField,			//index of the structure's field which we want to set.
 							mxArray*	inArray){		//the mxArray we want to copy into the mxStruct
-	//TODO
-	
+	/* 
+	 * Assigns an mxArray to one of the fields of a structArray
+	 */
+	(mxArray*)(mxStruct[index].pr[iField]) = inArray;
 }
 
-void	mxDestroyArray(mxArray* array){
+void	mxDestroyArray(mxArray* inArray){
 	/*
 	 * Free's all memory alocated to an mxArray.
 	 * TODO: add support for freeing structure's subelements
 	 */
-	 if (array->pr != NULL){
-		free(array->pr);
+	 if (inArray->pr != NULL){
+		free(inArray->pr);
 	 }
-	 if (array->numericType == mxCOMPLEX && array->pi != NULL){
-		free(array->pi);
+	 if (inArray->numericType == mxCOMPLEX && inArray->pi != NULL){
+		free(inArray->pi);
 	 }
-	 if (array->isStruct){
-		if (array->fieldNames != NULL){
-			for (int i=0; i<array->nFields; i++){
-				if (array->fieldNames[i] != NULL){
-					free((void*)array->fieldNames[i]);
+	 if (inArray->isStruct){
+		if (inArray->fieldNames != NULL){
+			for (int i=0; i<inArray->nFields; i++){
+				if (inArray->fieldNames[i] != NULL){
+					free((void*)inArray->fieldNames[i]);
 				}
 			}
 		}
