@@ -15,7 +15,7 @@
 	#include "toolsMatlabOut.h"
 #endif
 */
-#include "toolsMatlabOut.c"
+#include "matout/matlabOut.h"
 
 /********************************************************************************
  * Configuration:																*
