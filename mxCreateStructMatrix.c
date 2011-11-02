@@ -35,16 +35,17 @@ mxArray* mxCreateStructMatrix(uintptr_t nRows, uintptr_t nCols, uintptr_t nField
 	outArray[0].fieldNames		= malloc(nFields*sizeof(uintptr_t));
 	
 	//copy fieldnames into struct info
-	for (int iField=0; iField<nFields; iField++){
+	for (uintptr_t iField=0; iField<nFields; iField++){
 		//NOTE: strlen returns the length of a string, not including the terminating NULL character
 		outArray[0].fieldNames[iField] = mallocChar(strlen(fieldNames[iField])+1);	
 		strncpy(outArray[0].fieldNames[iField], fieldNames[iField], strlen(fieldNames[iField])+1);
 	}
 	
 	// allocate memory for structure members (fields)
-	for (int iStruct=0; iStruct<nCols*nRows; iStruct++){
-		outArray[iStruct].pr	= NULL;
-		outArray[iStruct].pi	= NULL;
+	for (uintptr_t iStruct=0; iStruct<nCols*nRows; iStruct++){
+		outArray[iStruct].pr_double	= NULL;
+		outArray[iStruct].pi_double	= NULL;
+		outArray[iStruct].pr_char	= NULL;
 		
 		outArray[iStruct].field	= NULL;
 		outArray[iStruct].field	= (mxArray*)malloc(nFields*sizeof(mxArray*));

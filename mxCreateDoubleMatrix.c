@@ -30,8 +30,9 @@ mxArray* mxCreateDoubleMatrix(uintptr_t nRows, uintptr_t nCols, uintptr_t numeri
 	// initialize variables
 	outArray->mxCLASS			= mxDOUBLE_CLASS;
 	outArray->dataElementSize	= sizeof(double);
-	outArray->pr 				= NULL;
-	outArray->pi 				= NULL;
+	outArray->pr_double			= NULL;
+	outArray->pi_double			= NULL;
+	outArray->pr_char			= NULL;
 	outArray->dims[0]			= nRows;
 	outArray->dims[1]			= nCols;
 	outArray->numericType		= numericType;
@@ -41,9 +42,9 @@ mxArray* mxCreateDoubleMatrix(uintptr_t nRows, uintptr_t nCols, uintptr_t numeri
 	
 	// allocate memory for structure members
 	// NOTE: mallocDouble already checks for succesfull allocation
-	outArray->pr 	=	(void*)mallocDouble(nRows*nCols);
+	outArray->pr_double	=	mallocDouble(nRows*nCols);
 	if (numericType	==	mxCOMPLEX){
-		outArray->pi=	(void*)mallocDouble(nRows*nCols);
+		outArray->pi_double=	mallocDouble(nRows*nCols);
 	}
 	
 	return outArray;
