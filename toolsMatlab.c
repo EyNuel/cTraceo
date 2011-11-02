@@ -13,7 +13,7 @@
 #ifdef USE_MATLAB
 	#include	<matrix.h>			//for matlab functions (used in copyComplexToPtr and copyComplexToPtr2D)
 #else
-	#include	"matout/matlabOut.h"
+	#include	"matlabOut/matlabOut.h"
 #endif
 #include	<stdint.h>
 #include	<stdbool.h>
