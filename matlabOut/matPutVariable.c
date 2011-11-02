@@ -13,6 +13,9 @@ uintptr_t matPutVariable(MATFile* outfile, const char* arrayName, mxArray* inArr
 	 * TODO add support for structures.
 	 * TODO actually verify successfull write instead of siomply returning 0
 	 */
+	
+	calcArraySize(inArray);
+	 
 	if (inArray->isStruct == false){
 		//assume that if it isn't struct, its a matrix
 		writeArray(outfile, arrayName, inArray);

@@ -16,7 +16,7 @@ uintptr_t	writeArray(MATFile* outfile, const char* arrayName, mxArray* inArray){
 	
 	uint8_t		mxClass		= inArray->mxCLASS;
 	uint8_t		flags;
-	uint16_t	tempUInt16	= 0x00;
+	//uint16_t	tempUInt16	= 0x00;
 	uint32_t	tempUInt32	= 0x00;;
 	uint32_t	nArrayElements = inArray->dims[0] * inArray->dims[1];
 	uint32_t	nArrayBytes;
@@ -29,25 +29,17 @@ uintptr_t	writeArray(MATFile* outfile, const char* arrayName, mxArray* inArray){
 	tempUInt32	= miMATRIX;
 	fwrite(&tempUInt32, sizeof(uint32_t), 1, outfile);
 	
-	nArrayBytes = 4*8;
 	
-	//if this mxArray is member of a structure, it's name will not be written
-	//to file, so required size is different
+	/* get the mxArray's previously calculated size and add the
+	 * number of bytes required for arrayName. Note that if this
+	 * mxArray is member of a structure, it's name will not be
+	 * written to file, so required size is different.
+	 */
+	nArrayBytes = inArray->nBytes;
 	if (inArray->isChild == true){
 		nArrayBytes += 8;
 	}else{
 		nArrayBytes += dataElementSize(sizeof(char), strlen(arrayName));
-	}
-	
-	if (inArray->mxCLASS == mxCHAR_CLASS){
-		//NOTE: mxCHAR_CLASS is strange: although datatype is 'char' 2B are written per character
-		nArrayBytes += dataElementSize(2*sizeof(char), inArray->dims[0]*inArray->dims[1]);
-	}else{
-		nArrayBytes += dataElementSize(inArray->dataElementSize, inArray->dims[0]*inArray->dims[1]);
-	}
-	//if data is complex, get size of imaginary part
-	if (inArray->numericType == mxCOMPLEX){
-		nArrayBytes += dataElementSize(inArray->dataElementSize, inArray->dims[0]*inArray->dims[1]);
 	}
 	
 	fwrite(&nArrayBytes, sizeof(uint32_t), 1, outfile);
