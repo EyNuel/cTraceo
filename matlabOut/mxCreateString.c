@@ -15,8 +15,9 @@ mxArray* mxCreateString(const char *inString){
 	// initialize variables
 	outArray->mxCLASS			= mxCHAR_CLASS;
 	outArray->dataElementSize	= sizeof(char);
-	outArray->pr 				= NULL;
-	outArray->pi 				= NULL;
+	outArray->pr_double			= NULL;
+	outArray->pi_double			= NULL;
+	outArray->pr_char			= NULL;
 	outArray->dims[0]			= 1;
 	outArray->dims[1]			= strlen(inString);
 	outArray->numericType		= mxREAL;
@@ -26,11 +27,11 @@ mxArray* mxCreateString(const char *inString){
 	
 	// allocate memory for string
 	// NOTE: mallocChar already checks for succesfull allocation
-	outArray->pr 	=	(void*)mallocChar(strlen(inString));
+	outArray->pr_char 	=	mallocChar(strlen(inString));
 	
 	//Copy string to data pointer
 	//strncpy(char* dst, const char* src, size_t size);
-	strncpy(outArray->pr, inString, strlen(inString));
+	strncpy(outArray->pr_char, inString, strlen(inString));
 	printf("strlen(inString): %u", (uint32_t)strlen(inString));
 	
 	return outArray;

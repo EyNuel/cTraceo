@@ -1,14 +1,28 @@
 #pragma once
 #include "matlabOut.h"
 
-double* mxGetData(mxArray* array);
+void* 	mxGetData(mxArray* inArray);
 
-double*	mxGetData(mxArray* array){
+void*	mxGetData(mxArray* inArray){
 	/*
 	 * Returns pointer to the first element of the mxArray's real data.
 	 * NOTE: in the matlab API this functions returns a void* pointer.
 	 * NOTE: This is actually identical to mxGetPr()
 	 */
-	return(array->pr);
+	if (inArray->isStruct){
+		fatal("mxGetData(): not possible to get data pointer from a structure.\n");
+	}
+	
+	switch(inArray->mxCLASS){
+		case mxDOUBLE_CLASS:
+			return(inArray->pr_double);
+			break;
+		case mxCHAR_CLASS:
+			return(inArray->pr_char);
+			break;
+		default:
+			fatal("mxGetData(): data has unknown mxClass.\n");
+	}
+	return NULL;
 }
 

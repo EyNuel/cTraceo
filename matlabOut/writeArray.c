@@ -4,6 +4,8 @@
 #include "matlabOut.h"
 #include "writeDataElement.c"
 #include "dataElementSize.c"
+#include "mxGetData.c"
+#include "mxGetImagData.c"
 
 uintptr_t	writeArray(MATFile* outfile, const char* arrayName, mxArray* inArray);
 
@@ -112,18 +114,17 @@ uintptr_t	writeArray(MATFile* outfile, const char* arrayName, mxArray* inArray){
 	}
 	
 	
-	
 	/* *********************************************************
 	 * write data element containing real part of array 
 	 */
-	writeDataElement(outfile, inArray->mxCLASS, inArray->pr, inArray->dataElementSize, nArrayElements);
+	writeDataElement(outfile, inArray->mxCLASS, mxGetData(inArray), inArray->dataElementSize, nArrayElements);
 	
 	 
 	/* *********************************************************
 	 * write data element containing imaginary part of array (if complex)
 	 */
 	if(inArray->numericType == mxCOMPLEX){
-		writeDataElement(outfile, miDOUBLE, inArray->pi, sizeof(double), nArrayElements);
+		writeDataElement(outfile, miDOUBLE, mxGetImagData(inArray), sizeof(double), nArrayElements);
 	}
 	
 	return 0;
