@@ -78,7 +78,7 @@ struct mxArray{
 	bool 			isChild;		//determines wheter this mxArray is a Child of another (when set, its name will not be written to the matfile, as it is already defined in the parent's fieldnames
 	uintptr_t		nFields;
 	char**			fieldNames;		//something like: {	"theta","r","z"};
-	struct mxArray*	field;			//pointer to member mxArrays. only used when isStruct is set.
+	struct mxArray	**field;		//pointer to member mxArrays. only used when isStruct is set.
 };
 typedef struct mxArray mxArray;
 
