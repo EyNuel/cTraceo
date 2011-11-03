@@ -173,13 +173,13 @@ uintptr_t	writeStructArray(MATFile* outfile, const char* arrayName, mxArray* inA
 	
 	//write fieldnames (with padding at end of each fiedname to reach maxLengthFieldname)
 	tempUInt8	= 0x00;
-	for (int iField=0; iField<inArray->nFields; iField++){
+	for (uintptr_t iField=0; iField<inArray->nFields; iField++){
 		//write the fieldName:
-		printf("writing fildName[%d]: strlen()= %lu\n", iField, strlen(inArray->fieldNames[iField]));
+		printf("writing fildName[%lu]: strlen()= %lu\n", iField, strlen(inArray->fieldNames[iField]));
 		fwrite(inArray->fieldNames[iField], sizeof(uint8_t), strlen(inArray->fieldNames[iField]), outfile);
 		
 		//write individual padding:
-		for (int j=1; j<maxLengthFieldname; j++){
+		for (uintptr_t j=0; j<maxLengthFieldname-strlen(inArray->fieldNames[iField]); j++){
 			fwrite(&tempUInt8, sizeof(uint8_t), 1, outfile);
 		}
 	}
@@ -187,20 +187,26 @@ uintptr_t	writeStructArray(MATFile* outfile, const char* arrayName, mxArray* inA
 	//after the fieldNames (which were already zero-padded to have a length of maxLengthFieldnames),
 	//pad some more to reach the 8B boundary
 	nBytes = maxLengthFieldname * inArray->nFields;
-	if (nBytes % 8 > 0){
-		paddingBytes= 8 - nBytes % 8;	//This could probably be neatly rewritten with the ternary operator
+	if (nBytes >= 8){
+		if (nBytes % 8 > 0){
+			paddingBytes= 8 - nBytes % 8;	//This could probably be neatly rewritten with the ternary operator
+		}
+	}else{
+		paddingBytes = 8 - nBytes;
 	}
-	for (int i=1; i<paddingBytes; i++){
+	printf("PaddingBytes: %lu\n", paddingBytes);
+	for (uintptr_t i=0; i<paddingBytes; i++){
 		fwrite(&tempUInt8, sizeof(uint8_t), 1, outfile);
+		printf("pad%lu ",i);
 	}
-	
+	printf("\n");
 	
 	/* *********************************************************
-	 * write the structures children to the matfile
+	 * write the structure's children to the matfile
 	 * TODO: support for nested structures
 	 */
-	for (int i=0; i<inArray->nFields; i++){
-		writeArray(outfile, inArray->fieldNames[i], (mxArray*)&inArray->field[i]);
+	for (uintptr_t i=0; i<inArray->nFields; i++){
+		writeArray(outfile, inArray->fieldNames[i], inArray->field[i]);
 	}
 	
 	
