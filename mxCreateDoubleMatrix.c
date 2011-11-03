@@ -47,5 +47,7 @@ mxArray* mxCreateDoubleMatrix(uintptr_t nRows, uintptr_t nCols, uintptr_t numeri
 		outArray->pi_double=	mallocDouble(nRows*nCols);
 	}
 	
+	printf("mxCreateDoubleMatrix(): address of new mxArray: %lu\n", outArray);
+	
 	return outArray;
 }

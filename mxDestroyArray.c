@@ -24,7 +24,7 @@ void mxDestroyArray(mxArray* inArray){
 				if (inArray->fieldNames[i] != NULL){
 					free((void*)inArray->fieldNames[i]);
 				}
-				mxDestroyArray(&inArray->field[i]);
+				//mxDestroyArray(&inArray->field[i]);
 			}
 		}
 	 }

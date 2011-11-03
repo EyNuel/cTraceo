@@ -109,6 +109,9 @@ uintptr_t	writeArray(MATFile* outfile, const char* arrayName, mxArray* inArray){
 	/* *********************************************************
 	 * write data element containing real part of array 
 	 */
+	double *tempDouble = NULL;
+	tempDouble = (double*)mxGetData(inArray);
+	printf("data[0]: %lf\n", tempDouble[0]);
 	writeDataElement(outfile, inArray->mxCLASS, mxGetData(inArray), inArray->dataElementSize, nArrayElements);
 	
 	 
