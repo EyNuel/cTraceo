@@ -51,7 +51,7 @@ void writeDataElement(FILE* outfile, uint32_t dataType, void* data, size_t dataI
 	if (nBytes % 8 > 0){
 		paddingBytes= 8 - nBytes % 8;	//This could probably be neatly rewritten with the ternary operator
 	}
-	printf("numBytes: %u, paddingBytes: %u\n", nBytes, paddingBytes);
+	//printf("numBytes: %u, paddingBytes: %u\n", nBytes, paddingBytes);
 	for (i=0; i<paddingBytes; i++){
 		fwrite(&emptyChar, sizeof(uint8_t), 1, outfile);
 	}

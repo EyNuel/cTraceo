@@ -81,8 +81,6 @@ uint32_t	calcArraySize(mxArray* inArray){
 			printf("size required including child[%lu]: %lu\n", i, nBytes);
 		}
 		
-		//for some reason 16B are still missing:
-		//nBytes += 16;	//TODO: where?? SOLVED 
 	
 	
 	// Handle mxArrays which aren't structures:
