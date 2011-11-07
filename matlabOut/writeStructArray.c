@@ -30,17 +30,22 @@ uintptr_t	writeStructArray(MATFile* outfile, const char* arrayName, mxArray* inA
 	
 	/* Calculate the struct array's size:
 	 * NOTE: the 8 extra bytes below are for the array name tag.
-	 * 		Extra size to be added is obtained from the
-	 * 		arrayName's length.
+	 * 		 Extra size to be added is obtained from the
+	 * 		 arrayName's length.
+	 * NOTE: The array name is only written if the struct is
+	 * 		 not a child of another struct.
 	 */
 	tempUInt32	= inArray->nBytes + 8;
-	
-	// add size for full lines
-	tempUInt32 += strlen(arrayName) / 8;
-	// if padding is required, include another full line
-	if ( (strlen(arrayName) % 8) > 0) {
-		tempUInt32 += 8;
+	printf("total size without array name: %u\n", tempUInt32);
+	if(inArray->isChild == false){
+		// add size for full lines
+		tempUInt32 += strlen(arrayName) / 8;
+		// if padding is required, include another full line
+		if ( (strlen(arrayName) % 8) > 0) {
+			tempUInt32 += 8;
+		}
 	}
+	printf("total size inc. arrayname: %u\n", tempUInt32);
 	//write size to file
 	fwrite(&tempUInt32, sizeof(uint32_t), 1, outfile);
 	
@@ -68,37 +73,45 @@ uintptr_t	writeStructArray(MATFile* outfile, const char* arrayName, mxArray* inA
 	fwrite(&tempUInt32, sizeof(uint32_t), 1, outfile);
 	
 	
+	
 	/* *********************************************************
 	 * write the dimensions element
 	 */
 	writeDataElement(outfile, miINT32, inArray->dims, sizeof(int32_t), 2);
 	
 	
+	
 	/* *********************************************************
 	 * write the struct array's name
 	 * "1"(2B), "miINT8"(2B), "X"(1B), "padding"(3B)
 	 */
-	
 	tempUInt32	= miINT8;
 	fwrite(&tempUInt32, sizeof(uint32_t), 1, outfile);
 	
-	tempUInt32	= strlen(arrayName);
-	fwrite(&tempUInt32, sizeof(uint32_t), 1, outfile);
-	
-	for (uintptr_t i=0; i<strlen(arrayName); i++){
-		tempUInt8	= arrayName[i];
-		fwrite(&tempUInt8, sizeof(uint8_t), 1, outfile);
+	if(inArray->isChild == false){
+		tempUInt32	= strlen(arrayName);
+		fwrite(&tempUInt32, sizeof(uint32_t), 1, outfile);
+		
+		for (uintptr_t i=0; i<strlen(arrayName); i++){
+			tempUInt8	= arrayName[i];
+			fwrite(&tempUInt8, sizeof(uint8_t), 1, outfile);
+		}
+		
+		//write padding at end:
+		nBytes = strlen(arrayName);
+		if (nBytes % 8 > 0){
+			paddingBytes= 8 - nBytes % 8;	//This could probably be neatly rewritten with the ternary operator
+		}
+		tempUInt8 = 0x00;
+		for (uintptr_t i=0; i<paddingBytes; i++){
+			fwrite(&tempUInt8, sizeof(uint8_t), 1, outfile);
+		}
+	}else{
+		// this struct is a child of another struct => don't write it's name (it is saved in the parent's fieldNames)
+		tempUInt32	= 0x00;
+		fwrite(&tempUInt32, sizeof(uint32_t), 1, outfile);
 	}
 	
-	//write padding at end:
-	nBytes = strlen(arrayName);
-	if (nBytes % 8 > 0){
-		paddingBytes= 8 - nBytes % 8;	//This could probably be neatly rewritten with the ternary operator
-	}
-	tempUInt8 = 0x00;
-	for (uintptr_t i=0; i<paddingBytes; i++){
-		fwrite(&tempUInt8, sizeof(uint8_t), 1, outfile);
-	}
 	
 	
 	/* *********************************************************
@@ -118,7 +131,7 @@ uintptr_t	writeStructArray(MATFile* outfile, const char* arrayName, mxArray* inA
 		maxLengthFieldname = max(maxLengthFieldname, strlen(inArray->fieldNames[i]));
 	}
 	maxLengthFieldname += 1;	//need to add one for the string's NULL terminator
-	printf("maxLengthFieldname: %lu\n", maxLengthFieldname);
+	//printf("maxLengthFieldname: %lu\n", maxLengthFieldname);
 	
 	//write length of longest fieldName:
 	fwrite(&maxLengthFieldname, sizeof(uint32_t), 1, outfile);
@@ -133,7 +146,7 @@ uintptr_t	writeStructArray(MATFile* outfile, const char* arrayName, mxArray* inA
 	tempUInt8	= 0x00;
 	for (uintptr_t iField=0; iField<inArray->nFields; iField++){
 		//write the fieldName:
-		printf("writing fildName[%lu]: strlen()= %lu\n", iField, strlen(inArray->fieldNames[iField]));
+		//printf("writing fildName[%lu]: strlen()= %lu\n", iField, strlen(inArray->fieldNames[iField]));
 		fwrite(inArray->fieldNames[iField], sizeof(uint8_t), strlen(inArray->fieldNames[iField]), outfile);
 		
 		//write individual padding:
@@ -144,27 +157,38 @@ uintptr_t	writeStructArray(MATFile* outfile, const char* arrayName, mxArray* inA
 	
 	//after the fieldNames (which were already zero-padded to have a length of maxLengthFieldnames),
 	//pad some more to reach the 8B boundary
+	paddingBytes = 0;
 	nBytes = maxLengthFieldname * inArray->nFields;
-	if (nBytes >= 8){
+	//printf("=>=>=> nBytes: %lu\n", nBytes);
+	if (nBytes > 8){
 		if (nBytes % 8 > 0){
 			paddingBytes= 8 - nBytes % 8;	//This could probably be neatly rewritten with the ternary operator
 		}
 	}else{
 		paddingBytes = 8 - nBytes;
 	}
-	printf("PaddingBytes: %lu\n", paddingBytes);
+	//printf("PaddingBytes: %lu\n", paddingBytes);
 	for (uintptr_t i=0; i<paddingBytes; i++){
 		fwrite(&tempUInt8, sizeof(uint8_t), 1, outfile);
-		printf("pad%lu ",i);
+		//printf("pad%lu ",i);
 	}
-	printf("\n");
+	//printf("\n");
+	
+	
 	
 	/* *********************************************************
 	 * write the structure's children to the matfile
 	 * TODO: support for nested structures
+	 * TODO: support for actual arrays, i.e.: more than one structure
 	 */
 	for (uintptr_t i=0; i<inArray->nFields; i++){
-		writeArray(outfile, inArray->fieldNames[i], inArray->field[i]);
+		if (inArray->field[i]->isStruct){
+			printf("writing an mxStruct. =======================\n");
+			writeStructArray(outfile, inArray->fieldNames[i], inArray->field[i]);
+		}else{
+			printf("writing an mxArray. =======================\n ");
+			writeArray(outfile, inArray->fieldNames[i], inArray->field[i]);
+		}
 	}
 	
 	
