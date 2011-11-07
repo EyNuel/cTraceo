@@ -76,11 +76,12 @@ uint32_t	calcArraySize(mxArray* inArray){
 		/*
 		 * Determine size required for the structure's children
 		 */
-		for (uintptr_t i=0; i<inArray->nFields; i++){
-			nBytes += calcArraySize(inArray->field[i]);
-			printf("size required including child[%lu]: %lu\n", i, nBytes);
+		for (uintptr_t j=0; j<inArray->dims[0]*inArray->dims[1]; j++){
+			for (uintptr_t i=0; i<inArray->nFields; i++){
+				nBytes += calcArraySize(inArray->field[i]);
+				printf("size required including child[%lu]: %lu\n", i, nBytes);
+			}
 		}
-		
 	
 	
 	// Handle mxArrays which aren't structures:

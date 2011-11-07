@@ -16,8 +16,8 @@ uintptr_t	writeStructArray(MATFile* outfile, const char* arrayName, mxArray* inA
 	
 	
 	///---------------------------------------------------------
-	inArray->dims[0]	= 1;
-	inArray->dims[1]	= 1;
+	//inArray->dims[0]	= 1;
+	//inArray->dims[1]	= 1;
 	///---------------------------------------------------------
 	
 	/* *********************************************************
@@ -178,19 +178,19 @@ uintptr_t	writeStructArray(MATFile* outfile, const char* arrayName, mxArray* inA
 	
 	/* *********************************************************
 	 * write the structure's children to the matfile
-	 * TODO: support for nested structures
 	 * TODO: support for actual arrays, i.e.: more than one structure
 	 */
-	for (uintptr_t i=0; i<inArray->nFields; i++){
-		if (inArray->field[i]->isStruct){
-			printf("writing an mxStruct. =======================\n");
-			writeStructArray(outfile, inArray->fieldNames[i], inArray->field[i]);
-		}else{
-			printf("writing an mxArray. =======================\n ");
-			writeArray(outfile, inArray->fieldNames[i], inArray->field[i]);
+	for (uintptr_t j=0; j<inArray->dims[0] * inArray->dims[1]; j++){
+		for (uintptr_t i=0; i<inArray->nFields; i++){
+			if (inArray->field[i]->isStruct){
+				printf("writing an mxStruct. =======================\n");
+				writeStructArray(outfile, inArray->fieldNames[i], inArray->field[i]);
+			}else{
+				printf("writing an mxArray. =======================\n ");
+				writeArray(outfile, inArray->fieldNames[i], inArray->field[i]);
+			}
 		}
 	}
-	
 	
 	 
 	return 0;
