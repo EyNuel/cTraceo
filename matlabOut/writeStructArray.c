@@ -28,24 +28,6 @@ uintptr_t	writeStructArray(MATFile* outfile, const char* arrayName, mxArray* inA
 	tempUInt32	= miMATRIX;
 	fwrite(&tempUInt32, sizeof(uint32_t), 1, outfile);
 	
-	#if 0
-	/** NOTE: this removed section calculates size for the cases
-	 *		where the array's name is shorter than 4 bytes.
-	 * 		This seems to be unnecessary.
-	 */
-	tempUInt32	= inArray->nBytes + 8;
-	/* NOTE: the 8 extra bytes on the line above include the array
-	 * 		name tag and an array name up to 4 letters.
-	 *		For longer names padding has to be performed.
-	 */
-	if (strlen(arrayName) > 4){
-		//include size of padding in overall file size
-		tempUInt32 += (strlen(arrayName)-4)/8;
-		if ( ((strlen(arrayName)-4) % 8) > 0) {
-			tempUInt32 += 8;
-		}
-	}
-	#endif
 	/* Calculate the struct array's size:
 	 * NOTE: the 8 extra bytes below are for the array name tag.
 	 * 		Extra size to be added is obtained from the
@@ -61,6 +43,7 @@ uintptr_t	writeStructArray(MATFile* outfile, const char* arrayName, mxArray* inA
 	}
 	//write size to file
 	fwrite(&tempUInt32, sizeof(uint32_t), 1, outfile);
+	
 	
 	
 	/* *********************************************************
@@ -95,17 +78,6 @@ uintptr_t	writeStructArray(MATFile* outfile, const char* arrayName, mxArray* inA
 	 * write the struct array's name
 	 * "1"(2B), "miINT8"(2B), "X"(1B), "padding"(3B)
 	 */
-	#if 0
-	/** NOTE: this removed section calculates size for the cases
-	 *		where the array's name is shorter than 4 bytes.
-	 * 		This seems to be unnecessary.
-	 */
-	tempUInt16	= miINT8;
-	fwrite(&tempUInt16, sizeof(uint16_t), 1, outfile);
-	
-	tempUInt16	= strlen(arrayName);
-	fwrite(&tempUInt16, sizeof(uint16_t), 1, outfile);
-	#endif
 	
 	tempUInt32	= miINT8;
 	fwrite(&tempUInt32, sizeof(uint32_t), 1, outfile);
@@ -119,20 +91,6 @@ uintptr_t	writeStructArray(MATFile* outfile, const char* arrayName, mxArray* inA
 	}
 	
 	//write padding at end:
-	#if 0
-	/** NOTE: this removed section calculates size for the cases
-	 *		where the array's name is shorter than 4 bytes.
-	 * 		This seems to be unnecessary.
-	 */
-	nBytes = 4 +strlen(arrayName);
-	if (nBytes % 8 > 0){
-		paddingBytes= 8 - nBytes % 8;	//This could probably be neatly rewritten with the ternary operator
-	}
-	tempUInt8 = 0x00;
-	for (uintptr_t i=0; i<paddingBytes; i++){
-		fwrite(&tempUInt8, sizeof(uint8_t), 1, outfile);
-	}
-	#endif
 	nBytes = strlen(arrayName);
 	if (nBytes % 8 > 0){
 		paddingBytes= 8 - nBytes % 8;	//This could probably be neatly rewritten with the ternary operator
