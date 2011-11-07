@@ -36,9 +36,7 @@ uintptr_t	writeArray(MATFile* outfile, const char* arrayName, mxArray* inArray){
 	 * written to file, so required size is different.
 	 */
 	nArrayBytes = inArray->nBytes;
-	if (inArray->isChild == true){
-		nArrayBytes += 8;
-	}else{
+	if (inArray->isChild == false){
 		nArrayBytes += dataElementSize(sizeof(char), strlen(arrayName));
 	}
 	

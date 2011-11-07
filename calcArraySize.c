@@ -28,6 +28,20 @@ uint32_t	calcArraySize(mxArray* inArray){
 	// Array Flags[16B] + Dimensions Array [16B]
 	nBytes += 4*8;
 	
+	/*
+	 * NOTE: The array names of member structures aren't
+	 * 		written, only a single byte defining the length
+	 * 		of the array name as being zero.
+	 * 		So: for parent arrays, the size required to write the
+	 * 		name to the file is calculated at the moment it is
+	 * 		written to disk, everytjing else (including the 8B
+	 * 		which define the arrayname as being of length 0) is
+	 * 		calculated here.
+	 */
+	if (inArray->isChild){
+		nBytes += 8;
+	}
+	
 	//Handle mxArrays which are structs:
 	if (inArray->isStruct){
 		printf("calculating size of mxStruct:\n");
@@ -48,14 +62,15 @@ uint32_t	calcArraySize(mxArray* inArray){
 		
 		nBytes += maxLengthFieldname * inArray->nFields;
 		
-		// determine padding required for the fieldnames_
-		if ((maxLengthFieldname * inArray->nFields) % 8 > 0){
+		// determine padding required for the fieldnames
+		if (nBytes % 8 > 0){
 			//add padding to size
-			printf("padded: %lu\n", (8 - nBytes % 8));
+			//printf("padded: %lu\n", (8 - nBytes % 8));
 			nBytes += 8 - nBytes % 8;
 		}
 		printf("sitze required for fieldnames: %lu\n", maxLengthFieldname * inArray->nFields);
 		printf("toal size required icluding fieldnames: %lu\n", nBytes);
+		
 		
 		
 		/*
@@ -63,21 +78,15 @@ uint32_t	calcArraySize(mxArray* inArray){
 		 */
 		for (uintptr_t i=0; i<inArray->nFields; i++){
 			nBytes += calcArraySize(inArray->field[i]);
-			printf("size of required including child[%lu]: %lu\n", i, nBytes);
+			printf("size required including child[%lu]: %lu\n", i, nBytes);
 		}
+		
+		//for some reason 16B are still missing:
+		//nBytes += 16;	//TODO: where?? SOLVED 
+	
 	
 	// Handle mxArrays which aren't structures:
 	}else{
-		/*
-		 * NOTE: The array names of member structures aren't
-		 * 		written, only a single byte defining the length
-		 * 		of the array name as being zero.
-		 */
-		if (inArray->isChild){
-			nBytes += 8;
-		}
-		
-		
 		// determine size required for the actual data:
 		if (inArray->mxCLASS == mxCHAR_CLASS){
 			/*
@@ -91,7 +100,8 @@ uint32_t	calcArraySize(mxArray* inArray){
 			 * All other data types [seem to] behave as expected
 			 */
 			nBytes += dataElementSize(inArray->dataElementSize, inArray->dims[0]*inArray->dims[1]);
-			printf("dataElementSize(): %u\n", dataElementSize(inArray->dataElementSize, inArray->dims[0]*inArray->dims[1]));
+			//printf("dataElementSize(): %u\n", dataElementSize(inArray->dataElementSize, inArray->dims[0]*inArray->dims[1]));
+			
 			//if data is complex, get size of imaginary part
 			if (inArray->numericType == mxCOMPLEX){
 				nBytes += dataElementSize(inArray->dataElementSize, inArray->dims[0]*inArray->dims[1]);
@@ -106,8 +116,10 @@ uint32_t	calcArraySize(mxArray* inArray){
 	 * NOTE: the size given in an mxArray's header does not
 	 * 		 include the 8 bytes of the header itself, thus
 	 * 		 an additional 8B are actually required to write the
-	 * 		 mxArray's header. However, i case of nested
+	 * 		 mxArray's header. However, in case of nested
 	 * 		 structures, the 8B for the header are needed.
+	 * 		 Because of this, those 8B are added to the return
+	 * 		 value.
 	 */
 	printf("nBytes+8: %lu\n", nBytes+8);
 	return nBytes +8;
