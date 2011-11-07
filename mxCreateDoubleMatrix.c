@@ -9,7 +9,7 @@ mxArray* mxCreateDoubleMatrix(uintptr_t nRows, uintptr_t nCols, uintptr_t numeri
 	 * creates a 2D array of double precision floating point values
 	 * can be real or complex.
 	 */
-	printf("nRows: %lu, nCols: %lu\n", nRows, nCols);
+	//printf("nRows: %lu, nCols: %lu\n", nRows, nCols);
 	mxArray*	outArray = NULL;
 	
 	
@@ -47,7 +47,7 @@ mxArray* mxCreateDoubleMatrix(uintptr_t nRows, uintptr_t nCols, uintptr_t numeri
 		outArray->pi_double=	mallocDouble(nRows*nCols);
 	}
 	
-	printf("mxCreateDoubleMatrix(): address of new mxArray: %lu\n", outArray);
+	//printf("mxCreateDoubleMatrix(): address of new mxArray: %lu\n", outArray);
 	
 	return outArray;
 }

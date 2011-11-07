@@ -13,7 +13,7 @@ void	mxSetFieldByNumber(	mxArray*	mxStruct,		//pointer to the mxStruct
 	/* 
 	 * Assigns an mxArray to one of the fields of a structArray
 	 */
-	printf("mxSetFieldByNumber(): address of inArray: %lu\n", inArray);
+	//printf("mxSetFieldByNumber(): address of inArray: %lu\n", inArray);
 	inArray->isChild = true;	//determines that this mxArray is a child of another one (necessary for calculating the size of structures)
 	mxStruct[index].field[iField] = inArray;
 	
