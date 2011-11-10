@@ -23,6 +23,7 @@ mxArray* mxCreateString(const char *inString){
 	outArray->dims[1]			= strlen(inString);
 	outArray->numericType		= mxREAL;
 	outArray->isStruct			= false;
+	outArray->isChild			= false;
 	outArray->nFields			= 0;
 	outArray->fieldNames		= NULL;
 	
