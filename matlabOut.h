@@ -9,7 +9,7 @@
 #define MATLAB_HEADER_TEXT "The cTraceo Acoustic Raytracing program. Signal Processing LABoratory, Universidade do Algarve 2011.                        "
 
 /*
- * Definitions for matlab data types
+ * Definitions for matlab data types (miTYPE)
  */
 #define miINT8		1
 #define miUINT8		2
@@ -67,6 +67,7 @@ struct mxArray{
 	 */
 	
 	uint8_t			mxCLASS;		//one of the Matlab array classes (Char array: mxCHAR_CLASS; Double precision array: mxDOUBLE_CLASS; etc...)
+	uint8_t			miTYPE;
 	size_t			dataElementSize;//Size in bytes, of the individual data elements (1B: Char, 4B Float, 8B: Double...)
 	uintptr_t		nBytes;			//the total amount of bytes required to write this mxArray to a matfile. (NOTE: this is calculated just before writing to file, in calcArraySize())
 	double*			pr_double;		//pointer to real part of double precision  data

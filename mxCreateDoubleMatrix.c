@@ -29,6 +29,7 @@ mxArray* mxCreateDoubleMatrix(uintptr_t nRows, uintptr_t nCols, uintptr_t numeri
 	
 	// initialize variables
 	outArray->mxCLASS			= mxDOUBLE_CLASS;
+	outArray->miTYPE			= miDOUBLE;
 	outArray->dataElementSize	= sizeof(double);
 	outArray->pr_double			= NULL;
 	outArray->pi_double			= NULL;
