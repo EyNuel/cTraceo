@@ -95,6 +95,7 @@ typedef FILE MATFile;
 #include	"calcArraySize.c"
 #include	"matClose.c"
 #include	"matPutVariable.c"
+#include	"mxCalcSingleSubscript.c"
 #include	"mxCreateString.c"
 #include	"mxDestroyArray.c"
 #include	"mxGetImagData.c"
