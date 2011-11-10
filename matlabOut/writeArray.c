@@ -16,7 +16,6 @@ uintptr_t	writeArray(MATFile* outfile, const char* arrayName, mxArray* inArray){
 	
 	uint8_t		mxClass		= inArray->mxCLASS;
 	uint8_t		flags;
-	//uint16_t	tempUInt16	= 0x00;
 	uint32_t	tempUInt32	= 0x00;;
 	uint32_t	nArrayElements = inArray->dims[0] * inArray->dims[1];
 	uint32_t	nArrayBytes;
@@ -107,11 +106,11 @@ uintptr_t	writeArray(MATFile* outfile, const char* arrayName, mxArray* inArray){
 	/* *********************************************************
 	 * write data element containing real part of array 
 	 */
-	double *tempDouble = NULL;
-	tempDouble = (double*)mxGetData(inArray);
-	//printf("data[0]: %lf\n", tempDouble[0]);
-	writeDataElement(outfile, inArray->mxCLASS, mxGetData(inArray), inArray->dataElementSize, nArrayElements);
-	
+	if (inArray->mxCLASS == mxCHAR_CLASS){
+		writeDataElement(outfile, mxCHAR_CLASS, mxGetData(inArray), inArray->dataElementSize, nArrayElements);
+	}else{
+		writeDataElement(outfile, inArray->miTYPE, mxGetData(inArray), inArray->dataElementSize, nArrayElements);
+	}
 	 
 	/* *********************************************************
 	 * write data element containing imaginary part of array (if complex)

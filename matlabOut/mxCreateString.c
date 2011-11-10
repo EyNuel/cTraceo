@@ -14,6 +14,7 @@ mxArray* mxCreateString(const char *inString){
 	
 	// initialize variables
 	outArray->mxCLASS			= mxCHAR_CLASS;
+	outArray->miTYPE			= miINT8;
 	outArray->dataElementSize	= sizeof(char);
 	outArray->pr_double			= NULL;
 	outArray->pi_double			= NULL;
