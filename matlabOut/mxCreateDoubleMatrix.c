@@ -38,6 +38,7 @@ mxArray* mxCreateDoubleMatrix(uintptr_t nRows, uintptr_t nCols, uintptr_t numeri
 	outArray->dims[1]			= nCols;
 	outArray->numericType		= numericType;
 	outArray->isStruct			= false;
+	outArray->isChild 			= false;
 	outArray->nFields			= 0;
 	outArray->fieldNames		= NULL;
 	
