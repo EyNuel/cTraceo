@@ -182,12 +182,10 @@ uintptr_t	writeStructArray(MATFile* outfile, const char* arrayName, mxArray* inA
 	 */
 	for (uintptr_t j=0; j<inArray->dims[0] * inArray->dims[1]; j++){
 		for (uintptr_t i=0; i<inArray->nFields; i++){
-			if (inArray->field[i]->isStruct){
-				printf("writing an mxStruct. =======================\n");
-				writeStructArray(outfile, inArray->fieldNames[i], inArray->field[i]);
+			if (inArray[j].field[i]->isStruct){
+				writeStructArray(outfile, inArray->fieldNames[i], inArray[j].field[i]);
 			}else{
-				printf("writing an mxArray. =======================\n ");
-				writeArray(outfile, inArray->fieldNames[i], inArray->field[i]);
+				writeArray(outfile, inArray->fieldNames[i], inArray[j].field[i]);
 			}
 		}
 	}

@@ -15,6 +15,7 @@ uintptr_t matPutVariable(MATFile* outfile, const char* arrayName, mxArray* inArr
 	 */
 	
 	calcArraySize(inArray);
+	//printf("After calcArraySize: inArray->nBytes = %lu \n", inArray->nBytes);
 	 
 	if (inArray->isStruct == false){
 		//assume that if it isn't struct, its a matrix

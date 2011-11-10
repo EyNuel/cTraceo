@@ -24,7 +24,7 @@
 #define miMATRIX	14
 
 /*
- * Definitions for matlab Array types (classes)
+ * Definitions for matlab Array types (mxCLASS)
  */
 #define mxCELL_CLASS	1
 #define mxSTRUCT_CLASS	2

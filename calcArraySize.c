@@ -24,6 +24,13 @@ uint32_t	calcArraySize(mxArray* inArray){
 	
 	uintptr_t	nBytes = 0;
 	uintptr_t	maxLengthFieldname = 0;
+	uintptr_t	temp = 0;
+	
+	
+	if (inArray == NULL){
+		//printf("calcArraySize(): received null pointer: ");
+		return 0;
+	}
 	
 	// Array Flags[16B] + Dimensions Array [16B]
 	nBytes += 4*8;
@@ -42,15 +49,20 @@ uint32_t	calcArraySize(mxArray* inArray){
 		nBytes += 8;
 	}
 	
-	//Handle mxArrays which are structs:
+	/*
+	 * Handle mxArrays which are structs:
+	 */
 	if (inArray->isStruct){
 		printf("calculating size of mxStruct:\n");
 		/*
 		 * Determine size required for the fieldnames:
 		 */
-		//Add size required for "field name length"(8B) + header header for the field names (another 8B)
+		 
+		// Add size required for "field name length"(8B) + header
+		// header for the field names (another 8B)
+		
 		nBytes += 8 + 8;
-		printf("headers: %lu\n", nBytes);
+		//printf("headers: %lu\n", nBytes);
 		
 		//get length of longest fieldname
 		for (uintptr_t i=0; i<inArray->nFields; i++){
@@ -59,7 +71,6 @@ uint32_t	calcArraySize(mxArray* inArray){
 		
 		//need to add 1B for the string's NULL terminator
 		maxLengthFieldname += 1;
-		
 		nBytes += maxLengthFieldname * inArray->nFields;
 		
 		// determine padding required for the fieldnames
@@ -68,8 +79,8 @@ uint32_t	calcArraySize(mxArray* inArray){
 			//printf("padded: %lu\n", (8 - nBytes % 8));
 			nBytes += 8 - nBytes % 8;
 		}
-		printf("sitze required for fieldnames: %lu\n", maxLengthFieldname * inArray->nFields);
-		printf("toal size required icluding fieldnames: %lu\n", nBytes);
+		//printf("size required for fieldnames: %lu\n", maxLengthFieldname * inArray->nFields);
+		//printf("toal size required icluding fieldnames: %lu\n", nBytes);
 		
 		
 		
@@ -78,13 +89,22 @@ uint32_t	calcArraySize(mxArray* inArray){
 		 */
 		for (uintptr_t j=0; j<inArray->dims[0]*inArray->dims[1]; j++){
 			for (uintptr_t i=0; i<inArray->nFields; i++){
-				nBytes += calcArraySize(inArray->field[i]);
-				printf("size required including child[%lu]: %lu\n", i, nBytes);
+				 temp = calcArraySize(inArray[j].field[i]);
+				 nBytes += temp;
+				//printf("size required including child[%lu]: %lu\n", i, nBytes);
+				
+				/*
+				//print fieldname to which we tried to assign an empty mxArray
+				if (temp == 0){
+					printf("%s\n",inArray[j].fieldNames[i]);
+				}
+				*/
 			}
 		}
 	
-	
-	// Handle mxArrays which aren't structures:
+	/*
+	 * Handle mxArrays which aren't structures:
+	 */
 	}else{
 		// determine size required for the actual data:
 		if (inArray->mxCLASS == mxCHAR_CLASS){
@@ -119,7 +139,8 @@ uint32_t	calcArraySize(mxArray* inArray){
 	 * 		 structures, the 8B for the header are needed.
 	 * 		 Because of this, those 8B are added to the return
 	 * 		 value.
+	 * 		TODO: this sounds confusing...
 	 */
-	printf("nBytes+8: %lu\n", nBytes+8);
+	//printf("nBytes+8: %lu\n", nBytes+8);
 	return nBytes +8;
 }
