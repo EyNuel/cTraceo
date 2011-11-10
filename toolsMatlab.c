@@ -10,7 +10,7 @@
  *******************************************************************************/
 
 #pragma once
-#ifdef USE_MATLAB
+#if USE_MATLAB == 1
 	#include	<matrix.h>			//for matlab functions (used in copyComplexToPtr and copyComplexToPtr2D)
 #else
 	#include	"matlabOut/matlabOut.h"
