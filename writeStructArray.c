@@ -182,8 +182,13 @@ uintptr_t	writeStructArray(MATFile* outfile, const char* arrayName, mxArray* inA
 	 */
 	for (uintptr_t j=0; j<inArray->dims[0] * inArray->dims[1]; j++){
 		for (uintptr_t i=0; i<inArray->nFields; i++){
-			if (inArray[j].field[i]->isStruct){
+			if (inArray[j].field[i] == NULL){
+				//empty structure field => need to write an empty mxArray to file
+				writeEmptyArray(outfile);
+			
+			}else if (inArray[j].field[i]->isStruct){
 				writeStructArray(outfile, inArray->fieldNames[i], inArray[j].field[i]);
+			
 			}else{
 				writeArray(outfile, inArray->fieldNames[i], inArray[j].field[i]);
 			}

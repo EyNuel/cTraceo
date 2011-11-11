@@ -95,6 +95,7 @@ typedef FILE MATFile;
 #include	"../toolsMemory.c"
 #include	"calcArraySize.c"
 #include	"matClose.c"
+#include	"writeEmptyArray.c"
 #include	"matPutVariable.c"
 #include	"mxCalcSingleSubscript.c"
 #include	"mxCreateString.c"
@@ -112,4 +113,5 @@ typedef FILE MATFile;
 #include	"mxSetFieldByNumber.c"
 #include	"writeArray.c"
 #include	"writeMatfileHeader.c"
+
 

@@ -29,8 +29,19 @@ uint32_t	calcArraySize(mxArray* inArray){
 	
 	if (inArray == NULL){
 		//printf("calcArraySize(): received null pointer: ");
-		return 0;
+		/*
+		 * Size required by an empty mxArray:
+		 * NOTE: empty arrays are written to the matfile by writeEmptyArray()
+		 */
+		nBytes += 8;	//header:						"miMatrix"[4B]; "size"[4B]
+		nBytes += 16;	//Array flags:					"miUINT32"[4B]; "8"[4B]; "flags+mxCLASS"[4B]; "undefined"[4B]
+		nBytes += 16;	//2D dimensions (1x1)
+		nBytes += 8;	//empty array name				"miINT8"[4B]; "0"[4B]
+		nBytes += 8;	//empty "double" data element	"miDouble"[4B9; "0"[4B]
+		
+		return nBytes;
 	}
+	
 	
 	// Array Flags[16B] + Dimensions Array [16B]
 	nBytes += 4*8;
@@ -53,7 +64,7 @@ uint32_t	calcArraySize(mxArray* inArray){
 	 * Handle mxArrays which are structs:
 	 */
 	if (inArray->isStruct){
-		printf("calculating size of mxStruct:\n");
+		//printf("calculating size of mxStruct:\n");
 		/*
 		 * Determine size required for the fieldnames:
 		 */
