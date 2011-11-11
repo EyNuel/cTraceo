@@ -29,12 +29,13 @@ mxArray* mxCreateString(const char *inString){
 	
 	// allocate memory for string
 	// NOTE: mallocChar already checks for succesfull allocation
-	outArray->pr_char 	=	mallocChar(strlen(inString));
+	outArray->pr_char 	=	mallocChar(strlen(inString)+1);
+	memset(outArray->pr_char, 0x00, strlen(inString)+1);
 	
 	//Copy string to data pointer
 	//strncpy(char* dst, const char* src, size_t size);
 	strncpy(outArray->pr_char, inString, strlen(inString));
-	printf("strlen(inString): %u", (uint32_t)strlen(inString));
+	//printf("strlen(inString): %u", (uint32_t)strlen(inString));
 	
 	return outArray;
 }
