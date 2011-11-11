@@ -41,12 +41,15 @@ void writeDataElement(FILE* outfile, uint32_t miTYPE, void* data, size_t dataIte
 	if (miTYPE == mxCHAR_CLASS){
 		//Again, because mxCharClass is strange, we have to write one char
 		//at a time, each followed by a null byte
+		uint8_t		*tempPtr = data;
 		tempUInt8 = 0x00;
+		
 		for (uintptr_t iChar=0; iChar<strlen(data); iChar++){
-			fwrite(&data[iChar], sizeof(uint8_t), 1, outfile);
+			fwrite(tempPtr, sizeof(uint8_t), 1, outfile);
+			tempPtr += 1;
 			fwrite(&tempUInt8, sizeof(uint8_t), 1, outfile);
 		}
-		
+	
 	}else{
 		fwrite(data, dataItemSize, nDataItems, outfile);
 	}
