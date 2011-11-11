@@ -24,32 +24,34 @@ mxArray* mxCreateStructMatrix(uintptr_t nRows, uintptr_t nCols, uintptr_t nField
 	}
 	
 	// initialize variables
-	//NOTE: only the first element of outArray will contain the basic struct information
-	outArray[0].mxCLASS			= mxSTRUCT_CLASS;
-	outArray[0].dataElementSize	= sizeof(mxArray);
-	outArray[0].dims[0]			= nRows;
-	outArray[0].dims[1]			= nCols;
-	outArray[0].numericType		= mxREAL;
-	outArray[0].isStruct		= true;
-	outArray[0].nFields			= nFields;
-	outArray[0].fieldNames		= malloc(nFields*sizeof(uintptr_t));
-	
-	//copy fieldnames into struct info
-	for (uintptr_t iField=0; iField<nFields; iField++){
-		//NOTE: strlen returns the length of a string, not including the terminating NULL character
-		outArray[0].fieldNames[iField] = mallocChar(strlen(fieldNames[iField])+1);	
-		strncpy(outArray[0].fieldNames[iField], fieldNames[iField], strlen(fieldNames[iField])+1);
-	}
-	
 	// allocate memory for structure members (fields)
 	for (uintptr_t iStruct=0; iStruct<nCols*nRows; iStruct++){
+		outArray[iStruct].mxCLASS			= mxSTRUCT_CLASS;
+		//outArray[iStruct].miTYPE			= mxSTRUCT_CLASS; TODO
+		outArray[iStruct].dataElementSize	= sizeof(mxArray);
+		outArray[iStruct].dims[0]			= nRows;
+		outArray[iStruct].dims[1]			= nCols;
+		outArray[iStruct].numericType		= mxREAL;
+		outArray[iStruct].isStruct			= true;
+		outArray[iStruct].isChild 			= false;
+		outArray[iStruct].nFields			= nFields;
+		outArray[iStruct].fieldNames		= malloc(nFields*sizeof(char*));
+		
+		//copy fieldnames into struct info
+		for (uintptr_t iField=0; iField<nFields; iField++){
+			//NOTE: strlen returns the length of a string, not including the terminating NULL character
+			outArray[iStruct].fieldNames[iField] = mallocChar(strlen(fieldNames[iField])+1);
+			memset(outArray[iStruct].fieldNames[iField], 0x00, strlen(fieldNames[iField])+1);
+			strncpy(outArray[iStruct].fieldNames[iField], fieldNames[iField], strlen(fieldNames[iField]));
+		}
+		
+		//printf("iStruct: %lu\n", iStruct);
 		outArray[iStruct].pr_double	= NULL;
 		outArray[iStruct].pi_double	= NULL;
 		outArray[iStruct].pr_char	= NULL;
-		
-		outArray[iStruct].field	= NULL;
-		outArray[iStruct].field	= malloc(nFields*sizeof(mxArray*));
-		if (outArray[iStruct].field== NULL){
+		outArray[iStruct].field		= NULL;
+		outArray[iStruct].field		= malloc(nFields*sizeof(mxArray*));
+		if (outArray[iStruct].field	== NULL){
 			fatal("mxCreateStructMatrix(): memory allocation error.\n");
 		}
 	}
