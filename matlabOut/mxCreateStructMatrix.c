@@ -54,6 +54,10 @@ mxArray* mxCreateStructMatrix(uintptr_t nRows, uintptr_t nCols, uintptr_t nField
 		if (outArray[iStruct].field	== NULL){
 			fatal("mxCreateStructMatrix(): memory allocation error.\n");
 		}
+		//initialize field members:
+		for (uintptr_t iField=0; iField<nFields; iField++){
+			outArray[iStruct].field[iField] = NULL;
+		}
 	}
 	
 	return outArray;
