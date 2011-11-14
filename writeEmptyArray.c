@@ -18,6 +18,9 @@ void writeEmptyArray(FILE* outfile){
 	 */
 	uint32_t	nBytes, tempUInt32, flags, mxClass;
 	
+	//char marker[8] = {'X','X','X','X','X','X','X','X'};
+	//fwrite(&marker, sizeof(uint8_t), 8, outfile);
+	
 	/*
 	 * Size required by an empty mxArray:
 	 */
@@ -51,6 +54,8 @@ void writeEmptyArray(FILE* outfile){
 	tempUInt32	<<=	8;	//left shift the flags by one byte
 	tempUInt32	|=	mxClass;
 	fwrite(&tempUInt32, sizeof(uint32_t), 1, outfile);
+	tempUInt32	=	0x00;
+	fwrite(&tempUInt32, sizeof(uint32_t), 1, outfile);
 	
 	
 	//write dimensions array (size is 1x1):
@@ -75,5 +80,7 @@ void writeEmptyArray(FILE* outfile){
 	fwrite(&tempUInt32, sizeof(uint32_t), 1, outfile);
 	tempUInt32	= 0;
 	fwrite(&tempUInt32, sizeof(uint32_t), 1, outfile);
+	
+	//fwrite(&marker, sizeof(uint8_t), 8, outfile);
 	
 }
