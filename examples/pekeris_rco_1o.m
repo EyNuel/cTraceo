@@ -7,7 +7,10 @@
 %  
 %==================================================================
 
+addpath('../M-Files/');
+addpath('../bin/');
 clear all%, close all 
+
 case_title = '''Ray Coordinates in a Pekeris flat waveguide with 1 object.''';
 
 %==================================================================

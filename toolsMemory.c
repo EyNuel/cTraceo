@@ -11,21 +11,22 @@
  *******************************************************************************/
 
 #pragma		once
-#include	"globals.h"
 #include	<stdlib.h>
 #include 	<stdio.h>
 #include	<string.h>
+#include	<stdint.h>
+#include	<stdbool.h>
+#include	"globals.h"
 #include	"toolsMisc.c"
 
 /** NOTE: the memory reallocation functions contained in this file are mostly not in use du to random occurences of "bus error".                       
  */
 
 
-///Prototypes:
-
-
-
+///Function Prototypes:
 char*			mallocChar(uintptr_t);
+bool*			mallocBool(uintptr_t numBools);
+bool*			reallocBool(bool* old, uintptr_t numBools);
 uint32_t*		mallocUint(uintptr_t);
 uint32_t*		reallocUint(uint32_t*, uintptr_t);
 int32_t*		mallocInt(uintptr_t);
@@ -65,11 +66,43 @@ char*				mallocChar(uintptr_t numChars){
 	*/
 	
 	char*	temp = NULL;	//temporary pointer
-	temp = malloc((unsigned long)numChars*sizeof(char));
+	temp = malloc((size_t)numChars*sizeof(char));
 	if (temp == NULL){
 		fatal("Memory allocation error.\n");
 	}
 	return temp;
+}
+
+
+bool*			mallocBool(uintptr_t numBools){
+	/*
+		Allocates a char string and returns a pointer to it in case of success,
+		exits with error code otherwise.
+	*/
+	bool*	temp = NULL;	//temporary pointer
+
+	temp = malloc(numBools*sizeof(bool));
+	return temp;
+}
+
+bool*			reallocBool(bool* old, uintptr_t numBools){
+	/*
+		Allocates an uint array and returns a pointer to it in case of success,
+		exits with error code otherwise.
+	*/
+	DEBUG(10,"reallocBool(),\t in\n");
+	bool*	new = NULL;
+
+	if(numBools == 0){
+		free(old);
+	}else{
+		new = realloc(old, numBools*sizeof(bool));
+		if (new == NULL){
+			fatal("Memory allocation error.\n");
+		}
+	}
+	DEBUG(10,"reallocBool(),\t out\n");
+	return new;
 }
 
 uint32_t*			mallocUint(uintptr_t numUints){
@@ -206,10 +239,16 @@ void				freeDouble2D(double** greenMile, uintptr_t items){
 
 complex double*		mallocComplex(uintptr_t numComplex){
 	complex double*	temp = NULL;
+	uintptr_t		i;
 	
 	temp = malloc(numComplex * sizeof(complex double));
 	if(temp == NULL)
 		fatal("Memory alocation error.");
+	//Initialize to zero:
+	for (i=0; i<numComplex; i++){
+		temp[i] = 0 + 0*I;
+	}
+	
 	return temp;
 }
 
@@ -811,7 +850,7 @@ void				reallocRayMembers(ray_t* ray, uintptr_t numRayCoords){
 	ray->r			= reallocDouble(	ray->r,			numRayCoords);
 	ray->z			= reallocDouble(	ray->z,			numRayCoords);
 	ray->c			= reallocDouble(	ray->c,			numRayCoords);
-	ray->iRefl		= reallocUint(		ray->iRefl,		numRayCoords);
+	ray->iRefl		= reallocBool(		ray->iRefl,		numRayCoords);
 	ray->decay		= reallocComplex(	ray->decay,		numRayCoords);
 	ray->phase		= reallocDouble(	ray->phase,		numRayCoords);
 	ray->tau		= reallocDouble(	ray->tau,		numRayCoords);

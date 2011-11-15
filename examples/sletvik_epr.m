@@ -7,6 +7,8 @@
 %
 %==================================================================
 
+addpath('../M-Files/');
+addpath('../bin/');
 clear all%, close all 
 
 case_title = '''Eigenray Search by Proximity in Sletvik (Hopavagen) waveguide.''';

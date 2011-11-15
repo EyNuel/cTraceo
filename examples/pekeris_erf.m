@@ -7,7 +7,11 @@
 %  
 %==================================================================
 
+
+addpath('../M-Files')
+addpath('../bin')
 clear all%, close all 
+
 case_title = '''Eigenray Search by Regula Falsi in a Pekeris flat waveguide.''';
 
 %==================================================================
@@ -27,7 +31,7 @@ ray_step = Rmax/1000;
 zs       = 25;
 rs       = 0;
 thetamax = 30;
-np2      = 501;
+np2      = 2001;
 la       = linspace(-thetamax,thetamax,np2);
 
 source_data.ds       = ray_step;
@@ -110,7 +114,7 @@ output_data.ctype       = '''ERF''';
 output_data.array_shape = '''VRY''';
 output_data.r           = ranges;
 output_data.z           = depths;
-output_data.miss        = 0.5;
+output_data.miss        = 1;
 
 %==================================================================
 %  
@@ -122,7 +126,7 @@ disp('Writing TRACEO waveguide input file...')
 
 wtraceoinfil('flat.in',case_title,source_data,surface_data,ssp_data,object_data,bottom_data,output_data);
 
-disp('Calling cTRACEO...')
+disp('Calling cTraceo...')
 !ctraceo flat
 
 disp('Reading the output data...')
@@ -136,7 +140,7 @@ plot(rs,zs,'ko',rs,zs,'m*','MarkerSize',16)
 for rHyd = 1:a  %iterate over hydrophone ranges
     for zHyd = 1:b  %iterate over hydrophone depths
         for i = 1:eigenrays(a,b).nEigenrays   %iterate over eigenrays of hydrphone
-            plot(eigenrays(a,b).eigenray(i).r, eigenrays(a,b).eigenray(i).z)   
+            plot(eigenrays(a,b).eigenray(i).r, eigenrays(a,b).eigenray(i).z, 'LineWidth', 2)   
         end
     end
 end
@@ -151,7 +155,7 @@ view(0,-90)
 hold off 
 xlabel('Range (m)')
 ylabel('Depth (m)')
-title('cTRACEO - Eigenray Search by Regula Falsi in a Pekeris flat waveguide.')
+title('cTraceo - Eigenray Search by Regula Falsi in a Pekeris flat waveguide.')
 
 %%
 %{

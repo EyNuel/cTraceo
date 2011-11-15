@@ -7,7 +7,9 @@
 %  
 %==================================================================
 
-%clear all, close all 
+addpath('../bin/');
+addpath('../M-Files/');
+clear all%, close all 
 imunit = sqrt(-1);
 
 case_title = '''Particle Velocity, Rectangular Array, 2 Objects''';
@@ -19,8 +21,8 @@ zs = 25;
 rs = 0;
 thetamax = 20;
 np2      = 101;
-m        = 45;
-n        = 90;
+m        = 501;
+n        = 201;
 ranges   = linspace(0,Rmaxhry,m);
 depths   = linspace(0,Dmax,n);
 zr       = 50;
@@ -157,7 +159,7 @@ tlw = 20.0*log10( abs(w) );
 
 figure
 subplot(1,2,1)
-imagesc(rarray(:,2:end-1),zarray,tlu(:,2:end-1));
+imagesc(arrayR(:,2:end-1),arrayZ,tlu(:,2:end-1));
 hold on
 xlabel('Range (m)')
 ylabel('Depth (m)')
@@ -165,7 +167,7 @@ title('Isovelocity waveguide: TL u (c)')
 hold off
 
 subplot(1,2,2)
-imagesc(rarray(:,2:end-1),zarray,tlw(:,2:end-1));
+imagesc(arrayR(:,2:end-1),arrayZ,tlw(:,2:end-1));
 hold on
 xlabel('Range (m)')
 ylabel('Depth (m)')
@@ -198,7 +200,7 @@ tlw = 20.0*log10( abs(f_w) );
 
 
 subplot(2,2,3)
-imagesc(rarray(:,2:end-1),zarray,tlu(:,2:end-1));
+imagesc(arrayR(:,2:end-1),arrayZ,tlu(:,2:end-1));
 hold on
 xlabel('Range (m)')
 ylabel('Depth (m)')
@@ -206,7 +208,7 @@ title('Isovelocity waveguide: TL u (f)')
 hold off
 
 subplot(2,2,4)
-imagesc(rarray(:,2:end-1),zarray,tlw(:,2:end-1));
+imagesc(arrayR(:,2:end-1),arrayZ,tlw(:,2:end-1));
 hold on
 xlabel('Range (m)')
 ylabel('Depth (m)')

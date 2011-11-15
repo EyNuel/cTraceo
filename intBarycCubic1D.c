@@ -1,5 +1,5 @@
 /************************************************************************
- *	intBarycParab1D.c		 											*
+ *	intBarycCubic1D.c		 											*
  * 	(formerly "bcui1d.for")												*
  * 	Perform Barycentric Cubic interpolation at 1D.			    		*
  * 																		*

@@ -27,8 +27,12 @@
 
 #include "globals.h"
 #include <complex.h>
-#include <mat.h>
-#include <matrix.h>
+#if USE_MATLAB == 1
+	#include <mat.h>
+	#include "matrix.h"
+#else
+	#include	"matlabOut/matlabOut.h"
+#endif
 #include "interpolation.h"
 
 void calcParticleVel(settings_t*);

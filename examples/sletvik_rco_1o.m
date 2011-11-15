@@ -8,9 +8,10 @@
 %
 %==================================================================
 
+addpath('../M-Files/');
+addpath('../bin/');
 clear all%, close all 
 imunit = sqrt( -1 );
-
 
 case_title = '''Ray Coordinates in Sletvik (Hopavagen) waveguide with 1 object.''';
 

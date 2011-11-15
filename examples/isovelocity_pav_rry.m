@@ -7,6 +7,8 @@
 %
 %==================================================================
 
+addpath('../M-Files/');
+addpath('../bin/');
 clear all%, close all 
 
 imunit = sqrt( -1 );
@@ -121,7 +123,7 @@ output_data.miss        = 1;
 disp('Writing TRACEO waveguide input file...')
 wtraceoinfil('flat.in',case_title,source_data,surface_data,ssp_data,object_data,bottom_data,output_data);
 
-disp('Calling cTRACEO...')
+disp('Calling cTraceo...')
 %%
 !ctraceo flat
 
@@ -134,7 +136,7 @@ tlw = 20.0*log10( abs(w) );
 
 figure
 subplot(1,3,1)
-imagesc(rarray,zarray,tl)%, shading interp, colorbar
+imagesc(arrayR,arrayZ,tl)%, shading interp, colorbar
 hold on
 plot(rs,zs,'ko',rs,zs,'m*','MarkerSize',16)
 axis ij
@@ -144,7 +146,7 @@ title('Isovelocity waveguide: TL (c)')
 hold off
 
 subplot(1,3,2)
-imagesc(rarray,zarray,tlu)%, shading interp, colorbar
+imagesc(arrayR,arrayZ,tlu)%, shading interp, colorbar
 hold on
 plot(rs,zs,'ko',rs,zs,'m*','MarkerSize',16)
 axis ij
@@ -154,7 +156,7 @@ title('Isovelocity waveguide: TL u (c)')
 hold off
 
 subplot(1,3,3)
-imagesc(rarray,zarray,tlw)%, shading interp, colorbar
+imagesc(arrayR,arrayZ,tlw)%, shading interp, colorbar
 hold on
 plot(rs,zs,'ko',rs,zs,'m*','MarkerSize',16)
 axis ij
@@ -166,7 +168,7 @@ hold off
 %%
 
 %{
-disp('Calling TRACEO...')
+disp('Calling fTRACEO...')
 !traceo flat
 
 disp('Reading the output data...')
@@ -181,7 +183,7 @@ tlu = 20.0*log10( abs(u_f) );
 tlw = 20.0*log10( abs(w_f) );
 
 subplot(2,3,4)
-imagesc(rarray,zarray,tl)%, shading interp, colorbar
+imagesc(arrayR,arrayZ,tl)%, shading interp, colorbar
 hold on
 plot(rs,zs,'ko',rs,zs,'m*','MarkerSize',16)
 axis ij
@@ -191,7 +193,7 @@ title('Isovelocity waveguide: TL (f)')
 hold off
 
 subplot(2,3,5)
-imagesc(rarray,zarray,tlu)%, shading interp, colorbar
+imagesc(arrayR,arrayZ,tlu)%, shading interp, colorbar
 hold on
 plot(rs,zs,'ko',rs,zs,'m*','MarkerSize',16)
 axis ij
@@ -201,7 +203,7 @@ title('Isovelocity waveguide: TL u (f)')
 hold off
 
 subplot(2,3,6)
-imagesc(rarray,zarray,tlw)%, shading interp, colorbar
+imagesc(arrayR,arrayZ,tlw)%, shading interp, colorbar
 hold on
 plot(rs,zs,'ko',rs,zs,'m*','MarkerSize',16)
 axis ij
@@ -214,8 +216,8 @@ hold off
 %{
 figure
 hold on
-quiver(rarray(1:10:end),zarray(1:10:end), u(1:10:end, 1:10:end), w(1:10:end, 1:10:end),2)
-contour(rarray(1:1:end),zarray(1:1:end), tl(1:1:end, 1:1:end))
+quiver(arrayR(1:10:end),arrayZ(1:10:end), u(1:10:end, 1:10:end), w(1:10:end, 1:10:end),2)
+contour(arrayR(1:1:end),arrayZ(1:1:end), tl(1:1:end, 1:1:end))
 axis ij
 hold off
 %}

@@ -8,6 +8,8 @@
 %  
 %==================================================================
 
+addpath('../M-Files/');
+addpath('../bin/');
 clear all%, close all 
 case_title = '''Ray Coordinates in Sletvik (Hopavagen) waveguide with 1 object at bottom''';
 
@@ -158,7 +160,7 @@ output_data.miss        = 0.5;
 disp('Writing TRACEO waveguide input file...')
 wtraceoinfil('sletvik.in',case_title,source_data,surface_data,ssp_data,object_data,bottom_data,output_data);
 
-disp('Calling cTRACEO...')
+disp('Calling cTraceo...')
 !ctraceo sletvik
 
 disp('Reading the output data...')

@@ -3,12 +3,17 @@
 ## Change the values in this section to match your system.
 ## ================================================================
 
-## The base directory of your matlab installation:
+## Whether to link with matlab or use the internal functions to
+## write .mat files:
+USE_MATLAB := 0
+
+## The base directory of your matlab installation (only relevant
+## if linking with matlab):
 #MATLAB_DIR := /usr/local/matlabr14/
 #MATLAB_DIR := /usr/local/MATLAB/R2010b/
 MATLAB_DIR := /usr/local/matlab2008a/
 
-## Your Matlab Version:
+## Your Matlab Version (only relevant if linking with matlab):
 ## Allowable options are: R12, R14, R2007A, R2007B, R2008A, R2008B, R2010B
 MATLAB_VERSION	:= R2008B
 
@@ -32,23 +37,33 @@ OS	:= LINUX
 CFLAGS := 	-Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align \
 			-Wwrite-strings -Wmissing-prototypes -Wmissing-declarations \
 			-Wredundant-decls -Wnested-externs -Winline -Wno-long-long \
-			-Wstrict-prototypes -std=gnu99 \
-			-I $(MATLAB_DIR)extern/include 
+			-Wstrict-prototypes -std=gnu99
 
-## Linker Flags:
-LFLAGS := -lm -leng -lmat -lmex -lut -Wl,
-
-## Generate path to matlab libraries according to configuration:
 ifeq ($(ARCH),32b)
-	LPATH := $(MATLAB_DIR)bin/glnx86
 	CFLAGS := $(CFLAGS) -march=i686 -m32
 endif
-ifeq ($(ARCH),64b)
-	LPATH := $(MATLAB_DIR)bin/glnxa64
+
+## Linker Flags:
+LFLAGS := -lm
+
+## Matlab output:
+ifeq ($(USE_MATLAB),1)
+	CFLAGS := $(CFLAGS) -I $(MATLAB_DIR)extern/include 
+	LFLAGS := $(LFLAGS) -leng -lmat -lmex -lut -Wl,
+
+	## Generate path to matlab libraries according to configuration:
+	ifeq ($(ARCH),32b)
+		LPATH := $(MATLAB_DIR)bin/glnx86
+	endif
+	ifeq ($(ARCH),64b)
+		LPATH := $(MATLAB_DIR)bin/glnxa64
+	endif
+	
+	## Finalize linker flags:
+	LFLAGS := $(LFLAGS)-rpath,$(LPATH) -L $(LPATH)
+	
 endif
 
-## Finalize linker flags:
-LFLAGS := $(LFLAGS)-rpath,$(LPATH) -L $(LPATH)
 
 ## Define the compiler and linker comands to use:
 LINK 		:= $(CC) $(LFLAGS) -o 
@@ -74,16 +89,16 @@ ALLFILES := $(SRCFILES) $(HDRFILES) $(AUXFILES) $(MFILES)
 
 ## Build targets:
 all:	dirs
-		@$(CC) $(CFLAGS) $(LFLAGS) -D VERBOSE=0 -D MATLAB_VERSION=$(MATLAB_VERSION) -O3 -o bin/ctraceo cTraceo.c
+		@$(CC) $(CFLAGS) $(LFLAGS) -D VERBOSE=0 -D USE_MATLAB=$(USE_MATLAB) -D MATLAB_VERSION=$(MATLAB_VERSION) -O3 -o bin/ctraceo cTraceo.c
 
 pg:		dirs
-		@gcc $(CFLAGS) $(LFLAGS) -D VERBOSE=0 -D MATLAB_VERSION=$(MATLAB_VERSION) -O3 -pg -o bin/ctraceo cTraceo.c
+		@gcc $(CFLAGS) $(LFLAGS) -D VERBOSE=0 -D USE_MATLAB=$(USE_MATLAB) -D MATLAB_VERSION=$(MATLAB_VERSION) -O3 -pg -o bin/ctraceo cTraceo.c
 
 debug:	dirs
-		@gcc $(CFLAGS) $(LFLAGS) -D VERBOSE=0 -D MATLAB_VERSION=$(MATLAB_VERSION) -O0 -g -o bin/ctraceo cTraceo.c
+		@gcc $(CFLAGS) $(LFLAGS) -D VERBOSE=0 -D USE_MATLAB=$(USE_MATLAB) -D MATLAB_VERSION=$(MATLAB_VERSION) -O0 -g -o bin/ctraceo cTraceo.c
 		
 verbose:dirs
-		@$(CC) $(CFLAGS) $(LFLAGS) -D VERBOSE=1 -D MATLAB_VERSION=$(MATLAB_VERSION) -O0 -g -o bin/ctraceo cTraceo.c
+		@$(CC) $(CFLAGS) $(LFLAGS) -D VERBOSE=1 -D USE_MATLAB=$(USE_MATLAB) -D MATLAB_VERSION=$(MATLAB_VERSION) -O0 -g -o bin/ctraceo cTraceo.c
 
 todo:	#list todos from all files
 		@for file in $(ALLFILES); do fgrep -H -e TODO $$file; done; true
@@ -92,6 +107,7 @@ discuss:#list discussion points from all files
 		@for file in $(ALLFILES); do fgrep -H -e DISCUSS $$file; done; true
 		
 dist:	#
+		@if [ ! -d "packages" ]; then mkdir packages; fi
 		@tar -czf ./packages/cTraceo.tgz $(ALLFILES)
 		
 dirs:	#creates 'bin/' directory if it doesn't exist

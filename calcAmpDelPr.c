@@ -32,8 +32,12 @@
 #include "tools.h"
 #include "solveDynamicEq.c"
 #include "solveEikonalEq.c"
-#include <mat.h>
-#include "matrix.h"
+#if USE_MATLAB == 1
+	#include <mat.h>
+	#include "matrix.h"
+#else
+	#include	"matlabOut/matlabOut.h"
+#endif
 #include "interpolation.h"
 #include "bracket.c"
 #include "eBracket.c"
@@ -173,7 +177,7 @@ void calcAmpDelPr(settings_t* settings){
 					//	Check if the ray is returning back or not;
 					//	if not:		we can bracket it without problems,
 					//	otherwise:	we need to know how many times it passed by the given array range 
-					if (ray[i].iReturn == FALSE){
+					if (ray[i].iReturn == false){
 						
 						//get the index of the lower bracketing element:
 						bracket(ray[i].nCoords,	ray[i].r, rHyd, &iHyd);
@@ -229,7 +233,7 @@ void calcAmpDelPr(settings_t* settings){
 							}//	if (dz settings->output.miss)
 						}//	for(jj=1; jj<=settings->output.nArrayZ; jj++)
 						
-					}else{// if (ray[i].iReturn == FALSE)
+					}else{// if (ray[i].iReturn == false)
 						
 						DEBUG(3,"returning ray: nCoords: %u, iHyd:%u\n", (uint32_t)ray[i].nCoords, (uint32_t)iHyd);
 						//get the indexes of the bracketing points.
@@ -285,10 +289,10 @@ void calcAmpDelPr(settings_t* settings){
 								}
 							}
 						}
-					}//	if (ray[i].iReturn == FALSE)
+					}//	if (ray[i].iReturn == false)
 				}//if ( (rHyd >= ray[i].rMin) && (rHyd < ray[i].rMax))
 			}//for(j=0; j<settings->output.nArrayR; j++){
-			if(KEEP_RAYS_IN_MEM == FALSE){
+			if(KEEP_RAYS_IN_MEM == false){
 				//free the ray's memory
 				reallocRayMembers(&ray[i],0);
 			}
@@ -324,22 +328,22 @@ void calcAmpDelPr(settings_t* settings){
 			idx[1] = (MWINDEX)j;
 			mxSetFieldByNumber(	mxAadStruct,									//pointer to the mxStruct
 								mxCalcSingleSubscript(mxAadStruct,	2, idx),	//index of the element
-								0,												//position of the field (in this case, field 0 is "theta"
+								0,												//position of the field (in this case, field 0 is "nArrivals"
 								mxNumArrivals);									//the mxArray we want to copy into the mxStruct
 			
 			mxSetFieldByNumber(	mxAadStruct,						//pointer to the mxStruct
 								mxCalcSingleSubscript(mxAadStruct,	2, idx),	//index of the element
-								1,											//position of the field (in this case, field 0 is "theta"
+								1,											//position of the field (in this case, field 1 is "rHyd"
 								mxRHyd);									//the mxArray we want to copy into the mxStruct
 			
 			mxSetFieldByNumber(	mxAadStruct,						//pointer to the mxStruct
 								mxCalcSingleSubscript(mxAadStruct,	2, idx),	//index of the element
-								2,											//position of the field (in this case, field 0 is "theta"
+								2,											//position of the field (in this case, field 2 is "zHyd"
 								mxZHyd);									//the mxArray we want to copy into the mxStruct
 			
 			mxSetFieldByNumber(	mxAadStruct,									//pointer to the mxStruct
 								mxCalcSingleSubscript(mxAadStruct,	2, idx),	//index of the element
-								3,												//position of the field (in this case, field 0 is "theta"
+								3,												//position of the field (in this case, field 3 is "arrival"
 								arrivals[j][jj].mxArrivalStruct);				//the mxArray we want to copy into the mxStruct
 		}
 	}

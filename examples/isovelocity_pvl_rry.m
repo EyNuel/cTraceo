@@ -7,6 +7,8 @@
 %
 %==================================================================
 
+addpath('../M-Files/');
+addpath('../bin/');
 clear all%, close all 
 imunit = sqrt( -1 );
 case_title = '''Particle Velocity, Rectangular Array''';
@@ -121,7 +123,7 @@ disp('Writing TRACEO waveguide input file...')
 
 wtraceoinfil('flat.in',case_title,source_data,surface_data,ssp_data,object_data,bottom_data,output_data);
 
-disp('Calling cTRACEO...')
+disp('Calling cTraceo...')
 
 !ctraceo flat
 
@@ -134,7 +136,7 @@ tlw = 20.0*log10( abs(w) );
 
 figure
 subplot(2,2,1)
-imagesc(rarray(:,2:end-1),zarray,tlu(:,2:end-1));
+imagesc(arrayR(:,2:end-1),arrayZ,tlu(:,2:end-1));
 hold on
 xlabel('Range (m)')
 ylabel('Depth (m)')
@@ -143,7 +145,7 @@ colorbar
 hold off
 
 subplot(2,2,2)
-imagesc(rarray(:,2:end-1),zarray,tlw(:,2:end-1));
+imagesc(arrayR(:,2:end-1),arrayZ,tlw(:,2:end-1));
 hold on
 xlabel('Range (m)')
 ylabel('Depth (m)')
@@ -169,7 +171,7 @@ tlw = 20.0*log10( abs(w) );
 
 %{
 figure
-pcolor(rarray,zarray,tl), shading interp, colorbar
+pcolor(arrayR,arrayZ,tl), shading interp, colorbar
 hold on
 plot(rs,zs,'ko',rs,zs,'m*','MarkerSize',16)
 view(0,-90)
@@ -181,8 +183,8 @@ hold off
 
 %figure
 subplot(2,2,3)
-%pcolor(rarray,zarray,tlu), shading interp, colorbar
-imagesc(rarray(:,2:end-1),zarray,tlu(:,2:end-1));
+%pcolor(arrayR,arrayZ,tlu), shading interp, colorbar
+imagesc(arrayR(:,2:end-1),arrayZ,tlu(:,2:end-1));
 hold on
 %plot(rs,zs,'ko',rs,zs,'m*','MarkerSize',16)
 %view(0,-90)
@@ -194,8 +196,8 @@ hold off
 
 %figure
 subplot(2,2,4)
-%pcolor(rarray,zarray,tlw), shading interp, colorbar
-imagesc(rarray(:,2:end-1),zarray,tlw(:,2:end-1));
+%pcolor(arrayR,arrayZ,tlw), shading interp, colorbar
+imagesc(arrayR(:,2:end-1),arrayZ,tlw(:,2:end-1));
 hold on
 %plot(rs,zs,'ko',rs,zs,'m*','MarkerSize',16)
 %view(0,-90)
@@ -208,8 +210,8 @@ hold off
 %{
 figure
 hold on
-quiver(rarray(1:10:end),zarray(1:10:end), u(1:10:end, 1:10:end), w(1:10:end, 1:10:end),2)
-%contour(rarray(1:1:end),zarray(1:1:end), tl(1:1:end, 1:1:end))
+quiver(arrayR(1:10:end),arrayZ(1:10:end), u(1:10:end, 1:10:end), w(1:10:end, 1:10:end),2)
+%contour(arrayR(1:1:end),arrayZ(1:1:end), tl(1:1:end, 1:1:end))
 axis ij
 hold off
 disp('done.')

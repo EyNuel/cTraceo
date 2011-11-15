@@ -8,7 +8,10 @@
 % 
 %==================================================================
 
-clear all, close all 
+addpath('../M-Files/');
+addpath('../bin/');
+clear all%, close all 
+
 disp('Deep water examples:') 
 case_title = '''Munk profile & variable boundaries''';
 

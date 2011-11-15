@@ -1,6 +1,6 @@
 /************************************************************************************
  *	solveDynamicEq.c		 														*
- * 	(formerly "seikeq.for")															*
+ * 	(formerly "sdyneq.for")															*
  * 	A raytracing subroutine for cylindrical simmetry.								*
  * 																					*
  *	originally written in FORTRAN by:												*
@@ -109,7 +109,7 @@ void	solveDynamicEq(settings_t* settings, ray_t* ray){
 		ci = ray->c[i];
 		cxc = ci*ci;
 
-		if ( ray->iRefl[i+1] == FALSE){
+		if ( ray->iRefl[i+1] == false){
 			DEBUG(9,"Case 1\n");
 			DEBUG(10,"p[0]:%e, p:%e\n", ray->p[0], ray->p[i]);
 			ray->p[i+1] = ray->p[i] - ray->q[i] * (cnn / cxc) * dsi;
@@ -126,7 +126,7 @@ void	solveDynamicEq(settings_t* settings, ray_t* ray){
 				rn		= -( rm * ( 2 * cnj - rm * csj )/cii );
 				ray->p[i+1]	= ray->p[i] + ray->q[i] * rn;
 			}
-		}else if (ray->iRefl[i+1] == TRUE){
+		}else if (ray->iRefl[i+1] == true){
 			DEBUG(9,"Case 2\n");
 			ibdry	= ray->boundaryJ[i+1];
 			tauB.r	= ray->boundaryTg[i+1].r;
@@ -160,8 +160,8 @@ void	solveDynamicEq(settings_t* settings, ray_t* ray){
 		*/
 	}
 	ray->amp[0] = NAN;
-	DEBUG(1, "decay[n-3]: %e +i*%e, s[n-3]: %e, amp[n-3]: %e +j*%e, p[n-3]: %e +j*%e, q[n-3]: %e +j*%e, c[n-3]: %e\n", creal(ray->decay[ray->nCoords-3]), cimag(ray->decay[ray->nCoords-3]), ray->s[ray->nCoords-3], creal(ray->amp[ray->nCoords-3]), cimag(ray->amp[ray->nCoords-3]), creal(ray->p[ray->nCoords-3]), cimag(ray->p[ray->nCoords-3]), creal(ray->q[ray->nCoords-3]), cimag(ray->q[ray->nCoords-3]), ray->c[ray->nCoords-3]);
-	DEBUG(1, "decay[n-2]: %e +i*%e, s[n-2]: %e, amp[n-2]: %e +j*%e, p[n-2]: %e +j*%e, q[n-2]: %e +j*%e, c[n-2]: %e\n", creal(ray->decay[ray->nCoords-2]), cimag(ray->decay[ray->nCoords-2]), ray->s[ray->nCoords-2], creal(ray->amp[ray->nCoords-2]), cimag(ray->amp[ray->nCoords-2]), creal(ray->p[ray->nCoords-2]), cimag(ray->p[ray->nCoords-2]), creal(ray->q[ray->nCoords-2]), cimag(ray->q[ray->nCoords-2]), ray->c[ray->nCoords-2]);
-	DEBUG(1, "decay[n-1]: %e +i*%e, s[n-1]: %e, amp[n-1]: %e +j*%e, p[n-1]: %e +j*%e, q[n-1]: %e +j*%e, c[n-1]: %e\n", creal(ray->decay[ray->nCoords-1]), cimag(ray->decay[ray->nCoords-1]), ray->s[ray->nCoords-1], creal(ray->amp[ray->nCoords-1]), cimag(ray->amp[ray->nCoords-1]), creal(ray->p[ray->nCoords-1]), cimag(ray->p[ray->nCoords-1]), creal(ray->q[ray->nCoords-1]), cimag(ray->q[ray->nCoords-1]), ray->c[ray->nCoords-1]);
+	DEBUG(4, "decay[n-3]: %e +i*%e, s[n-3]: %e, amp[n-3]: %e +j*%e, p[n-3]: %e +j*%e, q[n-3]: %e +j*%e, c[n-3]: %e\n", creal(ray->decay[ray->nCoords-3]), cimag(ray->decay[ray->nCoords-3]), ray->s[ray->nCoords-3], creal(ray->amp[ray->nCoords-3]), cimag(ray->amp[ray->nCoords-3]), creal(ray->p[ray->nCoords-3]), cimag(ray->p[ray->nCoords-3]), creal(ray->q[ray->nCoords-3]), cimag(ray->q[ray->nCoords-3]), ray->c[ray->nCoords-3]);
+	DEBUG(4, "decay[n-2]: %e +i*%e, s[n-2]: %e, amp[n-2]: %e +j*%e, p[n-2]: %e +j*%e, q[n-2]: %e +j*%e, c[n-2]: %e\n", creal(ray->decay[ray->nCoords-2]), cimag(ray->decay[ray->nCoords-2]), ray->s[ray->nCoords-2], creal(ray->amp[ray->nCoords-2]), cimag(ray->amp[ray->nCoords-2]), creal(ray->p[ray->nCoords-2]), cimag(ray->p[ray->nCoords-2]), creal(ray->q[ray->nCoords-2]), cimag(ray->q[ray->nCoords-2]), ray->c[ray->nCoords-2]);
+	DEBUG(4, "decay[n-1]: %e +i*%e, s[n-1]: %e, amp[n-1]: %e +j*%e, p[n-1]: %e +j*%e, q[n-1]: %e +j*%e, c[n-1]: %e\n", creal(ray->decay[ray->nCoords-1]), cimag(ray->decay[ray->nCoords-1]), ray->s[ray->nCoords-1], creal(ray->amp[ray->nCoords-1]), cimag(ray->amp[ray->nCoords-1]), creal(ray->p[ray->nCoords-1]), cimag(ray->p[ray->nCoords-1]), creal(ray->q[ray->nCoords-1]), cimag(ray->q[ray->nCoords-1]), ray->c[ray->nCoords-1]);
 	DEBUG(3, "out\n");
 }

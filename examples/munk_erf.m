@@ -7,7 +7,10 @@
 % 
 %==================================================================
 
+addpath('../M-Files/');
+addpath('../bin/');
 clear all%, close all 
+
 disp('Deep water examples:') 
 case_title = '''Munk Profile, Deep Water, Eigenray Search by Regula Falsi''';
 

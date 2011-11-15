@@ -10,7 +10,13 @@
  *******************************************************************************/
 
 #pragma once
-#include	<matrix.h>			//for matlab functions (used in copyComplexToPtr and copyComplexToPtr2D)
+#if USE_MATLAB == 1
+	#include	<matrix.h>			//for matlab functions (used in copyComplexToPtr and copyComplexToPtr2D)
+#else
+	#include	"matlabOut/matlabOut.h"
+#endif
+#include	<stdint.h>
+#include	<stdbool.h>
 
 
 ///Prototypes:
@@ -18,6 +24,7 @@
 void			copyDoubleToPtr(double*, double*, uintptr_t);
 void			copyDoubleToMxArray(double*, mxArray*, uintptr_t);
 void			copyUInt32ToMxArray(uint32_t*, mxArray*, uintptr_t);
+void			copyBoolToMxArray(bool*, mxArray*, uintptr_t);
 
 void			copyDoubleToPtr2D(double**, double*, uintptr_t, uintptr_t);
 void			copyDoubleToMxArray2D(double**, mxArray*, uintptr_t, uintptr_t);
@@ -52,6 +59,17 @@ void		copyDoubleToMxArray(double* origin, mxArray* dest, uintptr_t nItems){
 }
 
 void		copyUInt32ToMxArray(uint32_t* origin, mxArray* dest, uintptr_t nItems){
+	uintptr_t	i;
+	double*	destReal = NULL;
+	
+	destReal = mxGetData(dest);
+	
+	for( i=0; i<nItems; i++ ){
+		destReal[i] = (double)origin[i];
+	}
+}
+
+void		copyBoolToMxArray(bool* origin, mxArray* dest, uintptr_t nItems){
 	uintptr_t	i;
 	double*	destReal = NULL;
 	

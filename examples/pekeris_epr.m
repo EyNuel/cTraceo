@@ -7,7 +7,10 @@
 %  
 %==================================================================
 
+addpath('../M-Files/');
+addpath('../bin/');
 clear all%, close all 
+
 case_title = '''Eigenray Search by Proximity in a Pekeris flat waveguide''';
 
 %==================================================================
@@ -26,7 +29,7 @@ ray_step = Rmax/1000;
 zs       = 25;
 rs       = 0;
 thetamax = 30;
-np2      = 501;
+np2      = 2001;
 la       = linspace(-thetamax,thetamax,np2);
 
 source_data.ds       = ray_step;
@@ -109,7 +112,7 @@ output_data.ctype       = '''EPR''';
 output_data.array_shape = '''VRY''';
 output_data.r           = ranges;
 output_data.z           = depths;
-output_data.miss        = 0.5;
+output_data.miss        = 1;
 
 %==================================================================
 %  
@@ -151,7 +154,7 @@ view(0,-90)
 hold off 
 xlabel('Range (m)')
 ylabel('Depth (m)')
-title('cTRACEO - Eigenray Search by Proximity in a Pekeris flat waveguide.')
+title('cTraceo - Eigenray Search by Proximity in a Pekeris flat waveguide.')
 
 %%
 %{

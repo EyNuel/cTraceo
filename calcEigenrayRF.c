@@ -33,8 +33,12 @@
 #include "tools.h"
 #include "solveDynamicEq.c"
 #include "solveEikonalEq.c"
-#include <mat.h>
-#include "matrix.h"
+#if USE_MATLAB == 1
+	#include <mat.h>
+	#include "matrix.h"
+#else
+	#include	"matlabOut/matlabOut.h"
+#endif
 #include "interpolation.h"
 #include "bracket.c"
 
@@ -54,7 +58,7 @@ void	calcEigenrayRF(settings_t* settings){
 	double*			thetaL 				= NULL;
 	double*			thetaR 				= NULL;
 	ray_t*			tempRay 			= NULL;
-	uint32_t		success 			= FALSE;
+	bool			success 			= false;
 	double*			thetas				= NULL;
 	double**		depths				= NULL;
 	ray_t*			ray					= NULL;
@@ -71,12 +75,30 @@ void	calcEigenrayRF(settings_t* settings){
 	mxArray*		mxZ					= NULL;
 	mxArray*		mxTau				= NULL;
 	mxArray*		mxAmp				= NULL;
+	mxArray*		iReturns			= NULL;
+	mxArray*		nSurRefl			= NULL;
+	mxArray*		nBotRefl			= NULL;
+	mxArray*		nObjRefl			= NULL;
+	mxArray*		nRefrac				= NULL;
+	mxArray*		mxRefrac_r			= NULL;
+	mxArray*		mxRefrac_z			= NULL;
 	mxArray*		mxAllEigenraysStruct= NULL;		//contains all the eigenrays at all hydrophones
 	mxArray*		mxNumEigenrays		= NULL;
 	mxArray*		mxRHyd				= NULL;
 	mxArray*		mxZHyd				= NULL;
 	const char*		AllEigenrayFieldNames[]= {	"nEigenrays", "rHyd", "zHyd", "eigenray" };
-	const char*		eigenrayFieldNames[]= {	"theta", "r", "z", "tau", "amp"};		//the names of the fields contained in mxRayStruct
+	const char*		eigenrayFieldNames[]= {	"theta",
+											"r",
+											"z",
+											"tau",
+											"amp",
+											"iReturns",
+											"nSurRefl",
+											"nBotRefl",
+											"nObjRefl",
+											"nRefrac",
+											"refrac_r",
+											"refrac_z"};		//the names of the fields contained in mxRayStruct
 	MWINDEX			idx[2];			//used for accessing a specific element in the mxAllEigenrayStruct
 	
 	eigenrays_t		eigenrays[settings->output.nArrayR][settings->output.nArrayZ];
@@ -90,7 +112,7 @@ void	calcEigenrayRF(settings_t* settings){
 			eigenrays[i][j].nEigenrays = 0;
 			eigenrays[i][j].mxEigenrayStruct = mxCreateStructMatrix(	(MWSIZE)settings->source.nThetas,		//number of rows
 																		(MWSIZE)1,								//number of columns
-																		5,										//number of fields in each element
+																		12,										//number of fields in each element
 																		eigenrayFieldNames);						//list of field names
 			if( eigenrays[i][j].mxEigenrayStruct == NULL ){
 				fatal("Memory Alocation error.");
@@ -169,7 +191,7 @@ void	calcEigenrayRF(settings_t* settings){
 			solveEikonalEq(settings, &ray[i]);
 			solveDynamicEq(settings, &ray[i]);
 			
-			if (ray[i].iReturn == TRUE){
+			if (ray[i].iReturn == true){
 				printf("Eigenray search by Regula Falsi detected a returning ray at angle %lf.\n", thetas[i]);
 				fatal("Returning eigenrays can only be determined by Proximity.\nAborting");
 			}
@@ -237,8 +259,8 @@ void	calcEigenrayRF(settings_t* settings){
 				prod = fl*fr;
 				DEBUG(3, "k: %u; thetaL: %e; thetaR: %e\n", (uint32_t)k, thetaL[k], thetaR[k]);
 				
-				if(	isnan_d(depths[k][i]) == FALSE	&&
-					isnan_d(depths[k+1][i]) == FALSE	){
+				if(	isnan_d(depths[k][i]) == false	&&
+					isnan_d(depths[k+1][i]) == false	){
 					DEBUG(3, "Not a NAN\n");
 					
 					if(	(fl == 0.0) && (fr != 0.0)){
@@ -312,22 +334,22 @@ void	calcEigenrayRF(settings_t* settings){
 					DEBUG(3, "\"left\" is eigenray.\n");
 					theta0 = thetaL[l];
 					nFoundEigenRays++;
-					success = TRUE;
+					success = true;
 				
 				}else if (fabs(fr) <= settings->output.miss){
 					DEBUG(3, "\"right\" is eigenray.\n");
 					theta0 = thetaR[l];
 					nFoundEigenRays++;
-					success = TRUE;
+					success = true;
 				
 				//if not, try to find the "exact" launching angle
 				}else{
 					DEBUG(3, "Neither \"left\" nor \"right\" ray are close enough to be eigenrays.\nApplying Regula-Falsi...\n");
 					nTrial = 0;
-					success = FALSE;
+					success = false;
 					
 					//here comes the actual Regula-Falsi loop:
-					while(success == FALSE){
+					while(success == false){
 						nTrial++;
 						
 						if (nTrial > 21){
@@ -352,7 +374,7 @@ void	calcEigenrayRF(settings_t* settings){
 						//check if the new rays is close enough to the hydrophone to be considered and eigenray:
 						if (fabs(f0) < settings->output.miss){
 							DEBUG(3, "Found eigenray by applying Regula-Falsi.\n");
-							success = TRUE;
+							success = true;
 							nFoundEigenRays++;
 							break;
 						
@@ -373,7 +395,7 @@ void	calcEigenrayRF(settings_t* settings){
 						}
 					}//while()
 				}
-				if (success == TRUE){
+				if (success == true){
 					
 					//finally: get the coordinates and amplitudes of the eigenray
 					tempRay[0].theta = theta0;
@@ -410,6 +432,37 @@ void	calcEigenrayRF(settings_t* settings){
 					mxSetFieldByNumber(	eigenrays[i][j].mxEigenrayStruct, (MWINDEX)eigenrays[i][j].nEigenrays, 4, mxAmp);
 					///ray has been saved to mxStructArray
 					
+					///now lets save some aditional ray information:
+					iReturns	= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)1, mxREAL);
+					nSurRefl	= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)1, mxREAL);
+					nBotRefl	= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)1, mxREAL);
+					nObjRefl	= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)1, mxREAL);
+					nRefrac		= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)1, mxREAL);
+					
+					copyBoolToMxArray(		&tempRay->iReturn,	iReturns, 	1);
+					copyUInt32ToMxArray(	&tempRay->sRefl,	nSurRefl, 	1);
+					copyUInt32ToMxArray(	&tempRay->bRefl,	nBotRefl, 	1);
+					copyUInt32ToMxArray(	&tempRay->oRefl,	nObjRefl, 	1);
+					copyUInt32ToMxArray(	&tempRay->nRefrac,	nRefrac, 	1);
+					
+					mxSetFieldByNumber(	eigenrays[i][j].mxEigenrayStruct, (MWINDEX)i, 5, iReturns);
+					mxSetFieldByNumber(	eigenrays[i][j].mxEigenrayStruct, (MWINDEX)i, 6, nSurRefl);
+					mxSetFieldByNumber(	eigenrays[i][j].mxEigenrayStruct, (MWINDEX)i, 7, nBotRefl);
+					mxSetFieldByNumber(	eigenrays[i][j].mxEigenrayStruct, (MWINDEX)i, 8, nObjRefl);
+					mxSetFieldByNumber(	eigenrays[i][j].mxEigenrayStruct, (MWINDEX)i, 9, nRefrac);
+					///aditional information has been saved
+					
+					///save refraction coordinates to structure:
+					if (tempRay->nRefrac > 0){
+						mxRefrac_r = mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)tempRay->nRefrac, mxREAL);
+						mxRefrac_z = mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)tempRay->nRefrac, mxREAL);
+						
+						copyDoubleToMxArray(tempRay->rRefrac,	mxRefrac_r,	tempRay->nRefrac);
+						copyDoubleToMxArray(tempRay->zRefrac,	mxRefrac_z, tempRay->nRefrac);
+						
+						mxSetFieldByNumber(	eigenrays[i][j].mxEigenrayStruct, (MWINDEX)i, 10, mxRefrac_r);
+						mxSetFieldByNumber(	eigenrays[i][j].mxEigenrayStruct, (MWINDEX)i, 11, mxRefrac_z);
+					}
 					eigenrays[i][j].nEigenrays += 1;
 				}
 			}

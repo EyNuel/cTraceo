@@ -7,7 +7,10 @@
 %  
 %==================================================================
 
+addpath('../M-Files/');
+addpath('../bin/');
 clear all%, close all 
+
 case_title = '''Pekeris waveguide with wedge: Eigenray Search by Proximity''';
 
 %==================================================================
@@ -115,7 +118,7 @@ output_data.miss        = 0.5;
 disp('Writing TRACEO waveguide input file...')
 wtraceoinfil('wedge.in',case_title,source_data,surface_data,ssp_data,object_data,bottom_data,output_data);
 
-disp('Calling cTRACEO...')
+disp('Calling cTraceo...')
 !ctraceo wedge
 
 disp('Reading the output data...')
@@ -137,6 +140,6 @@ view(0,-90)
 hold off 
 xlabel('Range (m)')
 ylabel('Depth (m)')
-title('cTRACEO - Pekeris waveguide, Eigenrays by Proximity')
+title('cTraceo - Pekeris waveguide, Eigenrays by Proximity')
 
 disp('done.')

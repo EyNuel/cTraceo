@@ -7,12 +7,12 @@
 %
 %==================================================================
 
+addpath('../M-Files/');
+addpath('../bin/');
+
 clear all%, close all 
-
 disp('Deep water examples:') 
-
 case_title = '''Munk Profile, Deep Water, Coherent Transmission Loss along a Horizontal Array''';
-
 imunit = sqrt( -1 ); 
 
 %==================================================================
@@ -140,7 +140,7 @@ size(tl)
 %tl = -20*log10( abs(p) ); 
 
 figure
-plot(rarray,tl)
+plot(arrayR,tl)
 axis([0 100*1000 60 120])
 view(0,-90)
 grid on, box on
@@ -150,15 +150,15 @@ title('fTraceo.')
 %}
 %% --
 
-disp('Calling cTRACEO...')
+disp('Calling cTraceo...')
 !ctraceo munk
 
 disp('Reading the output data...')
 load ctl
-size(tl)
+%size(tl)
 
 figure
-plot(rarray,tl)
+plot(arrayR,tl)
 axis([0 100*1000 60 120])
 view(0,-90)
 grid on, box on
@@ -173,7 +173,7 @@ kr  = 1000*kraken_tlr(:,1);
 ktl =      kraken_tlr(:,2); 
 
 figure(1)
-plot(rarray,tl,'--',kr,ktl)
+plot(arrayR,tl,'--',kr,ktl)
 axis([0 100*1000 60 120])
 view(0,-90)
 grid on, box on

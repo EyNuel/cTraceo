@@ -91,16 +91,16 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 	rho1 = 1.0;			//density of water.
 	
 	//define initial conditions:
-	ray->iKill	= FALSE;
-	iUp			= FALSE;
-	iDown		= FALSE;
+	ray->iKill	= false;
+	iUp			= false;
+	iDown		= false;
 	sRefl		= 0;
 	bRefl		= 0;
 	oRefl		= 0;
 	jRefl		= 0;
 	ray->iRefl[0] = jRefl;
 
-	ray->iReturn = FALSE;
+	ray->iReturn = false;
 	numRungeKutta = 0;
 	reflDecay = 1 + 0*I;
 	ray->decay[0] = reflDecay;
@@ -155,7 +155,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 	 *	Start tracing the ray:												*
 	 ***********************************************************************/
 	i = 0;
-	while(	(ray->iKill == FALSE )	&&
+	while(	(ray->iKill == false )	&&
 			(ray->r[i] < settings->source.rbox2 ) &&
 			(ray->r[i] > settings->source.rbox1 )){
 			//repeat while the ray is whithin the range box (rbox), and hasn't been killed by any other condition.
@@ -196,12 +196,12 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 			boundaryInterpolation(	&(settings->batimetry), ri, &batInterpolatedZ, &junkVector, &normal);
 		}else{
 			DEBUG(8,"ray killed\n");
-			ray->iKill = TRUE;
+			ray->iKill = true;
 		}
 		DEBUG(9,"altInterpolatedZ: %lf\n", altInterpolatedZ);
 		DEBUG(9,"batInterpolatedZ: %lf\n", batInterpolatedZ);
 		DEBUG(7, "Check if the ray is still between the boundaries; if not, find the intersection point and calculate the reflection: \n");
-		if ((ray->iKill == FALSE ) && (zi <= altInterpolatedZ || zi >= batInterpolatedZ)){
+		if ((ray->iKill == false ) && (zi <= altInterpolatedZ || zi >= batInterpolatedZ)){
 			pointA.r = yOld[0];
 			pointA.z = yOld[1];
 			pointB.r = yNew[0];
@@ -235,12 +235,12 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 				DEBUG(8, "Testing step: ri+settings->source.ds*tauR.r: %lf\n", ri+settings->source.ds*tauR.r);
 				if(ri+settings->source.ds*tauR.r < settings->source.rbox1 || ri+settings->source.ds*tauR.r > settings->source.rbox2){
 					DEBUG(5, "Next step is outside of rangeBox => terminate the ray.\n");
-					ray->iKill = TRUE;
+					ray->iKill = true;
 				}else{
 					boundaryInterpolation(	&(settings->altimetry), ri+settings->source.ds*tauR.r, &altInterpolatedZ, &tauB, &normal);
 					if ( (zi + settings->source.ds*tauR.z) < altInterpolatedZ){
 						DEBUG(5, "Ray is digging in above surface: %lf\n", ray->theta);
-						ray->iKill = TRUE;
+						ray->iKill = true;
 					}
 				}
 				
@@ -250,7 +250,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 					
 					case SURFACE_TYPE__ABSORVENT:	//"A"
 						reflCoeff = 0 +0*I;
-						ray->iKill = TRUE;
+						ray->iKill = true;
 						break;
 						
 					case SURFACE_TYPE__RIGID:		//"R"
@@ -359,7 +359,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 				DEBUG(7, "Kill the ray if the reflection coefficient is too small: \n");
 				if ( cabs(reflDecay) < MIN_REFLECTION_COEFFICIENT ){
 					DEBUG(2, "Ray killed. abs(reflCoeff) = %e < 1e-5 )\n", cabs(reflDecay));
-					ray->iKill = TRUE;
+					ray->iKill = true;
 				}
 			//	end of "ray above surface?"
 			}else if (zi >= batInterpolatedZ){	//	Ray below bottom?
@@ -387,12 +387,12 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 				DEBUG(8, "Testing step: ri+settings->source.ds*tauR.r: %lf\n", ri+settings->source.ds*tauR.r);
 				if(ri+settings->source.ds*tauR.r < settings->source.rbox1 || ri+settings->source.ds*tauR.r > settings->source.rbox2){
 					DEBUG(5, "Next step is outside of rangeBox => terminate the ray.\n");
-					ray->iKill = TRUE;
+					ray->iKill = true;
 				}else{
 					boundaryInterpolation(	&(settings->batimetry), ri+settings->source.ds*tauR.r, &batInterpolatedZ, &tauB, &normal);
 					if ( (zi + settings->source.ds*tauR.z) > batInterpolatedZ){
 						DEBUG(5, "Ray is digging in below bottom: %lf\n", ray->theta);
-						ray->iKill = TRUE;
+						ray->iKill = true;
 					}
 				}
 				
@@ -401,7 +401,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 					
 					case SURFACE_TYPE__ABSORVENT:	//"A"
 						reflCoeff = 0 +0*I;
-						ray->iKill = TRUE;
+						ray->iKill = true;
 						break;
 						
 					case SURFACE_TYPE__RIGID:		//"R"
@@ -510,7 +510,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 				DEBUG(7,"decay: %lf, abs(reflDecay): %lf, reflCoeff: %lf\n", cabs(ray->decay[i]), cabs(reflDecay), cabs(reflCoeff));
 				//Kill the ray if the reflection coefficient is too small: 
 				if ( cabs(reflDecay) < MIN_REFLECTION_COEFFICIENT ){
-					ray->iKill = TRUE;
+					ray->iKill = true;
 					DEBUG(2, "Ray killed. abs(reflCoeff) = %e < 1e-5 )\n", cabs(reflDecay));
 				}
 			}	//if (zi > batInterpolatedZ) (	Ray below bottom?)
@@ -528,7 +528,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 			fNew[1] = tauR.z;
 			fNew[2] = slowness.r;
 			fNew[3] = slowness.z;
-		}	//if ((ray->iKill == FALSE ) && (zi < altInterpolatedZ || zi > batInterpolatedZ))
+		}	//if ((ray->iKill == false ) && (zi < altInterpolatedZ || zi > batInterpolatedZ))
 		
 		/*************************
 		 *  Object reflection:
@@ -723,7 +723,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 							case SURFACE_TYPE__ABSORVENT:	//"A"
 								DEBUG(5, "Object: SURFACE_TYPE__ABSORVENT\n");
 								reflCoeff = 0 +0*I;
-								ray->iKill = TRUE;
+								ray->iKill = true;
 								break;
 						
 							case SURFACE_TYPE__RIGID:		//"R"
@@ -775,7 +775,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 						//Kill the ray if the reflection coefficient is too small: 
 						if ( cabs(reflDecay) < MIN_REFLECTION_COEFFICIENT ){
 							DEBUG(2, "Ray killed. abs(reflCoeff) = %e < 1e-5 )\n", cabs(reflDecay));
-							ray->iKill = TRUE;
+							ray->iKill = true;
 						}
 						
 						//Update marching solution and function:
@@ -926,7 +926,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 		//reallocRayMembers(ray, ray->nCoords-1);
 	}
 	
-	DEBUG(1, "r: %lf, z: %lf, IC: %lf\n", ray->r[ray->nCoords -1], ray->z[ray->nCoords -1], ray->ic[ray->nCoords -1]);
+	DEBUG(4, "r: %lf, z: %lf, IC: %lf\n", ray->r[ray->nCoords -1], ray->z[ray->nCoords -1], ray->ic[ray->nCoords -1]);
 	
 	/* Search for refraction points (refraction angles are zero!), rMin, rMax and twisting(returning) of rays:	*/
 	//NOTE: We are assuming (safely) that there can't be more refraction points than the ray has coordinates,
@@ -945,7 +945,7 @@ void	solveEikonalEq(settings_t* settings, ray_t* ray){
 		
 		prod = ( ray->r[i+1]-ray->r[i] )*( ray->r[i]-ray->r[i-1] );
 		if ( prod < 0 ){
-			ray->iReturn = TRUE;
+			ray->iReturn = true;
 		}
 	}
 	

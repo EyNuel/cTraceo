@@ -8,7 +8,10 @@
 %  
 %==================================================================
 
+addpath('../M-Files/');
+addpath('../bin/');
 clear all%, close all 
+
 case_title = '''Coherent Acoustic Pressure in a Pekeris flat waveguide, with a rectangular array and 2 objects.''';
 imunit = sqrt( -1 ); 
 
@@ -139,7 +142,7 @@ output_data.miss        = 0.5;
 disp('Writing TRACEO waveguide input file...')
 wtraceoinfil('cpr.in',case_title,source_data,surface_data,ssp_data,object_data,bottom_data,output_data);
 
-disp('Calling cTRACEO...')
+disp('Calling cTraceo...')
 !ctraceo cpr
 
 disp('Reading the output data...')
@@ -151,7 +154,7 @@ tej = flipud( jet( 256 ) );
 %%
 figure, hold on
 plot(rs,zs,'ko',rs,zs,'m*','MarkerSize',16) 
-pcolor(rarray,zarray,tl), shading interp, colormap( tej ), caxis([20 120]), 
+pcolor(arrayR,arrayZ,tl), shading interp, colormap( tej ), caxis([20 120]), 
 colorbar 
 box on
 fill(xobj1(1,:),xobj1(2,:),'k')
@@ -162,7 +165,7 @@ view(0,-90)
 hold off 
 xlabel('Range (m)')
 ylabel('Depth (m)')
-title('cTRACEO - Pekeris waveguide, TL from Pressure')
+title('cTraceo - Pekeris waveguide, TL from Pressure')
 %%
 %{
 disp('Calling fTRACEO...')
@@ -176,7 +179,7 @@ tej = flipud( jet( 256 ) );
 
 figure, hold on
 plot(rs,zs,'ko',rs,zs,'m*','MarkerSize',16) 
-pcolor(rarray,zarray,tl), shading interp, colormap( tej ), caxis([20 120]), 
+pcolor(arrayR,arrayZ,tl), shading interp, colormap( tej ), caxis([20 120]), 
 colorbar 
 box on
 fill(xobj1(1,:),xobj1(2,:),'k')
@@ -193,8 +196,8 @@ title('fTRACEO - Pekeris waveguide, TL p')
 %{
 figure
 hold on
-quiver(rarray(1:10:end),zarray(1:10:end), u(1:10:end, 1:10:end), w(1:10:end, 1:10:end),2)
-contour(rarray(1:1:end),zarray(1:1:end), tl(1:1:end, 1:1:end))
+quiver(arrayR(1:10:end),arrayZ(1:10:end), u(1:10:end, 1:10:end), w(1:10:end, 1:10:end),2)
+contour(arrayR(1:1:end),arrayZ(1:1:end), tl(1:1:end, 1:1:end))
 axis ij
 hold off
 %}

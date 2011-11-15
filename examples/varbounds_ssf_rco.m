@@ -8,6 +8,8 @@
 % 
 %==================================================================
 
+addpath('../M-Files/');
+addpath('../bin/');
 clear all%, close all 
 disp('Deep water examples:') 
 case_title = '''Deep Water, Ray Coordinates with Munk Sound Speed Field (range dependent).''';

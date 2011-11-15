@@ -7,7 +7,9 @@
 %  
 %==================================================================
 
-%clear all, close all 
+addpath('../M-Files/');
+addpath('../bin/');
+clear all%, close all 
 imunit = sqrt(-1);
 
 case_title = '''Particle Velocity, Linear Array and 2 objects''';
@@ -146,7 +148,7 @@ output_data.miss        = 0.5;
 disp('Writing TRACEO waveguide input file...')
 wtraceoinfil('flat.in',case_title,source_data,surface_data,ssp_data,object_data,bottom_data,output_data);
 
-disp('Calling TRACEO...')
+disp('Calling cTraceo...')
 !ctraceo flat
 
 disp('Reading the output data...')
@@ -157,7 +159,7 @@ tlw = 20.0*log10( abs(w) );
 
 figure
 subplot(1,2,1)
-imagesc(rarray(:,2:end-1),zarray,tlu(:,2:end-1));
+imagesc(arrayR(:,2:end-1),arrayZ,tlu(:,2:end-1));
 hold on
 xlabel('Range (m)')
 ylabel('Depth (m)')
@@ -165,7 +167,7 @@ title('Isovelocity waveguide: TL u (c)')
 hold off
 
 subplot(1,2,2)
-imagesc(rarray(:,2:end-1),zarray,tlw(:,2:end-1));
+imagesc(arrayR(:,2:end-1),arrayZ,tlw(:,2:end-1));
 hold on
 xlabel('Range (m)')
 ylabel('Depth (m)')
@@ -198,7 +200,7 @@ tlw = 20.0*log10( abs(w) );
 
 
 subplot(2,2,3)
-imagesc(rarray(:,2:end-1),zarray,tlu(:,2:end-1));
+imagesc(arrayR(:,2:end-1),arrayZ,tlu(:,2:end-1));
 hold on
 xlabel('Range (m)')
 ylabel('Depth (m)')
@@ -206,7 +208,7 @@ title('Isovelocity waveguide: TL u (f)')
 hold off
 
 subplot(2,2,4)
-imagesc(rarray(:,2:end-1),zarray,tlw(:,2:end-1));
+imagesc(arrayR(:,2:end-1),arrayZ,tlw(:,2:end-1));
 hold on
 xlabel('Range (m)')
 ylabel('Depth (m)')

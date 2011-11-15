@@ -8,7 +8,10 @@
 %
 %==================================================================
 
+addpath('../M-Files/');
+addpath('../bin/');
 clear all%, close all 
+
 disp('Deep water examples:') 
 case_title = '''Munk Profile, Deep Water, Coherent Acoustic Pressure along a Horizontal Array''';
 
@@ -29,7 +32,7 @@ Dmax   =  5000;
 ray_step = Rmax/1000; 
 
 zs = 1000; rs = 0;
-np2 = 51; thetamax = 14; la = linspace(-thetamax,thetamax,np2);
+np2 = 3500; thetamax = 14; la = linspace(-thetamax,thetamax,np2);
 
 source_data.ds       = ray_step;
 source_data.position = [rs zs];
@@ -139,8 +142,8 @@ tl = -20*log10( abs(p) );
 size(tl)
 
 figure
-plot(rarray,tl)
-%pcolor(rarray,zarray,tl), shading interp
+plot(arrayR,tl)
+%pcolor(arrayR,arrayZ,tl), shading interp
 axis([0 100*1000 60 120])
 view(0,-90)
 grid on, box on
@@ -150,7 +153,7 @@ title('fTraceo.')
 %}
 %% --
 
-disp('Calling cTRACEO...')
+disp('Calling cTraceo...')
 !ctraceo munk
 
 disp('Reading the output data...')
@@ -161,7 +164,7 @@ tl = -20*log10( abs(p) );
 size(tl)
 
 figure
-plot(rarray,tl)
+plot(arrayR,tl)
 axis([0 100*1000 60 120])
 view(0,-90)
 grid on, box on
@@ -176,7 +179,7 @@ kr  = 1000*kraken_tlr(:,1);
 ktl =      kraken_tlr(:,2); 
 
 figure(1)
-plot(rarray,tl,'--',kr,ktl)
+plot(arrayR,tl,'--',kr,ktl)
 axis([0 100*1000 60 120])
 view(0,-90)
 grid on, box on

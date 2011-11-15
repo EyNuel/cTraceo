@@ -15,7 +15,9 @@
 %  
 %==================================================================
 
-%clear all%, close all 
+addpath('../M-Files/');
+addpath('../bin/');
+clear all%, close all 
 imunit = sqrt( -1 );
 
 a = [100:150:550];  %raystep
@@ -197,7 +199,7 @@ for i=1:length(a)
 
         %%
         figure
-        pcolor(rarray,zarray,tl), shading interp, %caxis([-20 -5]),
+        pcolor(arrayR,arrayZ,tl), shading interp, %caxis([-20 -5]),
         colorbar
         hold on
         plot(rs,zs,'ko',rs,zs,'m*','MarkerSize',16)
@@ -228,7 +230,7 @@ for i=1:length(a)
         %%
         subplot(spds(1), spds(2), subplotIndex);
         figure(1)
-        pcolor(rarray,zarray,tl), shading interp, %caxis([-20 -5]),
+        pcolor(arrayR,arrayZ,tl), shading interp, %caxis([-20 -5]),
 %        colorbar
         hold on
         plot(rs,zs,'ko',rs,zs,'m*','MarkerSize',16)
@@ -255,7 +257,7 @@ end
 differ = (abs(p_fTraceo) - abs(p_cTraceo))./abs(p_fTraceo)*100;
 differ(~isfinite(differ)) = 0;  %set inf and nan to zero
 figure
-pcolor(rarray,zarray,differ), shading interp, caxis([min(min(differ)) max(max(differ))]),
+pcolor(arrayR,arrayZ,differ), shading interp, caxis([min(min(differ)) max(max(differ))]),
 colorbar
 axis([0 Rmax 0 Dmax])
 view(0,-90)
@@ -268,7 +270,7 @@ title('cTraceo vs fTraceo - relative amplitude difference (%).')
 differ = (convang(angle(p_fTraceo), 'rad', 'deg') - convang(angle(p_cTraceo), 'rad', 'deg'))./convang(angle(p_fTraceo), 'rad', 'deg')*100;
 differ(~isfinite(differ)) = 0;  %set inf and nan to zero
 figure
-pcolor(rarray,zarray,differ), shading interp, caxis([min(min(differ)) max(max(differ))]),
+pcolor(arrayR,arrayZ,differ), shading interp, caxis([min(min(differ)) max(max(differ))]),
 colorbar
 axis([0 Rmax 0 Dmax])
 view(0,-90)

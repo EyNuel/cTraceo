@@ -8,6 +8,8 @@
 %
 %==================================================================
 
+addpath('../M-Files/');
+addpath('../bin/');
 clear all%, close all 
 
 case_title = '''Eigenray Search by Regula Falsi in Sletvik (Hopavagen) waveguide.''';
