@@ -36,7 +36,7 @@ uintptr_t	writeStructArray(MATFile* outfile, const char* arrayName, mxArray* inA
 	 * 		 not a child of another struct.
 	 */
 	tempUInt32	= inArray->nBytes + 8;
-	printf("total size without array name: %u\n", tempUInt32);
+	//printf("total size without array name: %u\n", tempUInt32);
 	if(inArray->isChild == false){
 		// add size for full lines
 		tempUInt32 += strlen(arrayName) / 8;
@@ -45,7 +45,7 @@ uintptr_t	writeStructArray(MATFile* outfile, const char* arrayName, mxArray* inA
 			tempUInt32 += 8;
 		}
 	}
-	printf("total size inc. arrayname: %u\n", tempUInt32);
+	//printf("total size inc. arrayname: %u\n", tempUInt32);
 	//write size to file
 	fwrite(&tempUInt32, sizeof(uint32_t), 1, outfile);
 	
@@ -146,7 +146,7 @@ uintptr_t	writeStructArray(MATFile* outfile, const char* arrayName, mxArray* inA
 	tempUInt8	= 0x00;
 	for (uintptr_t iField=0; iField<inArray->nFields; iField++){
 		//write the fieldName:
-		//printf("writing fildName[%lu]: strlen()= %lu\n", iField, strlen(inArray->fieldNames[iField]));
+		//printf("writing fieldName[%lu]: %s, strlen()= %lu\n", iField, inArray->fieldNames[iField], strlen(inArray->fieldNames[iField]));
 		fwrite(inArray->fieldNames[iField], sizeof(uint8_t), strlen(inArray->fieldNames[iField]), outfile);
 		
 		//write individual padding:
@@ -178,7 +178,6 @@ uintptr_t	writeStructArray(MATFile* outfile, const char* arrayName, mxArray* inA
 	
 	/* *********************************************************
 	 * write the structure's children to the matfile
-	 * TODO: support for actual arrays, i.e.: more than one structure
 	 */
 	for (uintptr_t j=0; j<inArray->dims[0] * inArray->dims[1]; j++){
 		for (uintptr_t i=0; i<inArray->nFields; i++){

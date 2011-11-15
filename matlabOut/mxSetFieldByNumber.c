@@ -37,7 +37,6 @@ void	mxSetFieldByNumber(	mxArray*	mxStruct,		//pointer to the mxStruct
 	mxStruct[index].field[iField] = inArray;
 	
 	//printf("assigned: %s\n", mxStruct[index].fieldNames[iField]);
-	
 	//print the addresses of the mxStruct members:
 	/*
 	for (uintptr_t iStruct=0; iStruct<mxStruct->dims[0]*mxStruct->dims[1]; iStruct++){
