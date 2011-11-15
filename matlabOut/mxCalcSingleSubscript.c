@@ -31,8 +31,8 @@ uintptr_t	mxCalcSingleSubscript(mxArray *inArray, uintptr_t nSubs, uintptr_t *su
 	 * 		http://www.mathworks.com/help/techdoc/apiref/mxcalcsinglesubscript.html
 	 *	
 	 *	NOTE:
-	 * 		This implementatio only supports up to 2 dimensions, as no nedd for more
-	 * 		in cTraceo.
+	 * 		This implementation only supports up to 2 dimensions, as there is no need
+	 * 		for more in cTraceo.
 	 */
 	
 	uintptr_t index = 0;
@@ -41,7 +41,9 @@ uintptr_t	mxCalcSingleSubscript(mxArray *inArray, uintptr_t nSubs, uintptr_t *su
 	row		= subs[0];
 	col		= subs[1];
 	nRows	= inArray->dims[0];
-	index	= col + row * nRows;
+	index	= row + col * nRows;
+	
+	//printf("mxCalcSingleSubscript(): (row, col, nRows) = (%lu, %lu, %lu) => (%lu)\n", subs[0], subs[1], nRows, index);
 	
 	return index;
 }
