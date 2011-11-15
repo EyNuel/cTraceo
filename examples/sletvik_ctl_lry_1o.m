@@ -235,3 +235,9 @@ ylabel('Depth (m)')
 title('cTraceo - Sletvik waveguide, Coherent TL with 1 object.')
 caxis([minTL maxTL])
 
+%%
+figure
+plot(tl);
+xlabel('Range (m)')
+axis([0 Rmax 0 maxTL])
+axis ij
