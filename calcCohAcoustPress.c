@@ -139,7 +139,7 @@ void	calcCohAcoustPress(settings_t* settings){
 	}
 	matPutVariable(matfile, "caseTitle", pTitle);
 	mxDestroyArray(pTitle);
-
+	
 	//write hydrophone array ranges to file:
 	pHydArrayR	= mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)settings->output.nArrayR, mxREAL);
 	if(pHydArrayR == NULL){

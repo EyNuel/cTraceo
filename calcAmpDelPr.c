@@ -328,22 +328,22 @@ void calcAmpDelPr(settings_t* settings){
 			idx[1] = (MWINDEX)j;
 			mxSetFieldByNumber(	mxAadStruct,									//pointer to the mxStruct
 								mxCalcSingleSubscript(mxAadStruct,	2, idx),	//index of the element
-								0,												//position of the field (in this case, field 0 is "theta"
+								0,												//position of the field (in this case, field 0 is "nArrivals"
 								mxNumArrivals);									//the mxArray we want to copy into the mxStruct
 			
 			mxSetFieldByNumber(	mxAadStruct,						//pointer to the mxStruct
 								mxCalcSingleSubscript(mxAadStruct,	2, idx),	//index of the element
-								1,											//position of the field (in this case, field 0 is "theta"
+								1,											//position of the field (in this case, field 1 is "rHyd"
 								mxRHyd);									//the mxArray we want to copy into the mxStruct
 			
 			mxSetFieldByNumber(	mxAadStruct,						//pointer to the mxStruct
 								mxCalcSingleSubscript(mxAadStruct,	2, idx),	//index of the element
-								2,											//position of the field (in this case, field 0 is "theta"
+								2,											//position of the field (in this case, field 2 is "zHyd"
 								mxZHyd);									//the mxArray we want to copy into the mxStruct
 			
 			mxSetFieldByNumber(	mxAadStruct,									//pointer to the mxStruct
 								mxCalcSingleSubscript(mxAadStruct,	2, idx),	//index of the element
-								3,												//position of the field (in this case, field 0 is "theta"
+								3,												//position of the field (in this case, field 3 is "arrival"
 								arrivals[j][jj].mxArrivalStruct);				//the mxArray we want to copy into the mxStruct
 		}
 	}

@@ -100,18 +100,21 @@ void	calcEigenrayPr(settings_t* settings){
 	//initialize to 0
 	for (j=0; j<settings->output.nArrayR; j++){
 		for (jj=0; jj<settings->output.nArrayZ; jj++){
+			DEBUG(1, "initializing eigenray structure (j, jj) = (%lu, %lu)...", j, jj);
 			eigenrays[j][jj].nEigenrays = 0;
 			eigenrays[j][jj].mxEigenrayStruct = mxCreateStructMatrix(	(MWSIZE)settings->source.nThetas,		//number of rows
-																	(MWSIZE)1,								//number of columns
-																	12,										//number of fields in each element
-																	arrivalFieldNames);						//list of field names
+																		(MWSIZE)1,								//number of columns
+																		12,										//number of fields in each element
+																		arrivalFieldNames);						//list of field names
 			if( eigenrays[j][jj].mxEigenrayStruct == NULL ){
 				fatal("Memory Alocation error.");
 			}
+			DEBUG(1, "Done.\n");
 		}
 	}
 	
 	#if 1
+	
 	//open matfile for output
 	matfile 	= matOpen("eig.mat", "w");
 	
@@ -155,7 +158,7 @@ void	calcEigenrayPr(settings_t* settings){
 	matPutVariable(matfile, "zarray", pHydArrayZ);
 	mxDestroyArray(pHydArrayZ);
 	
-
+	
 	//allocate memory for the rays:
 	ray = makeRay(settings->source.nThetas);
 	#endif
@@ -408,13 +411,14 @@ void	calcEigenrayPr(settings_t* settings){
 	}//for(i=0; i<settings->source.nThetas; i++)
 	
 	//copy arrival data to mxAllEigenraysStruct:
-	mxAllEigenraysStruct = mxCreateStructMatrix(	(MWSIZE)settings->output.nArrayZ,	//number of rows
+	mxAllEigenraysStruct = mxCreateStructMatrix((MWSIZE)settings->output.nArrayZ,	//number of rows
 												(MWSIZE)settings->output.nArrayR,	//number of columns
 												4,									//number of fields in each element
 												eigenrayFieldNames);				//list of field names
 	if( mxAllEigenraysStruct == NULL ) {
 		fatal("Memory Alocation error.");
 	}
+	
 	for (j=0; j<settings->output.nArrayR; j++){
 		for (jj=0; jj<settings->output.nArrayZ; jj++){
 			mxNumEigenrays	= mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)1,	mxREAL);
