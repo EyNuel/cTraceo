@@ -100,16 +100,8 @@ uint32_t	calcArraySize(mxArray* inArray){
 		 */
 		for (uintptr_t j=0; j<inArray->dims[0]*inArray->dims[1]; j++){
 			for (uintptr_t i=0; i<inArray->nFields; i++){
-				 temp = calcArraySize(inArray[j].field[i]);
-				 nBytes += temp;
+				nBytes += calcArraySize(inArray[j].field[i]);
 				//printf("size required including child[%lu]: %lu\n", i, nBytes);
-				
-				/*
-				//print fieldname to which we tried to assign an empty mxArray
-				if (temp == 0){
-					printf("%s\n",inArray[j].fieldNames[i]);
-				}
-				*/
 			}
 		}
 	

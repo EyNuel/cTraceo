@@ -16,7 +16,7 @@ FILE* writeMatfileHeader(FILE* outfile, const char descriptiveText[124]){
 	 */
 	uint16_t	tempUInt16 = 0x0100;
 	fwrite(&tempUInt16, sizeof(uint16_t), 1, outfile);
-	printf(":%u:\n", tempUInt16);
+	//printf(":%u:\n", tempUInt16);
 	
 
 	/*
