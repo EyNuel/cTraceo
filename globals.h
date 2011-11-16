@@ -67,6 +67,9 @@
 #define TOP		0
 #define	BOTTOM	2
 
+#define LINUX   1
+#define WINDOWS 2
+
 //function macro used for showing debugging information:
 #if VERBOSE == 1
 	#define WHERESTR				"[%s,\tline %d]:\t"
