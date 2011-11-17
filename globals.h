@@ -6,7 +6,7 @@
 #include <stdint.h>		//needed for inequivocal type qualifiers as defined in C99
 #include <stdbool.h>	//for boolean data type
 #include <complex.h>
-#include <matrix.h>		//needed for matlab matrix dimensions (mwSize)
+
 
 /********************************************************************************
  * Configuration:																*
@@ -31,34 +31,34 @@
  * their type according to the matlab version used during compilation.			*
  * NOTE: To choose a specific matlab version for compilatio, edit the Makefile.	*
  ********************************************************************************/
-#define R12		0
-#define R14		1
-#define R2007A	2
-#define R2007B	3
-#define R2008A	4
-#define R2008B	5
-#define R2010B	6
+#if USE_MATLAB == 1
+	#define R12		0
+	#define R14		1
+	#define R2007A	2
+	#define R2007B	3
+	#define R2008A	4
+	#define R2008B	5
+	#define R2010B	6
 
 
-//When writing matlab-matrixes to matfiles, the data type varies between matlab versions.
-#if MATLAB_VERSION == R12 || MATLAB_VERSION == R14
-	//matlab R14 uses int32
-	#define MWSIZE			int32_t
-	#define	MWINDEX			int32_t
-#elif	MATLAB_VERSION == R2007A || MATLAB_VERSION == R2007B || MATLAB_VERSION == R2008A || MATLAB_VERSION == R2008B || MATLAB_VERSION == R2010B
-	//matlab R2008b and others use mwSize and mwIndex which defined in "matrix.h"
-	#define MWSIZE			mwSize		
-	#define MWINDEX			mwIndex
+	//When writing matlab-matrixes to matfiles, the data type varies between matlab versions.
+	#if MATLAB_VERSION == R12 || MATLAB_VERSION == R14
+		//matlab R14 uses int32
+		#define MWSIZE			int32_t
+		#define	MWINDEX			int32_t
+	#elif	MATLAB_VERSION == R2007A || MATLAB_VERSION == R2007B || MATLAB_VERSION == R2008A || MATLAB_VERSION == R2008B || MATLAB_VERSION == R2010B
+		//matlab R2008b and others use mwSize and mwIndex which defined in "matrix.h"
+		#define MWSIZE			mwSize		
+		#define MWINDEX			mwIndex
+	#endif
+#else
+	#define MWSIZE			uintptr_t
+	#define MWINDEX			uintptr_t
 #endif
-
 
 /********************************************************************************
  * Some utilities																*
  ********************************************************************************/
-//#define	true	1
-//#define false	0
-//typedef false false
-//typedef true  true
 
 //the following 5 lines are used to simplify access to star pressure elements (for particle velocity)
 #define LEFT	0
@@ -68,7 +68,10 @@
 #define TOP		0
 #define	BOTTOM	2
 
-//functin macro used for showing debugging information:
+#define LINUX   1
+#define WINDOWS 2
+
+//function macro used for showing debugging information:
 #if VERBOSE == 1
 	#define WHERESTR				"[%s,\tline %d]:\t"
 	#define WHEREARG				__FILE__, __LINE__
@@ -294,6 +297,21 @@ typedef struct settings {
 	interface_t		batimetry;
 	output_t		output;
 }settings_t;
+
+
+/********************************************************************************
+ * Structures that contain the results which will be written to matfiles.		*
+ *******************************************************************************/
+
+//#define USE_MATLAB 0
+
+#if USE_MATLAB == 1
+	#include <matrix.h>		//needed for matlab matrix dimensions (mwSize)
+#else
+	#include "matlabOut/matlabOut.h"
+#endif
+
+
 
 
 typedef struct arrivals{

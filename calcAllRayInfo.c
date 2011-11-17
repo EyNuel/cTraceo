@@ -30,8 +30,12 @@
 #include "tools.h"
 #include "solveDynamicEq.c"
 #include "solveEikonalEq.c"
-#include <mat.h>
-#include "matrix.h"
+#if USE_MATLAB == 1
+	#include <mat.h>
+	#include "matrix.h"
+#else
+	#include	"matlabOut/matlabOut.h"
+#endif
 
 void	calcAllRayInfo(settings_t*);
 

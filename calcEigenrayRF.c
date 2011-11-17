@@ -33,8 +33,12 @@
 #include "tools.h"
 #include "solveDynamicEq.c"
 #include "solveEikonalEq.c"
-#include <mat.h>
-#include "matrix.h"
+#if USE_MATLAB == 1
+	#include <mat.h>
+	#include "matrix.h"
+#else
+	#include	"matlabOut/matlabOut.h"
+#endif
 #include "interpolation.h"
 #include "bracket.c"
 
@@ -450,16 +454,15 @@ void	calcEigenrayRF(settings_t* settings){
 					
 					///save refraction coordinates to structure:
 					if (tempRay->nRefrac > 0){
-						mxRefrac_r = mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)ray[i].nRefrac, mxREAL);
-						mxRefrac_z = mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)ray[i].nRefrac, mxREAL);
+						mxRefrac_r = mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)tempRay->nRefrac, mxREAL);
+						mxRefrac_z = mxCreateDoubleMatrix((MWSIZE)1,	(MWSIZE)tempRay->nRefrac, mxREAL);
 						
-						copyDoubleToMxArray(tempRay->rRefrac,	mxRefrac_r,	ray[i].nRefrac);
-						copyDoubleToMxArray(tempRay->zRefrac,	mxRefrac_z, ray[i].nRefrac);
+						copyDoubleToMxArray(tempRay->rRefrac,	mxRefrac_r,	tempRay->nRefrac);
+						copyDoubleToMxArray(tempRay->zRefrac,	mxRefrac_z, tempRay->nRefrac);
 						
 						mxSetFieldByNumber(	eigenrays[i][j].mxEigenrayStruct, (MWINDEX)i, 10, mxRefrac_r);
 						mxSetFieldByNumber(	eigenrays[i][j].mxEigenrayStruct, (MWINDEX)i, 11, mxRefrac_z);
 					}
-					
 					eigenrays[i][j].nEigenrays += 1;
 				}
 			}
