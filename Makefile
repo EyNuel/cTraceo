@@ -94,10 +94,10 @@ LINK 		:= $(CC) $(LFLAGS) -o
 COMPLINK 	:= $(CC) $(CFLAGS) $(LFLAGS) -o $@
 
 ## A list of all non-source files that are part of the distribution.
-AUXFILES := Makefile readme.txt
+AUXFILES := Makefile readme.txt examples/sletvik_transect.mat
 
 ## A list of directories that belong to the project
-PROJDIRS := . M-Files examples
+PROJDIRS := . M-Files examples matlabOut
 
 ## Recursively create a list of files that are inside the project
 SRCFILES := $(shell find $(PROJDIRS) -mindepth 0 -maxdepth 1 -name "*.c")
