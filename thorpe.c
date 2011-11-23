@@ -1,35 +1,50 @@
-/************************************************************************************
- *	thorpe.c		 																*
- * 	(formerly "thorpe.for")															*
- * 	Calculate Thorpe attenuation. (reference: Bellhop)								*
- * 																					*
- *	originally written in FORTRAN by:												*
- *  						Orlando Camargo Rodriguez:								*
- *							Copyright (C) 2010										*
- * 							Orlando Camargo Rodriguez								*
- *							orodrig@ualg.pt											*
- *							Universidade do Algarve									*
- *							Physics Department										*
- *							Signal Processing Laboratory							*
- *																					*
- *	Ported to C for project SENSOCEAN by:											*
- * 						Emanuel Ey													*
- *						emanuel.ey@gmail.com										*
- *						Signal Processing Laboratory								*
- *						Universidade do Algarve										*
- *																					*
- *	Inputs:																			*
- * 				freq	Frequency.													*
- * 	Outputs:																		*
- * 				alpha:	Thorpe attenuation in dB/m.									*
- * 																					*
- ***********************************************************************************/
-void	thorpe(double, double*);
+/****************************************************************************************
+ *  thorpe.c                                                                            *
+ *  (formerly "thorpe.for")                                                             *
+ *  Calculate Thorpe attenuation. (reference: Bellhop)                                  *
+ *                                                                                      *
+ * ------------------------------------------------------------------------------------ *
+ * License: This file is part of the cTraceo Raytracing Model and is released under the *
+ *          Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License  *
+ *          http://creativecommons.org/licenses/by-nc-sa/3.0/                           *
+ *                                                                                      *
+ * NOTE:    cTraceo is research code under active development.                          *
+ *          The code may contain bugs and updates are possible in the future.           *
+ *                                                                                      *
+ * Written for project SENSOCEAN by:                                                    *
+ *          Emanuel Ey                                                                  *
+ *          emanuel.ey@gmail.com                                                        *
+ *          Copyright (C) 2011                                                          *
+ *          Signal Processing Laboratory                                                *
+ *          Universidade do Algarve                                                     *
+ *                                                                                      *
+ * cTraceo is the C port of the FORTRAN 77 TRACEO code written by:                      *
+ *          Orlando Camargo Rodriguez:                                                  *
+ *          Copyright (C) 2010                                                          *
+ *          Orlando Camargo Rodriguez                                                   *
+ *          orodrig@ualg.pt                                                             *
+ *          Universidade do Algarve                                                     *
+ *          Physics Department                                                          *
+ *          Signal Processing Laboratory                                                *
+ *                                                                                      *
+ * ------------------------------------------------------------------------------------ *
+ * Inputs:                                                                              *
+ *          freq:   Frequency.                                                          *
+ *                                                                                      *
+ * Outputs:                                                                             *
+ *          alpha:  Thorpe attenuation in dB/m.                                         *
+ *                                                                                      *
+ * Return Value:                                                                        *
+ *          None                                                                        *
+ *                                                                                      *
+ ****************************************************************************************/
 
-void	thorpe(double freq, double* alpha){
-	double		fxf;
+void    thorpe(double, double*);
 
-	fxf		= pow( (freq/1000 ), 2);
-	*alpha	= 0.0033 +0.11 * fxf / (1 +fxf ) + 44 * fxf / (4100 +fxf) +0.0003 * fxf;
-	*alpha	= *alpha/8685.8896;
+void    thorpe(double freq, double* alpha){
+    double      fxf;
+
+    fxf     = pow( (freq/1000 ), 2);
+    *alpha  = 0.0033 +0.11 * fxf / (1 +fxf ) + 44 * fxf / (4100 +fxf) +0.0003 * fxf;
+    *alpha  = *alpha/8685.8896;
 }

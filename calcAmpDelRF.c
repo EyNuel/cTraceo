@@ -1,32 +1,43 @@
-/********************************************************************************
- *	calcAmpDelRF.c		 														*
- * 	(formerly "caladr.for")														*
- *	Calculates Amplitudes and arrivals using Regula Falsi method.				*
- *	Note that in fact this is simply a matter of finding the eigenrays and		*
- *	outputting their amplitudes and arrivals as a stem plot, so the only		*
- *	difference between this and calcEigenrayRF is in the output.				*
- *																				*
- *	originally written in FORTRAN by:											*
- *  					Orlando Camargo Rodriguez:								*
- *						Copyright (C) 2010										*
- * 						Orlando Camargo Rodriguez								*
- *						orodrig@ualg.pt											*
- *						Universidade do Algarve									*
- *						Physics Department										*
- *						Signal Processing Laboratory							*
- *																				*
- *	Ported to C for project SENSOCEAN by:										*
- * 						Emanuel Ey												*
- *						emanuel.ey@gmail.com									*
- *						Signal Processing Laboratory							*
- *						Universidade do Algarve									*
- *																				*
- *	Inputs:																		*
- * 				settings:	Pointer to structure containing all input info.		*
- * 	Outputs:																	*
- * 				none:		Writes to file "eig.mat".							*
- * 																				*
- *******************************************************************************/
+/****************************************************************************************
+ *  calcAmpDelPr.c                                                                      *
+ *  (formerly "caladp.for")                                                             *
+ *  Calculates Amplitudes and arrivals using Regula Falsi method.                       *
+ *                                                                                      *
+ * ------------------------------------------------------------------------------------ *
+ * License: This file is part of the cTraceo Raytracing Model and is released under the *
+ *          Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License  *
+ *          http://creativecommons.org/licenses/by-nc-sa/3.0/                           *
+ *                                                                                      *
+ * NOTE:    cTraceo is research code under active development.                          *
+ *          The code may contain bugs and updates are possible in the future.           *
+ *                                                                                      *
+ * Written for project SENSOCEAN by:                                                    *
+ *          Emanuel Ey                                                                  *
+ *          emanuel.ey@gmail.com                                                        *
+ *          Copyright (C) 2011                                                          *
+ *          Signal Processing Laboratory                                                *
+ *          Universidade do Algarve                                                     *
+ *                                                                                      *
+ * cTraceo is the C port of the FORTRAN 77 TRACEO code written by:                      *
+ *          Orlando Camargo Rodriguez:                                                  *
+ *          Copyright (C) 2010                                                          *
+ *          Orlando Camargo Rodriguez                                                   *
+ *          orodrig@ualg.pt                                                             *
+ *          Universidade do Algarve                                                     *
+ *          Physics Department                                                          *
+ *          Signal Processing Laboratory                                                *
+ *                                                                                      *
+ * ------------------------------------------------------------------------------------ *
+ *  Inputs:                                                                             *
+ *          settings:   Pointer to structure containing all input info.                 *
+ *                                                                                      *
+ *  Outputs:                                                                            *
+ *          "aad.mat":  File containing arrival information.                            *
+ *                                                                                      *
+ *  Return Value:                                                                       *
+ *          None                                                                        *
+ *                                                                                      *
+ ****************************************************************************************/
 
 #pragma  once
 #include <complex.h>
