@@ -81,12 +81,25 @@ void calcAmpDelPr(settings_t* settings){
     mxArray*        mxZ                 = NULL;
     mxArray*        mxTau               = NULL;
     mxArray*        mxAmp               = NULL;
+    mxArray*        iReturns            = NULL;
+    mxArray*        nSurRefl            = NULL;
+    mxArray*        nBotRefl            = NULL;
+    mxArray*        nObjRefl            = NULL;
     mxArray*        mxAadStruct         = NULL;     //contains the arrivals at a single hydrophone
     mxArray*        mxNumArrivals       = NULL;
     mxArray*        mxRHyd              = NULL;
     mxArray*        mxZHyd              = NULL;
     const char*     aadFieldNames[]     = { "nArrivals", "rHyd", "zHyd", "arrival" };
-    const char*     arrivalFieldNames[] = { "theta", "r", "z", "tau", "amp"};   //the names of the fields contained in mxArrivalStruct
+    const char*     arrivalFieldNames[] = { "theta",
+                                            "r",
+                                            "z",
+                                            "tau",
+                                            "amp",
+                                            "iReturns",
+                                            "nSurRefl",
+                                            "nBotRefl",
+                                            "nObjRefl"};        //the names of the fields contained in mxArrivalStruct
+
     MWINDEX         idx[2];                     //used for accessing a specific element in the mxAadStruct
 
     arrivals_t      arrivals[settings->output.nArrayR][settings->output.nArrayZ];
@@ -100,7 +113,7 @@ void calcAmpDelPr(settings_t* settings){
             arrivals[j][jj].nArrivals = 0;
             arrivals[j][jj].mxArrivalStruct = mxCreateStructMatrix( (MWSIZE)settings->source.nThetas,       //number of rows
                                                                     (MWSIZE)1,                              //number of columns
-                                                                    5,                                      //number of fields in each element
+                                                                    9,                                      //number of fields in each element
                                                                     arrivalFieldNames);                     //list of field names
             if( arrivals[j][jj].mxArrivalStruct == NULL ){
                 fatal("Memory Alocation error.");
@@ -238,7 +251,24 @@ void calcAmpDelPr(settings_t* settings){
                                 mxSetFieldByNumber( arrivals[j][jj].mxArrivalStruct, (MWINDEX)arrivals[j][jj].nArrivals, 3, mxTau);
                                 mxSetFieldByNumber( arrivals[j][jj].mxArrivalStruct, (MWINDEX)arrivals[j][jj].nArrivals, 4, mxAmp);
                                 ///Arrival has been saved to mxAadStruct
+                                
+                                ///now lets save some aditional ray information:
+                                iReturns    = mxCreateDoubleMatrix((MWSIZE)1,   (MWSIZE)1, mxREAL);
+                                nSurRefl    = mxCreateDoubleMatrix((MWSIZE)1,   (MWSIZE)1, mxREAL);
+                                nBotRefl    = mxCreateDoubleMatrix((MWSIZE)1,   (MWSIZE)1, mxREAL);
+                                nObjRefl    = mxCreateDoubleMatrix((MWSIZE)1,   (MWSIZE)1, mxREAL);
 
+                                copyBoolToMxArray(      &ray[i].iReturn,    iReturns,   1);
+                                copyUInt32ToMxArray(    &ray[i].sRefl,  nSurRefl,   1);
+                                copyUInt32ToMxArray(    &ray[i].bRefl,  nBotRefl,   1);
+                                copyUInt32ToMxArray(    &ray[i].oRefl,  nObjRefl,   1);
+
+                                mxSetFieldByNumber( arrivals[j][jj].mxArrivalStruct, (MWINDEX)arrivals[j][jj].nArrivals, 5, iReturns);
+                                mxSetFieldByNumber( arrivals[j][jj].mxArrivalStruct, (MWINDEX)arrivals[j][jj].nArrivals, 6, nSurRefl);
+                                mxSetFieldByNumber( arrivals[j][jj].mxArrivalStruct, (MWINDEX)arrivals[j][jj].nArrivals, 7, nBotRefl);
+                                mxSetFieldByNumber( arrivals[j][jj].mxArrivalStruct, (MWINDEX)arrivals[j][jj].nArrivals, 8, nObjRefl);
+                                ///aditional information has been saved
+                                
                                 arrivals[j][jj].nArrivals += 1;
                                 maxNumArrivals = max(arrivals[j][jj].nArrivals, maxNumArrivals);
                             }// if (dz settings->output.miss)
@@ -294,6 +324,22 @@ void calcAmpDelPr(settings_t* settings){
                                     mxSetFieldByNumber( arrivals[j][jj].mxArrivalStruct, (MWINDEX)arrivals[j][jj].nArrivals, 3, mxTau);
                                     mxSetFieldByNumber( arrivals[j][jj].mxArrivalStruct, (MWINDEX)arrivals[j][jj].nArrivals, 4, mxAmp);
                                     ///Arrival has been saved to mxAadStruct
+                                    
+                                     ///now lets save some aditional ray information:
+                                    iReturns    = mxCreateDoubleMatrix((MWSIZE)1,   (MWSIZE)1, mxREAL);
+                                    nSurRefl    = mxCreateDoubleMatrix((MWSIZE)1,   (MWSIZE)1, mxREAL);
+                                    nBotRefl    = mxCreateDoubleMatrix((MWSIZE)1,   (MWSIZE)1, mxREAL);
+                                    nObjRefl    = mxCreateDoubleMatrix((MWSIZE)1,   (MWSIZE)1, mxREAL);
+
+                                    copyBoolToMxArray(      &ray[i].iReturn,    iReturns,   1);
+                                    copyUInt32ToMxArray(    &ray[i].sRefl,  nSurRefl,   1);
+                                    copyUInt32ToMxArray(    &ray[i].bRefl,  nBotRefl,   1);
+                                    copyUInt32ToMxArray(    &ray[i].oRefl,  nObjRefl,   1);
+
+                                    mxSetFieldByNumber( arrivals[j][jj].mxArrivalStruct, (MWINDEX)arrivals[j][jj].nArrivals, 5, iReturns);
+                                    mxSetFieldByNumber( arrivals[j][jj].mxArrivalStruct, (MWINDEX)arrivals[j][jj].nArrivals, 6, nSurRefl);
+                                    mxSetFieldByNumber( arrivals[j][jj].mxArrivalStruct, (MWINDEX)arrivals[j][jj].nArrivals, 7, nBotRefl);
+                                    ///aditional information has been saved
 
                                     arrivals[j][jj].nArrivals += 1;
                                     maxNumArrivals = max(arrivals[j][jj].nArrivals, maxNumArrivals);
