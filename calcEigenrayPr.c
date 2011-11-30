@@ -297,11 +297,11 @@ void    calcEigenrayPr(settings_t* settings){
                                 copyUInt32ToMxArray(    &ray[i].oRefl,  nObjRefl,   1);
                                 copyUInt32ToMxArray(    &ray[i].nRefrac,    nRefrac,    1);
 
-                                mxSetFieldByNumber( eigenrays[j][jj].mxEigenrayStruct, (MWINDEX)i, 5, iReturns);
-                                mxSetFieldByNumber( eigenrays[j][jj].mxEigenrayStruct, (MWINDEX)i, 6, nSurRefl);
-                                mxSetFieldByNumber( eigenrays[j][jj].mxEigenrayStruct, (MWINDEX)i, 7, nBotRefl);
-                                mxSetFieldByNumber( eigenrays[j][jj].mxEigenrayStruct, (MWINDEX)i, 8, nObjRefl);
-                                mxSetFieldByNumber( eigenrays[j][jj].mxEigenrayStruct, (MWINDEX)i, 9, nRefrac);
+                                mxSetFieldByNumber( eigenrays[j][jj].mxEigenrayStruct, (MWINDEX)eigenrays[j][jj].nEigenrays, 5, iReturns);
+                                mxSetFieldByNumber( eigenrays[j][jj].mxEigenrayStruct, (MWINDEX)eigenrays[j][jj].nEigenrays, 6, nSurRefl);
+                                mxSetFieldByNumber( eigenrays[j][jj].mxEigenrayStruct, (MWINDEX)eigenrays[j][jj].nEigenrays, 7, nBotRefl);
+                                mxSetFieldByNumber( eigenrays[j][jj].mxEigenrayStruct, (MWINDEX)eigenrays[j][jj].nEigenrays, 8, nObjRefl);
+                                mxSetFieldByNumber( eigenrays[j][jj].mxEigenrayStruct, (MWINDEX)eigenrays[j][jj].nEigenrays, 9, nRefrac);
                                 ///aditional information has been saved
 
                                 ///save refraction coordinates to structure:
