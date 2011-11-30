@@ -54,11 +54,46 @@ int     main(int, char**);
 
 void    printHelp(void){
     /*
-     * Print help
+     * Print usage help
      */
-    //TODO
-    printf("Wouldn't it be great to get some usefull info?\n"
-    "And yet someone's gotta write it first!\n");
+    printf("\n"
+"* =========================================================================== *\n"
+"*                    The cTraceo Acoustic Raytracing Model.                   *\n"
+"*                                                                             *\n"
+"* --------------------------------------------------------------------------- *\n"
+"* License: The cTraceo Acoustic Raytracing Model is released under the        *\n"
+"*          Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported *\n"
+"*          License ( http://creativecommons.org/licenses/by-nc-sa/3.0/ )      *\n"
+"*                                                                             *\n"
+"* NOTE:    cTraceo is research code under active development.                 *\n"
+"*          The code may contain bugs and updates are possible in the future.  *\n"
+"*                                                                             *\n"
+"* Written for project SENSOCEAN by:                                           *\n"
+"*          Emanuel Ey                                                         *\n"
+"*          emanuel.ey@gmail.com                                               *\n"
+"*          Copyright (C) 2011                                                 *\n"
+"*          Signal Processing Laboratory                                       *\n"
+"*          Universidade do Algarve                                            *\n"
+"*                                                                             *\n"
+"* cTraceo is the C port of the FORTRAN 77 TRACEO code written by:             *\n"
+"*          Orlando Camargo Rodriguez:                                         *\n"
+"*          Copyright (C) 2010                                                 *\n"
+"*          Orlando Camargo Rodriguez                                          *\n"
+"*          orodrig@ualg.pt                                                    *\n"
+"*          Universidade do Algarve                                            *\n"
+"*          Physics Department                                                 *\n"
+"*          Signal Processing Laboratory                                       *\n"
+"*                                                                             *\n"
+"* ----------------------------------------------------------------------------*\n"
+"*  Usage:                                                                     *\n"
+"*          The only command line argument required by cTraceo is the name of  *\n"
+"*          the input file, without it's extension. Something like:            *\n"
+"*              $> ctraceo filename                                            *\n" 
+"*                                                                             *\n"
+"*          For more information check out the readme.txt, read the manual.pdf *\n"
+"*          or contact the authors.                                            *\n"
+"*                                                                             *\n"
+"* =========================================================================== *\n");
     
 }
 
