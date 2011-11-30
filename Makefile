@@ -8,8 +8,8 @@
 ## ================================================================
 
 ## Choose a compiler command:
-CC  := gcc
-#CC := clang
+#CC  := gcc
+CC := clang
 
 ## Set Operating system:
 ## Allowable values are: WINDOWS, LINUX
@@ -40,13 +40,13 @@ USE_MATLAB := 0
 
 ## The base directory of your matlab installation (only relevant
 ## if USE_MATLAB == 1):
-#MATLAB_DIR := /usr/local/matlabr14/
+MATLAB_DIR := /usr/local/matlabr14/
 #MATLAB_DIR := /usr/local/MATLAB/R2010b/
-MATLAB_DIR := /usr/local/matlab2008a/
+#MATLAB_DIR := /usr/local/matlab2008a/
 
 ## Your Matlab Version (only relevant if USE_MATLAB == 1):
 ## Allowable options are: R12, R14, R2007A, R2007B, R2008A, R2008B, R2010B
-MATLAB_VERSION	:= R2008B
+MATLAB_VERSION	:= R14
 
 
 
@@ -114,6 +114,9 @@ ALLFILES := $(SRCFILES) $(HDRFILES) $(AUXFILES) $(MFILES) $(PDFFILES)
 
 ## Build targets:
 all:	dirs
+		@echo " "
+		@echo "Building cTraceo with standard options -run 'make help' for more information."
+		@echo " "
 		@$(CC) $(CFLAGS) $(LFLAGS) -D VERBOSE=0 -D USE_MATLAB=$(USE_MATLAB) -D OS=$(OS) -D MATLAB_VERSION=$(MATLAB_VERSION) -O3 -o bin/ctraceo cTraceo.c
 
 pg:		dirs
@@ -138,3 +141,72 @@ dist:	#
 dirs:	#creates 'bin/' directory if it doesn't exist
 		@if [ ! -d "bin" ]; then mkdir bin; fi
 		
+help:	#
+		@echo " ============================================================================= "
+		@echo "                    The cTraceo Acoustic Raytracing Model.                     "
+		@echo "                                                                               "
+		@echo " ----------------------------------------------------------------------------- "
+		@echo " License: The cTraceo Acoustic Raytracing Model is released under the Creative "
+		@echo "          Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License    "
+		@echo "          (http://creativecommons.org/licenses/by-nc-sa/3.0/ )                 "
+		@echo "                                                                               "
+		@echo " NOTE:    cTraceo is research code under active development.                   "
+		@echo "          The code may contain bugs and updates are possible in the future.    "
+		@echo "                                                                               "
+		@echo " ----------------------------------------------------------------------------- "
+		@echo " Written for project SENSOCEAN by:                                             "
+		@echo "          Emanuel Ey                                                           "
+		@echo "          emanuel.ey@gmail.com                                                 "
+		@echo "          Copyright (C) 2011                                                   "
+		@echo "          Signal Processing Laboratory                                         "
+		@echo "          Universidade do Algarve                                              "
+		@echo "                                                                               "
+		@echo " cTraceo is the C port of the FORTRAN 77 TRACEO code written by:               "
+		@echo "          Orlando Camargo Rodriguez:                                           "
+		@echo "          Copyright (C) 2010                                                   "
+		@echo "          Orlando Camargo Rodriguez                                            "
+		@echo "          orodrig@ualg.pt                                                      "
+		@echo "          Universidade do Algarve                                              "
+		@echo "          Physics Department                                                   "
+		@echo "          Signal Processing Laboratory                                         "
+		@echo "                                                                               "
+		@echo " ============================================================================= "
+		@echo " Available make targets:                                                       "
+		@echo "                                                                               "
+		@echo "     all:      Compiles model with highest optimization level. [default]       "
+		@echo "                                                                               "
+		@echo "     pg:       Compiles model with highest optimization level, debugging       "
+		@echo "               symbols and profiling information. For use with 'gprof';        "
+		@echo "                                                                               "
+		@echo "     debug:    Compiles model without optimizations and with debugging simbols;"
+		@echo "                                                                               "
+		@echo "     verbose:  Compiles the model without optimizations and in verbose mode.   "
+		@echo "               Note that depending on the verbosity level defined in           "
+		@echo "               'globals.h', the model may become _extremely_ slow.             "
+		@echo "                                                                               "
+		@echo "     todo:     Prints a list of TODO's found in the source code.               "
+		@echo "                                                                               "
+		@echo "     dist:     Bundles the source code, examples and Manual in a nice tarball. "
+		@echo "                                                                               "
+		@echo "     help:     Prints this help.                                               "
+		@echo "                                                                               "
+		@echo " ============================================================================= "
+		
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
