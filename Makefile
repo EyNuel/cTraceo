@@ -94,10 +94,10 @@ LINK 		:= $(CC) $(LFLAGS) -o
 COMPLINK 	:= $(CC) $(CFLAGS) $(LFLAGS) -o $@
 
 ## A list of all non-source files that are part of the distribution.
-AUXFILES := Makefile readme.txt examples/sletvik_transect.mat
+AUXFILES := Makefile readme.txt examples/sletvik_transect.mat license.txt changelog.txt
 
 ## A list of directories that belong to the project
-PROJDIRS := . M-Files examples matlabOut
+PROJDIRS := . M-Files examples source source/matlabOut
 
 ## Recursively create a list of files that are inside the project
 SRCFILES := $(shell find $(PROJDIRS) -mindepth 0 -maxdepth 1 -name "*.c")
@@ -117,16 +117,16 @@ all:	dirs
 		@echo " "
 		@echo "Building cTraceo with standard options -run 'make help' for more information."
 		@echo " "
-		@$(CC) $(CFLAGS) $(LFLAGS) -D VERBOSE=0 -D USE_MATLAB=$(USE_MATLAB) -D OS=$(OS) -D MATLAB_VERSION=$(MATLAB_VERSION) -O3 -o bin/ctraceo cTraceo.c
+		@$(CC) $(CFLAGS) $(LFLAGS) -D VERBOSE=0 -D USE_MATLAB=$(USE_MATLAB) -D OS=$(OS) -D MATLAB_VERSION=$(MATLAB_VERSION) -O3 -o bin/ctraceo source/cTraceo.c
 
 pg:		dirs
-		@$(CC) $(CFLAGS) $(LFLAGS) -D VERBOSE=0 -D USE_MATLAB=$(USE_MATLAB) -D OS=$(OS) -D MATLAB_VERSION=$(MATLAB_VERSION) -O3 -pg -o bin/ctraceo cTraceo.c
+		@$(CC) $(CFLAGS) $(LFLAGS) -D VERBOSE=0 -D USE_MATLAB=$(USE_MATLAB) -D OS=$(OS) -D MATLAB_VERSION=$(MATLAB_VERSION) -O3 -pg -o bin/ctraceo source/cTraceo.c
 
 debug:	dirs
-		@$(CC) $(CFLAGS) $(LFLAGS) -D VERBOSE=0 -D USE_MATLAB=$(USE_MATLAB) -D OS=$(OS) -D MATLAB_VERSION=$(MATLAB_VERSION) -O0 -g -o bin/ctraceo cTraceo.c
+		@$(CC) $(CFLAGS) $(LFLAGS) -D VERBOSE=0 -D USE_MATLAB=$(USE_MATLAB) -D OS=$(OS) -D MATLAB_VERSION=$(MATLAB_VERSION) -O0 -g -o bin/ctraceo source/cTraceo.c
 		
 verbose:dirs
-		@$(CC) $(CFLAGS) $(LFLAGS) -D VERBOSE=1 -D USE_MATLAB=$(USE_MATLAB) -D OS=$(OS) -D MATLAB_VERSION=$(MATLAB_VERSION) -O0 -g -o bin/ctraceo cTraceo.c
+		@$(CC) $(CFLAGS) $(LFLAGS) -D VERBOSE=1 -D USE_MATLAB=$(USE_MATLAB) -D OS=$(OS) -D MATLAB_VERSION=$(MATLAB_VERSION) -O0 -g -o bin/ctraceo source/cTraceo.c
 
 todo:	#list todos from all files
 		@for file in $(ALLFILES); do fgrep -H -e TODO $$file; done; true
