@@ -58,7 +58,7 @@ void    printHelp(void){
      */
     printf("\n"
 "* =========================================================================== *\n"
-"*                    The cTraceo Acoustic Raytracing Model.                   *\n"
+"*          The cTraceo Acoustic Raytracing Model, Version "VERSION"*\n"
 "*                                                                             *\n"
 "* --------------------------------------------------------------------------- *\n"
 "* License: The cTraceo Acoustic Raytracing Model is released under the        *\n"
@@ -109,7 +109,26 @@ int main(int argc, char **argv){
     
     // check if a command line argument was passed:
     if(argc == 2){
-        //if so, try to use it as an inout file
+        //check for command line options:
+        if(argv[1][0] == '-'){
+            if(strlen(argv[1]) > 1){
+                switch(argv[1][1]){
+                    case 'h':
+                        printHelp();
+                        exit(EXIT_SUCCESS);
+                        break;
+                    case 'v':
+                        printf(HEADER);
+                        exit(EXIT_SUCCESS);
+                        break;
+                    default:
+                        fatal("Unknown input option.\n");
+                        break;
+                }
+            }
+        }
+        
+        //try to use command line argument it as an input file
         strcpy(inFileName, argv[1]);
         inFileName = strcat(inFileName, ".in");
     }else{
@@ -117,6 +136,8 @@ int main(int argc, char **argv){
         printHelp();
         fatal("No input file provided.\nAborting...");
     }
+
+    printf(HEADER);
 
     //Read the input file
     readIn(settings, inFileName);
