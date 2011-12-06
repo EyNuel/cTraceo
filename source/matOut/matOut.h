@@ -110,8 +110,8 @@ typedef FILE MATFile;
  * 	NOTE: 	these are included at the end so that they can make use of the
  * 			definitions contained in this file
  */
-#include	"toolsMisc.c"
-#include	"toolsMemory.c"
+#include	"../toolsMisc.c"
+#include	"../toolsMemory.c"
 #include	"calcArraySize.c"
 #include	"matClose.c"
 #include	"writeEmptyArray.c"

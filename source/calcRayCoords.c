@@ -44,7 +44,7 @@
     #include <mat.h>
     #include "matrix.h"
 #else
-    #include    "matlabOut/matlabOut.h"
+    #include    "matOut/matOut.h"
 #endif
 #include "tools.h"
 #include <math.h>

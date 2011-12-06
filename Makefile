@@ -97,7 +97,7 @@ COMPLINK 	:= $(CC) $(CFLAGS) $(LFLAGS) -o $@
 AUXFILES := Makefile readme.txt examples/sletvik_transect.mat license.txt changelog.txt
 
 ## A list of directories that belong to the project
-PROJDIRS := . M-Files examples source source/matlabOut
+PROJDIRS := . M-Files examples source source/matOut
 
 ## Recursively create a list of files that are inside the project
 SRCFILES := $(shell find $(PROJDIRS) -mindepth 0 -maxdepth 1 -name "*.c")

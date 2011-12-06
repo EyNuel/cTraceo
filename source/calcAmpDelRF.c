@@ -49,7 +49,7 @@
     #include <mat.h>
     #include "matrix.h"
 #else
-    #include    "matlabOut/matlabOut.h"
+    #include    "matOut/matOut.h"
 #endif
 #include "interpolation.h"
 #include "bracket.c"
@@ -372,8 +372,8 @@ void calcAmpDelRF(settings_t* settings){
                         nTrial++;
                         
                         if (nTrial > 21){
-                            printf("(rHyd,zHyd)= %e, %e\n", rHyd, zHyd);
-                            printf("Eigenray search failure, skipping to next case...\n");
+                            //printf("(rHyd,zHyd)= %e, %e\n", rHyd, zHyd);
+                            //printf("Eigenray search failure, skipping to next case...\n");
                             break;
                         }
                         

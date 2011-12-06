@@ -23,7 +23,7 @@
 #if USE_MATLAB == 1
     #include    <matrix.h>          //for matlab functions (used in copyComplexToPtr and copyComplexToPtr2D)
 #else
-    #include    "matlabOut/matlabOut.h"
+    #include    "matOut/matOut.h"
 #endif
 
 #include    <stdint.h>

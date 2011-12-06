@@ -334,7 +334,7 @@ typedef struct settings {
 #if USE_MATLAB == 1
     #include <matrix.h>     //needed for matlab matrix dimensions (mwSize)
 #else
-    #include "matlabOut/matlabOut.h"
+    #include "matOut/matOut.h"
 #endif
 
 
