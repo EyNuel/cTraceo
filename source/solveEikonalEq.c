@@ -54,7 +54,7 @@
 #include "rayBoundaryIntersection.c"
 #include "convertUnits.c"
 #include "specularReflection.c"
-#if VERBOSE
+#if VERBOSE && USE_MATLAB
     #include "mat.h"
     #include "matrix.h"
 #endif
@@ -62,7 +62,7 @@
 void    solveEikonalEq(settings_t*, ray_t*);
 
 void    solveEikonalEq(settings_t* settings, ray_t* ray){
-    DEBUG(1,"in. theta: %lf\n", ray->theta);
+    DEBUG(5,"in. theta: %lf\n", ray->theta);
     
     double          cx, ci, cc, sigmaI, sigmaR, sigmaZ, cri, czi, crri, czzi, crzi;
     uint32_t        iUp, iDown;
@@ -979,5 +979,5 @@ void    solveEikonalEq(settings_t* settings, ray_t* ray){
     free(fOld);
     free(yNew);
     free(fNew);
-    DEBUG(1,"out\n");
+    DEBUG(5,"out\n");
 }

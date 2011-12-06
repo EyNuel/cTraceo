@@ -76,6 +76,7 @@ uintptr_t   bracket(uintptr_t n, double* x, double xi, uintptr_t* i){
         fatal("Bounding error in bracket().\nAborting.");
         */
         //now it will return 0, thus indicating a bounding error
+        DEBUG(1, "bracket(): xi is outside of bounds.\n");
         return 0;
     }else{
         while( ib-ia > 1){

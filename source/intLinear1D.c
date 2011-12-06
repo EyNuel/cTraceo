@@ -43,6 +43,11 @@
  ****************************************************************************************/
 
 #pragma once
+/*
+ * TODO write a version of this function which doesn't calculate the derivative, and 
+ * which doesn't return the result through a pointer (so that it can be inlined by the
+ * compiler, thus increasing performance).
+ */
 void intLinear1D(double*, double*, double, double*, double*);
 
 void intLinear1D(double* x, double* f, double xi, double* fi, double* fxi){
