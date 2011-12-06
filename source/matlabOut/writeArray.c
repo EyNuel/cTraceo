@@ -1,7 +1,26 @@
+/*
+ *  Copyright 2011 Emanuel Ey <emanuel.ey@gmail.com>
+ * 
+ *  This file is part of matOut.
+ *
+ *  MatOut is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Lesser General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  MatOut is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with matOut.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #pragma once
 #include <stdio.h>
 #include <stdint.h>
-#include "matlabOut.h"
+#include "matOut.h"
 #include "writeDataElement.c"
 #include "dataElementSize.c"
 #include "mxGetData.c"
@@ -94,7 +113,7 @@ uintptr_t	writeArray(MATFile* outfile, const char* arrayName, mxArray* inArray){
 	 * write the array name element
 	 * NOTE: for mxArrays which are a child of another one
 	 * 		 the name is not actually written as it is already
-	 * 		 defined in the parent structure's filednames.
+	 * 		 defined in the parent structure's fieldnames.
 	 */
 	if (inArray->isChild == true){
 		writeDataElement(outfile, miINT8, (void*)arrayName, sizeof(char), 0);
