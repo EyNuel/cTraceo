@@ -94,10 +94,10 @@ LINK 		:= $(CC) $(LFLAGS) -o
 COMPLINK 	:= $(CC) $(CFLAGS) $(LFLAGS) -o $@
 
 ## A list of all non-source files that are part of the distribution.
-AUXFILES := Makefile readme.txt examples/sletvik_transect.mat license.txt changelog.txt
+AUXFILES := Makefile manual.pdf readme.txt license.txt changelog.txt examples/sletvik_transect.mat bin/ctraceo_lnx-i686 bin/ctraceo_lnx-ia64 bin/ctraceo_win-ia64.exe_ bin/ctraceo_win-i686.exe_
 
 ## A list of directories that belong to the project
-PROJDIRS := . M-Files examples source source/matOut
+PROJDIRS := M-Files examples source source/matOut
 
 ## Recursively create a list of files that are inside the project
 SRCFILES := $(shell find $(PROJDIRS) -mindepth 0 -maxdepth 1 -name "*.c")
