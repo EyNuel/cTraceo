@@ -30,6 +30,11 @@
  
  # Added help output to makefile and ctraceo executable.
  
+ # Added pre-compiled binaries for Windows/Linux i686/ia64.
+ 
+ # Added a decent header to the logfile and to the message
+   printed to stdout when running the model.
+ 
  
 ## Bugfixes:
  # Fixed a bug where launched rays would be terminated to early.
