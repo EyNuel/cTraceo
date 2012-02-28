@@ -61,7 +61,9 @@ void    solveDynamicEq(settings_t* settings, ray_t* ray){
     int32_t         ibdry;
     double          alpha;
     double          ri, zi, ci, cii, cxc, sigmaI, crri, czzi, crzi;
-    vector_t        slowness= {0,0};
+    double          crriNext, czziNext, crziNext;   //
+    vector_t        slowness     = {0,0};
+    vector_t        slownessNext = {0,0};
     vector_t        gradC   = {0,0};    //gradient of sound speed (c) at current coords
     vector_t        nGradC  = {0,0};    //gradient of sound speed (c) at next coords
     vector_t        dGradC  = {0,0};
@@ -85,19 +87,33 @@ void    solveDynamicEq(settings_t* settings, ray_t* ray){
     //Get Thorpe attenuation in dB/m:
     thorpe(settings->source.freqx, &alpha);
 
+    //get gradient of the sound speed at the first set of coordinates
+    //NOTE: these values are saves as "next" so that they can be used correctlyin the first iteration of the loop.
+    ri = ray->r[0];
+    zi = ray->z[0];
+    csValues(settings, ri, zi, &cii, &cxc, &sigmaI, &gradC.r, &gradC.z, &slownessNext, &crri, &czzi, &crzi);
+
     //Solve the Dynamic Equations:
     for(i=0; i<ray->nCoords -2; i++){
 
+        //NOTE: in subsequent iterations, the "current" is the former "next", so we'll get the former "next" and use it as "current"
+        gradC.r = nGradC.r;
+        gradC.z = nGradC.z;
+        slowness.r  = slownessNext.r;
+        slowness.z  = slownessNext.z;
+        crri = crriNext;
+        czzi = czziNext;
+        crzi = crziNext;
+        
         //determine the gradient of the sound speed at the next set of coordinates
         //TODO call csvalues directly with ray->xx (i.e.: skip the intermediate variable ri,zi
         ri = ray->r[i+1];
         zi = ray->z[i+1];
-        csValues(settings, ri, zi, &cii, &cxc, &sigmaI, &nGradC.r, &nGradC.z, &slowness, &crri, &czzi, &crzi);
+        csValues(settings, ri, zi, &cii, &cxc, &sigmaI, &nGradC.r, &nGradC.z, &slownessNext, &crriNext, &czziNext, &crziNext);
 
-        //determine the gradient of the sound speed at the current set of coordinates
-        ri = ray->r[i];
-        zi = ray->z[i];
-        csValues(settings, ri, zi, &cii, &cxc, &sigmaI, &gradC.r, &gradC.z, &slowness, &crri, &czzi, &crzi);
+//Q: crri, czzi, crzi are used? Which one is needed further on? "current" or "next"? seems to be "current"
+//R: "current" is used
+
 
         dGradC.r = nGradC.r - gradC.r;
         dGradC.z = nGradC.z - gradC.z;

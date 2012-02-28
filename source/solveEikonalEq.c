@@ -205,7 +205,7 @@ void    solveEikonalEq(settings_t* settings, ray_t* ray){
                 (ri < settings->altimetry.r[settings->altimetry.numSurfaceCoords -1]) &&
                 (ri > settings->batimetry.r[0]) &&
                 (ri < settings->batimetry.r[settings->batimetry.numSurfaceCoords -1] ) ){
-            DEBUG(7, "Calculate surface and bottom z at current ray position: \n");
+            DEBUG(7, "Calculate surface and bottom depth at current ray position: \n");
             boundaryInterpolation(  &(settings->altimetry), ri, &altInterpolatedZ, &junkVector, &normal);
             boundaryInterpolation(  &(settings->batimetry), ri, &batInterpolatedZ, &junkVector, &normal);
         }else{
