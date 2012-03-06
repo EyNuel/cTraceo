@@ -146,6 +146,7 @@ int main(int argc, char **argv){
                      * Read input file from stdin instead of from a file on disk.
                      * This avoids the overhead of writing to disk; intended for inversion uses.
                      * Same as short option "-"
+                     * TODO: this needs to be documented (manual and --help)
                      */
                     inFile = stdin;
                 }

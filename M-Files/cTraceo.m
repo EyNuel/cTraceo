@@ -2,10 +2,7 @@ function cTraceo(thetitle, source_info, surface_info, ssp_info, object_info, bat
 
 %**************************************************************************
 % Runs cTraceo without writing a input (waveguide) file to disk.
-% It is recommended to use this instead of wtraceoinfil.m as it avoids the
-% disk access overhead and should thus be slightly faster, especially for
-% inversion uses.
-% Except for not writing to the disk (and thus not taking afilename
+% Except for not writing to the disk (and thus not taking a filename
 % argument), this file is identical to wtraceoinfil.m.
 %
 %**************************************************************************
@@ -14,6 +11,8 @@ function cTraceo(thetitle, source_info, surface_info, ssp_info, object_info, bat
 %                       Created this file based on wtraceoinfil.m.
 %                       which does the exact same thing as this function,
 %                       but writes to disk.
+%                       NOTE: This function is not yet the recommended way
+%                       of running cTraceo.
 %
 % 05.03.2012 at 17:00   Edited by Emanuel Ey,    SiPLab UAlg 
 %                       Added support for irregularly spaced ray launching

@@ -8,9 +8,10 @@ function wtraceoinfil( filename, thetitle, source_info, surface_info, ssp_info, 
 % 06.03.2012            Edited by Emanuel Ey,    SiPLab UAlg
 %                       Created cTraceo.m which does the exact same thing
 %                       as this function but without writing files to disk.
-%                       It is recommended to use cTraceo.m as it avoids the
-%                       disk access overhead and should be slightly faster,
-%                       especially for inversion uses.
+%                       NOTE: although it could be assumed that this would
+%                       result in faster execution, it is in fact somewhat
+%                       slower, so wtraceoinfil.m is still the recommended
+%                       method.
 %
 % 05.03.2012 at 17:00   Edited by Emanuel Ey,    SiPLab UAlg
 %                       Added support for irregularly spaced ray launching
@@ -338,9 +339,9 @@ switch cdist
 	    fprintf(fid,   '%d %d\n' ,[m n]);
 	    fprintf(fid,'%e ',r);fprintf(fid,'\n');
 	    fprintf(fid,'%e ',z);fprintf(fid,'\n');
-	    for ii = 1:n
-                fprintf(fid,'%f ',c(ii,:)); fprintf(fid,'\n');
-            end
+        for ii = 1:n
+            fprintf(fid,'%f ',c(ii,:)); fprintf(fid,'\n');
+        end
    otherwise
             disp('Unknown sound speed distribution.'), return
 end

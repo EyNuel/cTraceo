@@ -1,5 +1,28 @@
 ################################################################
-## Beta 4 ##
+## Version 1.1 ##
+## Features/Changes:
+ # Added support for reading input files from stdin (as opposed
+   to reading them from disk).
+
+ # Added support for irregularly spaced (or arbitrary) ray
+   ray launching angles.
+   Note that this feature required changes to the input file
+   format; version 1.1 will read both input file versions
+   transparently, but pre 1.1 versions do not handle the new
+   input file version correclty.
+ 
+ # Reduced number of interpolation calls when solving dynamic 
+   equations by 50%, thus reducing overall raytracing
+   time by ~5%.
+ 
+ 
+## Bugfixes:
+ # Fixed a bug where, when using the Regula Falsi method, the
+   number arrivals [ADR] could under some conditions be different
+   than the number of eigenrays [ERF].
+
+################################################################
+## Version 1.0 ##
 ## Features/Changes:
  # Replaced the Matlab file output API with a set of self
    written functions (see: https://github.com/EyNuel/matlabOut).
