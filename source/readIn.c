@@ -60,6 +60,7 @@ void    readIn(settings_t* settings, const char* filename){
     uint32_t    numSurfaceCoords;   //used locally to make code more readable. Value is stored in settings.
     uint32_t    nr, nz;             //used locally to make code more readable. Value is stored in settings.
     char*       tempString;
+    int32_t     tempInt;
     char*       junkChar;
     FILE*       infile;                 //a pointer for the input file
     
@@ -84,9 +85,68 @@ void    readIn(settings_t* settings, const char* filename){
      settings->source.rbox1     = readDouble(infile);
      settings->source.rbox2     = readDouble(infile);
      settings->source.freqx     = readDouble(infile);
-     nThetas = (uint32_t)readInt(infile);
+     
+     /*
+      * Read the number of launching angles.
+      * NOTE: There are 2 methods of encoding ray launching angles in the input file,
+      *       both encode this information on two lines of the input text file.
+      *         a) classic: the number of rays on the first line, followed on the 2nd line
+      *            by a "start" and "end" angle. The launching angles will then be linealy spaced
+      *            between these 2 angles.
+      *         b) the number of rays on the first line, followed by a second line containing
+      *            all the launching angles, as well as the "dTheta" parameter.
+      *       Method b is identified by saving the number of launched rays as a negative value.
+      */
+     tempInt    = readInt(infile);
+     nThetas    = (uint32_t)abs(tempInt);   
      settings->source.nThetas   = nThetas;
-
+    
+    /*  Allocate memory for the launching angles    */
+    settings->source.thetas = mallocDouble(nThetas);
+    DEBUG(8,"number of launching angles in infile: %u\n", nThetas);
+    
+    /*  Read the  thetas from the file, according to method a or b (see above)  */
+    if (tempInt > 0){
+        //method a:
+        DEBUG(3, "reading launching angles according to method a.\n");
+        theta0 = readDouble(infile);
+        thetaN = readDouble(infile);
+        if(settings->source.nThetas == 1){
+            settings->source.thetas[0] = theta0;
+            dTheta = 0;
+        }else if(settings->source.nThetas == 2){
+            settings->source.thetas[0] = theta0;
+            settings->source.thetas[1] = thetaN;
+            dTheta = thetaN - theta0;
+        }else{
+            settings->source.thetas[0] = theta0;
+            settings->source.thetas[nThetas - 1] = thetaN;
+            dTheta =    (thetaN - theta0 ) / ( (double)nThetas - 1 );
+            
+            for(i=1;i <= nThetas-2; i++){
+                settings->source.thetas[i] = theta0 +dTheta *(double)(i);
+            }
+        }
+    
+    }else{
+        //method b:
+        DEBUG(3, "reading launching angles according to method a.\n");
+        
+        //read dTheta from the beginning of the 2nd line:
+        dTheta = readDouble(infile);
+        
+        //read all the launching angles from the file:
+        for (i=0; i<nThetas; i++){
+            settings->source.thetas[i] = readDouble(infile);
+        }
+        
+    }
+    settings->source.dTheta = dTheta;
+    
+    
+   
+    DEBUG(10,"\n");
+    
     /*  Source validation   */
     if(settings->source.ds == 0.0 ){
         settings->source.ds = fabs( settings->source.rbox2 - settings->source.rbox1)/1000;
@@ -96,30 +156,7 @@ void    readIn(settings_t* settings, const char* filename){
         fatal(  "Input file: Source: initial range is outside the range box!\nAborting...");
     }
     
-    /*  Allocate memory for the launching angles    */
-    settings->source.thetas = mallocDouble(nThetas);
-    DEBUG(8,"number of launching angles in infile: %u\n", nThetas);
-    /*  Read the  thetas from the file  */
-    theta0 = readDouble(infile);
-    thetaN = readDouble(infile);
-    if(settings->source.nThetas == 1){
-        settings->source.thetas[0] = theta0;
-        dTheta = 0;
-    }else if(settings->source.nThetas == 2){
-        settings->source.thetas[0] = theta0;
-        settings->source.thetas[1] = thetaN;
-        dTheta = thetaN - theta0;
-    }else{
-        settings->source.thetas[0] = theta0;
-        settings->source.thetas[nThetas - 1] = thetaN;
-        dTheta =    (thetaN - theta0 ) / ( (double)nThetas - 1 );
-        
-        for(i=1;i <= nThetas-2; i++){
-            settings->source.thetas[i] = theta0 +dTheta *(double)(i);
-        }
-    }
-    settings->source.dTheta = dTheta;
-    DEBUG(10,"\n");
+    
     /************************************************************************
      * Read and validate altimetry info:                                    *
      ***********************************************************************/

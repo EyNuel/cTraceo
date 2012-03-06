@@ -7,8 +7,10 @@ function wtraceoinfil( filename, thetitle, source_info, surface_info, ssp_info, 
 % Revisions:
 % 27/07/2010 at 11:00:  Written by Tordar,       SiPLab UAlg
 % 14/06/2011 at 11:30:  Edited by Emanuel Ey,    SiPLab UAlg
-%                       Added structure documentation and some minor code
+%                       Added this documentation as well some minor code
 %                       cleanups.
+% 05.03.2012 at 17:00   Added support for irregularly spaced ray launching
+%                       angles.
 %
 %**************************************************************************
 % INPUT STRUCTURES:
@@ -27,9 +29,19 @@ function wtraceoinfil( filename, thetitle, source_info, surface_info, ssp_info, 
 %       |
 %       |---.f          :Source frequency [Hz]
 %       |
-%       '---.thetas     :A vector containing the launching angles.
-%                       The length of the vector, as well as the first 
-%                       and the last elements will be used.
+%       |---.thetas     :A vector containing the launching angles.
+%       |
+%       '---.dTheta     :When launching irregularly spaced rays, this
+%                       parameter is required. It gives the step size
+%                       between individual rays which for regularly spaced
+%                       arrays is given by:
+%                           dTheta = (theta(N) - theta(1)) / (nThetas - 1 )
+%
+%                       To retain compaitibility with previous versions of
+%                       cTraceo examples, when dTheta is not provided the
+%                       lowest spacing between any to adjacent launching 
+%                       angles will used. This is obtained through:
+%                           dTheta = min(abs(thetas(1:end-1)-thetas(2:end)))
 %        
 %   surface_info        :A structure containing the surface (altimetry)
 %       |               configuration.
@@ -207,9 +219,10 @@ xs       = source_info.position;
 rbox     = source_info.rbox;
 freq     = source_info.f;
 thetas   = source_info.thetas;
-nthetas  = length( thetas ); 
-theta1   = thetas(1);
-thetan   = thetas( nthetas );
+nThetas  = length( thetas );
+if ~exist('source_info.dTheta')
+    dTheta   = min(abs(thetas(1:end-1)-thetas(2:end)));
+end
 
 %**************************************************************************
 % Get surface data: 
@@ -278,8 +291,12 @@ fprintf(fid,'%f\n',     ds);
 fprintf(fid,'%f %f\n',  xs);
 fprintf(fid,'%f %f\n',  rbox);
 fprintf(fid,'%f\n',     freq);
-fprintf(fid,'%d\n',     nthetas);
-fprintf(fid,'%f %f\n',  theta1,thetan);
+fprintf(fid,'%d\n',     -nThetas);
+fprintf(fid, '%f ', dTheta);
+for i = 1:nThetas
+    fprintf(fid, '%f ', thetas(i));
+end
+fprintf(fid, '\n');
 fprintf(fid,'%s\n',     separation_line);
 fprintf(fid,'%s\n',     atype);
 fprintf(fid,'%s\n',     aptype);

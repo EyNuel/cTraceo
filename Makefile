@@ -8,8 +8,8 @@
 ## ================================================================
 
 ## Choose a compiler command:
-#CC  := gcc
-CC := clang
+CC  := gcc
+#CC := clang
 
 ## Set Operating system:
 ## Allowable values are: WINDOWS, LINUX
