@@ -1,18 +1,21 @@
-function wtraceoinfil( filename, thetitle, source_info, surface_info, ssp_info, object_info, bathymetry_info, output_info )
+function cTraceo(thetitle, source_info, surface_info, ssp_info, object_info, bathymetry_info, output_info )
 
 %**************************************************************************
-% Writes Traceo input (waveguide) file. 
+% Runs cTraceo without writing a input (waveguide) file to disk.
+% It is recommended to use this instead of wtraceoinfil.m as it avoids the
+% disk access overhead and should thus be slightly faster, especially for
+% inversion uses.
+% Except for not writing to the disk (and thus not taking afilename
+% argument), this file is identical to wtraceoinfil.m.
 %
 %**************************************************************************
 % Revisions:
 % 06.03.2012            Edited by Emanuel Ey,    SiPLab UAlg
-%                       Created cTraceo.m which does the exact same thing
-%                       as this function but without writing files to disk.
-%                       It is recommended to use cTraceo.m as it avoids the
-%                       disk access overhead and should be slightly faster,
-%                       especially for inversion uses.
+%                       Created this file based on wtraceoinfil.m.
+%                       which does the exact same thing as this function,
+%                       but writes to disk.
 %
-% 05.03.2012 at 17:00   Edited by Emanuel Ey,    SiPLab UAlg
+% 05.03.2012 at 17:00   Edited by Emanuel Ey,    SiPLab UAlg 
 %                       Added support for irregularly spaced ray launching
 %                       angles.
 %
@@ -294,92 +297,96 @@ n = length( array_z );
 %**************************************************************************
 % Write the WAVFIL: 
  
-fid = fopen(filename,'w');
-fprintf(fid,'%s\n',     thetitle);
-fprintf(fid,'%s\n',     separation_line);
-fprintf(fid,'%f\n',     ds);
-fprintf(fid,'%f %f\n',  xs);
-fprintf(fid,'%f %f\n',  rbox);
-fprintf(fid,'%f\n',     freq);
-fprintf(fid,'%d\n',     -nThetas);
-fprintf(fid, '%f ', dTheta);
+%fid = fopen(filename,'w');
+string = '';
+string = [string, sprintf('%s\n',     thetitle)];
+string = [string, sprintf('%s\n',     separation_line)];
+string = [string, sprintf('%f\n',     ds)];
+string = [string, sprintf('%f %f\n',  xs)];
+string = [string, sprintf('%f %f\n',  rbox)];
+string = [string, sprintf('%f\n',     freq)];
+string = [string, sprintf('%d\n',     -nThetas)];
+string = [string, sprintf( '%f ', dTheta)];
 for i = 1:nThetas
-    fprintf(fid, '%f ', thetas(i));
+    string = [string, sprintf( '%f ', thetas(i))];
 end
-fprintf(fid, '\n');
-fprintf(fid,'%s\n',     separation_line);
-fprintf(fid,'%s\n',     atype);
-fprintf(fid,'%s\n',     aptype);
-fprintf(fid,'%s\n',     aitype);
-fprintf(fid,'%s\n',     atiu);
-fprintf(fid,'%d\n',     nati);
+string = [string, sprintf( '\n')];
+string = [string, sprintf('%s\n',     separation_line)];
+string = [string, sprintf('%s\n',     atype)];
+string = [string, sprintf('%s\n',     aptype)];
+string = [string, sprintf('%s\n',     aitype)];
+string = [string, sprintf('%s\n',     atiu)];
+string = [string, sprintf('%d\n',     nati)];
 if aptype == '''H'''
-fprintf(fid,'%f %f %f %f %f\n', aproperties);
-fprintf(fid,'%e %f\n',          xati);
+string = [string, sprintf('%f %f %f %f %f\n', aproperties)];
+string = [string, sprintf('%e %f\n',          xati)];
 elseif aptype == '''N'''
    for i = 1:nati 
-   fprintf(fid,'%f %f %f %f %f %f %f\n',[xati(i,1) xati(i,2) aproperties(i,1:5)]);
+   string = [string, sprintf('%f %f %f %f %f %f %f\n',[xati(i,1) xati(i,2) aproperties(i,1:5)])];
    end
 else
    disp('Unknown surface properties...'), return   
 end
-fprintf(fid,'%s\n',separation_line); 
-fprintf(fid,'%s\n',cdist);
-fprintf(fid,'%s\n',cclass);
+string = [string, sprintf('%s\n',separation_line)]; 
+string = [string, sprintf('%s\n',cdist)];
+string = [string, sprintf('%s\n',cclass)];
 switch cdist
    case '''c(z,z)'''
 	    nc = length( c );
 	    zc = [z(:)';c(:)']; 
-	    fprintf(fid,   '%d %d\n' ,[1 nc]);
-	    fprintf(fid,'%f %f\n' ,zc);
+	    string = [string, sprintf(   '%d %d\n' ,[1 nc])];
+	    string = [string, sprintf('%f %f\n' ,zc)];
    case '''c(r,z)'''
 	    m = length( r ); 
 	    n = length( z ); 
-	    fprintf(fid,   '%d %d\n' ,[m n]);
-	    fprintf(fid,'%e ',r);fprintf(fid,'\n');
-	    fprintf(fid,'%e ',z);fprintf(fid,'\n');
+	    string = [string, sprintf(   '%d %d\n' ,[m n])];
+	    string = [string, sprintf('%e ',r)];string = [string, sprintf('\n')];
+	    string = [string, sprintf('%e ',z)];string = [string, sprintf('\n')];
 	    for ii = 1:n
-                fprintf(fid,'%f ',c(ii,:)); fprintf(fid,'\n');
+                string = [string, sprintf('%f ',c(ii,:))]; string = [string, sprintf('\n')];
             end
    otherwise
             disp('Unknown sound speed distribution.'), return
 end
-fprintf(fid,'%s\n',separation_line);
-fprintf(fid,'%d\n',nobj);
+string = [string, sprintf('%s\n',separation_line)];
+string = [string, sprintf('%d\n',nobj)];
 if nobj > 0
-fprintf(fid,'%s\n',oitype);
+string = [string, sprintf('%s\n',oitype)];
 for i = 1:nobj
-    fprintf(fid,'%s\n',otype(i,:));
-    fprintf(fid,'%s\n', obju(i,:));
-    fprintf(fid,'%d\n',npobj(i));
-    fprintf(fid,'%f %f %f %f %f\n', oproperties(i,:));
+    string = [string, sprintf('%s\n',otype(i,:))];
+    string = [string, sprintf('%s\n', obju(i,:))];
+    string = [string, sprintf('%d\n',npobj(i))];
+    string = [string, sprintf('%f %f %f %f %f\n', oproperties(i,:))];
     for j = 1:npobj(i)
-        fprintf(fid,'%f %f %f\n', xobj(i,1:3,j));
+        string = [string, sprintf('%f %f %f\n', xobj(i,1:3,j))];
     end 
 end
 end
-fprintf(fid,'%s\n',separation_line);
-fprintf(fid,'%s\n', btype);
-fprintf(fid,'%s\n',bptype);
-fprintf(fid,'%s\n',bitype);
-fprintf(fid,'%s\n', btyu);
-fprintf(fid,'%d\n',nbty);
+string = [string, sprintf('%s\n',separation_line)];
+string = [string, sprintf('%s\n', btype)];
+string = [string, sprintf('%s\n',bptype)];
+string = [string, sprintf('%s\n',bitype)];
+string = [string, sprintf('%s\n', btyu)];
+string = [string, sprintf('%d\n',nbty)];
 if bptype == '''H'''
-	fprintf(fid,'%f %f %f %f %f\n',bproperties);
-	fprintf(fid,'%e %f\n',xbty);
+	string = [string, sprintf('%f %f %f %f %f\n',bproperties)];
+	string = [string, sprintf('%e %f\n',xbty)];
 else
    for i = 1:nbty 
-   fprintf(fid,'%f %f %f %f %f %f %f\n',[xbty(i,1) xbty(i,2) bproperties(i,1:5)]);
+   string = [string, sprintf('%f %f %f %f %f %f %f\n',[xbty(i,1) xbty(i,2) bproperties(i,1:5)])];
    end 
 end
 m = length( array_r );
 n = length( array_z );
-fprintf(fid,'%s\n',separation_line);
-fprintf(fid,'%s\n',array_shape);
-fprintf(fid,   '%d %d\n',m,n);
-fprintf(fid,       '%e ',array_r);fprintf(fid,'\n');
-fprintf(fid,       '%e ',array_z);fprintf(fid,'\n');
-fprintf(fid,'%s\n',separation_line);
-fprintf(fid,'%s\n',  calc_type);
-fprintf(fid,'%f ',array_miss); fprintf(fid,'\n');
-fclose( fid );
+string = [string, sprintf('%s\n',separation_line)];
+string = [string, sprintf('%s\n',array_shape)];
+string = [string, sprintf(   '%d %d\n',m,n)];
+string = [string, sprintf(       '%e ',array_r)];string = [string, sprintf('\n')];
+string = [string, sprintf(       '%e ',array_z)];string = [string, sprintf('\n')];
+string = [string, sprintf('%s\n',separation_line)];
+string = [string, sprintf('%s\n',  calc_type)];
+string = [string, sprintf('%f ',array_miss)]; string = [string, sprintf('\n')];
+
+%call the cTraceo binary
+command = ['echo "', string, '"|ctraceo --stdin'];
+system(command, '-echo');
