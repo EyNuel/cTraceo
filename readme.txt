@@ -16,7 +16,7 @@
 ## Written for project SENSOCEAN by:                          ##  
 ##          Emanuel Ey                                        ##  
 ##          emanuel.ey@gmail.com                              ##  
-##          Copyright (C) 2011                                ##  
+##          Copyright (C) 2011, 2012                          ##  
 ##          Signal Processing Laboratory                      ##  
 ##          Universidade do Algarve                           ##  
 ##                                                            ##  
@@ -133,7 +133,8 @@
 # The "USE_MATLAB" variable
   When compiling cTraceo on Linux it is possible to choose between
   using Matlab or the internal functions to write the result files.
-  If in doubt, leave at "0".
+  If in doubt, leave at "0". Note that linking with matlab is only
+  supported in linux.
    
 # The "MATLAB_DIR" variable
   This variable should contain the base directory of the 

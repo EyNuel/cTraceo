@@ -74,6 +74,7 @@ void    readIn(settings_t* settings, FILE* inFile){
      *  Read the title:                                                     *
      ***********************************************************************/
     junkChar = fgets(settings->cTitle, MAX_LINE_LEN+1, inFile);
+    (void)junkChar;
 
 
     /************************************************************************

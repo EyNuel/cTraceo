@@ -65,7 +65,7 @@ void    calcCohAcoustPress(settings_t* settings){
     mxArray*            pHydArrayR  = NULL;
     mxArray*            pHydArrayZ  = NULL;
     mxArray*            p   = NULL;
-    double              omega, lambda;
+    double              lambda;
     uintptr_t           i, j, jj, k, l, iHyd = 0;
     uintptr_t           dimR = 0, dimZ = 0;
     ray_t*              ray = NULL;
@@ -190,7 +190,6 @@ void    calcCohAcoustPress(settings_t* settings){
                 &junkVector, &junkDouble, &junkDouble, &junkDouble);
 
     q0 = cx / ( M_PI * settings->source.dTheta/180.0 );
-    omega  = 2.0 * M_PI * settings->source.freqx;
 
 
     /**

@@ -75,6 +75,7 @@ double      readDouble(FILE* infile){
     int32_t junkInt;
     
     junkInt = fscanf(infile, "%s\n", junkString);
+    (void)junkInt;
     tempDouble = atof(junkString);
     free(junkString);
     
@@ -91,6 +92,7 @@ int32_t     readInt(FILE* infile){
     int32_t     junkInt;
     
     junkInt = fscanf(infile, "%s\n", junkString);
+    (void)junkInt;
     tempInt = (int32_t)atol(junkString);
     free(junkString);
     
@@ -105,6 +107,7 @@ char*       readStringN(FILE* infile, uint32_t length){
     char*       junkChar;
 
     junkChar = fgets(outputString, (int32_t)length, infile);
+    (void)junkChar;
     return(outputString);
 }
 
@@ -116,7 +119,8 @@ void        skipLine(FILE* infile){
     char*       junkChar;
     
     junkChar = fgets(junkString, MAX_LINE_LEN+1, infile);
-
+    (void)junkChar;
+    
     free(junkString);
 }
 

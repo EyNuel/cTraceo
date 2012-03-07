@@ -71,7 +71,7 @@ void    printHelp(void){
 "* Written for project SENSOCEAN by:                                           *\n"
 "*          Emanuel Ey                                                         *\n"
 "*          emanuel.ey@gmail.com                                               *\n"
-"*          Copyright (C) 2011                                                 *\n"
+"*          Copyright (C) 2011, 2012                                           *\n"
 "*          Signal Processing Laboratory                                       *\n"
 "*          Universidade do Algarve                                            *\n"
 "*                                                                             *\n"
@@ -102,7 +102,6 @@ int main(int argc, char **argv){
     char*           logFileName = mallocChar(256);
     FILE*           inFile      = NULL;
     settings_t*     settings    = mallocSettings();
-    double          omega;
     const char*     line = "-----------------------------------------------";
     FILE*           logFile = NULL;
 
@@ -159,9 +158,10 @@ int main(int argc, char **argv){
             inFileName = strcat(inFileName, ".in");
             inFile = openFile(inFileName, "r");
         }
+    }
     
     //if no command line options where passed, complain and quit
-    }else{
+    else{
         printHelp();
         fatal("No input file provided.\nAborting...");
     }
@@ -176,8 +176,6 @@ int main(int argc, char **argv){
         printSettings(settings);
         DEBUG(2, "Returned from printSettings()\n");
     }
-
-    omega   = 2 * M_PI * settings->source.freqx;
 
     //open the log file and write the header:
     strcpy(logFileName, argv[1]);
