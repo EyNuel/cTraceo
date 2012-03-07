@@ -9,7 +9,7 @@
    Note that this feature required changes to the input file
    format; version 1.1 will read both input file versions
    transparently, but pre 1.1 versions do not handle the new
-   input file version correclty.
+   input file format correclty.
  
  # Reduced number of interpolation calls when solving dynamic 
    equations by 50%, thus reducing overall raytracing
@@ -20,6 +20,9 @@
  # Fixed a bug where, when using the Regula Falsi method, the
    number arrivals [ADR] could under some conditions be different
    than the number of eigenrays [ERF].
+   
+ # Solved all compiler warnings when compiling with GCC.
+   [tested with GCC 4.6.1]
 
 ################################################################
 ## Version 1.0 ##

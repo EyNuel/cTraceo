@@ -65,7 +65,6 @@ void    solveEikonalEq(settings_t* settings, ray_t* ray){
     DEBUG(5,"in. theta: %lf\n", ray->theta);
     
     double          cx, ci, cc, sigmaI, sigmaR, sigmaZ, cri, czi, crri, czzi, crzi;
-    uint32_t        iUp, iDown;
     int32_t         ibdry;                      //indicates at which boundary a ray is being reflected (-1 => surface, 1 => bottom)
     uint32_t        sRefl, bRefl, oRefl;    //counters for number of reflections at _s_urface, _s_ottom and _o_bject
     uint32_t        jRefl;                      //TODO huh?!
@@ -73,7 +72,6 @@ void    solveEikonalEq(settings_t* settings, ray_t* ray){
     uint32_t        i, j;
     complex double  reflCoeff, reflDecay;
     vector_t        es = {0,0};             //ray's tangent vector
-    vector_t        e1 = {0,0};             //ray's normal vector
     vector_t        slowness = {0,0};
     vector_t        junkVector = {0,0};
     vector_t        normal = {0,0};
@@ -106,8 +104,6 @@ void    solveEikonalEq(settings_t* settings, ray_t* ray){
     
     //define initial conditions:
     ray->iKill  = false;
-    iUp         = false;
-    iDown       = false;
     sRefl       = 0;
     bRefl       = 0;
     oRefl       = 0;
@@ -127,8 +123,6 @@ void    solveEikonalEq(settings_t* settings, ray_t* ray){
 
     es.r = cos( ray->theta );
     es.z = sin( ray->theta );
-    e1.r = -es.z;
-    e1.z =  es.r;
 
     //Calculate initial sound speed and its derivatives:
     csValues(   settings,
@@ -795,8 +789,6 @@ void    solveEikonalEq(settings_t* settings, ray_t* ray){
                         //Update marching solution and function:
                         es.r = tauR.r;
                         es.z = tauR.z;
-                        e1.r = -es.z;
-                        e1.z =  es.r;
                         DEBUG(7, "Calculating sound speed parameters for next step...\n");
                         csValues(   settings, ri, zi, &ci, &cc, &sigmaI, &cri, &czi, &slowness, &crri, &czzi, &crzi);
                         DEBUG(7, "Sound speed parameters for next step calculated.\n");
