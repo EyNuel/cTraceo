@@ -82,7 +82,7 @@ void    getRayPressureExplicit(settings_t* settings, ray_t* ray, uintptr_t iHyd,
     vector_t    es = {0,0};
     vector_t    e1 = {0,0};
     vector_t    deltaR = {0,0};
-    double      dr, dz, n, sRay, nxn;
+    double      dr, dz, n, sRay;
     double      delay;
     double      phi;
 
@@ -103,7 +103,6 @@ void    getRayPressureExplicit(settings_t* settings, ray_t* ray, uintptr_t iHyd,
 
     n = fabs( n );
     sRay = sRay/sqrt( dr*dr + dz*dz );
-    nxn = n*n;
 
     delay = tauRay + sRay*( ray->tau[iHyd+1] - ray->tau[iHyd] );
     if (n < width){

@@ -30,9 +30,9 @@
  ******************************************************** ************************/
 //NOTE: VERSION has to be 20 chars wide so that the header and help texts are printed correctly
 //              "----5---10---15---20"
-#define VERSION "1.1 Beta 1          "
+#define VERSION "1.1                 "
 //NOTE: HEADER is made up of consecutive strings, each 79 chars long:
-#define HEADER  "* =========================================================================== *\n""*          The cTraceo Acoustic Raytracing Model, Version "VERSION"*\n""*  Released under the Creative Commons Attribution-NonCommercial-ShareAlike   *\n""*  3.0 Unported License ( http://creativecommons.org/licenses/by-nc-sa/3.0/ ) *\n""* --------------------------------------------------------------------------- *\n""*            Copyright (C) 2011 Emanuel Ey <emanuel.ey@gmail.com>             *\n""*        Copyright (C) 2010 Orlando Camargo Rodriguez <orodrig@ualg.pt>       *\n""*     SiPLab, Universidade do Algarve, Portugal <www.siplab.fct.ualg.pt>      *\n""* =========================================================================== *\n\n"
+#define HEADER  "* =========================================================================== *\n""*          The cTraceo Acoustic Raytracing Model, Version "VERSION"*\n""*  Released under the Creative Commons Attribution-NonCommercial-ShareAlike   *\n""*  3.0 Unported License ( http://creativecommons.org/licenses/by-nc-sa/3.0/ ) *\n""* --------------------------------------------------------------------------- *\n""*         Copyright (C) 2011, 2012 Emanuel Ey <emanuel.ey@gmail.com>          *\n""*        Copyright (C) 2010 Orlando Camargo Rodriguez <orodrig@ualg.pt>       *\n""*     SiPLab, Universidade do Algarve, Portugal <www.siplab.fct.ualg.pt>      *\n""* =========================================================================== *\n\n"
 
 
 
@@ -85,6 +85,15 @@
 /********************************************************************************
  * Some utilities                                                               *
  ********************************************************************************/
+
+//For some reason the C99 standard dropped the definition of PI, so we're defining it manually:
+#ifndef M_PI
+#define M_PI 3.14159265358979323846264338327
+#endif
+#ifndef M_LOG10E
+#define M_LOG10E 0.43429448190325182765
+#endif
+
 
 //the following 5 lines are used to simplify access to star pressure elements (for particle velocity)
 #define LEFT    0

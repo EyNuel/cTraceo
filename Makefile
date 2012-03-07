@@ -61,10 +61,13 @@ WINDOWS := 2
 CFLAGS := 	-Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align \
 			-Wwrite-strings -Wmissing-prototypes -Wmissing-declarations \
 			-Wredundant-decls -Wnested-externs -Winline -Wno-long-long \
-			-Wstrict-prototypes -std=gnu99
+			-Wstrict-prototypes -std=c99
 
 ifeq ($(ARCH),32b)
 	CFLAGS := $(CFLAGS) -march=i686 -m32
+endif
+ifeq ($(ARCH),64b)
+	CFLAGS := $(CFLAGS) -march=nocona
 endif
 
 ## Linker Flags:
@@ -117,16 +120,16 @@ all:	dirs
 		@echo " "
 		@echo "Building cTraceo with standard options -run 'make help' for more information."
 		@echo " "
-		@$(CC) $(CFLAGS) $(LFLAGS) -D VERBOSE=0 -D USE_MATLAB=$(USE_MATLAB) -D OS=$(OS) -D MATLAB_VERSION=$(MATLAB_VERSION) -O3 -o bin/ctraceo source/cTraceo.c
+		@$(CC) $(CFLAGS) -D VERBOSE=0 -D USE_MATLAB=$(USE_MATLAB) -D OS=$(OS) -D MATLAB_VERSION=$(MATLAB_VERSION) -O3 -o bin/ctraceo source/cTraceo.c $(LFLAGS)
 
 pg:		dirs
-		@$(CC) $(CFLAGS) $(LFLAGS) -D VERBOSE=0 -D USE_MATLAB=$(USE_MATLAB) -D OS=$(OS) -D MATLAB_VERSION=$(MATLAB_VERSION) -O3 -pg -o bin/ctraceo source/cTraceo.c
+		@$(CC) $(CFLAGS) -D VERBOSE=0 -D USE_MATLAB=$(USE_MATLAB) -D OS=$(OS) -D MATLAB_VERSION=$(MATLAB_VERSION) -O3 -pg -o bin/ctraceo source/cTraceo.c $(LFLAGS)
 
 debug:	dirs
-		@$(CC) $(CFLAGS) $(LFLAGS) -D VERBOSE=0 -D USE_MATLAB=$(USE_MATLAB) -D OS=$(OS) -D MATLAB_VERSION=$(MATLAB_VERSION) -O0 -g -o bin/ctraceo source/cTraceo.c
+		@$(CC) $(CFLAGS) -D VERBOSE=0 -D USE_MATLAB=$(USE_MATLAB) -D OS=$(OS) -D MATLAB_VERSION=$(MATLAB_VERSION) -O0 -g -o bin/ctraceo source/cTraceo.c $(LFLAGS)
 		
 verbose:dirs
-		@$(CC) $(CFLAGS) $(LFLAGS) -D VERBOSE=1 -D USE_MATLAB=$(USE_MATLAB) -D OS=$(OS) -D MATLAB_VERSION=$(MATLAB_VERSION) -O0 -g -o bin/ctraceo source/cTraceo.c
+		@$(CC) $(CFLAGS) -D VERBOSE=1 -D USE_MATLAB=$(USE_MATLAB) -D OS=$(OS) -D MATLAB_VERSION=$(MATLAB_VERSION) -O0 -g -o bin/ctraceo source/cTraceo.c $(LFLAGS)
 
 todo:	#list todos from all files
 		@for file in $(ALLFILES); do fgrep -H -e TODO $$file; done; true
