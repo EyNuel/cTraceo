@@ -2,7 +2,10 @@
 ## Version 1.1 ##
 ## Features/Changes:
  # Added support for reading input files from stdin (as opposed
-   to reading them from disk).
+   to reading them from disk). This makes it possible to call
+   the model from within Matlab (R) without having to write any
+   files to the disk -this is done using the new "cTraceo.m"
+   function contained in the M-Files/ subfolder.
 
  # Added support for irregularly spaced (or arbitrary) ray
    ray launching angles.
@@ -11,8 +14,8 @@
    transparently, but pre 1.1 versions do not handle the new
    input file format correclty.
  
- # Reduced number of interpolation calls when solving dynamic 
-   equations by 50%, thus reducing overall raytracing
+ # Reduced the number of interpolation calls when solving dynamic 
+   equations by ~50%, thus reducing overall raytracing
    time by ~5%.
  
  
