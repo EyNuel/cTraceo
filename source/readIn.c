@@ -200,7 +200,7 @@ void    readIn(settings_t* settings, FILE* inFile){
     }
     free(tempString);
 
-    /* surfaceInterpolation;    //formerly "aitype" */
+    /* surface Interpolation;    //formerly "aitype" */
     tempString = readStringN(inFile,6);
     if(strcmp(tempString,"'FL'\n") == 0){
         settings->altimetry.surfaceInterpolation    = SURFACE_INTERPOLATION__FLAT;
@@ -212,7 +212,8 @@ void    readIn(settings_t* settings, FILE* inFile){
         settings->altimetry.surfaceInterpolation    = SURFACE_INTERPOLATION__2P;
         
     }else if(strcmp(tempString,"'3P'\n") == 0){
-        settings->altimetry.surfaceInterpolation    = SURFACE_INTERPOLATION__3P;
+        printf("WARNING: The selected surface interpolation method (parabolic/3P) is no longer supported - using cubic/4P interpolation instead.\n");
+        settings->altimetry.surfaceInterpolation    = SURFACE_INTERPOLATION__4P;
         
     }else if(strcmp(tempString,"'4P'\n") == 0){
         settings->altimetry.surfaceInterpolation    = SURFACE_INTERPOLATION__4P;
@@ -443,7 +444,8 @@ void    readIn(settings_t* settings, FILE* inFile){
             settings->objects.surfaceInterpolation  = SURFACE_INTERPOLATION__2P;
             
         }else if(strcmp(tempString,"'3P'\n") == 0){
-            settings->objects.surfaceInterpolation  = SURFACE_INTERPOLATION__3P;
+            printf("WARNING: The selected object surface interpolation method (parabolic/3P) is no longer supported - using cubic/4P interpolation instead.\n");
+            settings->objects.surfaceInterpolation  = SURFACE_INTERPOLATION__4P;
             
         }else if(strcmp(tempString,"'4P'\n") == 0){
             settings->objects.surfaceInterpolation  = SURFACE_INTERPOLATION__4P;
@@ -564,7 +566,7 @@ void    readIn(settings_t* settings, FILE* inFile){
     }
     free(tempString);
 
-    /* surfaceInterpolation;    //formerly "aitype" */
+    /* bottom Interpolation;    //formerly "aitype" */
     tempString = readStringN(inFile,6);
     if(strcmp(tempString,"'FL'\n") == 0){
         settings->batimetry.surfaceInterpolation    = SURFACE_INTERPOLATION__FLAT;
@@ -576,7 +578,8 @@ void    readIn(settings_t* settings, FILE* inFile){
         settings->batimetry.surfaceInterpolation    = SURFACE_INTERPOLATION__2P;
         
     }else if(strcmp(tempString,"'3P'\n") == 0){
-        settings->batimetry.surfaceInterpolation    = SURFACE_INTERPOLATION__3P;
+        printf("WARNING: The selected bottom interpolation method (parabolic/3P) is no longer supported - using cubic/4P interpolation instead.\n");
+        settings->batimetry.surfaceInterpolation    = SURFACE_INTERPOLATION__4P;
         
     }else if(strcmp(tempString,"'4P'\n") == 0){
         settings->batimetry.surfaceInterpolation    = SURFACE_INTERPOLATION__4P;
