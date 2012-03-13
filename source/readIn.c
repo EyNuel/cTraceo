@@ -195,7 +195,7 @@ void    readIn(settings_t* settings, FILE* inFile){
     }
     free(tempString);
 
-    /* surfaceInterpolation;    //formerly "aitype" */
+    /* surface Interpolation;    //formerly "aitype" */
     tempString = readStringN(inFile,6);
     if(strcmp(tempString,"'FL'\n") == 0){
         settings->altimetry.surfaceInterpolation    = SURFACE_INTERPOLATION__FLAT;
