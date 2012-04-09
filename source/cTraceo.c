@@ -94,6 +94,7 @@ void    printHelp(void){
 "*          filename            :The input file's name, without it's extension.*\n"
 "*                                                                             *\n"
 "*  Options:                                                                   *\n"
+"*          --nolog             :Do not write a log file.                      *\n"
 "*          -h, --help          :show this text.                               *\n"
 "*          -s <#>, --ssp <#>   :generate the interpolated sound speed profile *\n"
 "*                               as used by the model and save it as 'ssp.mat'.*\n"
@@ -119,6 +120,7 @@ int main(int argc, char **argv){
     const char*     line = "-----------------------------------------------";
     FILE*           logFile = NULL;
     bool            saveSSP = false;
+    bool            writeLogFile = true;
     uint32_t        nSSPPoints = 0;
 
     DEBUG(1,"Running cTraceo in verbose mode.\n\n");
@@ -199,6 +201,11 @@ int main(int argc, char **argv){
                         nSSPPoints = atoi(argv[++i]);
                         saveSSP = true;
                     }
+                    
+                    // '--nolog' don't write a log file
+                    else if(!strcmp(argv[i], "--nolog")){
+                        writeLogFile = false;
+                    }
                 }
             
             }else{
@@ -233,18 +240,20 @@ int main(int argc, char **argv){
         DEBUG(2, "Returned from printSettings()\n");
     }
 
-    //open the log file and write the header:
-    strcpy(logFileName, argv[1]);
-    logFile= openFile(strcat(logFileName,".log"), "w");
-    fprintf(logFile, "TRACEO ray tracing program.\n");
-    fprintf(logFile, "TODO: write a nice header for the log file.\n");
-    fprintf(logFile, "%s\n", line);
+    if(writeLogFile){
+        //open the log file and write the header:
+        strcpy(logFileName, argv[1]);
+        logFile= openFile(strcat(logFileName,".log"), "w");
+        fprintf(logFile, "TRACEO ray tracing program.\n");
+        fprintf(logFile, "TODO: write a nice header for the log file.\n");
+        fprintf(logFile, "%s\n", line);
 
-    fprintf(logFile, "INPUT:\n");
-    fprintf(logFile, "%s\n", settings->cTitle);
-    fprintf(logFile, "%s\n", line);
+        fprintf(logFile, "INPUT:\n");
+        fprintf(logFile, "%s\n", settings->cTitle);
+        fprintf(logFile, "%s\n", line);
 
-    fprintf(logFile, "OUTPUT:\n");
+        fprintf(logFile, "OUTPUT:\n");
+    }
     switch(settings->output.calcType){
         case CALC_TYPE__RAY_COORDS:
             printf("Calculating ray coordinates.\n");
