@@ -1,7 +1,6 @@
 /****************************************************************************************
- *  cValues1D.c                                                                         *
- *  (formerly "cvals1.for")                                                             *
- *  Perform 1-Dimensional Interpolation of sound speed and its derivatives.             *
+ *  calcSSP.c                                                                           *
+ *  Interpolates the sound speed with depth and over a certain number of points.        *
  *                                                                                      *
  * ------------------------------------------------------------------------------------ *
  * License: This file is part of the cTraceo Raytracing Model and is released under the *
@@ -29,58 +28,88 @@
  *                                                                                      *
  * ------------------------------------------------------------------------------------ *
  *  Inputs:                                                                             *
- *          n:      number of elements in vectors x anc c.                              *
- *          xTable: vector containing independent variable.                             *
- *          cTable: vector containing dependent variable c(x)                           *
- *          xi:     interpolation point.                                                *
+ *          settings:   Pointer to structure containing all input info.                 *
  *                                                                                      *
  *  Outputs:                                                                            *
- *          ci:     interpolated value c(xi).                                           *
- *          cxi:    1st derivative of c at xi.                                          *
- *          cxxi:   2nd derivative of c at xi.                                          *
+ *          "ssp.mat":  A file containing the trajectories of all launched rays.        *
  *                                                                                      *
  *  Return Value:                                                                       *
  *          None                                                                        *
  *                                                                                      *
  ****************************************************************************************/
- 
-#pragma once
-#include "interpolation.h"
-#include "bracket.c"
 
-void    cValues1D(uintptr_t, double*, double*, double, double*, double*, double*);
+#pragma  once
+#if USE_MATLAB == 1
+    #include <mat.h>
+    #include "matrix.h"
+#else
+    #include    "matOut/matOut.h"
+#endif
+#include "tools.h"
+#include <math.h>
+#include "solveEikonalEq.c"
 
-void    cValues1D(uintptr_t n, double* xTable, double* cTable, double xi, double* ci, double* cxi, double* cxxi){
-    DEBUG(10,"Entering cValues1D().\n");
-    uintptr_t   i = 0;
+void    calcSSP(settings_t* settings, uintptr_t nPoints);
 
-    //Note: the case that occurs most frequently is listed at top, so as to eliminate uneeded comparison operations.
-
-    if( xi >= xTable[1] &&  xi <xTable[n-2]){
-        //for all other cases do barycentric cubic interpolation
-        bracket(n, xTable, xi, &i);
-        intBarycCubic1D(    &xTable[i-1],
-                            &cTable[i-1],
-                            xi, ci, cxi, cxxi);
+void    calcSSP(settings_t* settings, uintptr_t nPoints){
+    DEBUG(1,"in\n");
     
-    }else if( xi < xTable[1]){
-        //if xi is in first interval of xTable, do linear interpolation
-        intLinear1D(    &xTable[0],
-                        &cTable[0],
-                        xi, ci, cxi);
-        *cxxi = 0.0;
+    MATFile*        matfile     = NULL;
+    mxArray*        mxZSSP      = NULL;
+    mxArray*        mxCSSP      = NULL;
+    double          *depths = NULL;
+    double          *c = NULL;
+    uintptr_t       i;
     
-    }else if( xi >= xTable[n-2]){
-        //if xi is in last interval of xTable, do linear interpolation
-        intLinear1D(    &xTable[n-2],
-                        &cTable[n-2],
-                        xi, ci, cxi);
-        *cxxi = 0.0;
+    double      cc, sigmaI, cri, czi, crri, czzi, crzi;
+    vector_t    slowness;
     
-    }else{
-        printf("Interpolating sound speed at: %lf [m]\n", xi);
-        fatal("in cValues1D(): Something is wrong.");
+    c = mallocDouble(nPoints);
+    depths = mallocDouble(nPoints);
+    linearSpaced(nPoints, settings->soundSpeed.z[0], settings->soundSpeed.z[settings->soundSpeed.nz-1], depths);
+    
+    
+    /* Interpolate the sound speeds:  */
+    for(i=0; i<nPoints; i++){
+        csValues(   settings,
+                    settings->source.rbox1,
+                    depths[i],
+                    &c[i],
+                    &cc,
+                    &sigmaI,
+                    &cri,
+                    &czi,
+                    &slowness,
+                    &crri,
+                    &czzi,
+                    &crzi);
     }
-    DEBUG(10,"Leaving cValues1D.\n");
-}
+    
+    //open matfile for output
+    matfile     = matOpen("ssp.mat", "w");
+    
+    mxZSSP        = mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)nPoints, mxREAL);
+    if(matfile == NULL || mxZSSP == NULL)
+        fatal("Memory alocation error.");
+    //copy cArray to mxArray:
+    copyDoubleToMxArray(depths, mxZSSP, nPoints);
+    //move mxArray to file:
+    matPutVariable(matfile, "zssp", mxZSSP);
+    mxDestroyArray(mxZSSP);
+    
+    mxCSSP        = mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)nPoints, mxREAL);
+    if( mxCSSP == NULL)
+        fatal("Memory alocation error.");
+    //copy cArray to mxArray:
+    copyDoubleToMxArray(c, mxCSSP, nPoints);
+    //move mxArray to file:
+    matPutVariable(matfile, "cssp", mxCSSP);
+    mxDestroyArray(mxCSSP);
 
+    
+    /// Finish up
+    matClose(matfile);
+    free(depths);
+    free(c);
+    DEBUG(1,"out\n");
+}
