@@ -64,11 +64,6 @@ void    readIn(settings_t* settings, FILE* inFile){
     int32_t     tempInt;
     char*       junkChar;
     
-    /*
-    FILE*       inFile;                 //a pointer for the input file
-    DEBUG(1, "Reading cTraceo input file \"%s\"\n", filename);
-    inFile = openFile(filename, "r");   //open file in "read" mode
-    */
 
     /************************************************************************
      *  Read the title:                                                     *
