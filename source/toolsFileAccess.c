@@ -56,7 +56,8 @@ FILE*       openFile(const char *filename, const char mode[4]) {
         
     temp=fopen(filename, mode);
     if(temp==NULL) {
-        fatal("Error while opening file.\n");
+        printf("Error while opening file '%s'.\n", filename);
+        fatal("Aborting.\n");
         exit(EXIT_FAILURE);     //this is redundant but avoids "control may reach end of non-void function" warning
     } else {
         if (VERBOSE)
