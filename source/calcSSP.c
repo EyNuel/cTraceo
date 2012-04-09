@@ -57,15 +57,15 @@ void    calcSSP(settings_t* settings, uintptr_t nPoints){
     MATFile*        matfile     = NULL;
     mxArray*        mxZSSP      = NULL;
     mxArray*        mxCSSP      = NULL;
-    double          *depths = NULL;
-    double          *c = NULL;
+    float          *depths = NULL;
+    float          *c = NULL;
     uintptr_t       i;
     
-    double      cc, sigmaI, cri, czi, crri, czzi, crzi;
+    float      cc, sigmaI, cri, czi, crri, czzi, crzi;
     vector_t    slowness;
     
-    c = mallocDouble(nPoints);
-    depths = mallocDouble(nPoints);
+    c = mallocFloat(nPoints);
+    depths = mallocFloat(nPoints);
     linearSpaced(nPoints, settings->soundSpeed.z[0], settings->soundSpeed.z[settings->soundSpeed.nz-1], depths);
     
     
@@ -92,7 +92,7 @@ void    calcSSP(settings_t* settings, uintptr_t nPoints){
     if(matfile == NULL || mxZSSP == NULL)
         fatal("Memory alocation error.");
     //copy cArray to mxArray:
-    copyDoubleToMxArray(depths, mxZSSP, nPoints);
+    copyFloatToMxArray(depths, mxZSSP, nPoints);
     //move mxArray to file:
     matPutVariable(matfile, "zssp", mxZSSP);
     mxDestroyArray(mxZSSP);
@@ -101,7 +101,7 @@ void    calcSSP(settings_t* settings, uintptr_t nPoints){
     if( mxCSSP == NULL)
         fatal("Memory alocation error.");
     //copy cArray to mxArray:
-    copyDoubleToMxArray(c, mxCSSP, nPoints);
+    copyFloatToMxArray(c, mxCSSP, nPoints);
     //move mxArray to file:
     matPutVariable(matfile, "cssp", mxCSSP);
     mxDestroyArray(mxCSSP);

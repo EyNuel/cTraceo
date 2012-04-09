@@ -1,4 +1,27 @@
 ################################################################
+## Version 1.2 ##
+## Features/Changes:
+ # Added a command line option to store the interpolated sound
+   speed profile, as used internally by the model, to a matfile.
+   Passing '-s #' or '--ssp #' will generate an #-point interpolated
+   SSP and store it in the file 'ssp.mat'.
+   
+ # Added a command line option to not write a log file to disk ('--nolog')
+ 
+ # Made file access errors more verbose. The user can now clearly
+   see which file caused the error.
+   
+ 
+## Bugfixes:
+ # Fixed a bug which caused incorrect ssp interpolation close to
+   ssp 'edges'. Linear interpolation was being used in first and
+   second as well as last and second-to-last interval of ssp
+   values when it should only be used in the first and last one.
+   
+ # Fixed a bug where the particle velocity output from a vertical
+   array would be transposed.
+
+################################################################
 ## Version 1.1 ##
 ## Features/Changes:
  # Added support for reading input files from stdin (as opposed
