@@ -87,7 +87,7 @@ void    solveEikonalEq(settings_t* settings, ray_t* ray){
     double          altInterpolatedZ, batInterpolatedZ;
     double          thetaRefl;
     point_t         pointA, pointB, pointIsect;
-    double          rho1, rho2, cp2, cs2, ap, as, lambda, tempDouble;
+    double          rho1, rho2, cp2, cs2, ap, as, lambda, tempDouble = 0;
     double          dr, dz, dIc;
     double          prod;
     uintptr_t       initialMemorySize;

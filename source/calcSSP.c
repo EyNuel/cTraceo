@@ -55,8 +55,8 @@ void    calcSSP(settings_t* settings, uintptr_t nPoints){
     DEBUG(1,"in\n");
     
     MATFile*        matfile     = NULL;
-    mxArray*        mxZSSP      = NULL;
-    mxArray*        mxCSSP      = NULL;
+    mxArray*        mxSSPZ      = NULL;
+    mxArray*        mxSSPC      = NULL;
     double          *depths = NULL;
     double          *c = NULL;
     uintptr_t       i;
@@ -88,23 +88,23 @@ void    calcSSP(settings_t* settings, uintptr_t nPoints){
     //open matfile for output
     matfile     = matOpen("ssp.mat", "w");
     
-    mxZSSP        = mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)nPoints, mxREAL);
-    if(matfile == NULL || mxZSSP == NULL)
+    mxSSPZ        = mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)nPoints, mxREAL);
+    if(matfile == NULL || mxSSPZ == NULL)
         fatal("Memory alocation error.");
     //copy cArray to mxArray:
-    copyDoubleToMxArray(depths, mxZSSP, nPoints);
+    copyDoubleToMxArray(depths, mxSSPZ, nPoints);
     //move mxArray to file:
-    matPutVariable(matfile, "zssp", mxZSSP);
-    mxDestroyArray(mxZSSP);
+    matPutVariable(matfile, "sspZ", mxSSPZ);
+    mxDestroyArray(mxSSPZ);
     
-    mxCSSP        = mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)nPoints, mxREAL);
-    if( mxCSSP == NULL)
+    mxSSPC        = mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)nPoints, mxREAL);
+    if( mxSSPC == NULL)
         fatal("Memory alocation error.");
     //copy cArray to mxArray:
-    copyDoubleToMxArray(c, mxCSSP, nPoints);
+    copyDoubleToMxArray(c, mxSSPC, nPoints);
     //move mxArray to file:
-    matPutVariable(matfile, "cssp", mxCSSP);
-    mxDestroyArray(mxCSSP);
+    matPutVariable(matfile, "sspC", mxSSPC);
+    mxDestroyArray(mxSSPC);
 
     
     /// Finish up
