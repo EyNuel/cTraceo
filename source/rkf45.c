@@ -60,11 +60,8 @@ void rkf45(settings_t* settings, float* dsi, float* yOld, float* fOld, float* yN
     DEBUG(6,"in\n");
     uintptr_t   j;
     float       dr,dz;
-    float       a1,a3,a4,a5;
-    float       b1,b3,b4,b5,b6;
     float       k1[4],k2[4],k3[4],k4[4],k5[4],k6[4];
     float       yk[4],yrk4[4],yrk5[4];
-
     float       ri;
     float       zi;
     float       ci;
@@ -83,16 +80,16 @@ void rkf45(settings_t* settings, float* dsi, float* yOld, float* fOld, float* yN
     
     //define coeficients required for Runge-Kutta-Fehlberg method:
     //RK4:
-    a1 =   25.0/216.0;
-    a3 = 1408.0/2565.0;
-    a4 = 2197.0/4101.0;
-    a5 =   -1.0/5.0;
-    //RK5:
-    b1 =    16.0/135.0;
-    b3 =  6656.0/12825.0;
-    b4 = 28561.0/56430.0;
-    b5 =    -9.0/50.0;
-    b6 =     2.0/55.0;
+    #define A1   (25.0/216.0)
+    #define A3 (1408.0/2565.0)
+    #define A4 (2197.0/4101.0)
+    #define A5   (-1.0/5.0)
+    //RK5:     
+    #define B1    (16.0/135.0)
+    #define B3  (6656.0/12825.0)
+    #define B4 (28561.0/56430.0)
+    #define B5    (-9.0/50.0)
+    #define B6     (2.0/55.0)
 
     ri = yOld[0];
     zi = yOld[1];
@@ -186,8 +183,8 @@ void rkf45(settings_t* settings, float* dsi, float* yOld, float* fOld, float* yN
 
     
     for(j=0; j<4; j++){
-        yrk4[j] = yOld[j] + (*dsi) * ( a1 * k1[j] + a3 * k3[j] + a4 * k4[j] + a5 * k5[j]);
-        yrk5[j] = yOld[j] + (*dsi) * ( b1 * k1[j] + b3 * k3[j] + b4 * k4[j] + b5 * k5[j] + b6 * k6[j]);
+        yrk4[j] = yOld[j] + (*dsi) * ( A1 * k1[j] + A3 * k3[j] + A4 * k4[j] + A5 * k5[j]);
+        yrk5[j] = yOld[j] + (*dsi) * ( B1 * k1[j] + B3 * k3[j] + B4 * k4[j] + B5 * k5[j] + B6 * k6[j]);
         yNew[j] = yrk5[j];
     }
 

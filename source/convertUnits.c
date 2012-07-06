@@ -52,7 +52,7 @@ void convertUnits(float*, float*, float*, uint32_t*, float*);
 void convertUnits(float* aIn, float* lambda, float* freq, uint32_t* units, float* aOut){
     //TODO add support for "parameter loss", 'L' option from Bellhop's option1(3)
     
-    float c1 = 8.68588963806504;
+    #define c1 (8.68588963806504)
     
     switch(*units){
         case    SURFACE_ATTEN_UNITS__dBperkHz:      //"F",  dB/kHz
