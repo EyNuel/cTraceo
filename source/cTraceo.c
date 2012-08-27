@@ -46,10 +46,7 @@
 #include "calcCohTransLoss.c"
 #include "calcParticleVel.c"
 #include "calcSSP.c"
-#ifndef WINDOWS
-    #include <sys/time.h>       //for struct timeval
-    #include <sys/resource.h>   //for getrusage()
-#endif
+#include <time.h>
 #include <string.h>
 #include <stdbool.h>
 
@@ -115,6 +112,7 @@ void    printHelp(void){
 }
 
 int main(int argc, char **argv){
+    float           tEnd, tInit   = (double)clock()/CLOCKS_PER_SEC;   //get time
     char*           inFileName  = mallocChar(256);
     char*           logFileName = mallocChar(256);
     FILE*           inFile      = NULL;
@@ -350,10 +348,12 @@ int main(int argc, char **argv){
         fprintf(logFile, "%s\n", line);
         fprintf(logFile, "Done.\n");
     }
-    
-    printCpuTime(stdout);
+
+    //get elapsed time:
+    tEnd = (double)clock()/CLOCKS_PER_SEC;    
+    fprintf(stderr,     "---------\n%f seconds total.\n", tEnd-tInit);
     if(writeLogFile){
-        printCpuTime(logFile);
+        fprintf(logFile,    "---------\n%f seconds total.\n", tEnd-tInit);
     }
     
     //free memory
