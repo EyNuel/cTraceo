@@ -77,6 +77,7 @@ void        fatal(const char* message){
     exit(EXIT_FAILURE);
 }
 
+#if 0
 void        printCpuTime(FILE* stream){
     /*
      * prints total cpu time used by process.
@@ -93,3 +94,4 @@ void        printCpuTime(FILE* stream){
         fprintf(stream, "%ld.%06ld seconds system CPU time used.\n", usage.ru_stime.tv_sec, usage.ru_stime.tv_usec);
     #endif
 }
+#endif

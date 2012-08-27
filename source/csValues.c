@@ -66,7 +66,6 @@ void    csValues(settings_t* settings, float ri, float zi, float* ci, float* cc,
     float**    c2D;    //used locally to make code more readable
     float*     r;      //used locally to make code more readable
     float*     z;      //used locally to make code more readable
-    float      epsilon, bmunk, bmunk2;
    
     #define epsilon (7.4e-3f)
     #define bmunk   (1300.0f)
