@@ -8,8 +8,8 @@
 ## ================================================================
 
 ## Choose a compiler command:
-#CC  := gcc
-CC := clang
+CC  := gcc
+#CC := clang
 
 ## Set Operating system:
 ## Allowable values are: WINDOWS, LINUX
@@ -65,6 +65,9 @@ CFLAGS := 	-Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align \
 
 ifeq ($(ARCH),32b)
 	CFLAGS := $(CFLAGS) -march=i686 -m32
+endif
+ifeq ($(ARCH),64b)
+	CFLAGS := $(CFLAGS) -march=nocona
 endif
 
 ## Linker Flags:
