@@ -43,16 +43,24 @@ uint32_t*       mallocUint(uintptr_t);
 uint32_t*       reallocUint(uint32_t*, uintptr_t);
 int32_t*        mallocInt(uintptr_t);
 int32_t*        reallocInt(int32_t*, uintptr_t);
+
+float*          mallocFloat(uintptr_t);
+float*          reallocFloat(float*, uintptr_t);
+void            freeFloat(float*);
+float**         mallocFloat2D(uintptr_t, uintptr_t);
+void            freeFloat2D(float**, uintptr_t);
+
 double*         mallocDouble(uintptr_t);
 double*         reallocDouble(double*, uintptr_t);
 void            freeDouble(double*);
 double**        mallocDouble2D(uintptr_t, uintptr_t);
 void            freeDouble2D(double**, uintptr_t);
-complex double* mallocComplex(uintptr_t);
-complex double* reallocComplex(complex double*, uintptr_t);
-void            freeComplex(complex double*);
-complex double** mallocComplex2D(uintptr_t, uintptr_t);
-void            freeComplex2D(complex double**, uintptr_t);
+
+complex float*  mallocComplex(uintptr_t);
+complex float*  reallocComplex(complex float*, uintptr_t);
+void            freeComplex(complex float*);
+complex float** mallocComplex2D(uintptr_t, uintptr_t);
+void            freeComplex2D(complex float**, uintptr_t);
 
 settings_t*     mallocSettings(void);
 void            freeInterface(interface_t*);
@@ -177,14 +185,14 @@ int32_t*            reallocInt(int32_t* old, uintptr_t numInts){
     return new;
 }
 
-double*             mallocDouble(uintptr_t numDoubles){
+double*             mallocDouble(uintptr_t numdoubles){
     /*
         Allocates an array of doubles and returns a pointer to it in case of success,
         Exits with error code otherwise.
     */
     DEBUG(9,"mallocDouble(),\tin\n");
     double* temp = NULL;    //temporary pointer
-    temp = malloc(numDoubles * sizeof(double));
+    temp = malloc(numdoubles * sizeof(double));
     if(temp == NULL){
         fatal("Memory alocation error.\n");
     }
@@ -192,19 +200,19 @@ double*             mallocDouble(uintptr_t numDoubles){
     return temp;
 }
     
-double*             reallocDouble(double* old, uintptr_t numDoubles){
-    DEBUG(10,"reallocDouble(),\tin\n");
+double*             reallocDouble(double* old, uintptr_t numdoubles){
+    DEBUG(10,"reallocdouble(),\tin\n");
     double*     new = NULL;
     
-    if(numDoubles == 0){
+    if(numdoubles == 0){
         free(old);
     }else{
-        new = realloc(old, numDoubles*sizeof(double));
+        new = realloc(old, numdoubles*sizeof(double));
         if (new == NULL){
             fatal("Memory allocation error.\n");
         }
     }
-    DEBUG(10,"reallocDouble(),\tout\n");
+    DEBUG(10,"reallocdouble(),\tout\n");
     return new;
 }
     
@@ -249,11 +257,83 @@ void                freeDouble2D(double** greenMile, uintptr_t items){
     free(greenMile);
 }
 
-complex double*     mallocComplex(uintptr_t numComplex){
-    complex double* temp = NULL;
+float*             mallocFloat(uintptr_t numfloats){
+    /*
+        Allocates an array of floats and returns a pointer to it in case of success,
+        Exits with error code otherwise.
+    */
+    DEBUG(9,"mallocFloat(),\tin\n");
+    float* temp = NULL;    //temporary pointer
+    temp = malloc(numfloats * sizeof(float));
+    if(temp == NULL){
+        fatal("Memory alocation error.\n");
+    }
+    DEBUG(9,"mallocFloat(),\tout\n");
+    return temp;
+}
+    
+float*             reallocFloat(float* old, uintptr_t numfloats){
+    DEBUG(10,"reallocFloat(),\tin\n");
+    float*     new = NULL;
+    
+    if(numfloats == 0){
+        free(old);
+    }else{
+        new = realloc(old, numfloats*sizeof(float));
+        if (new == NULL){
+            fatal("Memory allocation error.\n");
+        }
+    }
+    DEBUG(10,"reallocFloat(),\tout\n");
+    return new;
+}
+    
+void                freeFloat(float* greenMile){
+    if(greenMile != NULL){
+        free(greenMile);
+    }
+}
+    
+float**            mallocFloat2D(uintptr_t numRows, uintptr_t numCols){
+    /*
+     * Returns a pointer to an array of pointer do floats.
+     * Or:
+     * Return a 2D Array.
+     */
+
+    uint32_t    i;
+    float**    array = NULL;
+    array = malloc(numRows * sizeof(uintptr_t*));   //malloc an array of pointers
+    
+    if(array == NULL)
+        fatal("Memory allocation error.\n");
+
+    for(i = 0; i < numRows; i++){
+        array[i] = mallocFloat(numCols);   //Nota that mallocFloat() already checks for allocation errors
+    }
+
+    return array;
+}
+
+void                freeFloat2D(float** greenMile, uintptr_t items){
+    /*
+     * frees the memory allocated to a float pointer of type float.
+     */
+     uintptr_t  i;
+     
+    for(i=0; i<items; i++){
+        if(greenMile[i] != NULL){
+            free(greenMile[i]);
+        }
+    }
+    free(greenMile);
+}
+
+complex float*     mallocComplex(uintptr_t numComplex){
+    complex float* temp = NULL;
     uintptr_t       i;
     
-    temp = malloc(numComplex * sizeof(complex double));
+    temp = malloc(numComplex * sizeof(complex float));
     if(temp == NULL)
         fatal("Memory alocation error.");
     //Initialize to zero:
@@ -264,13 +344,13 @@ complex double*     mallocComplex(uintptr_t numComplex){
     return temp;
 }
 
-complex double*     reallocComplex(complex double* old, uintptr_t numComplex){
-    complex double* new = NULL;
+complex float*     reallocComplex(complex float* old, uintptr_t numComplex){
+    complex float* new = NULL;
 
     if(numComplex == 0){
         free(old);
     }else{
-        new = realloc(old, numComplex*sizeof(complex double));
+        new = realloc(old, numComplex*sizeof(complex float));
         if (new == NULL){
             fatal("Memory allocation error.\n");
         }
@@ -278,36 +358,36 @@ complex double*     reallocComplex(complex double* old, uintptr_t numComplex){
     return new;
 }
 
-void                freeComplex(complex double* greenMile){
+void                freeComplex(complex float* greenMile){
     if(greenMile != NULL){
         free(greenMile);
     }
 }
 
-complex double**    mallocComplex2D(uintptr_t numRows, uintptr_t numCols){
+complex float**    mallocComplex2D(uintptr_t numRows, uintptr_t numCols){
     /*
-     * Returns a pointer to an array of pointer do doubles.
+     * Returns a pointer to an array of pointer do floats.
      * Or:
      * Return a 2D Array.
      */
 
     uint32_t    i;
-    complex double**    array = NULL;
+    complex float**    array = NULL;
     array = malloc(numRows * sizeof(uintptr_t*));   //malloc an array of pointers
     
     if(array == NULL)
         fatal("Memory allocation error.\n");
 
     for(i = 0; i < numRows; i++){
-        array[i] = mallocComplex(numCols);  //Nota that mallocDouble() already checks for allocation errors
+        array[i] = mallocComplex(numCols);  //Nota that mallocFloat() already checks for allocation errors
     }
 
     return array;
 }
 
-void                freeComplex2D(complex double** greenMile, uintptr_t items){
+void                freeComplex2D(complex float** greenMile, uintptr_t items){
     /*
-     * frees the memory allocated to a double pointer of type complex double.
+     * frees the memory allocated to a float pointer of type complex float.
      */
      uintptr_t  i;
      
@@ -352,13 +432,13 @@ settings_t*         mallocSettings(void){
 void                freeInterface(interface_t* interface){
     if(interface != NULL){
         //Note that reallcing to size 0, corresponds to deallocing the memory
-        reallocDouble(interface->r, 0);
-        reallocDouble(interface->z, 0);
-        reallocDouble(interface->cp, 0);
-        reallocDouble(interface->cs, 0);
-        reallocDouble(interface->rho, 0);
-        reallocDouble(interface->ap, 0);
-        reallocDouble(interface->as, 0);
+        reallocFloat(interface->r, 0);
+        reallocFloat(interface->z, 0);
+        reallocFloat(interface->cp, 0);
+        reallocFloat(interface->cs, 0);
+        reallocFloat(interface->rho, 0);
+        reallocFloat(interface->ap, 0);
+        reallocFloat(interface->as, 0);
         //free(interface);
     }
 }
@@ -379,7 +459,7 @@ void                freeSettings(settings_t* settings){
         
         //free source:
         if(&settings->source != NULL){
-            reallocDouble(settings->source.thetas, 0);
+            reallocFloat(settings->source.thetas, 0);
         }
         
         //free altimetry:
@@ -387,17 +467,17 @@ void                freeSettings(settings_t* settings){
         
         //free soundSpeed:
         if(&settings->soundSpeed != NULL){
-            freeDouble(settings->soundSpeed.z);
+            freeFloat(settings->soundSpeed.z);
             //note that the range coordinates of the soundspeed are only allocated for cDist = C_DIST__FIELD
             
             switch (settings->soundSpeed.cDist){
                 case C_DIST__PROFILE:
-                    freeDouble(settings->soundSpeed.c1D);
+                    freeFloat(settings->soundSpeed.c1D);
                     break;
                     
                 case C_DIST__FIELD:
-                    freeDouble(settings->soundSpeed.r);
-                    freeDouble2D(settings->soundSpeed.c2D, settings->soundSpeed.nz);
+                    freeFloat(settings->soundSpeed.r);
+                    freeFloat2D(settings->soundSpeed.c2D, settings->soundSpeed.nz);
                     break;
                     
                 default:
@@ -412,9 +492,9 @@ void                freeSettings(settings_t* settings){
             if(settings->objects.numObjects > 0){
                 for (i=0; i<settings->objects.numObjects; i++){
                     if (settings->objects.object[i].nCoords > 0){
-                        freeDouble(settings->objects.object[i].r);
-                        freeDouble(settings->objects.object[i].zDown);
-                        freeDouble(settings->objects.object[i].zUp);
+                        freeFloat(settings->objects.object[i].r);
+                        freeFloat(settings->objects.object[i].zDown);
+                        freeFloat(settings->objects.object[i].zUp);
                     }
                 }
                 free(settings->objects.object);
@@ -427,10 +507,10 @@ void                freeSettings(settings_t* settings){
         //free output (array configuration and acoustic pressure -if calculated):
         if(&settings->output != NULL){
             if(settings->output.nArrayR > 0){
-                freeDouble(settings->output.arrayR);
+                freeFloat(settings->output.arrayR);
             }
             if (settings->output.nArrayZ > 0){
-                freeDouble(settings->output.arrayZ);
+                freeFloat(settings->output.arrayZ);
             }
 
             //TODO this is no longer corrrect => adapt to new layout of pressure2D
@@ -859,23 +939,23 @@ void                reallocRayMembers(ray_t* ray, uintptr_t numRayCoords){
      */
     DEBUG(5,"reallocRayMembers(%u),\t in\n", (uint32_t)numRayCoords);
     ray->nCoords    = numRayCoords;
-    ray->r          = reallocDouble(    ray->r,         numRayCoords);
-    ray->z          = reallocDouble(    ray->z,         numRayCoords);
-    ray->c          = reallocDouble(    ray->c,         numRayCoords);
+    ray->r          = reallocFloat(    ray->r,         numRayCoords);
+    ray->z          = reallocFloat(    ray->z,         numRayCoords);
+    ray->c          = reallocFloat(    ray->c,         numRayCoords);
     ray->iRefl      = reallocBool(      ray->iRefl,     numRayCoords);
     ray->decay      = reallocComplex(   ray->decay,     numRayCoords);
-    ray->phase      = reallocDouble(    ray->phase,     numRayCoords);
-    ray->tau        = reallocDouble(    ray->tau,       numRayCoords);
-    ray->s          = reallocDouble(    ray->s,         numRayCoords);
-    ray->ic         = reallocDouble(    ray->ic,        numRayCoords);
+    ray->phase      = reallocFloat(    ray->phase,     numRayCoords);
+    ray->tau        = reallocFloat(    ray->tau,       numRayCoords);
+    ray->s          = reallocFloat(    ray->s,         numRayCoords);
+    ray->ic         = reallocFloat(    ray->ic,        numRayCoords);
     ray->boundaryTg = reallocVector(    ray->boundaryTg,numRayCoords);
     ray->boundaryJ  = reallocInt(       ray->boundaryJ, numRayCoords);
     ray->nRefrac    = (uint32_t)numRayCoords;
-    ray->rRefrac    = reallocDouble(    ray->rRefrac,   numRayCoords);
-    ray->zRefrac    = reallocDouble(    ray->zRefrac,   numRayCoords);
-    ray->p          = reallocDouble(    ray->p,         numRayCoords);
-    ray->q          = reallocDouble(    ray->q,         numRayCoords);
-    ray->caustc     = reallocDouble(    ray->caustc,    numRayCoords);
+    ray->rRefrac    = reallocFloat(    ray->rRefrac,   numRayCoords);
+    ray->zRefrac    = reallocFloat(    ray->zRefrac,   numRayCoords);
+    ray->p          = reallocFloat(    ray->p,         numRayCoords);
+    ray->q          = reallocFloat(    ray->q,         numRayCoords);
+    ray->caustc     = reallocFloat(    ray->caustc,    numRayCoords);
     ray->amp        = reallocComplex(   ray->amp,       numRayCoords);
     DEBUG(5,"reallocRayMembers(), \t out\n");
 }

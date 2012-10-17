@@ -50,11 +50,11 @@
 #pragma     once
 #include    "tools.h"
 
-void    eBracket(uintptr_t, double*, double, uintptr_t*, uintptr_t*);
+void    eBracket(uintptr_t, float*, float, uintptr_t*, uintptr_t*);
 
-void    eBracket(uintptr_t n, double* x, double xi, uintptr_t* nb, uintptr_t* ib){
+void    eBracket(uintptr_t n, float* x, float xi, uintptr_t* nb, uintptr_t* ib){
     uintptr_t   i;
-    double_t    a, b;
+    float_t    a, b;
     
     ib[0]   = 0;
     *nb     = 0;

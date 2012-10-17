@@ -51,9 +51,9 @@
 #pragma  once
 #include <stdint.h>
 
-uintptr_t   bracket(uintptr_t, double*, double, uintptr_t*);
+uintptr_t   bracket(uintptr_t, float*, float, uintptr_t*);
 
-uintptr_t   bracket(uintptr_t n, double* x, double xi, uintptr_t* i){
+uintptr_t   bracket(uintptr_t n, float* x, float xi, uintptr_t* i){
     DEBUG(5, "Entering bracket().\n");
     uintptr_t   ia,im,ib;
     

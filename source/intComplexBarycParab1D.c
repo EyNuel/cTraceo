@@ -48,10 +48,10 @@
 #pragma once
 #include <complex.h>
 
-void intComplexBarycParab1D(double*, complex double*, complex double, complex double*, complex double*, complex double*);
+void intComplexBarycParab1D(float*, complex float*, complex float, complex float*, complex float*, complex float*);
 
-void intComplexBarycParab1D(double* x, complex double* f, complex double xi, complex double* fi, complex double* fxi, complex double* fxxi){
-    complex double      a1,a2,px1,px2,sx1,sx2;
+void intComplexBarycParab1D(float* x, complex float* f, complex float xi, complex float* fi, complex float* fxi, complex float* fxxi){
+    complex float      a1,a2,px1,px2,sx1,sx2;
 
     //TODO remove calculation of second derivative -it is never used.
     px1 = (x[1] -x[0]) * (x[1] -x[2]);

@@ -30,7 +30,7 @@
 ///Prototypes:
 
 FILE*           openFile(const char* , const char[4]);
-double          readDouble(FILE*);
+float          readfloat(FILE*);
 int32_t         readInt(FILE*);
 char*           readStringN(FILE*, uint32_t);
 void            skipLine(FILE*);
@@ -65,20 +65,20 @@ FILE*       openFile(const char *filename, const char mode[4]) {
     }
 }
 
-double      readDouble(FILE* infile){
+float      readfloat(FILE* infile){
     /************************************************
-     *  Reads a double from a file and returns it   *
+     *  Reads a float from a file and returns it   *
      ***********************************************/
      
     char*   junkString = mallocChar((uintptr_t)(MAX_LINE_LEN + 1));;
-    double  tempDouble;
+    float  tempfloat;
     int32_t junkInt;
     
     junkInt = fscanf(infile, "%s\n", junkString);
-    tempDouble = atof(junkString);
+    tempfloat = atof(junkString);
     free(junkString);
     
-    return(tempDouble);
+    return(tempfloat);
 }
 
 int32_t     readInt(FILE* infile){

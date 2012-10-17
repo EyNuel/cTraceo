@@ -57,8 +57,8 @@ void calcCohTransLoss(settings_t*);
 
 void calcCohTransLoss(settings_t* settings){
     uint32_t    i, j, dim;
-    double*     tl      = NULL;
-    double**    tl2D    = NULL;
+    float*     tl      = NULL;
+    float**    tl2D    = NULL;
     MATFile*    matfile = NULL;
     mxArray*    ptl     = NULL;
     mxArray*    ptl2D       = NULL;
@@ -76,7 +76,7 @@ void calcCohTransLoss(settings_t* settings){
              * horizontal and vertical arrays are special cases of Rectangular hydrophone arrays,
              * so all of them can be handled by the same code.
              */
-            tl2D = mallocDouble2D(settings->output.nArrayR, settings->output.nArrayZ);
+            tl2D = mallocFloat2D(settings->output.nArrayR, settings->output.nArrayZ);
 
             for(i=0; i<settings->output.nArrayR; i++){
                 for(j=0; j<settings->output.nArrayZ; j++){
@@ -88,16 +88,16 @@ void calcCohTransLoss(settings_t* settings){
             if(ptl2D == NULL){
                 fatal("Memory alocation error.");
             }
-            copyDoubleToPtr2D_transposed(tl2D, ptl2D, settings->output.nArrayZ, settings->output.nArrayR);
+            copyFloatToMxArray2D_transposed(tl2D, ptl2D, settings->output.nArrayZ, settings->output.nArrayR);
             matPutVariable(matfile,"tl",ptl2D);
             mxDestroyArray(ptl2D);
 
-            freeDouble2D(tl2D, settings->output.nArrayR);
+            freeFloat2D(tl2D, settings->output.nArrayR);
             break;
 
         case ARRAY_TYPE__LINEAR:
-            dim = (uint32_t)max((double)settings->output.nArrayR, (double)settings->output.nArrayZ);
-            tl = mallocDouble(dim);
+            dim = (uint32_t)max((float)settings->output.nArrayR, (float)settings->output.nArrayZ);
+            tl = mallocFloat(dim);
 
             for(j=0; j<dim; j++){
                 tl[j] = -20.0*log10( cabs( settings->output.pressure2D[0][j] ) );
@@ -108,7 +108,7 @@ void calcCohTransLoss(settings_t* settings){
             if(ptl == NULL){
                 fatal("Memory alocation error.");
             }
-            copyDoubleToPtr(tl, mxGetPr(ptl), dim);
+            copyFloatToMxArray(tl, ptl, dim);
             matPutVariable(matfile,"tl",ptl);
             mxDestroyArray(ptl);
 

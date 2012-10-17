@@ -39,10 +39,10 @@
  *                                                                                      *
  ****************************************************************************************/
 
-void    thorpe(double, double*);
+void    thorpe(float, float*);
 
-void    thorpe(double freq, double* alpha){
-    double      fxf;
+void    thorpe(float freq, float* alpha){
+    float      fxf;
 
     fxf     = pow( (freq/1000 ), 2);
     *alpha  = 0.0033 +0.11 * fxf / (1 +fxf ) + 44 * fxf / (4100 +fxf) +0.0003 * fxf;

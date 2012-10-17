@@ -64,12 +64,12 @@ void calcParticleVel(settings_t* settings){
     mxArray*            pw2D;
     uintptr_t           i, j, k;
     uintptr_t           dimR=0, dimZ=0;
-    double              rHyd, zHyd;
-    double              xp[3];
-    double              dr, dz;     //used locally to make code more efficient (and more readable)
-    complex double      junkComplex, dP_dRi, dP_dZi;
-    complex double**    dP_dR2D = NULL;
-    complex double**    dP_dZ2D = NULL;
+    float              rHyd, zHyd;
+    float              xp[3];
+    float              dr, dz;     //used locally to make code more efficient (and more readable)
+    complex float      junkComplex, dP_dRi, dP_dZi;
+    complex float**    dP_dR2D = NULL;
+    complex float**    dP_dZ2D = NULL;
 
     //open the correct matfile for output:
     switch(settings->output.calcType){
@@ -217,7 +217,7 @@ void calcParticleVel(settings_t* settings){
             if( pu2D == NULL){
                 fatal("Memory alocation error.");
             }
-            copyComplexToMxArray2D_transposed(dP_dR2D, pu2D, dimZ, dimR);
+            copyComplexFloatToMxArray2D_transposed(dP_dR2D, pu2D, dimZ, dimR);
             matPutVariable(matfile, "u", pu2D);
             mxDestroyArray(pu2D);
             
@@ -226,7 +226,7 @@ void calcParticleVel(settings_t* settings){
             if( pw2D == NULL){
                 fatal("Memory alocation error.");
             }
-            copyComplexToMxArray2D_transposed(dP_dZ2D, pw2D, dimZ, dimR);
+            copyComplexFloatToMxArray2D_transposed(dP_dZ2D, pw2D, dimZ, dimR);
             matPutVariable(matfile, "w", pw2D);
             mxDestroyArray(pw2D);
             break;
@@ -240,7 +240,7 @@ void calcParticleVel(settings_t* settings){
             if( pu2D == NULL){
                 fatal("Memory alocation error.");
             }
-            copyComplexToMxArray2D(dP_dR2D, pu2D, dimZ, dimR);
+            copyComplexFloatToMxArray2D(dP_dR2D, pu2D, dimZ, dimR);
             matPutVariable(matfile, "u", pu2D);
             mxDestroyArray(pu2D);
             
@@ -249,7 +249,7 @@ void calcParticleVel(settings_t* settings){
             if( pw2D == NULL){
                 fatal("Memory alocation error.");
             }
-            copyComplexToMxArray2D(dP_dZ2D, pw2D, dimZ, dimR);
+            copyComplexFloatToMxArray2D(dP_dZ2D, pw2D, dimZ, dimR);
             matPutVariable(matfile, "w", pw2D);
             mxDestroyArray(pw2D);
             break;

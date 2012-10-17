@@ -66,7 +66,7 @@ void    calcRayCoords(settings_t* settings){
     const char*     fieldNames[]= { "theta",
                                     "r",
                                     "z"};
-    double      thetai, ctheta;
+    float      thetai, ctheta;
     ray_t*      ray     = NULL;
     uintptr_t   i;
     
@@ -81,7 +81,7 @@ void    calcRayCoords(settings_t* settings){
     if(matfile == NULL || mxThetas == NULL)
         fatal("Memory alocation error.");
     //copy cArray to mxArray:
-    copyDoubleToMxArray(    settings->source.thetas, mxThetas, settings->source.nThetas);
+    copyFloatToMxArray(    settings->source.thetas, mxThetas, settings->source.nThetas);
     //move mxArray to file:
     matPutVariable(matfile, "thetas", mxThetas);
     mxDestroyArray(mxThetas);
@@ -135,9 +135,9 @@ void    calcRayCoords(settings_t* settings){
             mxZ     = mxCreateDoubleMatrix((MWSIZE)1,   (MWSIZE)ray[i].nCoords, mxREAL);
             
             //copy data to mxArrays:
-            copyDoubleToMxArray(&settings->source.thetas[i],mxTheta,1);
-            copyDoubleToMxArray(ray[i].r,                   mxR,    ray[i].nCoords);
-            copyDoubleToMxArray(ray[i].z,                   mxZ,    ray[i].nCoords);
+            copyFloatToMxArray(&settings->source.thetas[i],mxTheta,1);
+            copyFloatToMxArray(ray[i].r,                   mxR,    ray[i].nCoords);
+            copyFloatToMxArray(ray[i].z,                   mxZ,    ray[i].nCoords);
             
             //copy mxArrays to mxRayStruct
             mxSetFieldByNumber( mxRayStruct,                        //pointer to the mxStruct

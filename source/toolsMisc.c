@@ -30,17 +30,17 @@
 
 ///Prototypes:
 
-uint32_t    isnan_d(double);
-double      min(double, double);
-double      max(double, double);
+uint32_t    isnan_d(float);
+float      min(float, float);
+float      max(float, float);
 void        fatal(const char*);
 void        printCpuTime(FILE*);
 
 
 ///Functions:
 
-uint32_t isnan_d(double x){
-    //Note that isnan() is only defined for the float data type, and not for doubles
+uint32_t isnan_d(float x){
+    //Note that isnan() is only defined for the float data type, and not for floats
     //NANs are never equal to anything -even themselves:
     if (x!=x){
         return true;
@@ -49,7 +49,7 @@ uint32_t isnan_d(double x){
     }
 }
 
-double      min(double a, double b){
+float      min(float a, float b){
     if( a <= b){
         return a;
     }else{
@@ -57,7 +57,7 @@ double      min(double a, double b){
     }
 }
 
-double      max(double a, double b){
+float      max(float a, float b){
     if( a > b){
         return a;
     }else{
