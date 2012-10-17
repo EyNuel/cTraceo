@@ -30,7 +30,7 @@
 ///Prototypes:
 
 FILE*           openFile(const char* , const char[4]);
-float          readfloat(FILE*);
+float           readFloat(FILE*);
 int32_t         readInt(FILE*);
 char*           readStringN(FILE*, uint32_t);
 void            skipLine(FILE*);
@@ -65,7 +65,7 @@ FILE*       openFile(const char *filename, const char mode[4]) {
     }
 }
 
-float      readfloat(FILE* infile){
+float      readFloat(FILE* infile){
     /************************************************
      *  Reads a float from a file and returns it   *
      ***********************************************/
@@ -75,6 +75,7 @@ float      readfloat(FILE* infile){
     int32_t junkInt;
     
     junkInt = fscanf(infile, "%s\n", junkString);
+    (void)junkInt;
     tempfloat = atof(junkString);
     free(junkString);
     
@@ -91,6 +92,7 @@ int32_t     readInt(FILE* infile){
     int32_t     junkInt;
     
     junkInt = fscanf(infile, "%s\n", junkString);
+    (void)junkInt;
     tempInt = (int32_t)atol(junkString);
     free(junkString);
     
@@ -105,6 +107,7 @@ char*       readStringN(FILE* infile, uint32_t length){
     char*       junkChar;
 
     junkChar = fgets(outputString, (int32_t)length, infile);
+    (void)junkChar;
     return(outputString);
 }
 
@@ -116,7 +119,8 @@ void        skipLine(FILE* infile){
     char*       junkChar;
     
     junkChar = fgets(junkString, MAX_LINE_LEN+1, infile);
-
+    (void)junkChar;
+    
     free(junkString);
 }
 

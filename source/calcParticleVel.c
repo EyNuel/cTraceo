@@ -64,12 +64,12 @@ void calcParticleVel(settings_t* settings){
     mxArray*            pw2D;
     uintptr_t           i, j, k;
     uintptr_t           dimR=0, dimZ=0;
-    float              rHyd, zHyd;
-    float              xp[3];
-    float              dr, dz;     //used locally to make code more efficient (and more readable)
-    complex float      junkComplex, dP_dRi, dP_dZi;
-    complex float**    dP_dR2D = NULL;
-    complex float**    dP_dZ2D = NULL;
+    float               rHyd, zHyd;
+    float               xp[3];
+    float               dr, dz;     //used locally to make code more efficient (and more readable)
+    complex float       junkComplex, dP_dRi, dP_dZi;
+    complex float**     dP_dR2D = NULL;
+    complex float**     dP_dZ2D = NULL;
 
     //open the correct matfile for output:
     switch(settings->output.calcType){

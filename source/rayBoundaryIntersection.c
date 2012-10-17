@@ -138,7 +138,7 @@ void    rayBoundaryIntersection(interface_t* interface, point_t* a, point_t* b, 
                 isect->z = 0.0;
             }
             break;
-//TODO float check the last 20~ lines
+//TODO double check the last 20~ lines
     }
     DEBUG(4,"out\n");
 }

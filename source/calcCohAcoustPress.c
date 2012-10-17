@@ -65,20 +65,20 @@ void    calcCohAcoustPress(settings_t* settings){
     mxArray*            pHydArrayR  = NULL;
     mxArray*            pHydArrayZ  = NULL;
     mxArray*            p   = NULL;
-    float              omega, lambda;
+    float               lambda;
     uintptr_t           i, j, jj, k, l, iHyd = 0;
     uintptr_t           dimR = 0, dimZ = 0;
     ray_t*              ray = NULL;
-    float              ctheta, thetai, cx, q0;
-    float              junkfloat;
+    float               ctheta, thetai, cx, q0;
+    float               junkfloat;
     vector_t            junkVector;
-    float              rHyd, zHyd;
-    complex float      pressure;
-    complex float      pressure_H[3];
-    complex float      pressure_V[3];
+    float               rHyd, zHyd;
+    complex float       pressure;
+    complex float       pressure_H[3];
+    complex float       pressure_V[3];
     uintptr_t           nRet;
     uintptr_t           iRet[51];
-    float              dr, dz; //used for star pressure contributions (for particle velocity)
+    float               dr, dz; //used for star pressure contributions (for particle velocity)
     #if VERBOSE
         //indexing variables used to output the pressure2D variable during debugging:
         uintptr_t           rr,zz;
@@ -190,7 +190,6 @@ void    calcCohAcoustPress(settings_t* settings){
                 &junkVector, &junkfloat, &junkfloat, &junkfloat);
 
     q0 = cx / ( M_PI * settings->source.dTheta/180.0 );
-    omega  = 2.0 * M_PI * settings->source.freqx;
 
 
     /**
