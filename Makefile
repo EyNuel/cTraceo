@@ -104,7 +104,7 @@ COMPLINK 	:= $(CC) $(CFLAGS) $(LFLAGS) -o $@
 AUXFILES := Makefile cTraceo_User_Manual.pdf readme.txt license.txt changelog.txt examples/sletvik_transect.mat bin/ctraceo_linux_i686 bin/ctraceo_linux_x86-64 bin/ctraceo_win_x86-64.exe bin/ctraceo_win_x86.exe
 
 ## A list of directories that belong to the project
-PROJDIRS := M-Files examples source source/matOut bin
+PROJDIRS := M-Files examples source source/matOut doc bin
 
 ## Recursively create a list of files that are inside the project
 SRCFILES := $(shell find $(PROJDIRS) -mindepth 0 -maxdepth 1 -name "*.c")
