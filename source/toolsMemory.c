@@ -185,14 +185,14 @@ int32_t*            reallocInt(int32_t* old, uintptr_t numInts){
     return new;
 }
 
-double*             mallocDouble(uintptr_t numdoubles){
+double*             mallocDouble(uintptr_t numDoubles){
     /*
         Allocates an array of doubles and returns a pointer to it in case of success,
         Exits with error code otherwise.
     */
     DEBUG(9,"mallocDouble(),\tin\n");
     double* temp = NULL;    //temporary pointer
-    temp = malloc(numdoubles * sizeof(double));
+    temp = malloc(numDoubles * sizeof(double));
     if(temp == NULL){
         fatal("Memory alocation error.\n");
     }
@@ -200,19 +200,19 @@ double*             mallocDouble(uintptr_t numdoubles){
     return temp;
 }
     
-double*             reallocDouble(double* old, uintptr_t numdoubles){
-    DEBUG(10,"reallocdouble(),\tin\n");
+double*             reallocDouble(double* old, uintptr_t numDoubles){
+    DEBUG(10,"reallocDouble(),\tin\n");
     double*     new = NULL;
     
-    if(numdoubles == 0){
+    if(numDoubles == 0){
         free(old);
     }else{
-        new = realloc(old, numdoubles*sizeof(double));
+        new = realloc(old, numDoubles*sizeof(double));
         if (new == NULL){
             fatal("Memory allocation error.\n");
         }
     }
-    DEBUG(10,"reallocdouble(),\tout\n");
+    DEBUG(10,"reallocDouble(),\tout\n");
     return new;
 }
     

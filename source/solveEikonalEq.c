@@ -64,37 +64,35 @@ void    solveEikonalEq(settings_t*, ray_t*);
 void    solveEikonalEq(settings_t* settings, ray_t* ray){
     DEBUG(5,"in. theta: %lf\n", ray->theta);
     
-    float          cx, ci, cc, sigmaI, sigmaR, sigmaZ, cri, czi, crri, czzi, crzi;
-    uint32_t        iUp, iDown;
+    float           cx, ci, cc, sigmaI, sigmaR, sigmaZ, cri, czi, crri, czzi, crzi;
     int32_t         ibdry;                      //indicates at which boundary a ray is being reflected (-1 => surface, 1 => bottom)
     uint32_t        sRefl, bRefl, oRefl;    //counters for number of reflections at _s_urface, _s_ottom and _o_bject
     uint32_t        jRefl;                      //TODO huh?!
     uint32_t        numRungeKutta;              //counts the number o RKF45 iterations
     uint32_t        i, j;
-    complex float  reflCoeff, reflDecay;
+    complex float   reflCoeff, reflDecay;
     vector_t        es = {0,0};             //ray's tangent vector
-    vector_t        e1 = {0,0};             //ray's normal vector
     vector_t        slowness = {0,0};
     vector_t        junkVector = {0,0};
     vector_t        normal = {0,0};
     vector_t        tauB = {0,0};
     vector_t        tauR = {0,0};
-    float*         yOld            = mallocFloat(4);  //TODO replace with array? might improve performance.
-    float*         fOld            = mallocFloat(4);
-    float*         yNew            = mallocFloat(4);
-    float*         fNew            = mallocFloat(4);
-    float          dsi, ds4, ds5;
-    float          stepError;
-    float          ri, zi;
-    float          altInterpolatedZ, batInterpolatedZ;
-    float          thetaRefl;
+    float*          yOld            = mallocFloat(4);  //TODO replace with array? might improve performance.
+    float*          fOld            = mallocFloat(4);
+    float*          yNew            = mallocFloat(4);
+    float*          fNew            = mallocFloat(4);
+    float           dsi, ds4, ds5;
+    float           stepError;
+    float           ri, zi;
+    float           altInterpolatedZ, batInterpolatedZ;
+    float           thetaRefl;
     point_t         pointA, pointB, pointIsect;
-    float          rho1, rho2, cp2, cs2, ap, as, lambda, tempfloat;
-    float          dr, dz, dIc;
-    float          prod;
+    float           rho1, rho2, cp2, cs2, ap, as, lambda, tempfloat;
+    float           dr, dz, dIc;
+    float           prod;
     uintptr_t       initialMemorySize;
     uint32_t        nObjCoords; //"noj"
-    float          ziDown, ziUp;   //"zidn, ziup", interpolated height of upper/lower boundary of an object
+    float           ziDown, ziUp;   //"zidn, ziup", interpolated height of upper/lower boundary of an object
 
     //allocate memory for ray components:
     //TODO move memory allocation up one level -this should improve performance
@@ -106,8 +104,6 @@ void    solveEikonalEq(settings_t* settings, ray_t* ray){
     
     //define initial conditions:
     ray->iKill  = false;
-    iUp         = false;
-    iDown       = false;
     sRefl       = 0;
     bRefl       = 0;
     oRefl       = 0;
@@ -127,8 +123,6 @@ void    solveEikonalEq(settings_t* settings, ray_t* ray){
 
     es.r = cos( ray->theta );
     es.z = sin( ray->theta );
-    e1.r = -es.z;
-    e1.z =  es.r;
 
     //Calculate initial sound speed and its derivatives:
     csValues(   settings,
@@ -795,8 +789,6 @@ void    solveEikonalEq(settings_t* settings, ray_t* ray){
                         //Update marching solution and function:
                         es.r = tauR.r;
                         es.z = tauR.z;
-                        e1.r = -es.z;
-                        e1.z =  es.r;
                         DEBUG(7, "Calculating sound speed parameters for next step...\n");
                         csValues(   settings, ri, zi, &ci, &cc, &sigmaI, &cri, &czi, &slowness, &crri, &czzi, &crzi);
                         DEBUG(7, "Sound speed parameters for next step calculated.\n");
@@ -892,7 +884,7 @@ void    solveEikonalEq(settings_t* settings, ray_t* ray){
                     "Note that in cases where neither surface nor bottom have attenuation, rays can be endlessly reflected up and down and become \"trapped\".\n"
                     "If you need a high number or reflections per ray, you may also try changing MEM_FACTOR (in globals.h) to a higher value and recompile.\n"
                     "Aborting...");
-            //float the memory allocated for the ray:
+            //double the memory allocated for the ray:
             //TODO find bus error that happens on realloc when realloccing to a larger value (toolsMemory.c".)
             //reallocRay(ray, ray->nCoords * 2);        //TODO disabled as this sometimes results in "bus error".
             

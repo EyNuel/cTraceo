@@ -16,7 +16,7 @@
 ## Written for project SENSOCEAN by:                          ##  
 ##          Emanuel Ey                                        ##  
 ##          emanuel.ey@gmail.com                              ##  
-##          Copyright (C) 2011                                ##  
+##          Copyright (C) 2011, 2012                          ##  
 ##          Signal Processing Laboratory                      ##  
 ##          Universidade do Algarve                           ##  
 ##                                                            ##  

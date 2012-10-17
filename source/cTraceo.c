@@ -71,7 +71,7 @@ void    printHelp(void){
 "* Written for project SENSOCEAN by:                                           *\n"
 "*          Emanuel Ey                                                         *\n"
 "*          emanuel.ey@gmail.com                                               *\n"
-"*          Copyright (C) 2011                                                 *\n"
+"*          Copyright (C) 2011, 2012                                           *\n"
 "*          Signal Processing Laboratory                                       *\n"
 "*          Universidade do Algarve                                            *\n"
 "*                                                                             *\n"
@@ -98,10 +98,10 @@ void    printHelp(void){
 }
 
 int main(int argc, char **argv){
-    char*       inFileName = mallocChar(256);
-    char*       logFileName = mallocChar(256);
-    settings_t*     settings = mallocSettings();
-    float          omega;
+    char*           inFileName  = mallocChar(256);
+    char*           logFileName = mallocChar(256);
+    FILE*           inFile      = NULL;
+    settings_t*     settings    = mallocSettings();
     const char*     line = "-----------------------------------------------";
     FILE*           logFile = NULL;
 
@@ -111,7 +111,18 @@ int main(int argc, char **argv){
     if(argc == 2){
         //check for command line options:
         if(argv[1][0] == '-'){
-            if(strlen(argv[1]) > 1){
+            //check if input file should be read from stdin:
+            if(strlen(argv[1]) == 1){
+                /*
+                 * Read input file from stdin instead of from a file on disk.
+                 * This avoids the overhead of writing to disk; intended for inversion uses.
+                 * Same as long option "--stdin"
+                 */
+                 inFile = stdin;
+            }
+            
+            //check for short options:
+            else if(strlen(argv[1]) == 2){
                 switch(argv[1][1]){
                     case 'h':
                         printHelp();
@@ -126,13 +137,31 @@ int main(int argc, char **argv){
                         break;
                 }
             }
+            
+            //check for long options:
+            else if (strlen(argv[1]) > 2){
+                if (!strcmp(argv[1], "--stdin")){
+                    /*
+                     * Read input file from stdin instead of from a file on disk.
+                     * This avoids the overhead of writing to disk; intended for inversion uses.
+                     * Same as short option "-"
+                     * TODO: this needs to be documented (manual and --help)
+                     */
+                    inFile = stdin;
+                }
+            }
         }
         
-        //try to use command line argument it as an input file
-        strcpy(inFileName, argv[1]);
-        inFileName = strcat(inFileName, ".in");
-    }else{
-        //otherwise, complain and quit
+        //if no special options where passed, try to use command line argument it as an input file
+        else{
+            strcpy(inFileName, argv[1]);
+            inFileName = strcat(inFileName, ".in");
+            inFile = openFile(inFileName, "r");
+        }
+    }
+    
+    //if no command line options where passed, complain and quit
+    else{
         printHelp();
         fatal("No input file provided.\nAborting...");
     }
@@ -140,15 +169,13 @@ int main(int argc, char **argv){
     printf(HEADER);
 
     //Read the input file
-    readIn(settings, inFileName);
+    readIn(settings, inFile);
 
     if (VERBOSE){
         DEBUG(2, "Calling printSettings()\n");
         printSettings(settings);
         DEBUG(2, "Returned from printSettings()\n");
     }
-
-    omega   = 2 * M_PI * settings->source.freqx;
 
     //open the log file and write the header:
     strcpy(logFileName, argv[1]);

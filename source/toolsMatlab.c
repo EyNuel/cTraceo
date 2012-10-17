@@ -32,13 +32,11 @@
 
 ///Prototypes:
  
-//void    copyDoubleToPtr(double*, double*, uintptr_t);
 void    copyFloatToMxArray(float*, mxArray*, uintptr_t);
 void    copyDoubleToMxArray(double*, mxArray*, uintptr_t);
 void    copyUInt32ToMxArray(uint32_t*, mxArray*, uintptr_t);
 void    copyBoolToMxArray(bool*, mxArray*, uintptr_t);
         
-//void    copyfloatToPtr2D(float**, float*, uintptr_t, uintptr_t);
 void    copyFloatToMxArray2D(float**, mxArray*, uintptr_t, uintptr_t);
 void    copyFloatToMxArray2D_transposed(float**, mxArray*, uintptr_t, uintptr_t);
 void    copyDoubleToMxArray2D(double**, mxArray*, uintptr_t, uintptr_t);
@@ -55,17 +53,6 @@ void    copyComplexDoubleToMxArray2D_transposed(complex double**, mxArray*, uint
 
 ///Functions:
 
-/*
- * TODO: safe to remove?
-void    copyDoubleToPtr(double* origin, double* dest, uintptr_t nItems){
-    //TODO replace all uses of this function with copyToMxArray()
-    uintptr_t   i;
-    
-    for( i=0; i<nItems; i++ ){
-        dest[i] = origin[i];
-    }
-}
-*/
 
 void    copyFloatToMxArray(float* origin, mxArray* dest, uintptr_t nItems){
     uintptr_t   i;
@@ -111,19 +98,6 @@ void    copyBoolToMxArray(bool* origin, mxArray* dest, uintptr_t nItems){
     }
 }
 
-/*
- * TODO: safe to remove
-void    copyDoubleToPtr2D(double** origin, double* dest, uintptr_t rowSize, uintptr_t colSize){
-    //TODO replace all uses of this function with copyToMxArray2D()
-    uintptr_t   i,j;
-
-    for( j=0; j<colSize; j++ ){
-        for(i=0; i<rowSize; i++){
-            dest[i*colSize +j] = origin[j][i];
-        }
-    }
-}
-*/
 
 void    copyFloatToMxArray2D(float** origin, mxArray* dest, uintptr_t rowSize, uintptr_t colSize){
     uintptr_t   i,j;

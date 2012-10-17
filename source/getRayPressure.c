@@ -78,13 +78,13 @@ void    getRayPressure(settings_t* settings, ray_t* ray, uintptr_t iHyd, float q
 
 void    getRayPressureExplicit(settings_t* settings, ray_t* ray, uintptr_t iHyd, float zHyd, float tauRay, float zRay, float dzdr, complex float ampRay, float width, complex float* pressure){
     DEBUG(4, "in\n");
-    float      omega, theta;
+    float       omega, theta;
     vector_t    es = {0,0};
     vector_t    e1 = {0,0};
     vector_t    deltaR = {0,0};
-    float      dr, dz, n, sRay, nxn;
-    float      delay;
-    float      phi;
+    float       dr, dz, n, sRay;
+    float       delay;
+    float       phi;
 
     omega = 2 * M_PI * settings->source.freqx;
     theta = atan( dzdr );
@@ -103,7 +103,6 @@ void    getRayPressureExplicit(settings_t* settings, ray_t* ray, uintptr_t iHyd,
 
     n = fabs( n );
     sRay = sRay/sqrt( dr*dr + dz*dz );
-    nxn = n*n;
 
     delay = tauRay + sRay*( ray->tau[iHyd+1] - ray->tau[iHyd] );
     if (n < width){
