@@ -66,12 +66,11 @@ void    csValues(settings_t* settings, double ri, double zi, double* ci, double*
     double**    c2D;    //used locally to make code more readable
     double*     r;      //used locally to make code more readable
     double*     z;      //used locally to make code more readable
-    double      epsilon, bmunk, bmunk2;
-
-    epsilon = 7.4e-3;
-    bmunk  = 1300.0;
-    bmunk2 = bmunk*bmunk;
-
+    
+    #define epsilon (7.4e-3f)
+    #define bmunk   (1300.0f)
+    #define bmunk2  (bmunk*bmunk)
+    
     c1D = settings->soundSpeed.c1D;
     c2D = settings->soundSpeed.c2D;
     r =  settings->soundSpeed.r;

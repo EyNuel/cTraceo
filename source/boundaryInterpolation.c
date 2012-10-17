@@ -79,17 +79,6 @@ void boundaryInterpolationExplicit(uint32_t* numSurfaceCoords, double* r, double
             
         case SURFACE_INTERPOLATION__3P:
             fatal("Error: Parabolic (3P) interpolation is no longer supported as it causes incorrect results.\nPlease use a different type of Boundary interpolation.");
-            /*
-            DEBUG(5,"3P surface interpolation\n");
-            if (ri <= r[1]){
-                i = 0;
-            }else if( ri >= r[*numSurfaceCoords - 2]){
-                i = *numSurfaceCoords-3;
-            }else{
-                bracket(*numSurfaceCoords, &(r[0]), ri, &i);
-            }
-            intBarycParab1D( &(r[i]), &(z[i]), ri, zi, &zri, &zrri);
-            */
             break;
             
         case SURFACE_INTERPOLATION__4P:

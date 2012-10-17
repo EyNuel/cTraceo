@@ -9,9 +9,13 @@
 
 ## Choose a compiler command:
 CC  := gcc
-#CC := clang
+#~ CC := clang
 
-## Set Operating system:
+##Compiler commands for cross-compiling from linux ia64 to windows:
+CCW32 := i686-w64-mingw32-gcc
+CCW64 := x86_64-w64-mingw32-gcc
+
+## Set Current Operating system:
 ## Allowable values are: WINDOWS, LINUX
 OS  := LINUX
 
@@ -58,16 +62,16 @@ LINUX   := 1
 WINDOWS := 2
 
 ## Compiler flags:
-CFLAGS := 	-Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align \
+CFLAGSBASE := -Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align \
 			-Wwrite-strings -Wmissing-prototypes -Wmissing-declarations \
 			-Wredundant-decls -Wnested-externs -Winline -Wno-long-long \
 			-Wstrict-prototypes -std=c99
 
 ifeq ($(ARCH),32b)
-	CFLAGS := $(CFLAGS) -march=i686 -m32
+	CFLAGS := $(CFLAGSBASE) -march=i686 -m32
 endif
 ifeq ($(ARCH),64b)
-	CFLAGS := $(CFLAGS) -march=nocona
+	CFLAGS := $(CFLAGSBASE) -march=nocona
 endif
 
 ## Linker Flags:
@@ -97,10 +101,10 @@ LINK 		:= $(CC) $(LFLAGS) -o
 COMPLINK 	:= $(CC) $(CFLAGS) $(LFLAGS) -o $@
 
 ## A list of all non-source files that are part of the distribution.
-AUXFILES := Makefile manual.pdf readme.txt license.txt changelog.txt examples/sletvik_transect.mat bin/ctraceo_lnx-i686 bin/ctraceo_lnx-ia64 bin/ctraceo_win-ia64.exe_ bin/ctraceo_win-i686.exe_
+AUXFILES := Makefile cTraceo_User_Manual.pdf readme.txt license.txt changelog.txt examples/sletvik_transect.mat bin/ctraceo_linux_i686 bin/ctraceo_linux_x86-64 bin/ctraceo_win_x86-64.exe bin/ctraceo_win_x86.exe
 
 ## A list of directories that belong to the project
-PROJDIRS := M-Files examples source source/matOut
+PROJDIRS := M-Files examples source source/matOut bin
 
 ## Recursively create a list of files that are inside the project
 SRCFILES := $(shell find $(PROJDIRS) -mindepth 0 -maxdepth 1 -name "*.c")
@@ -122,6 +126,36 @@ all:	dirs
 		@echo " "
 		@$(CC) $(CFLAGS) -D VERBOSE=0 -D USE_MATLAB=$(USE_MATLAB) -D OS=$(OS) -D MATLAB_VERSION=$(MATLAB_VERSION) -O3 -o bin/ctraceo source/cTraceo.c $(LFLAGS)
 
+win:	win32 win64
+
+win32:	dirs
+		@echo " "
+		@echo "Building cTraceo for Windows x86."
+		@echo "---------------------------------"
+		@$(CCW32) $(CFLAGSBASE) -march=i686 -m32 -D VERBOSE=0 -D USE_MATLAB=0 -D OS=WINDOWS -D WINDOWS -D MATLAB_VERSION=$(MATLAB_VERSION) -O3 -o bin/ctraceo_win_x86.exe source/cTraceo.c $(LFLAGS)
+		@echo "Please ignore possible 'warning: imaginary constants are a GCC extension [enabled by default]'. This is due to a bug in gcc-mingw which has been solved in version 4.8."
+
+win64:	dirs
+		@echo " "
+		@echo "Building cTraceo for Windows x86-64."
+		@echo "------------------------------------"
+		@$(CCW64) $(CFLAGSBASE) -march=nocona -D VERBOSE=0 -D USE_MATLAB=0 -D OS=WINDOWS -D WINDOWS -D MATLAB_VERSION=$(MATLAB_VERSION) -O3 -o bin/ctraceo_win_x86-64.exe source/cTraceo.c $(LFLAGS)
+		@echo "Please ignore possible 'warning: imaginary constants are a GCC extension [enabled by default]'. This is due to a bug in gcc-mingw which has been solved in version 4.8."
+
+linux:	linux32 linux64
+
+linux32:dirs
+		@echo " "
+		@echo "Building cTraceo for Linux i686."
+		@echo "--------------------------------"
+		@$(CC) $(CFLAGSBASE) -march=i686 -m32 -D VERBOSE=0 -D USE_MATLAB=0 -D OS=LINUX -D MATLAB_VERSION=$(MATLAB_VERSION) -O3 -o bin/ctraceo_linux_i686 source/cTraceo.c $(LFLAGS)
+
+linux64:dirs
+		@echo " "
+		@echo "Building cTraceo for Linux x86-64."
+		@echo "----------------------------------"
+		@$(CC) $(CFLAGSBASE) -march=nocona -D VERBOSE=0 -D USE_MATLAB=0 -D OS=LINUX -D MATLAB_VERSION=$(MATLAB_VERSION) -O3 -o bin/ctraceo_linux_x86-64 source/cTraceo.c $(LFLAGS)
+
 pg:		dirs
 		@$(CC) $(CFLAGS) -D VERBOSE=0 -D USE_MATLAB=$(USE_MATLAB) -D OS=$(OS) -D MATLAB_VERSION=$(MATLAB_VERSION) -O3 -pg -o bin/ctraceo source/cTraceo.c $(LFLAGS)
 
@@ -137,7 +171,10 @@ todo:	#list todos from all files
 discuss:#list discussion points from all files
 		@for file in $(ALLFILES); do fgrep -H -e DISCUSS $$file; done; true
 		
-dist:	#
+dist:	dirs win linux
+		@echo " "
+		@echo "Making distribution package."
+		@echo "----------------------------"
 		@if [ ! -d "packages" ]; then mkdir packages; fi
 		@tar -czf ./packages/cTraceo.tgz $(ALLFILES)
 		
@@ -189,7 +226,9 @@ help:	#
 		@echo "                                                                               "
 		@echo "     todo:     Prints a list of TODO's found in the source code.               "
 		@echo "                                                                               "
-		@echo "     dist:     Bundles the source code, examples and Manual in a nice tarball. "
+		@echo "     dist:     Compiles all binaries for Windows/Linux 32/64bit, and bundles   "
+		@echo "               them in a nice tarball along with the source code, examples     "
+		@echo "               and Manual.                                                     "
 		@echo "                                                                               "
 		@echo "     help:     Prints this help.                                               "
 		@echo "                                                                               "

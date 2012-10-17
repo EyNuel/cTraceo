@@ -21,8 +21,10 @@
 
 #pragma once
 #include    <string.h>
-#include    <sys/time.h>        //for struct time_t
-#include    <sys/resource.h>    //for getrusage()
+#ifndef WINDOWS
+    #include    <sys/time.h>        //for struct time_t
+    #include    <sys/resource.h>    //for getrusage()
+#endif
 #include    "globals.h"
 #include    <stdbool.h>
 #include    <stdlib.h>
@@ -75,13 +77,21 @@ void        fatal(const char* message){
     exit(EXIT_FAILURE);
 }
 
+#if 0
 void        printCpuTime(FILE* stream){
     /*
      * prints total cpu time used by process.
+     * NOTE: because getrusage is Posix (ie, Unix/Linux) only, to make stuff easy, we're simply stripping this function from the windows version
      */
-    struct rusage   usage;
     
-    getrusage(RUSAGE_SELF, &usage);
-    fprintf(stream, "%ld.%06ld seconds user CPU time,\n", usage.ru_utime.tv_sec, usage.ru_utime.tv_usec);
-    fprintf(stream, "%ld.%06ld seconds system CPU time used.\n", usage.ru_stime.tv_sec, usage.ru_stime.tv_usec);
+    #ifdef WINDOWS
+        (void)stream;
+    #else
+        struct rusage   usage;
+        
+        getrusage(RUSAGE_SELF, &usage);
+        fprintf(stream, "%ld.%06ld seconds user CPU time,\n", usage.ru_utime.tv_sec, usage.ru_utime.tv_usec);
+        fprintf(stream, "%ld.%06ld seconds system CPU time used.\n", usage.ru_stime.tv_sec, usage.ru_stime.tv_usec);
+    #endif
 }
+#endif

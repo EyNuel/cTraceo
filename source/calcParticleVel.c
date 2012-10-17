@@ -211,6 +211,7 @@ void calcParticleVel(settings_t* settings){
     switch( settings->output.arrayType){
         case ARRAY_TYPE__HORIZONTAL:
         case ARRAY_TYPE__RECTANGULAR:
+        case ARRAY_TYPE__VERTICAL:
             //Note: the output for rectangular and horizontal cases has to be transposed.
             /// write the U-component to the mat-file:
             pu2D = mxCreateDoubleMatrix((MWSIZE)dimZ, (MWSIZE)dimR, mxCOMPLEX);
@@ -231,7 +232,7 @@ void calcParticleVel(settings_t* settings){
             mxDestroyArray(pw2D);
             break;
             
-        case ARRAY_TYPE__VERTICAL:
+        
         case ARRAY_TYPE__LINEAR:
             DEBUG(3,"Writing pressure output of rectangular/vertical/horizontal array to file:\n");
             

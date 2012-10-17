@@ -1,8 +1,34 @@
 ################################################################
+## Version 1.2 ##
+## Features/Changes:
+ # Added a command line option to store the interpolated sound
+   speed profile, as used internally by the model, to a matfile.
+   Passing '-s #' or '--ssp #' will generate an #-point interpolated
+   SSP and store it in the file 'ssp.mat'.
+   
+ # Added a command line option to not write a log file to disk ('--nolog')
+ 
+ # Made file access errors more verbose. The user can now clearly
+   see which file caused the error.
+   
+ 
+## Bugfixes:
+ # Fixed a bug which caused incorrect ssp interpolation close to
+   ssp 'edges'. Linear interpolation was being used in first and
+   second as well as last and second-to-last interval of ssp
+   values when it should only be used in the first and last one.
+   
+ # Fixed a bug where the particle velocity output from a vertical
+   array would be transposed.
+
+################################################################
 ## Version 1.1 ##
 ## Features/Changes:
  # Added support for reading input files from stdin (as opposed
-   to reading them from disk).
+   to reading them from disk). This makes it possible to call
+   the model from within Matlab (R) without having to write any
+   files to the disk -this is done using the new "cTraceo.m"
+   function contained in the M-Files/ subfolder.
 
  # Added support for irregularly spaced (or arbitrary) ray
    ray launching angles.
@@ -11,8 +37,8 @@
    transparently, but pre 1.1 versions do not handle the new
    input file format correclty.
  
- # Reduced number of interpolation calls when solving dynamic 
-   equations by 50%, thus reducing overall raytracing
+ # Reduced the number of interpolation calls when solving dynamic 
+   equations by ~50%, thus reducing overall raytracing
    time by ~5%.
  
  

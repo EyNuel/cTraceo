@@ -1,7 +1,6 @@
 /****************************************************************************************
- *  convertUnits.c                                                                      *
- *  (formerly "cnvnts.for")                                                             *
- *  Convert from several atenuation units to dB/lambda.                                 *
+ *  calcSSP.c                                                                           *
+ *  Interpolates the sound speed with depth and over a certain number of points.        *
  *                                                                                      *
  * ------------------------------------------------------------------------------------ *
  * License: This file is part of the cTraceo Raytracing Model and is released under the *
@@ -29,13 +28,10 @@
  *                                                                                      *
  * ------------------------------------------------------------------------------------ *
  *  Inputs:                                                                             *
- *          aIn:    Atenuation value to be converted.                                   *
- *          lambda: Wavelength.                                                         *
- *          freq:   Frequency.                                                          *
- *          units:  Determines the input units (see globals.h for possible values).     *
+ *          settings:   Pointer to structure containing all input info.                 *
  *                                                                                      *
  *  Outputs:                                                                            *
- *          aOut:   Converted atenuation value.                                         *
+ *          "ssp.mat":  A file containing the trajectories of all launched rays.        *
  *                                                                                      *
  *  Return Value:                                                                       *
  *          None                                                                        *
@@ -43,45 +39,77 @@
  ****************************************************************************************/
 
 #pragma  once
-#include "globals.h"
+#if USE_MATLAB == 1
+    #include <mat.h>
+    #include "matrix.h"
+#else
+    #include    "matOut/matOut.h"
+#endif
 #include "tools.h"
 #include <math.h>
+#include "solveEikonalEq.c"
 
-void convertUnits(double*, double*, double*, uint32_t*, double*);
+void    calcSSP(settings_t* settings, uintptr_t nPoints);
 
-void convertUnits(double* aIn, double* lambda, double* freq, uint32_t* units, double* aOut){
-    //TODO add support for "parameter loss", 'L' option from Bellhop's option1(3)
+void    calcSSP(settings_t* settings, uintptr_t nPoints){
+    DEBUG(1,"in\n");
     
-    #define c1 (8.68588963806504)
+    MATFile*        matfile     = NULL;
+    mxArray*        mxSSPZ      = NULL;
+    mxArray*        mxSSPC      = NULL;
+    double          *depths = NULL;
+    double          *c = NULL;
+    uintptr_t       i;
     
-    switch(*units){
-        case    SURFACE_ATTEN_UNITS__dBperkHz:      //"F",  dB/kHz
-            *aOut = *aIn * (*lambda) * (*freq) * 1.0e-3;
-            break;
-            
-        case    SURFACE_ATTEN_UNITS__dBperMeter:    //"M",  dB/meter
-            *aOut = (*aIn) * (*lambda);
-            break;
-            
-        case    SURFACE_ATTEN_UNITS__dBperNeper:    //"N",  dB/neper
-            *aOut = (*aIn) * (*lambda) * c1;
-            break;
-            
-        case    SURFACE_ATTEN_UNITS__qFactor:       //"Q",  Q factor
-            //Avoid divide-by-zero
-            if (*aIn == 0.0){
-                *aOut = 0.0;
-            }else{
-                *aOut = c1 * M_PI / (*aIn);
-            }
-            break;
-            
-        case    SURFACE_ATTEN_UNITS__dBperLambda:   //"W",  dB/<lambda>
-            *aOut = *aIn;
-            break;
-            
-        default:
-            fatal("Boundary attenuation: unknown units.\nAborting...");
-            break;
+    double      cc, sigmaI, cri, czi, crri, czzi, crzi;
+    vector_t    slowness;
+    
+    c = mallocDouble(nPoints);
+    depths = mallocDouble(nPoints);
+    linearSpaced(nPoints, settings->soundSpeed.z[0], settings->soundSpeed.z[settings->soundSpeed.nz-1], depths);
+    
+    
+    /* Interpolate the sound speeds:  */
+    for(i=0; i<nPoints; i++){
+        csValues(   settings,
+                    settings->source.rbox1,
+                    depths[i],
+                    &c[i],
+                    &cc,
+                    &sigmaI,
+                    &cri,
+                    &czi,
+                    &slowness,
+                    &crri,
+                    &czzi,
+                    &crzi);
     }
+    
+    //open matfile for output
+    matfile     = matOpen("ssp.mat", "w");
+    
+    mxSSPZ        = mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)nPoints, mxREAL);
+    if(matfile == NULL || mxSSPZ == NULL)
+        fatal("Memory alocation error.");
+    //copy cArray to mxArray:
+    copyDoubleToMxArray(depths, mxSSPZ, nPoints);
+    //move mxArray to file:
+    matPutVariable(matfile, "sspZ", mxSSPZ);
+    mxDestroyArray(mxSSPZ);
+    
+    mxSSPC        = mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)nPoints, mxREAL);
+    if( mxSSPC == NULL)
+        fatal("Memory alocation error.");
+    //copy cArray to mxArray:
+    copyDoubleToMxArray(c, mxSSPC, nPoints);
+    //move mxArray to file:
+    matPutVariable(matfile, "sspC", mxSSPC);
+    mxDestroyArray(mxSSPC);
+
+    
+    /// Finish up
+    matClose(matfile);
+    free(depths);
+    free(c);
+    DEBUG(1,"out\n");
 }

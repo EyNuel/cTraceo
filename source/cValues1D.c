@@ -56,24 +56,17 @@ void    cValues1D(uintptr_t n, double* xTable, double* cTable, double xi, double
 
     //Note: the case that occurs most frequently is listed at top, so as to eliminate uneeded comparison operations.
 
-    if( xi >= xTable[2] &&  xi <xTable[n-3]){
+    if( xi >= xTable[1] &&  xi <xTable[n-2]){
         //for all other cases do barycentric cubic interpolation
         bracket(n, xTable, xi, &i);
         intBarycCubic1D(    &xTable[i-1],
                             &cTable[i-1],
                             xi, ci, cxi, cxxi);
     
-    }else if( xi < xTable[2]){
+    }else if( xi < xTable[1]){
         //if xi is in first interval of xTable, do linear interpolation
         intLinear1D(    &xTable[0],
                         &cTable[0],
-                        xi, ci, cxi);
-        *cxxi = 0.0;
-    
-    }else if( xi >= xTable[1]  &&  xi < xTable[2]){
-        //if xi is in second interval of xTable, do linear interpolation
-        intLinear1D(    &xTable[1],
-                        &cTable[1],
                         xi, ci, cxi);
         *cxxi = 0.0;
     
@@ -84,15 +77,9 @@ void    cValues1D(uintptr_t n, double* xTable, double* cTable, double xi, double
                         xi, ci, cxi);
         *cxxi = 0.0;
     
-    }else if( xi >= xTable[n-3]  &&  xi < xTable[n-2] ){
-        //if xi is in second to last interval of xTable, do linear interpolation
-        intLinear1D(    &xTable[n-3],
-                        &cTable[n-3],
-                        xi, ci, cxi);
-        *cxxi = 0.0;
-    
     }else{
-        fatal("in cValues1D(): This should not be possible.");
+        printf("Interpolating sound speed at: %lf [m]\n", xi);
+        fatal("in cValues1D(): Something is wrong.");
     }
     DEBUG(10,"Leaving cValues1D.\n");
 }
