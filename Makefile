@@ -14,7 +14,6 @@ CC  := gcc
 ##Compiler commands for cross-compiling from linux ia64 to windows:
 CCW32 := i686-w64-mingw32-gcc
 CCW64 := x86_64-w64-mingw32-gcc
-CCW64 := x86_64-w64-mingw32-gcc
 
 ## Set Current Operating system:
 ## Allowable values are: WINDOWS, LINUX
@@ -102,10 +101,10 @@ LINK 		:= $(CC) $(LFLAGS) -o
 COMPLINK 	:= $(CC) $(CFLAGS) $(LFLAGS) -o $@
 
 ## A list of all non-source files that are part of the distribution.
-AUXFILES := Makefile manual.pdf readme.txt license.txt changelog.txt examples/sletvik_transect.mat bin/ctraceo_linux_i686 bin/ctraceo_linux_x86-64 bin/ctraceo_win_x86-64.exe bin/ctraceo_win_x86.exe
+AUXFILES := Makefile cTraceo_User_Manual.pdf readme.txt license.txt changelog.txt examples/sletvik_transect.mat bin/ctraceo_linux_i686 bin/ctraceo_linux_x86-64 bin/ctraceo_win_x86-64.exe bin/ctraceo_win_x86.exe
 
 ## A list of directories that belong to the project
-PROJDIRS := M-Files examples source source/matOut
+PROJDIRS := M-Files examples source source/matOut bin
 
 ## Recursively create a list of files that are inside the project
 SRCFILES := $(shell find $(PROJDIRS) -mindepth 0 -maxdepth 1 -name "*.c")
@@ -130,17 +129,31 @@ all:	dirs
 win:	win32 win64
 
 win32:	dirs
-		@$(CCW32) $(CFLAGSBASE) -march=i686 -m32 -D VERBOSE=0 -D USE_MATLAB=0 -D OS=WINDOWS -D MATLAB_VERSION=$(MATLAB_VERSION) -O3 -o bin/ctraceo_win_x86.exe source/cTraceo.c $(LFLAGS)
+		@echo " "
+		@echo "Building cTraceo for Windows x86."
+		@echo "---------------------------------"
+		@$(CCW32) $(CFLAGSBASE) -march=i686 -m32 -D VERBOSE=0 -D USE_MATLAB=0 -D OS=WINDOWS -D WINDOWS -D MATLAB_VERSION=$(MATLAB_VERSION) -O3 -o bin/ctraceo_win_x86.exe source/cTraceo.c $(LFLAGS)
+		@echo "Please ignore possible 'warning: imaginary constants are a GCC extension [enabled by default]'. This is due to a bug in gcc-mingw which has been solved in version 4.8."
 
 win64:	dirs
-		@$(CCW64) $(CFLAGSBASE) -march=nocona -D VERBOSE=0 -D USE_MATLAB=0 -D OS=WINDOWS -D MATLAB_VERSION=$(MATLAB_VERSION) -O3 -o bin/ctraceo_win_x86-64.exe source/cTraceo.c $(LFLAGS)
+		@echo " "
+		@echo "Building cTraceo for Windows x86-64."
+		@echo "------------------------------------"
+		@$(CCW64) $(CFLAGSBASE) -march=nocona -D VERBOSE=0 -D USE_MATLAB=0 -D OS=WINDOWS -D WINDOWS -D MATLAB_VERSION=$(MATLAB_VERSION) -O3 -o bin/ctraceo_win_x86-64.exe source/cTraceo.c $(LFLAGS)
+		@echo "Please ignore possible 'warning: imaginary constants are a GCC extension [enabled by default]'. This is due to a bug in gcc-mingw which has been solved in version 4.8."
 
 linux:	linux32 linux64
 
 linux32:dirs
+		@echo " "
+		@echo "Building cTraceo for Linux i686."
+		@echo "--------------------------------"
 		@$(CC) $(CFLAGSBASE) -march=i686 -m32 -D VERBOSE=0 -D USE_MATLAB=0 -D OS=LINUX -D MATLAB_VERSION=$(MATLAB_VERSION) -O3 -o bin/ctraceo_linux_i686 source/cTraceo.c $(LFLAGS)
 
 linux64:dirs
+		@echo " "
+		@echo "Building cTraceo for Linux x86-64."
+		@echo "----------------------------------"
 		@$(CC) $(CFLAGSBASE) -march=nocona -D VERBOSE=0 -D USE_MATLAB=0 -D OS=LINUX -D MATLAB_VERSION=$(MATLAB_VERSION) -O3 -o bin/ctraceo_linux_x86-64 source/cTraceo.c $(LFLAGS)
 
 pg:		dirs
@@ -159,6 +172,9 @@ discuss:#list discussion points from all files
 		@for file in $(ALLFILES); do fgrep -H -e DISCUSS $$file; done; true
 		
 dist:	dirs win linux
+		@echo " "
+		@echo "Making distribution package."
+		@echo "----------------------------"
 		@if [ ! -d "packages" ]; then mkdir packages; fi
 		@tar -czf ./packages/cTraceo.tgz $(ALLFILES)
 		
