@@ -48,9 +48,9 @@
  * which doesn't return the result through a pointer (so that it can be inlined by the
  * compiler, thus increasing performance).
  */
-void intLinear1D(double*, double*, double, double*, double*);
+void intLinear1D(float*, float*, float, float*, float*);
 
-void intLinear1D(double* x, double* f, double xi, double* fi, double* fxi){
+void intLinear1D(float* x, float* f, float xi, float* fi, float* fxi){
     DEBUG(8,"in\n");
     *fxi    =   ( f[1] -f[0]) / ( x[1] -x[0]);
     *fi     =   f[0] +(xi -x[0]) *(*fxi);

@@ -60,14 +60,14 @@
 #include "globals.h"
 #include <complex.h>
 
-void    getRayPressure(settings_t*, ray_t*, uintptr_t, double, double, double, complex double*);
-void    getRayPressureExplicit(settings_t*, ray_t*, uintptr_t, double, double, double, double, complex double, double, complex double*);
+void    getRayPressure(settings_t*, ray_t*, uintptr_t, float, float, float, complex float*);
+void    getRayPressureExplicit(settings_t*, ray_t*, uintptr_t, float, float, float, float, complex float, float, complex float*);
 
 
-void    getRayPressure(settings_t* settings, ray_t* ray, uintptr_t iHyd, double q0, double rHyd, double zHyd, complex double* pressure){
+void    getRayPressure(settings_t* settings, ray_t* ray, uintptr_t iHyd, float q0, float rHyd, float zHyd, complex float* pressure){
     DEBUG(4, "in\n");
-    double          dzdr, tauRay, zRay, qRay, width;
-    complex double  ampRay;
+    float          dzdr, tauRay, zRay, qRay, width;
+    complex float  ampRay;
     
     getRayParameters(ray, iHyd, q0, rHyd, &dzdr, &tauRay, &zRay, &ampRay, &qRay, &width);
     DEBUG(5, "iHyd: %u, dzdr: %e; tauRay: %e; zRay: %e; ampRay: %e +j%e; qRay: %e; width %e;\n", (uint32_t)iHyd, dzdr, tauRay, zRay, creal(ampRay), cimag(ampRay), qRay, width);
@@ -76,15 +76,15 @@ void    getRayPressure(settings_t* settings, ray_t* ray, uintptr_t iHyd, double 
 }
 
 
-void    getRayPressureExplicit(settings_t* settings, ray_t* ray, uintptr_t iHyd, double zHyd, double tauRay, double zRay, double dzdr, complex double ampRay, double width, complex double* pressure){
+void    getRayPressureExplicit(settings_t* settings, ray_t* ray, uintptr_t iHyd, float zHyd, float tauRay, float zRay, float dzdr, complex float ampRay, float width, complex float* pressure){
     DEBUG(4, "in\n");
-    double      omega, theta;
+    float      omega, theta;
     vector_t    es = {0,0};
     vector_t    e1 = {0,0};
     vector_t    deltaR = {0,0};
-    double      dr, dz, n, sRay, nxn;
-    double      delay;
-    double      phi;
+    float      dr, dz, n, sRay, nxn;
+    float      delay;
+    float      phi;
 
     omega = 2 * M_PI * settings->source.freqx;
     theta = atan( dzdr );

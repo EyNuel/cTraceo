@@ -59,13 +59,13 @@ void calcAmpDelPr(settings_t* settings){
     //NOTE: the code below is practically identical to calcEigenrayPr.c, the only difference being the file output
     DEBUG(1,"in\n");
 
-    double          thetai, ctheta;
-    double          junkDouble;
-    double          maxNumArrivals=0;       //keeps track of the highest number of arrivals
+    float          thetai, ctheta;
+    float          junkfloat;
+    float          maxNumArrivals=0;       //keeps track of the highest number of arrivals
     uintptr_t       i, j, jj, l;
-    double          rHyd, zHyd, zRay, tauRay;
-    complex double  junkComplex, ampRay;
-    double          dz;
+    float          rHyd, zHyd, zRay, tauRay;
+    complex float  junkComplex, ampRay;
+    float          dz;
     uintptr_t       nRet, iHyd = 0;
     uintptr_t       iRet[51];
     ray_t*          ray                 = NULL;
@@ -131,7 +131,7 @@ void calcAmpDelPr(settings_t* settings){
         fatal("Memory alocation error.");
     }
     //copy angles in cArray to mxArray:
-    copyDoubleToMxArray(settings->source.thetas, pThetas, settings->source.nThetas);
+    copyFloatToMxArray(settings->source.thetas, pThetas, settings->source.nThetas);
     //move mxArray to file and free memory:
     matPutVariable(matfile, "thetas", pThetas);
     mxDestroyArray(pThetas);
@@ -151,7 +151,7 @@ void calcAmpDelPr(settings_t* settings){
     if(pHydArrayR == NULL){
         fatal("Memory alocation error.");
     }
-    copyDoubleToMxArray(    settings->output.arrayR, pHydArrayR, (uintptr_t)settings->output.nArrayR);
+    copyFloatToMxArray(    settings->output.arrayR, pHydArrayR, (uintptr_t)settings->output.nArrayR);
     matPutVariable(matfile, "arrayR", pHydArrayR);
     mxDestroyArray(pHydArrayR);
 
@@ -161,7 +161,7 @@ void calcAmpDelPr(settings_t* settings){
     if(pHydArrayZ == NULL){
         fatal("Memory alocation error.");
     }
-    copyDoubleToMxArray(    settings->output.arrayZ, pHydArrayZ, (uintptr_t)settings->output.nArrayZ);
+    copyFloatToMxArray(    settings->output.arrayZ, pHydArrayZ, (uintptr_t)settings->output.nArrayZ);
     matPutVariable(matfile, "arrayZ", pHydArrayZ);
     mxDestroyArray(pHydArrayZ);
 
@@ -171,7 +171,7 @@ void calcAmpDelPr(settings_t* settings){
     if(pSourceZ == NULL){
         fatal("Memory alocation error.");
     }
-    copyDoubleToMxArray(&settings->source.zx, pSourceZ, 1);
+    copyFloatToMxArray(&settings->source.zx, pSourceZ, 1);
     matPutVariable(matfile, "sourceZ", pSourceZ);
     mxDestroyArray(pSourceZ);
 
@@ -208,7 +208,7 @@ void calcAmpDelPr(settings_t* settings){
                         DEBUG(3,"non-returning ray: nCoords: %u, iHyd:%u\n", (uint32_t)ray[i].nCoords, (uint32_t)iHyd);
 
                         //from index interpolate the rays' depth:
-                        intLinear1D(        &ray[i].r[iHyd], &ray[i].z[iHyd],   rHyd, &zRay,    &junkDouble);
+                        intLinear1D(        &ray[i].r[iHyd], &ray[i].z[iHyd],   rHyd, &zRay,    &junkfloat);
 
                         //for every hydrophone check distance to ray
                         for(jj=0; jj<settings->output.nArrayZ; jj++){
@@ -220,7 +220,7 @@ void calcAmpDelPr(settings_t* settings){
                                 DEBUG(3, "Eigenray found\n");
 
                                 //from index interpolate the rays' travel time and amplitude:
-                                intLinear1D(        &ray[i].r[iHyd], &ray[i].tau[iHyd], rHyd, &tauRay,  &junkDouble);
+                                intLinear1D(        &ray[i].r[iHyd], &ray[i].tau[iHyd], rHyd, &tauRay,  &junkfloat);
                                 intComplexLinear1D( &ray[i].r[iHyd], &ray[i].amp[iHyd], rHyd, &ampRay,  &junkComplex);
 
                                 ///prepare to write arrival to matfile:
@@ -235,11 +235,11 @@ void calcAmpDelPr(settings_t* settings){
                                 }
 
                                 //copy data to mxArrays:
-                                copyDoubleToMxArray(&settings->source.thetas[i],mxTheta,1);
-                                copyDoubleToMxArray(&rHyd,                      mxR,    1);
-                                copyDoubleToMxArray(&zRay,                      mxZ,    1);
-                                copyDoubleToMxArray(&tauRay,                    mxTau,  1);
-                                copyComplexToMxArray(&ampRay,                   mxAmp,  1);
+                                copyFloatToMxArray(&settings->source.thetas[i],mxTheta,1);
+                                copyFloatToMxArray(&rHyd,                      mxR,    1);
+                                copyFloatToMxArray(&zRay,                      mxZ,    1);
+                                copyFloatToMxArray(&tauRay,                    mxTau,  1);
+                                copyComplexFloatToMxArray(&ampRay,                   mxAmp,  1);
 
                                 //copy mxArrays to mxArrivalStruct
                                 mxSetFieldByNumber( arrivals[j][jj].mxArrivalStruct,    //pointer to the mxStruct
@@ -283,7 +283,7 @@ void calcAmpDelPr(settings_t* settings){
                         //for each index where the ray passes at the hydrophone, interpolate the rays' depth:
                         for(l=0; l<nRet; l++){
                             DEBUG(4, "nRet=%u, iRet[%u]= %u\n", (uint32_t)nRet, (uint32_t)l, (uint32_t)iRet[l]);
-                            intLinear1D(        &ray[i].r[iRet[l]], &ray[i].z[iRet[l]],     rHyd, &zRay,    &junkDouble);
+                            intLinear1D(        &ray[i].r[iRet[l]], &ray[i].z[iRet[l]],     rHyd, &zRay,    &junkfloat);
 
                             //for every hydrophone check if the ray is close enough to be considered an eigenray:
                             for(jj=0;jj<settings->output.nArrayZ; jj++){
@@ -293,8 +293,8 @@ void calcAmpDelPr(settings_t* settings){
                                 if (dz < settings->output.miss){
 
                                     //interpolate the ray's travel time and amplitude:
-                                    intLinear1D(        &ray[i].r[iRet[l]], &ray[i].tau[iRet[l]],   rHyd, &tauRay,  &junkDouble);
-                                    intComplexLinear1D( &ray[i].r[iRet[l]], &ray[i].amp[iRet[l]],   (complex double)rHyd, &ampRay,  &junkComplex);
+                                    intLinear1D(        &ray[i].r[iRet[l]], &ray[i].tau[iRet[l]],   rHyd, &tauRay,  &junkfloat);
+                                    intComplexLinear1D( &ray[i].r[iRet[l]], &ray[i].amp[iRet[l]],   (complex float)rHyd, &ampRay,  &junkComplex);
 
                                     ///prepare to write arrival to matfile:
                                     //create mxArrays:
@@ -308,11 +308,11 @@ void calcAmpDelPr(settings_t* settings){
                                     }
 
                                     //copy data to mxArrays:
-                                    copyDoubleToMxArray(&settings->source.thetas[i],mxTheta,1);
-                                    copyDoubleToMxArray(&rHyd,                      mxR,    1);
-                                    copyDoubleToMxArray(&zRay,                      mxZ,    1);
-                                    copyDoubleToMxArray(&tauRay,                    mxTau,  1);
-                                    copyComplexToMxArray(&ampRay,                   mxAmp,  1);
+                                    copyFloatToMxArray(&settings->source.thetas[i],mxTheta,1);
+                                    copyFloatToMxArray(&rHyd,                      mxR,    1);
+                                    copyFloatToMxArray(&zRay,                      mxZ,    1);
+                                    copyFloatToMxArray(&tauRay,                    mxTau,  1);
+                                    copyComplexFloatToMxArray(&ampRay,                   mxAmp,  1);
 
                                     //copy mxArrays to mxArrivalStruct
                                     mxSetFieldByNumber( arrivals[j][jj].mxArrivalStruct,    //pointer to the mxStruct
@@ -359,7 +359,7 @@ void calcAmpDelPr(settings_t* settings){
 
     //write "maximum number of arrivals at any single hydrophone" to matfile:
     mxNumArrivals = mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)1, mxREAL);
-    copyDoubleToMxArray(&maxNumArrivals, mxNumArrivals, 1);
+    copyFloatToMxArray(&maxNumArrivals, mxNumArrivals, 1);
     matPutVariable(matfile, "maxNumArrivals", mxNumArrivals);
 
 
@@ -377,9 +377,9 @@ void calcAmpDelPr(settings_t* settings){
             mxRHyd          = mxCreateDoubleMatrix((MWSIZE)1,   (MWSIZE)1,  mxREAL);
             mxZHyd          = mxCreateDoubleMatrix((MWSIZE)1,   (MWSIZE)1,  mxREAL);
 
-            copyDoubleToMxArray(&arrivals[j][jj].nArrivals,     mxNumArrivals,1);
-            copyDoubleToMxArray(&settings->output.arrayR[j],    mxRHyd,1);
-            copyDoubleToMxArray(&settings->output.arrayZ[jj],   mxZHyd,1);
+            copyFloatToMxArray(&arrivals[j][jj].nArrivals,     mxNumArrivals,1);
+            copyFloatToMxArray(&settings->output.arrayR[j],    mxRHyd,1);
+            copyFloatToMxArray(&settings->output.arrayZ[jj],   mxZHyd,1);
 
             idx[0] = (MWINDEX)jj;
             idx[1] = (MWINDEX)j;

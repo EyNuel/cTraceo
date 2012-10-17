@@ -53,10 +53,10 @@ void    readIn(settings_t*, const char*);
 void    readIn(settings_t* settings, const char* filename){
 
     uint32_t    i,j;
-    double      dTheta;
+    float      dTheta;
     uint32_t    nThetas;            //used locally to make code more readable. Value is stored in settings.
-    double      theta0;             //used locally to make code more readable. Value is stored in settings.
-    double      thetaN;             //used locally to make code more readable. Value is stored in settings.
+    float      theta0;             //used locally to make code more readable. Value is stored in settings.
+    float      thetaN;             //used locally to make code more readable. Value is stored in settings.
     uint32_t    numSurfaceCoords;   //used locally to make code more readable. Value is stored in settings.
     uint32_t    nr, nz;             //used locally to make code more readable. Value is stored in settings.
     char*       tempString;
@@ -78,12 +78,12 @@ void    readIn(settings_t* settings, const char* filename){
      ***********************************************************************/
      DEBUG(2, "Reading source info.\n");
      skipLine(infile);
-     settings->source.ds        = readDouble(infile);
-     settings->source.rx        = readDouble(infile);
-     settings->source.zx        = readDouble(infile);
-     settings->source.rbox1     = readDouble(infile);
-     settings->source.rbox2     = readDouble(infile);
-     settings->source.freqx     = readDouble(infile);
+     settings->source.ds        = readfloat(infile);
+     settings->source.rx        = readfloat(infile);
+     settings->source.zx        = readfloat(infile);
+     settings->source.rbox1     = readfloat(infile);
+     settings->source.rbox2     = readfloat(infile);
+     settings->source.freqx     = readfloat(infile);
      nThetas = (uint32_t)readInt(infile);
      settings->source.nThetas   = nThetas;
 
@@ -97,11 +97,11 @@ void    readIn(settings_t* settings, const char* filename){
     }
     
     /*  Allocate memory for the launching angles    */
-    settings->source.thetas = mallocDouble(nThetas);
+    settings->source.thetas = mallocFloat(nThetas);
     DEBUG(8,"number of launching angles in infile: %u\n", nThetas);
     /*  Read the  thetas from the file  */
-    theta0 = readDouble(infile);
-    thetaN = readDouble(infile);
+    theta0 = readfloat(infile);
+    thetaN = readfloat(infile);
     if(settings->source.nThetas == 1){
         settings->source.thetas[0] = theta0;
         dTheta = 0;
@@ -112,10 +112,10 @@ void    readIn(settings_t* settings, const char* filename){
     }else{
         settings->source.thetas[0] = theta0;
         settings->source.thetas[nThetas - 1] = thetaN;
-        dTheta =    (thetaN - theta0 ) / ( (double)nThetas - 1 );
+        dTheta =    (thetaN - theta0 ) / ( (float)nThetas - 1 );
         
         for(i=1;i <= nThetas-2; i++){
-            settings->source.thetas[i] = theta0 +dTheta *(double)(i);
+            settings->source.thetas[i] = theta0 +dTheta *(float)(i);
         }
     }
     settings->source.dTheta = dTheta;
@@ -160,7 +160,7 @@ void    readIn(settings_t* settings, const char* filename){
     }
     free(tempString);
 
-    /* surfaceInterpolation;    //formerly "aitype" */
+    /* surface Interpolation;    //formerly "aitype" */
     tempString = readStringN(infile,6);
     if(strcmp(tempString,"'FL'\n") == 0){
         settings->altimetry.surfaceInterpolation    = SURFACE_INTERPOLATION__FLAT;
@@ -169,10 +169,12 @@ void    readIn(settings_t* settings, const char* filename){
         settings->altimetry.surfaceInterpolation    = SURFACE_INTERPOLATION__SLOPED;
         
     }else if(strcmp(tempString,"'2P'\n") == 0){
+        printf("WARNING: The selected surface interpolation method (linear/2P) may return imprecise results - consider using cubic/4P interpolation instead.\n");
         settings->altimetry.surfaceInterpolation    = SURFACE_INTERPOLATION__2P;
         
     }else if(strcmp(tempString,"'3P'\n") == 0){
-        settings->altimetry.surfaceInterpolation    = SURFACE_INTERPOLATION__3P;
+        printf("WARNING: The selected surface interpolation method (parabolic/3P) is no longer supported - using cubic/4P interpolation instead.\n");
+        settings->altimetry.surfaceInterpolation    = SURFACE_INTERPOLATION__4P;
         
     }else if(strcmp(tempString,"'4P'\n") == 0){
         settings->altimetry.surfaceInterpolation    = SURFACE_INTERPOLATION__4P;
@@ -211,48 +213,48 @@ void    readIn(settings_t* settings, const char* filename){
     settings->altimetry.numSurfaceCoords = numSurfaceCoords;
 
     //malloc interface coords
-    settings->altimetry.r = mallocDouble(numSurfaceCoords);
-    settings->altimetry.z = mallocDouble(numSurfaceCoords);
+    settings->altimetry.r = mallocFloat(numSurfaceCoords);
+    settings->altimetry.z = mallocFloat(numSurfaceCoords);
     
     //read the surface properties and coordinates
     switch(settings->altimetry.surfacePropertyType){
         case SURFACE_PROPERTY_TYPE__HOMOGENEOUS:
             //malloc and read only one set of interface properties:
-            settings->altimetry.cp  = mallocDouble(1);
-            settings->altimetry.cs  = mallocDouble(1);
-            settings->altimetry.rho = mallocDouble(1);
-            settings->altimetry.ap  = mallocDouble(1);
-            settings->altimetry.as  = mallocDouble(1);
+            settings->altimetry.cp  = mallocFloat(1);
+            settings->altimetry.cs  = mallocFloat(1);
+            settings->altimetry.rho = mallocFloat(1);
+            settings->altimetry.ap  = mallocFloat(1);
+            settings->altimetry.as  = mallocFloat(1);
             
-            settings->altimetry.cp[0]   = readDouble(infile);
-            settings->altimetry.cs[0]   = readDouble(infile);
-            settings->altimetry.rho[0]  = readDouble(infile);
-            settings->altimetry.ap[0]   = readDouble(infile);
-            settings->altimetry.as[0]   = readDouble(infile);
+            settings->altimetry.cp[0]   = readfloat(infile);
+            settings->altimetry.cs[0]   = readfloat(infile);
+            settings->altimetry.rho[0]  = readfloat(infile);
+            settings->altimetry.ap[0]   = readfloat(infile);
+            settings->altimetry.as[0]   = readfloat(infile);
             
             //read coordinates of interface points:
             for(i=0; i<numSurfaceCoords; i++){
-                settings->altimetry.r[i] = readDouble(infile);
-                settings->altimetry.z[i] = readDouble(infile);
+                settings->altimetry.r[i] = readfloat(infile);
+                settings->altimetry.z[i] = readfloat(infile);
             }
             break;
         
         case SURFACE_PROPERTY_TYPE__NON_HOMOGENEOUS:
             //Read coordinates and interface properties for all interface points:
-            settings->altimetry.cp  = mallocDouble(numSurfaceCoords);
-            settings->altimetry.cs  = mallocDouble(numSurfaceCoords);
-            settings->altimetry.rho = mallocDouble(numSurfaceCoords);
-            settings->altimetry.ap  = mallocDouble(numSurfaceCoords);
-            settings->altimetry.as  = mallocDouble(numSurfaceCoords);
+            settings->altimetry.cp  = mallocFloat(numSurfaceCoords);
+            settings->altimetry.cs  = mallocFloat(numSurfaceCoords);
+            settings->altimetry.rho = mallocFloat(numSurfaceCoords);
+            settings->altimetry.ap  = mallocFloat(numSurfaceCoords);
+            settings->altimetry.as  = mallocFloat(numSurfaceCoords);
                 
             for(i=0; i<numSurfaceCoords; i++){
-                settings->altimetry.r[i]    = readDouble(infile);
-                settings->altimetry.z[i]    = readDouble(infile);
-                settings->altimetry.cp[i]   = readDouble(infile);
-                settings->altimetry.cs[i]   = readDouble(infile);
-                settings->altimetry.rho[i]  = readDouble(infile);
-                settings->altimetry.ap[i]   = readDouble(infile);
-                settings->altimetry.as[i]   = readDouble(infile);
+                settings->altimetry.r[i]    = readfloat(infile);
+                settings->altimetry.z[i]    = readfloat(infile);
+                settings->altimetry.cp[i]   = readfloat(infile);
+                settings->altimetry.cs[i]   = readfloat(infile);
+                settings->altimetry.rho[i]  = readfloat(infile);
+                settings->altimetry.ap[i]   = readfloat(infile);
+                settings->altimetry.as[i]   = readfloat(infile);
             }
             break;
     }
@@ -323,14 +325,14 @@ void    readIn(settings_t* settings, const char* filename){
             if(settings->soundSpeed.cClass != C_CLASS__TABULATED){
                 //all cClasses execept for "TABULATED" only require ( z0(0),c0(0) ) and ( z0(1), c0(1) )
                 //malloc z0 an c0:
-                settings->soundSpeed.z = mallocDouble(2);
-                settings->soundSpeed.c1D = mallocDouble(2);
+                settings->soundSpeed.z = mallocFloat(2);
+                settings->soundSpeed.c1D = mallocFloat(2);
 
                 //read 4 values:
-                settings->soundSpeed.z[0] = readDouble(infile);
-                settings->soundSpeed.c1D[0] = readDouble(infile);
-                settings->soundSpeed.z[1] = readDouble(infile);
-                settings->soundSpeed.c1D[1] = readDouble(infile);
+                settings->soundSpeed.z[0] = readfloat(infile);
+                settings->soundSpeed.c1D[0] = readfloat(infile);
+                settings->soundSpeed.z[1] = readfloat(infile);
+                settings->soundSpeed.c1D[1] = readfloat(infile);
 
                 // validate the values that were just read:
                 if( (settings->soundSpeed.cClass != C_CLASS__ISOVELOCITY) &&
@@ -344,13 +346,13 @@ void    readIn(settings_t* settings, const char* filename){
                 }
             }else if(settings->soundSpeed.cClass == C_CLASS__TABULATED){
                 //malloc z0 an c0:
-                settings->soundSpeed.z = mallocDouble(nz);
-                settings->soundSpeed.c1D = mallocDouble(nz);
+                settings->soundSpeed.z = mallocFloat(nz);
+                settings->soundSpeed.c1D = mallocFloat(nz);
 
                 //read pairs of z0 and c0
                 for(i=0; i<settings->soundSpeed.nz; i++){
-                    settings->soundSpeed.z[i]   = readDouble(infile);
-                    settings->soundSpeed.c1D[i]= readDouble(infile);
+                    settings->soundSpeed.z[i]   = readfloat(infile);
+                    settings->soundSpeed.c1D[i]= readfloat(infile);
                 }
             }
             break;
@@ -361,23 +363,23 @@ void    readIn(settings_t* settings, const char* filename){
                 fatal("Input file: Unknown sound speed field type.\nAborting...");
             
             //malloc ranges (vector)
-            settings->soundSpeed.r = mallocDouble(nr);
+            settings->soundSpeed.r = mallocFloat(nr);
             //read ranges
             for(i=0; i<nr; i++)
-                settings->soundSpeed.r[i] = readDouble(infile);
+                settings->soundSpeed.r[i] = readfloat(infile);
 
             //malloc depths (vector)
-            settings->soundSpeed.z = mallocDouble(nz);
+            settings->soundSpeed.z = mallocFloat(nz);
             //read depths
             for(i=0; i<nz; i++)
-                settings->soundSpeed.z[i] = readDouble(infile);
+                settings->soundSpeed.z[i] = readfloat(infile);
 
             //malloc sound speeds (2 dim matrix)
-            settings->soundSpeed.c2D = mallocDouble2D(nz, nr);  //mallocDouble2D(numCols, numRows)
+            settings->soundSpeed.c2D = mallocFloat2D(nz, nr);  //mallocFloat2D(numCols, numRows)
             //read actual sound speeds
             for(j=0; j<nz; j++){        //rows
                 for(i=0; i<nr; i++){    //columns
-                    settings->soundSpeed.c2D[j][i] = readDouble(infile);
+                    settings->soundSpeed.c2D[j][i] = readfloat(infile);
                 }
             }
             break;
@@ -400,10 +402,12 @@ void    readIn(settings_t* settings, const char* filename){
         /*  interpolation type  (formerly "oitype")     */
         tempString = readStringN(infile,6);
         if(strcmp(tempString,"'2P'\n") == 0){
+            printf("WARNING: The selected surface interpolation method (linear/2P) may return imprecise results - consider using cubic/4P interpolation instead.\n");
             settings->objects.surfaceInterpolation  = SURFACE_INTERPOLATION__2P;
             
         }else if(strcmp(tempString,"'3P'\n") == 0){
-            settings->objects.surfaceInterpolation  = SURFACE_INTERPOLATION__3P;
+            printf("WARNING: The selected object surface interpolation method (parabolic/3P) is no longer supported - using cubic/4P interpolation instead.\n");
+            settings->objects.surfaceInterpolation  = SURFACE_INTERPOLATION__4P;
             
         }else if(strcmp(tempString,"'4P'\n") == 0){
             settings->objects.surfaceInterpolation  = SURFACE_INTERPOLATION__4P;
@@ -459,16 +463,16 @@ void    readIn(settings_t* settings, const char* filename){
             free(tempString);
             
             settings->objects.object[i].nCoords = (uint32_t)readInt(infile);
-            settings->objects.object[i].cp      = readDouble(infile);               //compressional speed
-            settings->objects.object[i].cs      = readDouble(infile);               //shear speed
-            settings->objects.object[i].rho     = readDouble(infile);               //density
-            settings->objects.object[i].ap      = readDouble(infile);               //compressional attenuation
-            settings->objects.object[i].as      = readDouble(infile);               //shear attenuation
+            settings->objects.object[i].cp      = readfloat(infile);               //compressional speed
+            settings->objects.object[i].cs      = readfloat(infile);               //shear speed
+            settings->objects.object[i].rho     = readfloat(infile);               //density
+            settings->objects.object[i].ap      = readfloat(infile);               //compressional attenuation
+            settings->objects.object[i].as      = readfloat(infile);               //shear attenuation
 
             //malloc memory for the object coordinates:
-            settings->objects.object[i].r       = mallocDouble((uintptr_t)settings->objects.object[i].nCoords);
-            settings->objects.object[i].zDown   = mallocDouble((uintptr_t)settings->objects.object[i].nCoords);
-            settings->objects.object[i].zUp     = mallocDouble((uintptr_t)settings->objects.object[i].nCoords);
+            settings->objects.object[i].r       = mallocFloat((uintptr_t)settings->objects.object[i].nCoords);
+            settings->objects.object[i].zDown   = mallocFloat((uintptr_t)settings->objects.object[i].nCoords);
+            settings->objects.object[i].zUp     = mallocFloat((uintptr_t)settings->objects.object[i].nCoords);
             //verify succesfull allocation of memory:
             if( (settings->objects.object[i].r      ==  NULL)   ||
                 (settings->objects.object[i].zDown  ==  NULL)   ||
@@ -477,9 +481,9 @@ void    readIn(settings_t* settings, const char* filename){
             
             //read the coords of the object:
             for(j=0; j<settings->objects.object[i].nCoords; j++){
-                settings->objects.object[i].r[j]        = readDouble(infile);
-                settings->objects.object[i].zDown[j]    = readDouble(infile);
-                settings->objects.object[i].zUp[j]      = readDouble(infile);
+                settings->objects.object[i].r[j]        = readfloat(infile);
+                settings->objects.object[i].zDown[j]    = readfloat(infile);
+                settings->objects.object[i].zUp[j]      = readfloat(infile);
             }
         }
     }
@@ -524,7 +528,7 @@ void    readIn(settings_t* settings, const char* filename){
     }
     free(tempString);
 
-    /* surfaceInterpolation;    //formerly "aitype" */
+    /* bottom Interpolation;    //formerly "aitype" */
     tempString = readStringN(infile,6);
     if(strcmp(tempString,"'FL'\n") == 0){
         settings->batimetry.surfaceInterpolation    = SURFACE_INTERPOLATION__FLAT;
@@ -533,10 +537,12 @@ void    readIn(settings_t* settings, const char* filename){
         settings->batimetry.surfaceInterpolation    = SURFACE_INTERPOLATION__SLOPED;
         
     }else if(strcmp(tempString,"'2P'\n") == 0){
+        printf("WARNING: The selected surface interpolation method (linear/2P) may return imprecise results - consider using cubic/4P interpolation instead.\n");
         settings->batimetry.surfaceInterpolation    = SURFACE_INTERPOLATION__2P;
         
     }else if(strcmp(tempString,"'3P'\n") == 0){
-        settings->batimetry.surfaceInterpolation    = SURFACE_INTERPOLATION__3P;
+        printf("WARNING: The selected bottom interpolation method (parabolic/3P) is no longer supported - using cubic/4P interpolation instead.\n");
+        settings->batimetry.surfaceInterpolation    = SURFACE_INTERPOLATION__4P;
         
     }else if(strcmp(tempString,"'4P'\n") == 0){
         settings->batimetry.surfaceInterpolation    = SURFACE_INTERPOLATION__4P;
@@ -575,48 +581,48 @@ void    readIn(settings_t* settings, const char* filename){
     settings->batimetry.numSurfaceCoords = numSurfaceCoords;
 
     //malloc interface coords
-    settings->batimetry.r = mallocDouble(numSurfaceCoords);
-    settings->batimetry.z = mallocDouble(numSurfaceCoords);
+    settings->batimetry.r = mallocFloat(numSurfaceCoords);
+    settings->batimetry.z = mallocFloat(numSurfaceCoords);
     
     //read the surface properties and coordinates
     switch(settings->batimetry.surfacePropertyType){
         case SURFACE_PROPERTY_TYPE__HOMOGENEOUS:
             //malloc and read only one set of interface properties:
-            settings->batimetry.cp  = mallocDouble(1);
-            settings->batimetry.cs  = mallocDouble(1);
-            settings->batimetry.rho = mallocDouble(1);
-            settings->batimetry.ap  = mallocDouble(1);
-            settings->batimetry.as  = mallocDouble(1);
+            settings->batimetry.cp  = mallocFloat(1);
+            settings->batimetry.cs  = mallocFloat(1);
+            settings->batimetry.rho = mallocFloat(1);
+            settings->batimetry.ap  = mallocFloat(1);
+            settings->batimetry.as  = mallocFloat(1);
                             
-            settings->batimetry.cp[0]   = readDouble(infile);
-            settings->batimetry.cs[0]   = readDouble(infile);
-            settings->batimetry.rho[0]  = readDouble(infile);
-            settings->batimetry.ap[0]   = readDouble(infile);
-            settings->batimetry.as[0]   = readDouble(infile);
+            settings->batimetry.cp[0]   = readfloat(infile);
+            settings->batimetry.cs[0]   = readfloat(infile);
+            settings->batimetry.rho[0]  = readfloat(infile);
+            settings->batimetry.ap[0]   = readfloat(infile);
+            settings->batimetry.as[0]   = readfloat(infile);
             
             //read coordinates of interface points:
             for(i=0; i<numSurfaceCoords; i++){
-                settings->batimetry.r[i] = readDouble(infile);
-                settings->batimetry.z[i] = readDouble(infile);
+                settings->batimetry.r[i] = readfloat(infile);
+                settings->batimetry.z[i] = readfloat(infile);
             }
             break;
         
         case SURFACE_PROPERTY_TYPE__NON_HOMOGENEOUS:
             //Read coordinates and interface properties for all interface points:
-            settings->batimetry.cp  = mallocDouble(numSurfaceCoords);
-            settings->batimetry.cs  = mallocDouble(numSurfaceCoords);
-            settings->batimetry.rho = mallocDouble(numSurfaceCoords);
-            settings->batimetry.ap  = mallocDouble(numSurfaceCoords);
-            settings->batimetry.as  = mallocDouble(numSurfaceCoords);
+            settings->batimetry.cp  = mallocFloat(numSurfaceCoords);
+            settings->batimetry.cs  = mallocFloat(numSurfaceCoords);
+            settings->batimetry.rho = mallocFloat(numSurfaceCoords);
+            settings->batimetry.ap  = mallocFloat(numSurfaceCoords);
+            settings->batimetry.as  = mallocFloat(numSurfaceCoords);
                 
             for(i=0; i<numSurfaceCoords; i++){
-                settings->batimetry.r[i]    = readDouble(infile);
-                settings->batimetry.z[i]    = readDouble(infile);
-                settings->batimetry.cp[i]   = readDouble(infile);
-                settings->batimetry.cs[i]   = readDouble(infile);
-                settings->batimetry.rho[i]  = readDouble(infile);
-                settings->batimetry.ap[i]   = readDouble(infile);
-                settings->batimetry.as[i]   = readDouble(infile);
+                settings->batimetry.r[i]    = readfloat(infile);
+                settings->batimetry.z[i]    = readfloat(infile);
+                settings->batimetry.cp[i]   = readfloat(infile);
+                settings->batimetry.cs[i]   = readfloat(infile);
+                settings->batimetry.rho[i]  = readfloat(infile);
+                settings->batimetry.ap[i]   = readfloat(infile);
+                settings->batimetry.as[i]   = readfloat(infile);
             }
             break;
     }
@@ -668,15 +674,15 @@ void    readIn(settings_t* settings, const char* filename){
             break;
     }
 
-    settings->output.arrayR = mallocDouble(settings->output.nArrayR);
-    settings->output.arrayZ = mallocDouble(settings->output.nArrayZ);
+    settings->output.arrayR = mallocFloat(settings->output.nArrayR);
+    settings->output.arrayZ = mallocFloat(settings->output.nArrayZ);
 
     //read the actual array values
     for(i=0; i<settings->output.nArrayR; i++){
-        settings->output.arrayR[i] = readDouble(infile);
+        settings->output.arrayR[i] = readfloat(infile);
     }
     for(i=0; i<settings->output.nArrayZ; i++){
-        settings->output.arrayZ[i] = readDouble(infile);
+        settings->output.arrayZ[i] = readfloat(infile);
     }
 
     /************************************************************************
@@ -724,7 +730,7 @@ void    readIn(settings_t* settings, const char* filename){
     free(tempString);
 
     /*  output calculation type "catype"    */
-    settings->output.miss = readDouble(infile);
+    settings->output.miss = readfloat(infile);
 
     /* Check batimetry/altimetry    */
     if(settings->altimetry.r[0] > settings->source.rbox1)

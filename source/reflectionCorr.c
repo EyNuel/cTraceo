@@ -48,17 +48,17 @@
 #include "globals.h"
 #include "dotProduct.c"
 
-void    reflectionCorr(int32_t, vector_t, vector_t, vector_t, double, double*);
+void    reflectionCorr(int32_t, vector_t, vector_t, vector_t, float, float*);
 /*
 subroutine rnrefl(itop,sigma,tauB,gradC,ci,rn)
 integer*8 itop
 real*8  sigma(2),sigman(2),gradC(2),tauB(2),nbdy(2)
 real*8  tg,th,ci,cn,cs,rm,rn
 */
-void    reflectionCorr(int32_t iTop, vector_t sigma, vector_t tauB, vector_t gradC, double ci, double* rn){
+void    reflectionCorr(int32_t iTop, vector_t sigma, vector_t tauB, vector_t gradC, float ci, float* rn){
     vector_t    nBdy;   //normal to boundary
     vector_t    sigmaN; //normal to ray?
-    double      tg, th, cn, cs, rm;
+    float      tg, th, cn, cs, rm;
 
     iTop = -iTop;
     nBdy.r = -tauB.z;

@@ -60,23 +60,23 @@ void    calcEigenrayRF(settings_t*);
 
 void    calcEigenrayRF(settings_t* settings){
     DEBUG(1,"in\n");
-    double          thetai, ctheta;
+    float          thetai, ctheta;
     uintptr_t       i, j, k, l, nRays, iHyd = 0;
     uintptr_t       nPossibleEigenRays, nFoundEigenRays = 0;
-    double          zRay, zHyd, rHyd;
-    double          junkDouble;
+    float          zRay, zHyd, rHyd;
+    float          junkfloat;
     uint32_t        nTrial;
-    double          theta0, f0;
+    float          theta0, f0;
     //used for root-finding in actual Regula-Falsi Method:
-    double          fl, fr, prod;
-    double*         thetaL              = NULL;
-    double*         thetaR              = NULL;
+    float          fl, fr, prod;
+    float*         thetaL              = NULL;
+    float*         thetaR              = NULL;
     ray_t*          tempRay             = NULL;
     bool            success             = false;
-    double*         thetas              = NULL;
-    double**        depths              = NULL;
+    float*         thetas              = NULL;
+    float**        depths              = NULL;
     ray_t*          ray                 = NULL;
-    double*         dz                  = NULL;
+    float*         dz                  = NULL;
 
     MATFile*        matfile             = NULL;
     mxArray*        pThetas             = NULL;
@@ -145,7 +145,7 @@ void    calcEigenrayRF(settings_t* settings){
         fatal("Memory alocation error.");
     }
     //copy angles in cArray to mxArray:
-    copyDoubleToMxArray(    settings->source.thetas, pThetas , settings->source.nThetas);
+    copyFloatToMxArray(    settings->source.thetas, pThetas , settings->source.nThetas);
     matPutVariable(matfile, "thetas", pThetas);
     mxDestroyArray(pThetas);
 
@@ -164,7 +164,7 @@ void    calcEigenrayRF(settings_t* settings){
     if(pHydArrayR == NULL){
         fatal("Memory alocation error.");
     }
-    copyDoubleToMxArray( settings->output.arrayR, pHydArrayR, (uintptr_t)settings->output.nArrayR);
+    copyFloatToMxArray( settings->output.arrayR, pHydArrayR, (uintptr_t)settings->output.nArrayR);
     matPutVariable(matfile, "rarray", pHydArrayR);
     mxDestroyArray(pHydArrayR);
 
@@ -174,7 +174,7 @@ void    calcEigenrayRF(settings_t* settings){
     if(pHydArrayZ == NULL){
         fatal("Memory alocation error.");
     }
-    copyDoubleToMxArray( settings->output.arrayZ, pHydArrayZ, (uintptr_t)settings->output.nArrayZ);
+    copyFloatToMxArray( settings->output.arrayZ, pHydArrayZ, (uintptr_t)settings->output.nArrayZ);
     matPutVariable(matfile, "zarray", pHydArrayZ);
     mxDestroyArray(pHydArrayZ);
 
@@ -187,8 +187,8 @@ void    calcEigenrayRF(settings_t* settings){
      *  1)  Create a set of arrays (thetas[], depths[][]) that relate the launching angles of the
      *      rays with their depth at each of the hydrophone array's depths:
      */
-    thetas = mallocDouble(settings->source.nThetas);
-    depths = mallocDouble2D(settings->source.nThetas, settings->output.nArrayR);
+    thetas = mallocFloat(settings->source.nThetas);
+    depths = mallocFloat2D(settings->source.nThetas, settings->output.nArrayR);
     DEBUG(2,"Calculting preliminary rays:\n");
     nRays = 0;
 
@@ -221,7 +221,7 @@ void    calcEigenrayRF(settings_t* settings){
                     bracket( ray[i].nCoords, ray[i].r, rHyd, &iHyd);
 
                     //interpolate the ray depth at the range coord of hydrophone
-                    intLinear1D(&ray[i].r[iHyd], &ray[i].z[iHyd], rHyd, &zRay, &junkDouble);
+                    intLinear1D(&ray[i].r[iHyd], &ray[i].z[iHyd], rHyd, &zRay, &junkfloat);
                     depths[nRays][j] = zRay;
                     DEBUG(3,"rHyd: %lf; rMin: %lf; rMax: %lf\n", rHyd, ray[i].rMin, ray[i].rMax);
                     DEBUG(3,"nCoords: %u, rHyd: %lf; iHyd: %u, zRay: %lf\n", (uint32_t)ray[i].nCoords, rHyd, (uint32_t)iHyd, zRay);
@@ -243,9 +243,9 @@ void    calcEigenrayRF(settings_t* settings){
      */
 
     //allocate memory for some temporary variables
-    dz =        mallocDouble(nRays);
-    thetaL =    mallocDouble(nRays);
-    thetaR =    mallocDouble(nRays);
+    dz =        mallocFloat(nRays);
+    thetaL =    mallocFloat(nRays);
+    thetaR =    mallocFloat(nRays);
 
     //  iterate over....
     for (i=0; i<settings->output.nArrayR; i++){
@@ -429,11 +429,11 @@ void    calcEigenrayRF(settings_t* settings){
                     }
 
                     //copy data to mxArrays:
-                    copyDoubleToMxArray(&tempRay[0].theta,  mxTheta,1);
-                    copyDoubleToMxArray(tempRay->r,         mxR,    tempRay->nCoords);
-                    copyDoubleToMxArray(tempRay->z,         mxZ,    tempRay->nCoords);
-                    copyDoubleToMxArray(tempRay->tau,       mxTau,  tempRay->nCoords);
-                    copyComplexToMxArray(tempRay->amp,      mxAmp,  tempRay->nCoords);
+                    copyFloatToMxArray(&tempRay[0].theta,  mxTheta,1);
+                    copyFloatToMxArray(tempRay->r,         mxR,    tempRay->nCoords);
+                    copyFloatToMxArray(tempRay->z,         mxZ,    tempRay->nCoords);
+                    copyFloatToMxArray(tempRay->tau,       mxTau,  tempRay->nCoords);
+                    copyComplexFloatToMxArray(tempRay->amp,      mxAmp,  tempRay->nCoords);
 
                     //copy mxArrays to mxRayStruct
                     mxSetFieldByNumber( eigenrays[i][j].mxEigenrayStruct,               //pointer to the mxStruct
@@ -471,8 +471,8 @@ void    calcEigenrayRF(settings_t* settings){
                         mxRefrac_r = mxCreateDoubleMatrix((MWSIZE)1,    (MWSIZE)tempRay->nRefrac, mxREAL);
                         mxRefrac_z = mxCreateDoubleMatrix((MWSIZE)1,    (MWSIZE)tempRay->nRefrac, mxREAL);
 
-                        copyDoubleToMxArray(tempRay->rRefrac,   mxRefrac_r, tempRay->nRefrac);
-                        copyDoubleToMxArray(tempRay->zRefrac,   mxRefrac_z, tempRay->nRefrac);
+                        copyFloatToMxArray(tempRay->rRefrac,   mxRefrac_r, tempRay->nRefrac);
+                        copyFloatToMxArray(tempRay->zRefrac,   mxRefrac_z, tempRay->nRefrac);
 
                         mxSetFieldByNumber( eigenrays[i][j].mxEigenrayStruct, (MWINDEX)i, 10, mxRefrac_r);
                         mxSetFieldByNumber( eigenrays[i][j].mxEigenrayStruct, (MWINDEX)i, 11, mxRefrac_z);
@@ -486,8 +486,8 @@ void    calcEigenrayRF(settings_t* settings){
 
     ///Write number of eigenrays to matfile:
     pnEigenRays = mxCreateDoubleMatrix((MWSIZE)1,(MWSIZE)1,mxREAL);
-    junkDouble = (double)nFoundEigenRays;
-    copyDoubleToMxArray( &junkDouble, pnEigenRays, 1);
+    junkfloat = (float)nFoundEigenRays;
+    copyFloatToMxArray( &junkfloat, pnEigenRays, 1);
     matPutVariable(matfile, "nEigenrays", pnEigenRays);
     mxDestroyArray(pnEigenRays);
     DEBUG(3, "nFoundEigenRays: %u\n", (uint32_t)nFoundEigenRays);
@@ -507,9 +507,9 @@ void    calcEigenrayRF(settings_t* settings){
             mxRHyd          = mxCreateDoubleMatrix((MWSIZE)1,   (MWSIZE)1,  mxREAL);
             mxZHyd          = mxCreateDoubleMatrix((MWSIZE)1,   (MWSIZE)1,  mxREAL);
 
-            copyDoubleToMxArray(&eigenrays[i][j].nEigenrays,    mxNumEigenrays,1);
-            copyDoubleToMxArray(&settings->output.arrayR[i],    mxRHyd,1);
-            copyDoubleToMxArray(&settings->output.arrayZ[j],    mxZHyd,1);
+            copyFloatToMxArray(&eigenrays[i][j].nEigenrays,    mxNumEigenrays,1);
+            copyFloatToMxArray(&settings->output.arrayR[i],    mxRHyd,1);
+            copyFloatToMxArray(&settings->output.arrayZ[j],    mxZHyd,1);
 
             idx[0] = (MWINDEX)j;
             idx[1] = (MWINDEX)i;

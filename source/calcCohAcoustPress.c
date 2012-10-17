@@ -65,20 +65,20 @@ void    calcCohAcoustPress(settings_t* settings){
     mxArray*            pHydArrayR  = NULL;
     mxArray*            pHydArrayZ  = NULL;
     mxArray*            p   = NULL;
-    double              omega, lambda;
+    float              omega, lambda;
     uintptr_t           i, j, jj, k, l, iHyd = 0;
     uintptr_t           dimR = 0, dimZ = 0;
     ray_t*              ray = NULL;
-    double              ctheta, thetai, cx, q0;
-    double              junkDouble;
+    float              ctheta, thetai, cx, q0;
+    float              junkfloat;
     vector_t            junkVector;
-    double              rHyd, zHyd;
-    complex double      pressure;
-    complex double      pressure_H[3];
-    complex double      pressure_V[3];
+    float              rHyd, zHyd;
+    complex float      pressure;
+    complex float      pressure_H[3];
+    complex float      pressure_V[3];
     uintptr_t           nRet;
     uintptr_t           iRet[51];
-    double              dr, dz; //used for star pressure contributions (for particle velocity)
+    float              dr, dz; //used for star pressure contributions (for particle velocity)
     #if VERBOSE
         //indexing variables used to output the pressure2D variable during debugging:
         uintptr_t           rr,zz;
@@ -139,8 +139,8 @@ void    calcCohAcoustPress(settings_t* settings){
         fatal("Memory alocation error.");
 
     //copy angles in cArray to mxArray:
-    copyDoubleToPtr(    settings->source.thetas,
-                        mxGetPr(pThetas),
+    copyFloatToMxArray( settings->source.thetas,
+                        pThetas,
                         settings->source.nThetas);
     //move mxArray to file and free memory:
     matPutVariable(matfile, "thetas", pThetas);
@@ -159,8 +159,8 @@ void    calcCohAcoustPress(settings_t* settings){
     if(pHydArrayR == NULL){
         fatal("Memory alocation error.");
     }
-    copyDoubleToPtr(    settings->output.arrayR,
-                        mxGetPr(pHydArrayR),
+    copyFloatToMxArray( settings->output.arrayR,
+                        pHydArrayR,
                         (uintptr_t)settings->output.nArrayR);
     //move mxArray to file and free memory:
     matPutVariable(matfile, "arrayR", pHydArrayR);
@@ -172,8 +172,8 @@ void    calcCohAcoustPress(settings_t* settings){
     if(pHydArrayZ == NULL){
         fatal("Memory alocation error.");
     }
-    copyDoubleToPtr(    settings->output.arrayZ,
-                        mxGetPr(pHydArrayZ),
+    copyFloatToMxArray( settings->output.arrayZ,
+                        pHydArrayZ,
                         (uintptr_t)settings->output.nArrayZ);
     //move mxArray to file and free memory:
     matPutVariable(matfile, "arrayZ", pHydArrayZ);
@@ -186,8 +186,8 @@ void    calcCohAcoustPress(settings_t* settings){
 
     //get sound speed at source (cx):
     csValues(   settings, settings->source.rx, settings->source.zx, &cx,
-                &junkDouble, &junkDouble, &junkDouble, &junkDouble,
-                &junkVector, &junkDouble, &junkDouble, &junkDouble);
+                &junkfloat, &junkfloat, &junkfloat, &junkfloat,
+                &junkVector, &junkfloat, &junkfloat, &junkfloat);
 
     q0 = cx / ( M_PI * settings->source.dTheta/180.0 );
     omega  = 2.0 * M_PI * settings->source.freqx;
@@ -227,8 +227,8 @@ void    calcCohAcoustPress(settings_t* settings){
             fatal("Memory alocation error.");
         }
         for (i=0; i<dimR; i++){
-            settings->output.pressure_H[i] = malloc(dimZ * sizeof(complex double[3]));
-            settings->output.pressure_V[i] = malloc(dimZ * sizeof(complex double[3]));
+            settings->output.pressure_H[i] = malloc(dimZ * sizeof(complex float[3]));
+            settings->output.pressure_V[i] = malloc(dimZ * sizeof(complex float[3]));
             if(settings->output.pressure_H[i] == NULL || settings->output.pressure_V[i] == NULL){
                 fatal("Memory allocation error.");
             }
@@ -499,7 +499,7 @@ void    calcCohAcoustPress(settings_t* settings){
             case ARRAY_TYPE__HORIZONTAL:
             case ARRAY_TYPE__RECTANGULAR:
                 //Note: the output for rectangular arrays has to be transposed.
-                copyComplexToMxArray2D_transposed(settings->output.pressure2D, p, dimZ, dimR);
+                copyComplexFloatToMxArray2D_transposed(settings->output.pressure2D, p, dimZ, dimR);
                 break;
         }
 

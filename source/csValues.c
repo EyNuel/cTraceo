@@ -54,19 +54,19 @@
 #include    "cValues1D.c"
 #include    "cValues2D.c"
 
-void    csValues(settings_t*, double, double, double*, double*, double*, double*, double*,
-                vector_t*, double*, double*, double*);
+void    csValues(settings_t*, float, float, float*, float*, float*, float*, float*,
+                vector_t*, float*, float*, float*);
 
-void    csValues(settings_t* settings, double ri, double zi, double* ci, double* cc, double* si, double* cri, double* czi,
-                vector_t* slowness, double* crri, double* czzi, double* crzi){
+void    csValues(settings_t* settings, float ri, float zi, float* ci, float* cc, float* si, float* cri, float* czi,
+                vector_t* slowness, float* crri, float* czzi, float* crzi){
     DEBUG(8,"csValues(),\t in\n");
     
-    double      k,a,eta, root, root32, root52;
-    double*     c1D;    //used locally to make code more readable
-    double**    c2D;    //used locally to make code more readable
-    double*     r;      //used locally to make code more readable
-    double*     z;      //used locally to make code more readable
-    double      epsilon, bmunk, bmunk2;
+    float      k,a,eta, root, root32, root52;
+    float*     c1D;    //used locally to make code more readable
+    float**    c2D;    //used locally to make code more readable
+    float*     r;      //used locally to make code more readable
+    float*     z;      //used locally to make code more readable
+    float      epsilon, bmunk, bmunk2;
 
     epsilon = 7.4e-3;
     bmunk  = 1300.0;
@@ -142,7 +142,7 @@ void    csValues(settings_t* settings, double ri, double zi, double* ci, double*
                     break;
                     
                 case C_CLASS__TABULATED:            //"TABL"
-                    //cValues1D(uintptr_t n, double* xTable, double* cTable, double* xi, double* ci, double* cxi, double* cxxi){
+                    //cValues1D(uintptr_t n, float* xTable, float* cTable, float* xi, float* ci, float* cxi, float* cxxi){
                     cValues1D( settings->soundSpeed.nz, z, c1D, zi, ci, czi, czzi);
                     break;
                     

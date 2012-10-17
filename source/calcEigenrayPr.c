@@ -59,13 +59,13 @@ void    calcEigenrayPr(settings_t*);
 
 void    calcEigenrayPr(settings_t* settings){
     DEBUG(1,"in\n");
-    double          thetai, ctheta;
-    double          junkDouble;
+    float          thetai, ctheta;
+    float          junkfloat;
     ray_t*          ray         = NULL;
     uintptr_t       i, j, jj, l;
-    double          rHyd, zHyd, zRay, tauRay;
-    complex double  junkComplex, ampRay;
-    double          dz;
+    float          rHyd, zHyd, zRay, tauRay;
+    complex float  junkComplex, ampRay;
+    float          dz;
     uintptr_t       nRet, iHyd = 0;
     uintptr_t       iRet[51];
 
@@ -138,7 +138,7 @@ void    calcEigenrayPr(settings_t* settings){
         fatal("Memory alocation error.");
     }
     //copy angles in cArray to mxArray:
-    copyDoubleToMxArray(settings->source.thetas, pThetas, settings->source.nThetas);
+    copyFloatToMxArray(settings->source.thetas, pThetas, settings->source.nThetas);
     //move mxArray to file and free memory:
     matPutVariable(matfile, "thetas", pThetas);
     mxDestroyArray(pThetas);
@@ -158,7 +158,7 @@ void    calcEigenrayPr(settings_t* settings){
     if(pHydArrayR == NULL){
         fatal("Memory alocation error.");
     }
-    copyDoubleToMxArray(    settings->output.arrayR, pHydArrayR, (uintptr_t)settings->output.nArrayR);
+    copyFloatToMxArray(    settings->output.arrayR, pHydArrayR, (uintptr_t)settings->output.nArrayR);
     matPutVariable(matfile, "rarray", pHydArrayR);
     mxDestroyArray(pHydArrayR);
 
@@ -168,7 +168,7 @@ void    calcEigenrayPr(settings_t* settings){
     if(pHydArrayZ == NULL){
         fatal("Memory alocation error.");
     }
-    copyDoubleToMxArray(    settings->output.arrayZ, pHydArrayZ, (uintptr_t)settings->output.nArrayZ);
+    copyFloatToMxArray(    settings->output.arrayZ, pHydArrayZ, (uintptr_t)settings->output.nArrayZ);
     matPutVariable(matfile, "zarray", pHydArrayZ);
     mxDestroyArray(pHydArrayZ);
 
@@ -209,7 +209,7 @@ void    calcEigenrayPr(settings_t* settings){
 
                             mxArray*    pDyingRay   = NULL;
                             MATFile*    matfile2    = NULL;
-                            double**    dyingRay    = malloc(2*sizeof(uintptr_t));
+                            float**    dyingRay    = malloc(2*sizeof(uintptr_t));
                             char*       string2     = mallocChar(10);
 
                             dyingRay[0] = ray[i].r;
@@ -218,7 +218,7 @@ void    calcEigenrayPr(settings_t* settings){
                             pDyingRay   = mxCreateDoubleMatrix((MWSIZE)2, (MWSIZE)ray[i].nCoords, mxREAL);
                             if(pDyingRay == NULL || matfile2 == NULL)
                                 fatal("Memory alocation error.");
-                            copyDoubleToPtr2D(dyingRay, mxGetPr(pDyingRay), ray[i].nCoords,2);
+                            copyfloatToPtr2D(dyingRay, mxGetPr(pDyingRay), ray[i].nCoords,2);
                             sprintf(string2, "dyingRay");
                             matPutVariable(matfile2, (const char*)string2, pDyingRay);
 
@@ -234,7 +234,7 @@ void    calcEigenrayPr(settings_t* settings){
                         DEBUG(3,"non-returning ray: nCoords: %u, iHyd:%u\n", (uint32_t)ray[i].nCoords, (uint32_t)iHyd);
 
                         //from index interpolate the rays' depth:
-                        intLinear1D(        &ray[i].r[iHyd], &ray[i].z[iHyd],   rHyd, &zRay,    &junkDouble);
+                        intLinear1D(        &ray[i].r[iHyd], &ray[i].z[iHyd],   rHyd, &zRay,    &junkfloat);
 
                         //for every hydrophone check distance to ray
                         for(jj=0; jj<settings->output.nArrayZ; jj++){
@@ -246,7 +246,7 @@ void    calcEigenrayPr(settings_t* settings){
                                 DEBUG(3, "Eigenray found\n");
 
                                 //from index interpolate the rays' travel time and amplitude:
-                                intLinear1D(        &ray[i].r[iHyd], &ray[i].tau[iHyd], rHyd, &tauRay,  &junkDouble);
+                                intLinear1D(        &ray[i].r[iHyd], &ray[i].tau[iHyd], rHyd, &tauRay,  &junkfloat);
                                 intComplexLinear1D( &ray[i].r[iHyd], &ray[i].amp[iHyd], rHyd, &ampRay,  &junkComplex);
 
                                 //adjust the ray's last set of coordinates so that it matches up with the hydrophone
@@ -267,11 +267,11 @@ void    calcEigenrayPr(settings_t* settings){
                                 }
 
                                 //copy data to mxArrays:
-                                copyDoubleToMxArray(&settings->source.thetas[i],mxTheta,1);
-                                copyDoubleToMxArray(ray[i].r,                   mxR,    iHyd+2);
-                                copyDoubleToMxArray(ray[i].z,                   mxZ,    iHyd+2);
-                                copyDoubleToMxArray(ray[i].tau,                 mxTau,  iHyd+2);
-                                copyComplexToMxArray(ray[i].amp,                mxAmp,  iHyd+2);
+                                copyFloatToMxArray(&settings->source.thetas[i],mxTheta,1);
+                                copyFloatToMxArray(ray[i].r,                   mxR,    iHyd+2);
+                                copyFloatToMxArray(ray[i].z,                   mxZ,    iHyd+2);
+                                copyFloatToMxArray(ray[i].tau,                 mxTau,  iHyd+2);
+                                copyComplexFloatToMxArray(ray[i].amp,                mxAmp,  iHyd+2);
 
                                 //copy mxArrays to mxEigenrayStruct
                                 mxSetFieldByNumber( eigenrays[j][jj].mxEigenrayStruct,  //pointer to the mxStruct
@@ -309,8 +309,8 @@ void    calcEigenrayPr(settings_t* settings){
                                     mxRefrac_r = mxCreateDoubleMatrix((MWSIZE)1,    (MWSIZE)ray[i].nRefrac, mxREAL);
                                     mxRefrac_z = mxCreateDoubleMatrix((MWSIZE)1,    (MWSIZE)ray[i].nRefrac, mxREAL);
 
-                                    copyDoubleToMxArray(ray[i].rRefrac, mxRefrac_r, ray[i].nRefrac);
-                                    copyDoubleToMxArray(ray[i].zRefrac, mxRefrac_z, ray[i].nRefrac);
+                                    copyFloatToMxArray(ray[i].rRefrac, mxRefrac_r, ray[i].nRefrac);
+                                    copyFloatToMxArray(ray[i].zRefrac, mxRefrac_z, ray[i].nRefrac);
 
                                     mxSetFieldByNumber( eigenrays[j][jj].mxEigenrayStruct, (MWINDEX)i, 10, mxRefrac_r);
                                     mxSetFieldByNumber( eigenrays[j][jj].mxEigenrayStruct, (MWINDEX)i, 11, mxRefrac_z);
@@ -329,7 +329,7 @@ void    calcEigenrayPr(settings_t* settings){
                         //for each index where the ray passes at the hydrophone, interpolate the rays' depth:
                         for(l=0; l<nRet; l++){
                             DEBUG(4, "nRet=%u, iRet[%u]= %u\n", (uint32_t)nRet, (uint32_t)l, (uint32_t)iRet[l]);
-                            intLinear1D(        &ray[i].r[iRet[l]], &ray[i].z[iRet[l]],     rHyd, &zRay,    &junkDouble);
+                            intLinear1D(        &ray[i].r[iRet[l]], &ray[i].z[iRet[l]],     rHyd, &zRay,    &junkfloat);
 
                             //for every hydrophone check if the ray is close enough to be considered an eigenray:
                             for(jj=0;jj<settings->output.nArrayZ; jj++){
@@ -339,8 +339,8 @@ void    calcEigenrayPr(settings_t* settings){
                                 if (dz < settings->output.miss){
 
                                     //interpolate the ray's travel time and amplitude:
-                                    intLinear1D(        &ray[i].r[iRet[l]], &ray[i].tau[iRet[l]],   rHyd, &tauRay,  &junkDouble);
-                                    intComplexLinear1D( &ray[i].r[iRet[l]], &ray[i].amp[iRet[l]],   (complex double)rHyd, &ampRay,  &junkComplex);
+                                    intLinear1D(        &ray[i].r[iRet[l]], &ray[i].tau[iRet[l]],   rHyd, &tauRay,  &junkfloat);
+                                    intComplexLinear1D( &ray[i].r[iRet[l]], &ray[i].amp[iRet[l]],   (complex float)rHyd, &ampRay,  &junkComplex);
 
                                     DEBUG(1, "i: %u, iHyd: %u, nCoords: %u\n", (uint32_t)i, (uint32_t)iHyd,(uint32_t)ray[i].nCoords);
                                     //adjust the ray's last set of coordinates so that it matches up with the hydrophone
@@ -361,11 +361,11 @@ void    calcEigenrayPr(settings_t* settings){
                                     }
 
                                     //copy data to mxArrays:
-                                    copyDoubleToMxArray(&settings->source.thetas[i],mxTheta,1);
-                                    copyDoubleToMxArray(ray[i].r,                   mxR,    iRet[l]+2);
-                                    copyDoubleToMxArray(ray[i].z,                   mxZ,    iRet[l]+2);
-                                    copyDoubleToMxArray(ray[i].tau,                 mxTau,  iRet[l]+2);
-                                    copyComplexToMxArray(ray[i].amp,                mxAmp,  iRet[l]+2);
+                                    copyFloatToMxArray(&settings->source.thetas[i],mxTheta,1);
+                                    copyFloatToMxArray(ray[i].r,                   mxR,    iRet[l]+2);
+                                    copyFloatToMxArray(ray[i].z,                   mxZ,    iRet[l]+2);
+                                    copyFloatToMxArray(ray[i].tau,                 mxTau,  iRet[l]+2);
+                                    copyComplexFloatToMxArray(ray[i].amp,                mxAmp,  iRet[l]+2);
 
                                     //copy mxArrays to mxEigenrayStruct
                                     mxSetFieldByNumber( eigenrays[j][jj].mxEigenrayStruct,  //pointer to the mxStruct
@@ -403,8 +403,8 @@ void    calcEigenrayPr(settings_t* settings){
                                         mxRefrac_r = mxCreateDoubleMatrix((MWSIZE)1,    (MWSIZE)ray[i].nRefrac, mxREAL);
                                         mxRefrac_z = mxCreateDoubleMatrix((MWSIZE)1,    (MWSIZE)ray[i].nRefrac, mxREAL);
 
-                                        copyDoubleToMxArray(ray[i].rRefrac, mxRefrac_r, ray[i].nRefrac);
-                                        copyDoubleToMxArray(ray[i].zRefrac, mxRefrac_z, ray[i].nRefrac);
+                                        copyFloatToMxArray(ray[i].rRefrac, mxRefrac_r, ray[i].nRefrac);
+                                        copyFloatToMxArray(ray[i].zRefrac, mxRefrac_z, ray[i].nRefrac);
 
                                         mxSetFieldByNumber( eigenrays[j][jj].mxEigenrayStruct, (MWINDEX)i, 10, mxRefrac_r);
                                         mxSetFieldByNumber( eigenrays[j][jj].mxEigenrayStruct, (MWINDEX)i, 11, mxRefrac_z);
@@ -439,9 +439,9 @@ void    calcEigenrayPr(settings_t* settings){
             mxRHyd          = mxCreateDoubleMatrix((MWSIZE)1,   (MWSIZE)1,  mxREAL);
             mxZHyd          = mxCreateDoubleMatrix((MWSIZE)1,   (MWSIZE)1,  mxREAL);
 
-            copyDoubleToMxArray(&eigenrays[j][jj].nEigenrays,   mxNumEigenrays,1);
-            copyDoubleToMxArray(&settings->output.arrayR[j],    mxRHyd,1);
-            copyDoubleToMxArray(&settings->output.arrayZ[jj],   mxZHyd,1);
+            copyFloatToMxArray(&eigenrays[j][jj].nEigenrays,   mxNumEigenrays,1);
+            copyFloatToMxArray(&settings->output.arrayR[j],    mxRHyd,1);
+            copyFloatToMxArray(&settings->output.arrayZ[jj],   mxZHyd,1);
 
             idx[0] = (MWINDEX)jj;
             idx[1] = (MWINDEX)j;

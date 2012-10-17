@@ -64,14 +64,14 @@ void    solveEikonalEq(settings_t*, ray_t*);
 void    solveEikonalEq(settings_t* settings, ray_t* ray){
     DEBUG(5,"in. theta: %lf\n", ray->theta);
     
-    double          cx, ci, cc, sigmaI, sigmaR, sigmaZ, cri, czi, crri, czzi, crzi;
+    float          cx, ci, cc, sigmaI, sigmaR, sigmaZ, cri, czi, crri, czzi, crzi;
     uint32_t        iUp, iDown;
     int32_t         ibdry;                      //indicates at which boundary a ray is being reflected (-1 => surface, 1 => bottom)
     uint32_t        sRefl, bRefl, oRefl;    //counters for number of reflections at _s_urface, _s_ottom and _o_bject
     uint32_t        jRefl;                      //TODO huh?!
     uint32_t        numRungeKutta;              //counts the number o RKF45 iterations
     uint32_t        i, j;
-    complex double  reflCoeff, reflDecay;
+    complex float  reflCoeff, reflDecay;
     vector_t        es = {0,0};             //ray's tangent vector
     vector_t        e1 = {0,0};             //ray's normal vector
     vector_t        slowness = {0,0};
@@ -79,22 +79,22 @@ void    solveEikonalEq(settings_t* settings, ray_t* ray){
     vector_t        normal = {0,0};
     vector_t        tauB = {0,0};
     vector_t        tauR = {0,0};
-    double*         yOld            = mallocDouble(4);  //TODO replace with array? might improve performance.
-    double*         fOld            = mallocDouble(4);
-    double*         yNew            = mallocDouble(4);
-    double*         fNew            = mallocDouble(4);
-    double          dsi, ds4, ds5;
-    double          stepError;
-    double          ri, zi;
-    double          altInterpolatedZ, batInterpolatedZ;
-    double          thetaRefl;
+    float*         yOld            = mallocFloat(4);  //TODO replace with array? might improve performance.
+    float*         fOld            = mallocFloat(4);
+    float*         yNew            = mallocFloat(4);
+    float*         fNew            = mallocFloat(4);
+    float          dsi, ds4, ds5;
+    float          stepError;
+    float          ri, zi;
+    float          altInterpolatedZ, batInterpolatedZ;
+    float          thetaRefl;
     point_t         pointA, pointB, pointIsect;
-    double          rho1, rho2, cp2, cs2, ap, as, lambda, tempDouble;
-    double          dr, dz, dIc;
-    double          prod;
+    float          rho1, rho2, cp2, cs2, ap, as, lambda, tempfloat;
+    float          dr, dz, dIc;
+    float          prod;
     uintptr_t       initialMemorySize;
     uint32_t        nObjCoords; //"noj"
-    double          ziDown, ziUp;   //"zidn, ziup", interpolated height of upper/lower boundary of an object
+    float          ziDown, ziUp;   //"zidn, ziup", interpolated height of upper/lower boundary of an object
 
     //allocate memory for ray components:
     //TODO move memory allocation up one level -this should improve performance
@@ -205,7 +205,7 @@ void    solveEikonalEq(settings_t* settings, ray_t* ray){
                 (ri < settings->altimetry.r[settings->altimetry.numSurfaceCoords -1]) &&
                 (ri > settings->batimetry.r[0]) &&
                 (ri < settings->batimetry.r[settings->batimetry.numSurfaceCoords -1] ) ){
-            DEBUG(7, "Calculate surface and bottom z at current ray position: \n");
+            DEBUG(7, "Calculate surface and bottom depth at current ray position: \n");
             boundaryInterpolation(  &(settings->altimetry), ri, &altInterpolatedZ, &junkVector, &normal);
             boundaryInterpolation(  &(settings->batimetry), ri, &batInterpolatedZ, &junkVector, &normal);
         }else{
@@ -289,17 +289,17 @@ void    solveEikonalEq(settings_t* settings, ray_t* ray){
                                                 &lambda,
                                                 &(settings->source.freqx),
                                                 &(settings->altimetry.surfaceAttenUnits),
-                                                &tempDouble
+                                                &tempfloat
                                             );
-                                ap      = tempDouble;
+                                ap      = tempfloat;
                                 lambda  = cs2 / settings->source.freqx;
                                 convertUnits(   &as,
                                                 &lambda,
                                                 &(settings->source.freqx),
                                                 &(settings->altimetry.surfaceAttenUnits),
-                                                &tempDouble
+                                                &tempfloat
                                             );
-                                as      = tempDouble;
+                                as      = tempfloat;
                                 boundaryReflectionCoeff(&rho1, &rho2, &ci, &cp2, &cs2, &ap, &as, &thetaRefl, &reflCoeff);
                                 break;
                             
@@ -351,11 +351,11 @@ void    solveEikonalEq(settings_t* settings, ray_t* ray){
                                                                 &junkVector
                                                             );
                                 lambda = cp2/settings->source.freqx;
-                                convertUnits(&ap, &lambda, &settings->source.freqx, &settings->altimetry.surfaceAttenUnits, &tempDouble);
-                                ap = tempDouble;
+                                convertUnits(&ap, &lambda, &settings->source.freqx, &settings->altimetry.surfaceAttenUnits, &tempfloat);
+                                ap = tempfloat;
                                 lambda = cs2/settings->source.freqx;
-                                convertUnits(&as, &lambda, &settings->source.freqx, &settings->altimetry.surfaceAttenUnits, &tempDouble);
-                                as = tempDouble;
+                                convertUnits(&as, &lambda, &settings->source.freqx, &settings->altimetry.surfaceAttenUnits, &tempfloat);
+                                as = tempfloat;
                                 boundaryReflectionCoeff(&rho1, &rho2, &ci, &cp2, &cs2, &ap, &as, &thetaRefl, &reflCoeff);
                                 break;
                             default:
@@ -440,17 +440,17 @@ void    solveEikonalEq(settings_t* settings, ray_t* ray){
                                                 &lambda,
                                                 &(settings->source.freqx),
                                                 &(settings->batimetry.surfaceAttenUnits),
-                                                &tempDouble
+                                                &tempfloat
                                             );
-                                ap      = tempDouble;
+                                ap      = tempfloat;
                                 lambda  = cs2 / settings->source.freqx;
                                 convertUnits(   &as,
                                                 &lambda,
                                                 &(settings->source.freqx),
                                                 &(settings->batimetry.surfaceAttenUnits),
-                                                &tempDouble
+                                                &tempfloat
                                             );
-                                as      = tempDouble;
+                                as      = tempfloat;
                                 boundaryReflectionCoeff(&rho1, &rho2, &ci, &cp2, &cs2, &ap, &as, &thetaRefl, &reflCoeff);
                                 break;
                             
@@ -502,11 +502,11 @@ void    solveEikonalEq(settings_t* settings, ray_t* ray){
                                                                 &junkVector
                                                             );
                                 lambda = cp2/settings->source.freqx;
-                                convertUnits(&ap, &lambda, &settings->source.freqx, &settings->batimetry.surfaceAttenUnits, &tempDouble);
-                                ap = tempDouble;
+                                convertUnits(&ap, &lambda, &settings->source.freqx, &settings->batimetry.surfaceAttenUnits, &tempfloat);
+                                ap = tempfloat;
                                 lambda = cs2/settings->source.freqx;
-                                convertUnits(&as, &lambda, &settings->source.freqx, &settings->batimetry.surfaceAttenUnits, &tempDouble);
-                                as = tempDouble;
+                                convertUnits(&as, &lambda, &settings->source.freqx, &settings->batimetry.surfaceAttenUnits, &tempfloat);
+                                as = tempfloat;
                                 boundaryReflectionCoeff(&rho1, &rho2, &ci, &cp2, &cs2, &ap, &as, &thetaRefl, &reflCoeff);
                                 break;
                             default:
@@ -762,17 +762,17 @@ void    solveEikonalEq(settings_t* settings, ray_t* ray){
                                                 &lambda,
                                                 &(settings->source.freqx),
                                                 &(settings->objects.object[j].surfaceAttenUnits),
-                                                &tempDouble
+                                                &tempfloat
                                             );
-                                ap      = tempDouble;
+                                ap      = tempfloat;
                                 lambda  = cs2 / settings->source.freqx;
                                 convertUnits(   &as,
                                                 &lambda,
                                                 &(settings->source.freqx),
                                                 &(settings->objects.object[j].surfaceAttenUnits),
-                                                &tempDouble
+                                                &tempfloat
                                             );
-                                as      = tempDouble;
+                                as      = tempfloat;
                                 DEBUG(6, "Calculating reflection coefficient...\n");
                                 boundaryReflectionCoeff(&rho1, &rho2, &ci, &cp2, &cs2, &ap, &as, &thetaRefl, &reflCoeff);
                                 DEBUG(6, "Reflection coefficient calculated\n");
@@ -869,7 +869,7 @@ void    solveEikonalEq(settings_t* settings, ray_t* ray){
                 //when debugging, save the coordinates of the last ray to a separate matfile before exiting.
                 mxArray*    pRay    = NULL;
                 MATFile*    matfile = NULL;
-                double**    temp2D  = malloc(2*sizeof(uintptr_t));
+                float**    temp2D  = malloc(2*sizeof(uintptr_t));
                 char*       string  = mallocChar(10);
                 
                 temp2D[0]   = ray->r;
@@ -878,13 +878,13 @@ void    solveEikonalEq(settings_t* settings, ray_t* ray){
                 pRay        = mxCreateDoubleMatrix((MWSIZE)2, (MWSIZE)ray->nCoords, mxREAL);
                 if(pRay == NULL || matfile == NULL)
                     fatal("Memory alocation error.");
-                copyDoubleToPtr2D(temp2D, mxGetPr(pRay), ray->nCoords,2);
+                copyfloatToPtr2D(temp2D, mxGetPr(pRay), ray->nCoords,2);
 
                 sprintf(string, "dyingRay");
                 matPutVariable(matfile, (const char*)string, pRay);
                 mxDestroyArray(pRay);
                 matClose(matfile);
-                freeDouble2D(temp2D, 2);
+                freeFloat2D(temp2D, 2);
             #endif
             DEBUG(1, "ReflCoeff: %lf\n",cabs(reflDecay));
             DEBUG(1, "Total number of reflections: %u\n", (uint32_t)(sRefl +bRefl +oRefl));
@@ -892,7 +892,7 @@ void    solveEikonalEq(settings_t* settings, ray_t* ray){
                     "Note that in cases where neither surface nor bottom have attenuation, rays can be endlessly reflected up and down and become \"trapped\".\n"
                     "If you need a high number or reflections per ray, you may also try changing MEM_FACTOR (in globals.h) to a higher value and recompile.\n"
                     "Aborting...");
-            //double the memory allocated for the ray:
+            //float the memory allocated for the ray:
             //TODO find bus error that happens on realloc when realloccing to a larger value (toolsMemory.c".)
             //reallocRay(ray, ray->nCoords * 2);        //TODO disabled as this sometimes results in "bus error".
             
@@ -971,8 +971,8 @@ void    solveEikonalEq(settings_t* settings, ray_t* ray){
     
     //clip allocated memory for refractions
     //TODO remove memmory reallocation -performance!
-    ray->rRefrac = reallocDouble(ray->rRefrac, ray->nRefrac);
-    ray->zRefrac = reallocDouble(ray->zRefrac, ray->nRefrac);
+    ray->rRefrac = reallocFloat(ray->rRefrac, ray->nRefrac);
+    ray->zRefrac = reallocFloat(ray->zRefrac, ray->nRefrac);
     
     //free memory
     free(yOld);

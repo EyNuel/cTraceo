@@ -58,14 +58,14 @@
 #include <complex.h>
 #include "bracket.c"
 
-uintptr_t   pressureStar(settings_t*, ray_t*, double, double, double, complex double*, complex double[]);
+uintptr_t   pressureStar(settings_t*, ray_t*, float, float, float, complex float*, complex float[]);
 
-uintptr_t   pressureStar( settings_t* settings, ray_t* ray, double rHyd, double zHyd, double q0, complex double* pressure_H, complex double* pressure_V){
+uintptr_t   pressureStar( settings_t* settings, ray_t* ray, float rHyd, float zHyd, float q0, complex float* pressure_H, complex float* pressure_V){
 
-    double          rLeft, rRight, zTop, zBottom;
+    float          rLeft, rRight, zTop, zBottom;
     uintptr_t       iHyd;
-    double          dzdr, tauRay, zRay, qRay, width;
-    complex double  ampRay;
+    float          dzdr, tauRay, zRay, qRay, width;
+    complex float  ampRay;
     
     /* start with determining the coordinates for which we will need to calculate
      * acoustic pressure.

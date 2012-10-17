@@ -47,12 +47,12 @@
 #include "tools.h"
 #include <math.h>
 
-void convertUnits(double*, double*, double*, uint32_t*, double*);
+void convertUnits(float*, float*, float*, uint32_t*, float*);
 
-void convertUnits(double* aIn, double* lambda, double* freq, uint32_t* units, double* aOut){
+void convertUnits(float* aIn, float* lambda, float* freq, uint32_t* units, float* aOut){
     //TODO add support for "parameter loss", 'L' option from Bellhop's option1(3)
     
-    double c1 = 8.68588963806504;
+    float c1 = 8.68588963806504;
     
     switch(*units){
         case    SURFACE_ATTEN_UNITS__dBperkHz:      //"F",  dB/kHz

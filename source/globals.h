@@ -30,7 +30,7 @@
  ******************************************************** ************************/
 //NOTE: VERSION has to 20 chars wide so that the header and help texts are printed correclty
 //              "----5---10---15---20"
-#define VERSION "1.0.1               "
+#define VERSION "1.0.1 SP            "
 //NOTE: HEADER is made up of consecutive strings, each 79 chars long:
 #define HEADER  "* =========================================================================== *\n""*          The cTraceo Acoustic Raytracing Model, Version "VERSION"*\n""*  Released under the Creative Commons Attribution-NonCommercial-ShareAlike   *\n""*  3.0 Unported License ( http://creativecommons.org/licenses/by-nc-sa/3.0/ ) *\n""* --------------------------------------------------------------------------- *\n""*            Copyright (C) 2011 Emanuel Ey <emanuel.ey@gmail.com>             *\n""*        Copyright (C) 2010 Orlando Camargo Rodriguez <orodrig@ualg.pt>       *\n""*     SiPLab, Universidade do Algarve, Portugal <www.siplab.fct.ualg.pt>      *\n""* =========================================================================== *\n\n"
 
@@ -114,13 +114,13 @@
 
 //TODO this seems somewhat redundant...
 typedef struct  vector{
-    double  r;  //range component of vector
-    double  z;  //depth component of vector
+    float  r;  //range component of vector
+    float  z;  //depth component of vector
 }vector_t;      //TODO add position components?
 
 typedef struct  point{
-    double  r;  //range component of point
-    double  z;  //depth component of point
+    float  r;  //range component of point
+    float  z;  //depth component of point
 }point_t;
 
 
@@ -134,33 +134,33 @@ typedef struct  ray{
      */
     uintptr_t       nCoords;
     bool            iKill;      //indicates if ray has been "killed"
-    double          theta;      //launching angle of the ray
-    double          rMin, rMax; //used to determine if a ray "turns back"
+    float          theta;      //launching angle of the ray
+    float          rMin, rMax; //used to determine if a ray "turns back"
     bool            iReturn;    //indicates if a ray "turns back"
-    double*         r;          //range of ray at index
-    double*         z;          //depth of ray at index
-    double*         c;          //speed of sound at index
+    float*         r;          //range of ray at index
+    float*         z;          //depth of ray at index
+    float*         c;          //speed of sound at index
     bool*           iRefl;      //indicates if there is a reflection at a certain index of the ray coordinates.
     uint32_t        sRefl;      //number of surface reflections
     uint32_t        bRefl;      //number of bottom reflections
     uint32_t        oRefl;      //number of object reflections
     uint32_t        nRefl;      //number of total reflections
-    complex double* decay;      //decay of ray
-    double*         phase;      //ray phase
-    double*         tau;        //acumulated travel time
-    double*         s;          //acumulated distance travelled by the ray
-    double*         ic;         //see Chapter 3 of Traceo Manual
+    complex float* decay;      //decay of ray
+    float*         phase;      //ray phase
+    float*         tau;        //acumulated travel time
+    float*         s;          //acumulated distance travelled by the ray
+    float*         ic;         //see Chapter 3 of Traceo Manual
     vector_t*       boundaryTg; //"tbdry" a boundary's tangent vector
     int32_t*        boundaryJ;  //"jbdry",  indicates at what boundary a ray is (-1 => above surface; 1 => below bottom)
     uint32_t        nRefrac;    //"nrefr", number of refraction points
     //point_t*      refrac;     //"rrefr, zrefr", coordinates of refraction points. used in "solveEikonalEq.c"
-    double*         rRefrac;
-    double*         zRefrac;
+    float*         rRefrac;
+    float*         zRefrac;
 
-    double*         p;          //used in solveDynamicEq
-    double*         q;          //used in solveDynamicEq
-    double*         caustc;     //used in solveDynamicEq
-    complex double* amp;        //ray amplitude
+    float*         p;          //used in solveDynamicEq
+    float*         q;          //used in solveDynamicEq
+    float*         caustc;     //used in solveDynamicEq
+    complex float* amp;        //ray amplitude
 }ray_t;
 
 
@@ -170,14 +170,14 @@ typedef struct  ray{
  *******************************************************************************/
  
 typedef struct source{
-    double      ds;             //ray step
-    double      rx,zx;          //source coords
-    double      rbox1, rbox2;   //the box that limits the range of the rays
-    double      freqx;          //source frequency
+    float      ds;             //ray step
+    float      rx,zx;          //source coords
+    float      rbox1, rbox2;   //the box that limits the range of the rays
+    float      freqx;          //source frequency
     uint32_t    nThetas;        //number of launching angles
-    double      theta1, thetaN; //first and last launching angle
-    double      dTheta;         //the increment between launching angles
-    double*     thetas;         //the array that will actually contain the launching angles (is allocated in "readin.c")
+    float      theta1, thetaN; //first and last launching angle
+    float      dTheta;         //the increment between launching angles
+    float*     thetas;         //the array that will actually contain the launching angles (is allocated in "readin.c")
 }source_t;
 
 typedef struct interface{
@@ -187,13 +187,13 @@ typedef struct interface{
     //See #defines following this block for possible values
     uint32_t                surfaceType;            //formerly "atype"
     uint32_t                surfacePropertyType;    //formerly "aptype"
-    double*                 r;                      //"rati(n)"             |
-    double*                 z;                      //"zati(n)"              }  these pointers are mallocced in "readin.c"
-    double*                 cp;                     //"cpati",  compressional speed
-    double*                 cs;                     //"csati",  shear speed
-    double*                 rho;                    //"rhoati", density
-    double*                 ap;                     //"apati",  compressional attenuation
-    double*                 as;                     //"asati"   shear attenuation
+    float*                 r;                      //"rati(n)"             |
+    float*                 z;                      //"zati(n)"              }  these pointers are mallocced in "readin.c"
+    float*                 cp;                     //"cpati",  compressional speed
+    float*                 cs;                     //"csati",  shear speed
+    float*                 rho;                    //"rhoati", density
+    float*                 ap;                     //"apati",  compressional attenuation
+    float*                 as;                     //"asati"   shear attenuation
     uint32_t                surfaceInterpolation;   //formerly "aitype"
     uint32_t                surfaceAttenUnits;      //formerly "atiu"
     uint32_t                numSurfaceCoords;       //formerly "nati"
@@ -228,10 +228,10 @@ typedef struct soundSpeed{
     uint32_t    cDist;          //"cdist", type of sound speed distribution -profile or field (i.e. range dependent)
     uint32_t    cClass;         //"cclass", class of sound speed
     uint32_t    nr, nz;         //"nr0,nz0", number of points in range and depth
-    double*     z;              //"z0", depth
-    double*     r;              //"r0", range
-    double*     c1D;            //"c0", sound speed at (z0)
-    double**    c2D;            //"c02d", sound speed at (r0,z0)
+    float*     z;              //"z0", depth
+    float*     r;              //"r0", range
+    float*     c1D;            //"c0", sound speed at (z0)
+    float**    c2D;            //"c02d", sound speed at (r0,z0)
 }soundSpeed_t;
 
 //possible values for cDistribuition (see page 39, Traceo Manual)
@@ -255,15 +255,15 @@ typedef struct object{
      */
     uint32_t                surfaceType;            //"otype",      Object surface type (rigid, aboservent, etc), as defined for interface_t
     uint32_t                surfaceAttenUnits;      //"obju",       attenuation units, as define for interface_t
-    double                  cp;                     //"cpati",      compressional speed
-    double                  cs;                     //"csati",      shear speed
-    double                  rho;                    //"rhoati",     density
-    double                  ap;                     //"apati",      compressional attenuation
-    double                  as;                     //"asati",      shear attenuation
+    float                  cp;                     //"cpati",      compressional speed
+    float                  cs;                     //"csati",      shear speed
+    float                  rho;                    //"rhoati",     density
+    float                  ap;                     //"apati",      compressional attenuation
+    float                  as;                     //"asati",      shear attenuation
     uint32_t                nCoords;                //"no",         number of coordinates
-    double*                 r;                      //"ro"      |
-    double*                 zDown;                  //"zdn"      >  actual coordinates that define the object geometry
-    double*                 zUp;                    //"zup"     |
+    float*                 r;                      //"ro"      |
+    float*                 zDown;                  //"zdn"      >  actual coordinates that define the object geometry
+    float*                 zUp;                    //"zup"     |
 }object_t;
 
 typedef struct objects{
@@ -279,17 +279,17 @@ typedef struct output{
     uint32_t            calcType;           //"catype"
     uint32_t            arrayType;          //"artype"
     uint32_t            nArrayR, nArrayZ;   //"nra", "nza"  Array sizes in R and Z
-    double*             arrayR;             //"nra"         Array R (ranges)
-    double*             arrayZ;             //"nrz"         Array Z (depths)
-    //complex double*       pressure1D;         //will contain coherent acoustic pressure at each array element (1D), calculated in "calcCohAcoustPress.c"
-    complex double**    pressure2D;         //will contain coherent acoustic pressure at each array element (2D), calculated in "calcCohAcoustPress.c"
-    complex double      (**pressure_H)[3];      //used when calculating particle velocity (pressure at left, center, right)
-    complex double      (**pressure_V)[3];      //used when calculating particle velocity (pressure at top, center, bottom)
+    float*             arrayR;             //"nra"         Array R (ranges)
+    float*             arrayZ;             //"nrz"         Array Z (depths)
+    //complex float*       pressure1D;         //will contain coherent acoustic pressure at each array element (1D), calculated in "calcCohAcoustPress.c"
+    complex float**    pressure2D;         //will contain coherent acoustic pressure at each array element (2D), calculated in "calcCohAcoustPress.c"
+    complex float      (**pressure_H)[3];      //used when calculating particle velocity (pressure at left, center, right)
+    complex float      (**pressure_V)[3];      //used when calculating particle velocity (pressure at top, center, bottom)
                                                 /* Note the redundancy: the center pressure is present in both cases.
                                                  *                      This is done for performance reasons.
                                                  */
-    double              dr, dz;             //horizontal and vertical offset of the star pressure elements
-    double              miss;               //"miss"        distance threshold for finding eigenrays
+    float              dr, dz;             //horizontal and vertical offset of the star pressure elements
+    float              miss;               //"miss"        distance threshold for finding eigenrays
 }output_t;
 
 //possible values for calculationType (see page 43)
@@ -345,7 +345,7 @@ typedef struct arrivals{
      * Used in calcAmpDelxx to temporarily contain arrivals before they are written to 
      * a matlab structure at the end of the function.
      */
-    double          nArrivals;
+    float          nArrivals;
     mxArray*        mxArrivalStruct;
 }arrivals_t;
 
@@ -354,7 +354,7 @@ typedef struct eigenrays{
      * Similar to the above, but used in calcEigenrayXX.
      * Only difference is in variable naming.
      */
-    double          nEigenrays;
+    float          nEigenrays;
     mxArray*        mxEigenrayStruct;
 }eigenrays_t;
     

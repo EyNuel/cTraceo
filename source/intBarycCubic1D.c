@@ -46,10 +46,10 @@
 #pragma once
 #include <inttypes.h>
 
-void intBarycCubic1D(double*, double*, double, double*, double*, double*);
+void intBarycCubic1D(float*, float*, float, float*, float*, float*);
 
-void intBarycCubic1D(double* x, double* f, double xi, double* fi, double* fxi, double* fxxi){
-    double      a[3],px[3],sx[3],qx[3];
+void intBarycCubic1D(float* x, float* f, float xi, float* fi, float* fxi, float* fxxi){
+    float      a[3],px[3],sx[3],qx[3];
     uintptr_t   i;
     
     px[0] = ( x[1] - x[0] )*( x[1] - x[2] )*( x[1] - x[3] );

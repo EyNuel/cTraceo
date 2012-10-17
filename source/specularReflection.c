@@ -47,10 +47,10 @@
 #include "math.h"
 #include "dotProduct.c"
 
-void specularReflection(vector_t*, vector_t*, vector_t*, double*);
-void specularReflection(vector_t* normal, vector_t* tauI, vector_t* tauR, double* theta){
+void specularReflection(vector_t*, vector_t*, vector_t*, float*);
+void specularReflection(vector_t* normal, vector_t* tauI, vector_t* tauR, float* theta){
     DEBUG(5,"in\n");
-    double  c = dotProduct(normal, tauI);
+    float  c = dotProduct(normal, tauI);
 
     tauR->r = tauI->r - 2*c * normal->r;
     tauR->z = tauI->z - 2*c * normal->z;

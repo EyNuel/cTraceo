@@ -84,7 +84,7 @@ void    calcAllRayInfo(settings_t* settings){
                                         "nRefrac",
                                         "refrac_r",
                                         "refrac_z"};        //the names of the fields contained in mxRayStruct
-    double              thetai, ctheta;
+    float              thetai, ctheta;
     ray_t*              ray         = NULL;
     uintptr_t           i;
     
@@ -99,7 +99,7 @@ void    calcAllRayInfo(settings_t* settings){
         fatal("Memory alocation error.");
     }
     //copy angles in cArray to mxArray:
-    copyDoubleToMxArray(    settings->source.thetas, pThetas, settings->source.nThetas);
+    copyFloatToMxArray(    settings->source.thetas, pThetas, settings->source.nThetas);
     //move mxArray to file and free memory:
     matPutVariable(matfile, "thetas", pThetas);
     mxDestroyArray(pThetas);
@@ -159,11 +159,11 @@ void    calcAllRayInfo(settings_t* settings){
             }
             
             //copy data to mxArrays:
-            copyDoubleToMxArray(&settings->source.thetas[i],mxTheta,1);
-            copyDoubleToMxArray(ray[i].r,                   mxR,    ray[i].nCoords);
-            copyDoubleToMxArray(ray[i].z,                   mxZ,    ray[i].nCoords);
-            copyDoubleToMxArray(ray[i].tau,                 mxTau,  ray[i].nCoords);
-            copyComplexToMxArray(ray[i].amp,                mxAmp,  ray[i].nCoords);
+            copyFloatToMxArray(&settings->source.thetas[i],mxTheta,1);
+            copyFloatToMxArray(ray[i].r,                   mxR,    ray[i].nCoords);
+            copyFloatToMxArray(ray[i].z,                   mxZ,    ray[i].nCoords);
+            copyFloatToMxArray(ray[i].tau,                 mxTau,  ray[i].nCoords);
+            copyComplexFloatToMxArray(ray[i].amp,                mxAmp,  ray[i].nCoords);
             
             //copy mxArrays to mxRayStruct
             mxSetFieldByNumber( mxRayStruct,        //pointer to the mxStruct
@@ -201,8 +201,8 @@ void    calcAllRayInfo(settings_t* settings){
                 mxRefrac_r = mxCreateDoubleMatrix((MWSIZE)1,    (MWSIZE)ray[i].nRefrac, mxREAL);
                 mxRefrac_z = mxCreateDoubleMatrix((MWSIZE)1,    (MWSIZE)ray[i].nRefrac, mxREAL);
                 
-                copyDoubleToMxArray(ray[i].rRefrac, mxRefrac_r, ray[i].nRefrac);
-                copyDoubleToMxArray(ray[i].zRefrac, mxRefrac_z, ray[i].nRefrac);
+                copyFloatToMxArray(ray[i].rRefrac, mxRefrac_r, ray[i].nRefrac);
+                copyFloatToMxArray(ray[i].zRefrac, mxRefrac_z, ray[i].nRefrac);
                 
                 mxSetFieldByNumber( mxRayStruct, (MWINDEX)i, 10, mxRefrac_r);
                 mxSetFieldByNumber( mxRayStruct, (MWINDEX)i, 11, mxRefrac_z);

@@ -59,21 +59,23 @@ void    solveDynamicEq(settings_t*, ray_t*);
 void    solveDynamicEq(settings_t* settings, ray_t* ray){
     DEBUG(3,"in\n");
     int32_t         ibdry;
-    double          alpha;
-    double          ri, zi, ci, cii, cxc, sigmaI, crri, czzi, crzi;
-    vector_t        slowness= {0,0};
+    float          alpha;
+    float          ri, zi, ci, cii, cxc, sigmaI, crri, czzi, crzi;
+    float          crriNext, czziNext, crziNext;   //
+    vector_t        slowness     = {0,0};
+    vector_t        slownessNext = {0,0};
     vector_t        gradC   = {0,0};    //gradient of sound speed (c) at current coords
     vector_t        nGradC  = {0,0};    //gradient of sound speed (c) at next coords
     vector_t        dGradC  = {0,0};
-    double          dr, dz, dsi;
+    float          dr, dz, dsi;
     vector_t        es, sigma;
-    double          drdn, dzdn;
-    double          cnn;
+    float          drdn, dzdn;
+    float          cnn;
     vector_t        sigmaN;
-    double          cnj, csj, rm, rn;
+    float          cnj, csj, rm, rn;
     vector_t        tauB;
-    double          prod;
-    complex double  ap_aq;
+    float          prod;
+    complex float  ap_aq;
     uintptr_t       i;
 
     //Define initial conditions:
@@ -85,19 +87,33 @@ void    solveDynamicEq(settings_t* settings, ray_t* ray){
     //Get Thorpe attenuation in dB/m:
     thorpe(settings->source.freqx, &alpha);
 
+    //get gradient of the sound speed at the first set of coordinates
+    //NOTE: these values are saves as "next" so that they can be used correctlyin the first iteration of the loop.
+    ri = ray->r[0];
+    zi = ray->z[0];
+    csValues(settings, ri, zi, &cii, &cxc, &sigmaI, &gradC.r, &gradC.z, &slownessNext, &crri, &czzi, &crzi);
+
     //Solve the Dynamic Equations:
     for(i=0; i<ray->nCoords -2; i++){
 
+        //NOTE: in subsequent iterations, the "current" is the former "next", so we'll get the former "next" and use it as "current"
+        gradC.r = nGradC.r;
+        gradC.z = nGradC.z;
+        slowness.r  = slownessNext.r;
+        slowness.z  = slownessNext.z;
+        crri = crriNext;
+        czzi = czziNext;
+        crzi = crziNext;
+        
         //determine the gradient of the sound speed at the next set of coordinates
         //TODO call csvalues directly with ray->xx (i.e.: skip the intermediate variable ri,zi
         ri = ray->r[i+1];
         zi = ray->z[i+1];
-        csValues(settings, ri, zi, &cii, &cxc, &sigmaI, &nGradC.r, &nGradC.z, &slowness, &crri, &czzi, &crzi);
+        csValues(settings, ri, zi, &cii, &cxc, &sigmaI, &nGradC.r, &nGradC.z, &slownessNext, &crriNext, &czziNext, &crziNext);
 
-        //determine the gradient of the sound speed at the current set of coordinates
-        ri = ray->r[i];
-        zi = ray->z[i];
-        csValues(settings, ri, zi, &cii, &cxc, &sigmaI, &gradC.r, &gradC.z, &slowness, &crri, &czzi, &crzi);
+//Q: crri, czzi, crzi are used? Which one is needed further on? "current" or "next"? seems to be "current"
+//R: "current" is used
+
 
         dGradC.r = nGradC.r - gradC.r;
         dGradC.z = nGradC.z - gradC.z;
@@ -166,8 +182,8 @@ void    solveDynamicEq(settings_t* settings, ray_t* ray){
     //Amplitude calculation:
     DEBUG(10, "amp[10]:%lf, cxc:%lf, cnn:%e\n", cabs(ray->amp[10]), cxc, cnn);
     for(i=1; i<ray->nCoords; i++){
-        ap_aq       = (complex double)( ray->c[0] * cos(ray->theta) * ray->c[i] / ( ray->ic[i] * ray->q[i] ));
-        DEBUG(7, "i:%u, ap_aq:%e, c: %lf, ic:%lf, q:%e\n", (uint32_t)i, (double)cabs(ap_aq), ray->c[i], ray->ic[i], ray->q[i]);
+        ap_aq       = (complex float)( ray->c[0] * cos(ray->theta) * ray->c[i] / ( ray->ic[i] * ray->q[i] ));
+        DEBUG(7, "i:%u, ap_aq:%e, c: %lf, ic:%lf, q:%e\n", (uint32_t)i, (float)cabs(ap_aq), ray->c[i], ray->ic[i], ray->q[i]);
         ray->amp[i] = csqrt( ap_aq ) * ray->decay[i] * exp( -alpha * ray->s[i] );
         /*
         if(isnan((float)cabs(ray->amp[i]))){

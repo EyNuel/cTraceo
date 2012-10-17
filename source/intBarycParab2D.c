@@ -51,16 +51,16 @@
 #pragma once
 #include "tools.h"
 
-void intBarycParab2D(double*, double*, double**, double, double, double*, double*, double*, double*, double*, double*);
+void intBarycParab2D(float*, float*, float**, float, float, float*, float*, float*, float*, float*, float*);
 
-void intBarycParab2D(double* x, double* y, double** f, double xi, double yi, double* fi, double* fxi, double* fyi, double* fxxi, double* fyyi, double* fxyi){
+void intBarycParab2D(float* x, float* y, float** f, float xi, float yi, float* fi, float* fxi, float* fyi, float* fxxi, float* fyyi, float* fxyi){
     DEBUG(8, "in\n");
 
-    double      px[3];
-    double      py[3];
-    double      sx[3];
-    double      sy[3];
-    double      a[3][3];
+    float      px[3];
+    float      py[3];
+    float      sx[3];
+    float      sy[3];
+    float      a[3][3];
     uintptr_t   i, j;
 
     

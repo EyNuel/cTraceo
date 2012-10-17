@@ -50,14 +50,14 @@
 
 
 
-void boundaryInterpolationExplicit(uint32_t*, double*, double*, uint32_t*, double, double*, vector_t*, vector_t*);
-void boundaryInterpolation(interface_t*, double, double*, vector_t*, vector_t*);
+void boundaryInterpolationExplicit(uint32_t*, float*, float*, uint32_t*, float, float*, vector_t*, vector_t*);
+void boundaryInterpolation(interface_t*, float, float*, vector_t*, vector_t*);
 
-void boundaryInterpolationExplicit(uint32_t* numSurfaceCoords, double* r, double* z, uint32_t* surfaceInterpolation, double ri, double* zi, vector_t* taub, vector_t* normal){
+void boundaryInterpolationExplicit(uint32_t* numSurfaceCoords, float* r, float* z, uint32_t* surfaceInterpolation, float ri, float* zi, vector_t* taub, vector_t* normal){
     DEBUG(5,"in\n");
         
-    double      zri = 0;    //1st derivative of z at ri
-    double      zrri;   //2nd derivative of z at ri
+    float      zri = 0;    //1st derivative of z at ri
+    float      zrri;   //2nd derivative of z at ri
     uintptr_t   i = 0;
     
     switch(*surfaceInterpolation){
@@ -119,7 +119,7 @@ void boundaryInterpolationExplicit(uint32_t* numSurfaceCoords, double* r, double
     DEBUG(5,"out\n");
 }
 
-void boundaryInterpolation(interface_t* interface, double ri, double* zi, vector_t* taub, vector_t* normal){
+void boundaryInterpolation(interface_t* interface, float ri, float* zi, vector_t* taub, vector_t* normal){
     boundaryInterpolationExplicit(  &(interface->numSurfaceCoords),
                                     interface->r,
                                     interface->z,

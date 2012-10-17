@@ -101,7 +101,7 @@ int main(int argc, char **argv){
     char*       inFileName = mallocChar(256);
     char*       logFileName = mallocChar(256);
     settings_t*     settings = mallocSettings();
-    double          omega;
+    float          omega;
     const char*     line = "-----------------------------------------------";
     FILE*           logFile = NULL;
 
