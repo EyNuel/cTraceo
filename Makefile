@@ -117,7 +117,7 @@ PDFFILES := $(shell find $(PROJDIRS) -mindepth 1 -maxdepth 1 -name "*.pdf")
 ALLFILES := $(SRCFILES) $(HDRFILES) $(AUXFILES) $(MFILES) $(PDFFILES)
 
 ## Disable checking for files with the folowing names:
-.PHONY: all todo cTraceo.exe discuss 32b pg dist
+.PHONY: all todo cTraceo.exe discuss 32b pg dist doc
 
 ## Build targets:
 all:	dirs
@@ -233,3 +233,6 @@ help:	#
 		@echo "     help:     Prints this help.                                               "
 		@echo "                                                                               "
 		@echo " ============================================================================= "
+		
+doc:	#
+		doxygen Doxyfile
