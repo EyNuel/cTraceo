@@ -34,3 +34,8 @@ testing/
 
 #ignore "bughunt/" subdirectory
 bughunt/*
+
+#ignore the "doc/" subdirectory (the user is expected to generate the documentation locally)
+doc
+dependencies
+
