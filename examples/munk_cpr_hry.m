@@ -32,7 +32,7 @@ Dmax   =  5000;
 ray_step = Rmax/1000; 
 
 zs = 1000; rs = 0;
-np2 = 3500; thetamax = 14; la = linspace(-thetamax,thetamax,np2);
+np2 = 100; thetamax = 14; la = linspace(-thetamax,thetamax,np2);
 
 source_data.ds       = ray_step;
 source_data.position = [rs zs];
