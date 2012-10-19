@@ -88,7 +88,7 @@ void    solveEikonalEq(settings_t* settings, ray_t* ray){
     double          thetaRefl;
     point_t         pointA, pointB, pointIsect;
     double          rho1, rho2, cp2, cs2, ap, as, lambda, tempDouble = 0;
-    double          dr, dz, dIc;
+    double          dr, dz, dTau, dIc;
     double          prod;
     uintptr_t       initialMemorySize;
     uint32_t        nObjCoords; //"noj"
@@ -903,15 +903,18 @@ void    solveEikonalEq(settings_t* settings, ray_t* ray){
     ray->nRefl = sRefl + bRefl + oRefl;
     
     //Cut the ray at box exit:
-    dr  = ray->r[ray->nCoords -1] - ray->r[ray->nCoords-2];
-    dz  = ray->z[ray->nCoords -1] - ray->z[ray->nCoords-2];
-    dIc = ray->ic[ray->nCoords-1] - ray->ic[ray->nCoords-2];
+    dr  = ray->r[  ray->nCoords -1] - ray->r[  ray->nCoords-2];
+    dz  = ray->z[  ray->nCoords -1] - ray->z[  ray->nCoords-2];
+    dIc = ray->ic[ ray->nCoords -1] - ray->ic[ ray->nCoords-2];
+    dTau= ray->tau[ray->nCoords -1] - ray->tau[ray->nCoords-2];
+    
 
     if (ray->r[ray->nCoords-1] > settings->source.rbox2){
         //ray has exited rangebox at right edge
-        ray->z[ray->nCoords-1]  = ray->z[ray->nCoords-2] + (settings->source.rbox2 - ray->r[ray->nCoords-2])* dz/dr;
-        ray->ic[ray->nCoords-1] = ray->ic[ray->nCoords-2] + (settings->source.rbox2 - ray->r[ray->nCoords-2])* dIc/dr;
-        ray->r[ray->nCoords-1]  = settings->source.rbox2;
+        ray->z[  ray->nCoords-1] = ray->z[  ray->nCoords-2] + (settings->source.rbox2 - ray->r[ray->nCoords-2])* dz/dr;
+        ray->ic[ ray->nCoords-1] = ray->ic[ ray->nCoords-2] + (settings->source.rbox2 - ray->r[ray->nCoords-2])* dIc/dr;
+        ray->tau[ray->nCoords-1] = ray->tau[ray->nCoords-2] + (settings->source.rbox2 - ray->r[ray->nCoords-2])* dTau/dr;
+        ray->r[  ray->nCoords-1] = settings->source.rbox2;
         
         //adjust memory size of the ray (we don't need more memory than nCoords)
         //TODO remove memmory reallocation -performance!
