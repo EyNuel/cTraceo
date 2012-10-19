@@ -102,6 +102,8 @@ void    printHelp(void){
 "*          --stdin             :read input file from stdin instead of reading *\n"
 "*                               it from disk.                                 *\n"
 "*          -v                  :show version.                                 *\n"
+"*          --killBackscatteredRays :terminates a ray's propagation as soon as *\n"
+"*                               it inverts it's  horizontal travel direction. *\n"
 "*                                                                             *\n"
 "*  For more information check out the readme.txt, read the manual.pdf or      *\n"
 "*  contact the authors.                                                       *\n"
@@ -205,6 +207,11 @@ int main(int argc, char **argv){
                     // '--nolog' don't write a log file
                     else if(!strcmp(argv[i], "--nolog")){
                         writeLogFile = false;
+                    }
+                    
+                    // '--killBackstatteredRays'
+                    else if(!strcmp(argv[i], "--killBackscatteredRays")){
+                        settings->options.killBackscatteredRays = true;
                     }
                 }
             

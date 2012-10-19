@@ -319,8 +319,11 @@ typedef struct output{
 #define ARRAY_TYPE__VERTICAL        39  //"VRY"
 #define ARRAY_TYPE__LINEAR          40  //"LRY"
 
+typedef struct options{
+    bool            killBackscatteredRays;
+}options_t;
 
-typedef struct settings {
+typedef struct settings{
     /*
      * Contains all input information
      */
@@ -331,6 +334,7 @@ typedef struct settings {
     objects_t       objects;
     interface_t     batimetry;
     output_t        output;
+    options_t       options;
 }settings_t;
 
 
