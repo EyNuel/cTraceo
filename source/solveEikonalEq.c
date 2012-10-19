@@ -952,6 +952,11 @@ void    solveEikonalEq(settings_t* settings, ray_t* ray){
         prod = ( ray->r[i+1]-ray->r[i] )*( ray->r[i]-ray->r[i-1] );
         if ( prod < 0 ){
             ray->iReturn = true;
+            //if backscattering is disabled, cut the ray here and skip the remaining coords:
+            if(settings->options.killBackscatteredRays){
+                ray->nCoords = i+1;
+                break;
+            }
         }
     }
     

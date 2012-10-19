@@ -331,21 +331,23 @@ settings_t*         mallocSettings(void){
     if(settings == NULL){
         fatal("Memory allocation error.\n");
     }
-
+    
     settings->cTitle = mallocChar((uintptr_t)(MAX_LINE_LEN + 1));
     settings->source.thetas = NULL; //memory will be properly allocated in "readin.c"
-
+    
     settings->altimetry.r = NULL;
     settings->altimetry.z = NULL;
     //settings->altimetry.surfaceProperties = NULL;
-
+    
     settings->batimetry.r = NULL;
     settings->batimetry.z = NULL;
     //settings->batimetry.surfaceProperties = NULL;
-
+    
     settings->output.arrayR = NULL;
     settings->output.arrayZ = NULL;
-
+    
+    settings->options.killBackscatteredRays = false;
+    
     return(settings);
 }
 
