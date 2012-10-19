@@ -216,6 +216,12 @@ void    solveEikonalEq(settings_t* settings, ray_t* ray){
             pointB.z = yNew[1];
             
             DEBUG(7, "Ray above surface? \n");
+            /**
+             * NOTE:
+             * cTraceo uses a vertically inverted coordinate system.
+             * This means that z=0 will be at (or near) the water surface,
+             * while z<0 will be _above_ and z>0 will be _below_ water.
+             */
             if (zi <= altInterpolatedZ){
                 DEBUG(5,"ray above surface.\n");
                 //determine the coordinates of the ray-boundary intersection:
@@ -370,7 +376,15 @@ void    solveEikonalEq(settings_t* settings, ray_t* ray){
                     ray->iKill = true;
                 }
             //  end of "ray above surface?"
-            }else if (zi >= batInterpolatedZ){  //  Ray below bottom?
+            }
+            
+            /**
+             * NOTE:
+             * cTraceo uses an inverted coordinate system.
+             * This means that z=0 will be at (or near) the water surface,
+             * while z<0 will be _above_ and z>0 will be _below_ water.
+             */
+            else if (zi >= batInterpolatedZ){  //  Ray below bottom?
                 DEBUG(5,"ray below bottom.\n");
                 DEBUG(8,"ri: %lf, zi: %lf\n", ri, zi);
                 rayBoundaryIntersection(&(settings->batimetry), &pointA, &pointB, &pointIsect);
@@ -852,6 +866,7 @@ void    solveEikonalEq(settings_t* settings, ray_t* ray){
             yOld[j] = yNew[j];
             fOld[j] = fNew[j];
         }
+        
         //next step:
         i++;
         
