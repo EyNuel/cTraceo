@@ -6,6 +6,9 @@
  *       in use due to random occurences of "bus error".                                *
  *                                                                                      *
  * ------------------------------------------------------------------------------------ *
+ * Website:                                                                             *
+ *          https://github.com/EyNuel/cTraceo/wiki                                      *
+ *                                                                                      *
  * License: This file is part of the cTraceo Raytracing Model and is released under the *
  *          Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License  *
  *          http://creativecommons.org/licenses/by-nc-sa/3.0/                           *
