@@ -94,14 +94,14 @@ void    printHelp(void){
 "*                                                                             *\n"
 "*  Options:                                                                   *\n"
 "*          --nolog             :Do not write a log file.                      *\n"
-"*          -h, --help          :show this text.                               *\n"
-"*          -s <#>, --ssp <#>   :generate the interpolated sound speed profile *\n"
+"*          -h, --help          :Show this text.                               *\n"
+"*          -s <#>, --ssp <#>   :Generate the interpolated sound speed profile *\n"
 "*                               as used by the model and save it as 'ssp.mat'.*\n"
 "*                               The number # is the number of SSP points to   *\n"
 "*                               generate and should be a positive integer.    *\n"
-"*          --stdin             :read input file from stdin instead of reading *\n"
+"*          --stdin             :Read input file from stdin instead of reading *\n"
 "*                               it from disk.                                 *\n"
-"*          -v                  :show version.                                 *\n"
+"*          -v, --version       :Show version.                                 *\n"
 "*          --killBackscatteredRays :terminates a ray's propagation as soon as *\n"
 "*                               it inverts it's  horizontal travel direction. *\n"
 "*                                                                             *\n"
@@ -166,7 +166,7 @@ int main(int argc, char **argv){
                             break;
                             
                         
-                        // '-v' for version
+                        // '-v' for version (same as '--version')
                         case 'v':
                             printf(HEADER);
                             exit(EXIT_SUCCESS);
@@ -207,6 +207,12 @@ int main(int argc, char **argv){
                     // '--nolog' don't write a log file
                     else if(!strcmp(argv[i], "--nolog")){
                         writeLogFile = false;
+                    }
+                    
+                    // '--version' print out version string (same as -v)
+                    else if(!strcmp(argv[i], "--version")){
+                        printf(HEADER);
+                        exit(EXIT_SUCCESS);
                     }
                     
                     // '--killBackstatteredRays'
