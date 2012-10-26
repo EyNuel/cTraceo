@@ -327,6 +327,7 @@ typedef struct output{
 
 typedef struct options{
     bool            killBackscatteredRays;  //command line switch 
+    uint32_t        nBackscatteredRays;     //a counter for the number of rays truncated due to the --killBackscatteredRays switch
     bool            writeHeader;            //command line switch
     char*           inFileName;
     FILE*           inFile;                 //file pointer to the input file's name
