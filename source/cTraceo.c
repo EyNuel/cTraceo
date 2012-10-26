@@ -96,7 +96,7 @@ void    printHelp(void){
 "*          filename            :The input file's name, without it's extension.*\n"
 "*                                                                             *\n"
 "*  Options:                                                                   *\n"
-"*          --nolog             :Do not write a log file.                      *\n"
+"*          --noLog             :Do not write a log file.                      *\n"
 "*          -h, --help          :Show this text.                               *\n"
 "*          -s <#>, --ssp <#>   :Generate the interpolated sound speed profile *\n"
 "*                               as used by the model and save it as 'ssp.mat'.*\n"
@@ -183,7 +183,7 @@ int main(int argc, char **argv){
                 
                  //check for long options:
                 else if (strlen(argv[i]) > 2){
-                    if (!strcmp(argv[i], "--stdin")){
+                    if (!strcmp(stringToLower(argv[i]), "--stdin")){
                         /*
                          * Read input file from stdin instead of from a file on disk.
                          * This avoids the overhead of writing to disk; intended for inversion uses.
@@ -194,32 +194,32 @@ int main(int argc, char **argv){
                     }
                     
                     //print help file
-                    else if(!strcmp(argv[i], "--help")){
+                    else if(!strcmp(stringToLower(argv[i]), "--help")){
                         printHelp();
                         exit(EXIT_SUCCESS);
                     }
                     
                     // '--ssp' [save the interpolated soundSpeedProfile to ssp.mat]
                     // NOTE: same as short option '-s'
-                    else if(!strcmp(argv[i], "--ssp")){
+                    else if(!strcmp(stringToLower(argv[i]), "--ssp")){
                         //the next item from command line options should be the number of points used for generating the soundSpeedProfile (ssp.mat)
                         nSSPPoints = atoi(argv[++i]);
                         saveSSP = true;
                     }
                     
                     // '--nolog' don't write a log file
-                    else if(!strcmp(argv[i], "--nolog")){
+                    else if(!strcmp(stringToLower(argv[i]), "--nolog")){
                         writeLogFile = false;
                     }
                     
                     // '--version' print out version string (same as -v)
-                    else if(!strcmp(argv[i], "--version")){
+                    else if(!strcmp(stringToLower(argv[i]), "--version")){
                         printf(HEADER);
                         exit(EXIT_SUCCESS);
                     }
                     
                     // '--killBackstatteredRays'
-                    else if(!strcmp(argv[i], "--killBackscatteredRays")){
+                    else if(!strcmp(stringToLower(argv[i]), "--killbackscatteredrays")){
                         settings->options.killBackscatteredRays = true;
                     }
                 }
