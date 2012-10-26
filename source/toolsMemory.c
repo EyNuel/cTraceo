@@ -352,6 +352,7 @@ settings_t*         mallocSettings(void){
     //default values for options:
     settings->options.inFileName            = mallocChar(256);
     settings->options.killBackscatteredRays = false;
+    settings->options.writeHeader           = true;
     settings->options.writeLogFile          = true;
     settings->options.logFile               = NULL;
     settings->options.logFileName           = mallocChar(256);
