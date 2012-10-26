@@ -246,6 +246,7 @@ int main(int argc, char **argv){
                 strcpy(settings->options.inFileName, argv[i]);
                 settings->options.inFileName = strcat(  settings->options.inFileName, ".in");
                 settings->options.inFile     = openFile(settings->options.inFileName, "r");
+                strcpy(settings->options.logFileName, argv[i]);
                 break;  //leave the for loop (options after the input file's name will be ignored)
             }
         }//for loop
@@ -271,7 +272,6 @@ int main(int argc, char **argv){
 
     if(settings->options.writeLogFile){
         //open the log file and write the header:
-        strcpy(settings->options.logFileName, argv[1]);
         settings->options.logFile= openFile(strcat(settings->options.logFileName,".log"), "w");
         LOG(HEADER);
         LOG("\n");
