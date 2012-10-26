@@ -52,6 +52,7 @@
 #include <time.h>
 #include <string.h>
 #include <stdbool.h>
+#include "logOptions.c"
 
 void    printHelp(void);
 int     main(int, char**);
@@ -185,6 +186,7 @@ int main(int argc, char **argv){
                          * TODO: this needs to be documented (manual and --help)
                          */
                         settings->options.inFile = stdin;
+                        LOG("Option '--stdin' enabled; reading input file from stdin.\n");
                     }
                     
                     //print help file
@@ -215,6 +217,11 @@ int main(int argc, char **argv){
                     // '--killBackstatteredRays'
                     else if(!strcmp(stringToLower(argv[i]), "--killbackscatteredrays")){
                         settings->options.killBackscatteredRays = true;
+                    }
+                    
+                    // unknown options:
+                    else{
+                        printf("Ignoring unknown option %s.\n", argv[i]);
                     }
                 }
             
@@ -254,16 +261,16 @@ int main(int argc, char **argv){
     if(settings->options.writeLogFile){
         //open the log file and write the header:
         strcpy(settings->options.logFileName, argv[1]);
-        logFile= openFile(strcat(settings->options.logFileName,".log"), "w");
-        fprintf(settings->options.logFile, "TRACEO ray tracing program.\n");
-        fprintf(settings->options.logFile, "TODO: write a nice header for the log file.\n");
-        fprintf(settings->options.logFile, "%s\n", line);
-
-        fprintf(settings->options.logFile, "INPUT:\n");
-        fprintf(settings->options.logFile, "%s\n", settings->cTitle);
-        fprintf(settings->options.logFile, "%s\n", line);
-
-        fprintf(logFile, "OUTPUT:\n");
+        settings->options.logFile= openFile(strcat(settings->options.logFileName,".log"), "w");
+        LOG(HEADER);
+        LOG("\n");
+        
+        LOG("Input file: %s\n", settings->options.inFileName);
+        LOG("Title: %s\n", settings->cTitle);
+        LOG("%s\n", line);
+        
+        logOptions(settings);
+        LOG("%s\n", line);
     }
     switch(settings->output.calcType){
         case CALC_TYPE__RAY_COORDS:
