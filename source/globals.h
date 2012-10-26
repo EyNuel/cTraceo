@@ -119,6 +119,9 @@
     #define DEBUG(level, ...)       {}
 #endif
 
+//function macro used for displaying logging output:
+#define LOG(...)                    if(settings->options.writeLogFile){fprintf(settings->options.logFile, __VA_ARGS__);}
+
 
 /********************************************************************************
  * Minor data structures.                                                       *
@@ -323,7 +326,13 @@ typedef struct output{
 #define ARRAY_TYPE__LINEAR          40  //"LRY"
 
 typedef struct options{
-    bool            killBackscatteredRays;
+    bool            killBackscatteredRays;  //command line switch 
+    char*           inFileName;
+    FILE*           inFile;                 //file pointer to the input file's name
+    bool            writeLogFile;           //command line switch
+    char*           logFileName;            //contains name of log file
+    FILE*           logFile;                //file pointer to the log file
+    bool            saveSSP;                //command line switch
 }options_t;
 
 typedef struct settings{
