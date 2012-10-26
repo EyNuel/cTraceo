@@ -139,7 +139,12 @@ void    calcEigenrayRF(settings_t* settings){
 
     #if 1
     //Open matfile for output:
-    matfile     = matOpen("eig.mat", "w");
+    //open matfile for output
+    if(settings->options.outputFileName == NULL){
+        matfile     = matOpen("eig.mat", "w");
+    }else{
+        matfile = matOpen(settings->options.outputFileName, "w");
+    }
 
 
     //write ray launching angles to matfile:

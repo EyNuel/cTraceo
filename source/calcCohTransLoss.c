@@ -65,8 +65,13 @@ void calcCohTransLoss(settings_t* settings){
     MATFile*    matfile = NULL;
     mxArray*    ptl     = NULL;
     mxArray*    ptl2D       = NULL;
-
-    matfile     = matOpen("ctl.mat", "u");
+    
+    if(settings->options.outputFileName == NULL){
+        matfile     = matOpen("ctl.mat", "u");
+    }else{
+        matfile = matOpen(settings->options.outputFileName, "u");
+    }
+    
     if(matfile == NULL){
         fatal("Memory alocation error.");
     }

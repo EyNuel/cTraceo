@@ -331,6 +331,7 @@ typedef struct options{
     bool            writeHeader;            //command line switch
     char*           inFileName;
     FILE*           inFile;                 //file pointer to the input file's name
+    char*           outputFileName;
     bool            writeLogFile;           //command line switch
     char*           logFileName;            //contains name of log file
     FILE*           logFile;                //file pointer to the log file
