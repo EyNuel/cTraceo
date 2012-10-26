@@ -66,6 +66,9 @@ void    printHelp(void){
 "*          The cTraceo Acoustic Raytracing Model, Version "VERSION"*\n"                //NOTE: version string is defined in globals.h
 "*                                                                             *\n"
 "* --------------------------------------------------------------------------- *\n"
+"* Website:                                                                    *\n"
+"*          https://github.com/EyNuel/cTraceo/wiki                             *\n"
+"*                                                                             *\n"
 "* License: The cTraceo Acoustic Raytracing Model is released under the        *\n"
 "*          Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported *\n"
 "*          License ( http://creativecommons.org/licenses/by-nc-sa/3.0/ )      *\n"
@@ -89,7 +92,8 @@ void    printHelp(void){
 "*          Physics Department                                                 *\n"
 "*          Signal Processing Laboratory                                       *\n"
 "*                                                                             *\n"
-"* ----------------------------------------------------------------------------*\n"
+"* ----------------------------------------------------------------------------*\n");
+printf(""
 "*  Usage:                                                                     *\n"
 "*          $> ctraceo [options] <filename>                                    *\n" 
 "*                                                                             *\n"
@@ -108,6 +112,8 @@ void    printHelp(void){
 "*          -v, --version       :Show version.                                 *\n"
 "*          --killBackscatteredRays :terminates a ray's propagation as soon as *\n"
 "*                               it inverts it's  horizontal travel direction. *\n"
+"*          --noHeader           Disables the output of cTraceo's header. Can  *\n"
+"*                               be used to keep logs smaller.                 *\n"
 "*                                                                             *\n"
 "*  For more information check out the readme.txt, read the manual.pdf or      *\n"
 "*  contact the authors.                                                       *\n"
@@ -217,6 +223,11 @@ int main(int argc, char **argv){
                     // '--killBackstatteredRays'
                     else if(!strcmp(stringToLower(argv[i]), "--killbackscatteredrays")){
                         settings->options.killBackscatteredRays = true;
+                    }
+                    
+                    // '--noHeader'
+                    else if(!strcmp(stringToLower(argv[i]), "--noheader")){
+                        settings->options.writeHeader = false;
                     }
                     
                     // unknown options:
