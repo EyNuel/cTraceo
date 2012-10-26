@@ -24,6 +24,7 @@
 
 #pragma once
 #include    <string.h>
+#include    <ctype.h>   //for tolower()
 #ifndef WINDOWS
     #include    <sys/time.h>        //for struct time_t
     #include    <sys/resource.h>    //for getrusage()
@@ -40,6 +41,7 @@ double      min(double, double);
 double      max(double, double);
 void        fatal(const char*);
 void        printCpuTime(FILE*);
+char*       stringToLower(char* str);
 
 
 ///Functions:
@@ -98,3 +100,14 @@ void        printCpuTime(FILE* stream){
     #endif
 }
 #endif
+
+char*   stringToLower(char* str){
+    /*
+     * Converts a string to lowercase. assumes string is properly NULL-terminated.
+     */
+    for(uintptr_t i = 0; str[i]; i++){
+      str[i] = tolower(str[i]);
+    }
+    
+    return str;
+}
