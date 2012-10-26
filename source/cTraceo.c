@@ -256,6 +256,11 @@ int main(int argc, char **argv){
     if (settings->options.writeHeader){
         printf(HEADER);
     }
+    
+    if(settings->options.killBackscatteredRays){
+        printf("Option '--killBackscatteredRays' enabled; terminating any backscattered rays.\n");
+    }
+    
     //Read the input file
     readIn(settings);
     
@@ -350,6 +355,12 @@ int main(int argc, char **argv){
         default:
             fatal("Unknown output option.\nAborting...");
             break;
+    }
+    
+    //print some info:
+    if (settings->options.killBackscatteredRays){
+        printf("Truncated %u backscattered rays.\n", settings->options.nBackscatteredRays);
+        LOG("Truncated %u backscattered rays.\n", settings->options.nBackscatteredRays);
     }
     
     //finish up the log:

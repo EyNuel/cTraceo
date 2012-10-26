@@ -970,12 +970,16 @@ void    solveEikonalEq(settings_t* settings, ray_t* ray){
             ray->nRefrac++;
         }
         
+        
         prod = ( ray->r[i+1]-ray->r[i] )*( ray->r[i]-ray->r[i-1] );
         if ( prod < 0 ){
             ray->iReturn = true;
             //if backscattering is disabled, cut the ray here and skip the remaining coords:
             if(settings->options.killBackscatteredRays){
+                DEBUG(3, "Truncated a backscattered ray.\n");
                 ray->nCoords = i+1;
+                ray->iReturn = false;   //as we're truncating the ray, we don't need to mark it as 'returning'
+                settings->options.nBackscatteredRays += 1;
                 break;
             }
         }
