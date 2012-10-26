@@ -121,17 +121,37 @@ void    calcCohAcoustPress(settings_t* settings){
     //open the corresponding output file:
     switch(settings->output.calcType){
         case CALC_TYPE__COH_ACOUS_PRESS:
-            matfile     = matOpen("cpr.mat", "w");
+            if(settings->options.outputFileName == NULL){
+                matfile     = matOpen("cpr.mat", "w");
+            }else{
+                matfile = matOpen(settings->options.outputFileName, "w");
+            }
             break;
+            
         case CALC_TYPE__PART_VEL:
-            matfile     = matOpen("pvl.mat", "w");
+            if(settings->options.outputFileName == NULL){
+                matfile     = matOpen("pvl.mat", "w");
+            }else{
+                matfile = matOpen(settings->options.outputFileName, "w");
+            }
             break;
+            
         case CALC_TYPE__COH_ACOUS_PRESS_PART_VEL:
-            matfile     = matOpen("pav.mat", "w");
+            if(settings->options.outputFileName == NULL){
+                matfile     = matOpen("pav.mat", "w");
+            }else{
+                matfile = matOpen(settings->options.outputFileName, "w");
+            }
             break;
+            
         case CALC_TYPE__COH_TRANS_LOSS:
-            matfile     = matOpen("ctl.mat", "w");
+            if(settings->options.outputFileName == NULL){
+                matfile     = matOpen("ctl.mat", "w");
+            }else{
+                matfile = matOpen(settings->options.outputFileName, "w");
+            }
             break;
+            
         default:
             fatal("Uh-oh - calcCohAcoustPress(): unknown output type.");
             break;

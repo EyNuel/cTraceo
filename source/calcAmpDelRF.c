@@ -134,7 +134,11 @@ void calcAmpDelRF(settings_t* settings){
     
     #if 1
     //Open matfile for output:
-    matfile     = matOpen("aad.mat", "w");
+    if(settings->options.outputFileName == NULL){
+        matfile     = matOpen("aad.mat", "w");
+    }else{
+        matfile = matOpen(settings->options.outputFileName, "w");
+    }
     
     
     //write ray launching angles to matfile:

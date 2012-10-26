@@ -74,9 +74,12 @@ void    calcRayCoords(settings_t* settings){
     uintptr_t   i;
     
     
-    
     //open matfile for output
-    matfile     = matOpen("rco.mat", "w");
+    if(settings->options.outputFileName == NULL){
+        matfile     = matOpen("rco.mat", "w");
+    }else{
+        matfile = matOpen(settings->options.outputFileName, "w");
+    }
     
     
     //write launching angles to file
