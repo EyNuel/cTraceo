@@ -56,6 +56,10 @@ void logOptions(settings_t* settings){
     if(settings->options.writeHeader == false){
         LOG("Option '--noHeader' enabled; not displaying model's header on stdout.\n");
     }
+    
+    if(settings->options.outputFileName != NULL){
+        LOG("Option '--outputFileName' enabled; writing results to %s\n", settings->options.outputFileName);
+    }
 }
     
     

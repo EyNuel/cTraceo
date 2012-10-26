@@ -126,7 +126,12 @@ void calcAmpDelPr(settings_t* settings){
 
     #if 1
     //open matfile for output
-    matfile     = matOpen("aad.mat", "w");
+    if(settings->options.outputFileName == NULL){
+        matfile     = matOpen("aad.mat", "w");
+    }else{
+        matfile = matOpen(settings->options.outputFileName, "w");
+    }
+    
 
     //write launching angles to file
     pThetas     = mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)settings->source.nThetas, mxREAL);

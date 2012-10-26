@@ -77,10 +77,19 @@ void calcParticleVel(settings_t* settings){
     //open the correct matfile for output:
     switch(settings->output.calcType){
         case CALC_TYPE__PART_VEL:
-            matfile     = matOpen("pvl.mat", "u");      //open file in "update" mode
+            if(settings->options.outputFileName == NULL){
+                matfile     = matOpen("pvl.mat", "u");      //open file in "update" mode
+            }else{
+                matfile = matOpen(settings->options.outputFileName, "u");
+            }
             break;
+            
         case CALC_TYPE__COH_ACOUS_PRESS_PART_VEL:
-            matfile     = matOpen("pav.mat", "u");
+            if(settings->options.outputFileName == NULL){
+                matfile     = matOpen("pav.mat", "u");
+            }else{
+                matfile = matOpen(settings->options.outputFileName, "u");
+            }
             break;
     }
     
