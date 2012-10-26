@@ -51,10 +51,10 @@
 #include <math.h>
 
 //prototype:
-void    readIn(settings_t* settings, FILE* inFile);
+void    readIn(settings_t* settings);
 
 //actual function declaration:
-void    readIn(settings_t* settings, FILE* inFile){
+void    readIn(settings_t* settings){
 
     uint32_t    i,j;
     double      dTheta;
@@ -66,6 +66,7 @@ void    readIn(settings_t* settings, FILE* inFile){
     char*       tempString;
     int32_t     tempInt;
     char*       junkChar;
+    FILE*       inFile = settings->options.inFile;
     
 
     /************************************************************************

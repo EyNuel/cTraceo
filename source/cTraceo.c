@@ -118,14 +118,8 @@ void    printHelp(void){
 
 int main(int argc, char **argv){
     float           tEnd, tInit   = (double)clock()/CLOCKS_PER_SEC;   //get time
-    char*           inFileName  = mallocChar(256);
-    char*           logFileName = mallocChar(256);
-    FILE*           inFile      = NULL;
     settings_t*     settings    = mallocSettings();
     const char*     line = "-----------------------------------------------";
-    FILE*           logFile = NULL;
-    bool            saveSSP = false;
-    bool            writeLogFile = true;
     uint32_t        nSSPPoints = 0;
 
     DEBUG(1,"Running cTraceo in verbose mode.\n\n");
@@ -148,7 +142,7 @@ int main(int argc, char **argv){
                      * This avoids the overhead of writing to disk; intended for inversion uses.
                      * Same as long option "--stdin"
                      */
-                     inFile = stdin;
+                     settings->options.inFile = stdin;
                 }
                 
                 //check for short options:
@@ -165,7 +159,7 @@ int main(int argc, char **argv){
                         case 's':
                             //the next item from command line options should be the number of points used for generating the soundSpeedProfile (ssp.mat)
                             nSSPPoints = atoi(argv[++i]);
-                            saveSSP = true;
+                            settings->options.saveSSP = true;
                             break;
                             
                         
@@ -190,7 +184,7 @@ int main(int argc, char **argv){
                          * Same as short option "-"
                          * TODO: this needs to be documented (manual and --help)
                          */
-                        inFile = stdin;
+                        settings->options.inFile = stdin;
                     }
                     
                     //print help file
@@ -204,12 +198,12 @@ int main(int argc, char **argv){
                     else if(!strcmp(stringToLower(argv[i]), "--ssp")){
                         //the next item from command line options should be the number of points used for generating the soundSpeedProfile (ssp.mat)
                         nSSPPoints = atoi(argv[++i]);
-                        saveSSP = true;
+                        settings->options.saveSSP = true;
                     }
                     
                     // '--nolog' don't write a log file
                     else if(!strcmp(stringToLower(argv[i]), "--nolog")){
-                        writeLogFile = false;
+                        settings->options.writeLogFile = false;
                     }
                     
                     // '--version' print out version string (same as -v)
@@ -231,22 +225,23 @@ int main(int argc, char **argv){
                  */
                 
                 //try to use last command line argument as an input file name
-                strcpy(inFileName, argv[i]);
-                inFileName = strcat(inFileName, ".in");
-                inFile = openFile(inFileName, "r");
+                strcpy(settings->options.inFileName, argv[i]);
+                settings->options.inFileName = strcat(  settings->options.inFileName, ".in");
+                settings->options.inFile     = openFile(settings->options.inFileName, "r");
                 break;  //leave the for loop (options after the input file's name will be ignored)
             }
         }//for loop
     }//if (argc == 1)
 
     printf("\n");
-    printf(HEADER);
-
+    if (settings->options.writeHeader){
+        printf(HEADER);
+    }
     //Read the input file
-    readIn(settings, inFile);
+    readIn(settings);
     
     //if user requested storing the interpolated sound speed profile, do so now:
-    if(saveSSP){
+    if(settings->options.saveSSP){
         calcSSP(settings, nSSPPoints);
     }
     
@@ -256,100 +251,80 @@ int main(int argc, char **argv){
         DEBUG(2, "Returned from printSettings()\n");
     }
 
-    if(writeLogFile){
+    if(settings->options.writeLogFile){
         //open the log file and write the header:
-        strcpy(logFileName, argv[1]);
-        logFile= openFile(strcat(logFileName,".log"), "w");
-        fprintf(logFile, "TRACEO ray tracing program.\n");
-        fprintf(logFile, "TODO: write a nice header for the log file.\n");
-        fprintf(logFile, "%s\n", line);
+        strcpy(settings->options.logFileName, argv[1]);
+        logFile= openFile(strcat(settings->options.logFileName,".log"), "w");
+        fprintf(settings->options.logFile, "TRACEO ray tracing program.\n");
+        fprintf(settings->options.logFile, "TODO: write a nice header for the log file.\n");
+        fprintf(settings->options.logFile, "%s\n", line);
 
-        fprintf(logFile, "INPUT:\n");
-        fprintf(logFile, "%s\n", settings->cTitle);
-        fprintf(logFile, "%s\n", line);
+        fprintf(settings->options.logFile, "INPUT:\n");
+        fprintf(settings->options.logFile, "%s\n", settings->cTitle);
+        fprintf(settings->options.logFile, "%s\n", line);
 
         fprintf(logFile, "OUTPUT:\n");
     }
     switch(settings->output.calcType){
         case CALC_TYPE__RAY_COORDS:
-            printf("Calculating ray coordinates.\n");
-            if(writeLogFile){
-                fprintf(logFile, "Ray coordinates\n");
-            }
+            printf("Calculating ray coordinates [RCO].\n");
+            LOG("Calculating ray coordinates [RCO]\n");
             calcRayCoords(settings);
             break;
 
         case CALC_TYPE__ALL_RAY_INFO:
-            printf("Calculating all ray information.\n");
-            if(writeLogFile){
-                fprintf(logFile, "All ray information\n");
-            }
+            printf("Calculating all ray information [ARI].\n");
+            LOG("Calculating all ray information [ARI]\n");
             calcAllRayInfo(settings);
             break;
             
         case CALC_TYPE__EIGENRAYS_PROXIMITY:
-            printf("Calculating eigenrays by Proximity Method.\n");
-            if(writeLogFile){
-                fprintf(logFile, "Eigenrays by Proximity Method.\n");
-            }
+            printf("Calculating eigenrays by proximity method [EPR].\n");
+            LOG("Calculating eigenrays by proximity method [EPR].\n");
             calcEigenrayPr(settings);
             break;
             
         case CALC_TYPE__EIGENRAYS_REG_FALSI:
             printf("Calculating eigenrays by Regula Falsi Method.\n");
-            if(writeLogFile){
-                fprintf(logFile, "Eigenrays by Regula Falsi Method.\n");
-            }
+            LOG("Calculating  eigenrays by Regula Falsi Method.\n");
             calcEigenrayRF(settings);
             break;
             
         case CALC_TYPE__AMP_DELAY_PROXIMITY:
             printf("Calculating amplitudes and delays by Proximity Method.\n");
-            if(writeLogFile){
-                fprintf(logFile, "Amplitudes and delays by Proximity Method.\n");
-            }
+            LOG("Calculating amplitudes and delays by Proximity Method.\n");
             calcAmpDelPr(settings);
             break;
             
         case CALC_TYPE__AMP_DELAY_REG_FALSI:
             printf("Calculating amplitudes and delays by Regula Falsi Method.\n");
-            if(writeLogFile){
-                fprintf(logFile, "Amplitudes and delays by Regula Falsi Method.\n");
-            }
+            LOG("Calculating amplitudes and delays by Regula Falsi Method.\n");
             calcAmpDelRF(settings);
             break;
             
         case CALC_TYPE__COH_ACOUS_PRESS:
             printf("Calculating coherent acoustic pressure.\n");
-            if(writeLogFile){
-                fprintf(logFile, "Coherent acoustic pressure.\n");
-            }
+            LOG("Calculating coherent acoustic pressure.\n");
             calcCohAcoustPress(settings);
             break;
             
         case CALC_TYPE__COH_TRANS_LOSS:
             printf("Calculating coherent transmission loss.\n");
-            if(writeLogFile){
-                fprintf(logFile, "Coherent transmission loss.\n");
-            }
+            LOG("Calculating coherent transmission loss.\n");
             calcCohAcoustPress(settings);
             calcCohTransLoss(settings);
             break;
             
         case CALC_TYPE__PART_VEL:
             printf("Calculating particle velocity.\n");
-            if(writeLogFile){
-                fprintf(logFile, "Particle velocity.\n");
-            }
+            LOG("Calculating particle velocity.\n");
             calcCohAcoustPress(settings);
             calcParticleVel(settings);
             break;
             
         case CALC_TYPE__COH_ACOUS_PRESS_PART_VEL:
             printf("Calculating coherent acoustic pressure and particle velocity.\n");
-            if(writeLogFile){
-                fprintf(logFile, "Coherent acoustic pressure and particle velocity.\n");
-            }
+            LOG("Calculating coherent acoustic pressure and particle velocity.\n");
             calcCohAcoustPress(settings);
             calcParticleVel(settings);
             break;
@@ -359,25 +334,21 @@ int main(int argc, char **argv){
             break;
     }
     
-    if(writeLogFile){
-        //finish up the log:
-        fprintf(logFile, "%s\n", line);
-        fprintf(logFile, "Done.\n");
-    }
+    //finish up the log:
+    LOG("%s\n", line);
+    LOG("Done.\n");
 
     //get elapsed time:
     tEnd = (double)clock()/CLOCKS_PER_SEC;    
     fprintf(stderr,     "---------\n%f seconds total.\n", tEnd-tInit);
-    if(writeLogFile){
-        fprintf(logFile,    "---------\n%f seconds total.\n", tEnd-tInit);
-    }
+    LOG("---------\n%f seconds total.\n", tEnd-tInit);
     
     //free memory
     freeSettings(settings);
-    if(writeLogFile){
-        fclose(logFile);
-        free(logFileName);
+    if(settings->options.writeLogFile){
+        fclose( settings->options.logFile);
+        free(   settings->options.logFileName);
     }
-    free(inFileName);
+    free(settings->options.inFileName);
     exit(EXIT_SUCCESS);
 }

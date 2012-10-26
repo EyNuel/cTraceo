@@ -349,7 +349,13 @@ settings_t*         mallocSettings(void){
     settings->output.arrayR = NULL;
     settings->output.arrayZ = NULL;
     
+    //default values for options:
+    settings->options.inFileName            = mallocChar(256);
     settings->options.killBackscatteredRays = false;
+    settings->options.writeLogFile          = true;
+    settings->options.logFile               = NULL;
+    settings->options.logFileName           = mallocChar(256);
+    settings->options.saveSSP               = false;
     
     return(settings);
 }
