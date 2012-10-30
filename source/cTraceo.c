@@ -138,7 +138,6 @@ int main(int argc, char **argv){
     float           tEnd, tInit   = (double)clock()/CLOCKS_PER_SEC;   //get time
     settings_t*     settings    = mallocSettings();
     const char*     line = "-----------------------------------------------";
-    uint32_t        nSSPPoints = 0;
 
     DEBUG(1,"Running cTraceo in verbose mode.\n\n");
     
@@ -176,7 +175,7 @@ int main(int argc, char **argv){
                         // NOTE: same as long option '--ssp'
                         case 's':
                             //the next item from command line options should be the number of points used for generating the soundSpeedProfile (ssp.mat)
-                            nSSPPoints = atoi(argv[++i]);
+                            settings->options.nSSPPoints = atoi(argv[++i]);
                             settings->options.saveSSP = true;
                             break;
                             
@@ -216,7 +215,7 @@ int main(int argc, char **argv){
                     // NOTE: same as short option '-s'
                     else if(!strcmp(stringToLower(argv[i]), "--ssp")){
                         //the next item from command line options should be the number of points used for generating the soundSpeedProfile (ssp.mat)
-                        nSSPPoints = atoi(argv[++i]);
+                        settings->options.nSSPPoints = atoi(argv[++i]);
                         settings->options.saveSSP = true;
                     }
                     
@@ -284,7 +283,7 @@ int main(int argc, char **argv){
     
     //if user requested storing the interpolated sound speed profile, do so now:
     if(settings->options.saveSSP){
-        calcSSP(settings, nSSPPoints);
+        calcSSP(settings);
     }
     
     if (VERBOSE){

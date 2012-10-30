@@ -52,9 +52,9 @@
 #include <math.h>
 #include "solveEikonalEq.c"
 
-void    calcSSP(settings_t* settings, uintptr_t nPoints);
+void    calcSSP(settings_t* settings);
 
-void    calcSSP(settings_t* settings, uintptr_t nPoints){
+void    calcSSP(settings_t* settings){
     DEBUG(1,"in\n");
     
     MATFile*        matfile     = NULL;
@@ -63,6 +63,7 @@ void    calcSSP(settings_t* settings, uintptr_t nPoints){
     float          *depths = NULL;
     float          *c = NULL;
     uintptr_t       i;
+    uintptr_t       nPoints = settings->options.nSSPPoints;
     
     float      cc, sigmaI, cri, czi, crri, czzi, crzi;
     vector_t    slowness;

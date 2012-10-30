@@ -336,6 +336,7 @@ typedef struct options{
     char*           logFileName;            //contains name of log file
     FILE*           logFile;                //file pointer to the log file
     bool            saveSSP;                //command line switch
+    uintptr_t       nSSPPoints;             //number of points with which to generate the ssp
 }options_t;
 
 typedef struct settings{
