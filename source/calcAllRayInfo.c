@@ -93,11 +93,7 @@ void    calcAllRayInfo(settings_t* settings){
     
     
     //open matfile for output
-    if(settings->options.outputFileName == NULL){
-        matfile = matOpen("ari.mat", "w");
-    }else{
-        matfile = matOpen(settings->options.outputFileName, "w");
-    }
+    matfile = matOpen(settings->options.outputFileName, "w");
     
     //write launching angles to file
     pThetas     = mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)settings->source.nThetas, mxREAL);
