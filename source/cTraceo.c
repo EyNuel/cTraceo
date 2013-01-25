@@ -274,10 +274,6 @@ int main(int argc, char **argv){
         printf(HEADER);
     }
     
-    if(settings->options.killBackscatteredRays){
-        printf("Option '--killBackscatteredRays' enabled; terminating any backscattered rays.\n");
-    }
-    
     //Read the input file
     readIn(settings);
     
@@ -436,11 +432,40 @@ int main(int argc, char **argv){
             break;
     }
     
-    //print some info:
+    #if 0
+    /*
+     * TODO:
+     * this block results in corrupted matlab files when calculating CTL.
+     * This may be resolved be moving the matlab opening from the individual calcXX functions up one level to this file.
+     * See issues #
+     */
+    //write number of truncated rays to log and matfile:
     if (settings->options.killBackscatteredRays){
-        printf("Truncated %u backscattered rays.\n", settings->options.nBackscatteredRays);
         LOG("Truncated %u backscattered rays.\n", settings->options.nBackscatteredRays);
+        
+        MATFile*        matfile                 = NULL;
+        mxArray*        mxNBackscatteredRays    = NULL;
+        //~ double          nBackscatteredRays_d    = 10;//(double)settings->options.nBackscatteredRays;
+        
+        DEBUG(0, "nBackscatteredRays_d: %lf\n", settings->options.nBackscatteredRays);
+        DEBUG(0, "output file name: %s\n", settings->options.outputFileName);
+        
+        //open matfile for output
+        //~ matfile     = matOpen("ctl.mat", "u");
+        matfile = matOpen(settings->options.outputFileName, "u");
+        
+        //write launching angles to file
+        mxNBackscatteredRays = mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)1, mxREAL);
+        
+        //copy cArray to mxArray:
+        copyUInt32ToMxArray(&settings->options.nBackscatteredRays, mxNBackscatteredRays, 1);
+        
+        //move mxArray to file:
+        matPutVariable(matfile, "nBackscatteredRays", mxNBackscatteredRays);
+        mxDestroyArray(mxNBackscatteredRays);
+        matClose(matfile);
     }
+    #endif
     
     //finish up the log:
     LOG("%s\n", line);
