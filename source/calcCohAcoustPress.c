@@ -119,43 +119,8 @@ void    calcCohAcoustPress(settings_t* settings){
     }
 
     //open the corresponding output file:
-    switch(settings->output.calcType){
-        case CALC_TYPE__COH_ACOUS_PRESS:
-            if(settings->options.outputFileName == NULL){
-                matfile     = matOpen("cpr.mat", "w");
-            }else{
-                matfile = matOpen(settings->options.outputFileName, "w");
-            }
-            break;
-            
-        case CALC_TYPE__PART_VEL:
-            if(settings->options.outputFileName == NULL){
-                matfile     = matOpen("pvl.mat", "w");
-            }else{
-                matfile = matOpen(settings->options.outputFileName, "w");
-            }
-            break;
-            
-        case CALC_TYPE__COH_ACOUS_PRESS_PART_VEL:
-            if(settings->options.outputFileName == NULL){
-                matfile     = matOpen("pav.mat", "w");
-            }else{
-                matfile = matOpen(settings->options.outputFileName, "w");
-            }
-            break;
-            
-        case CALC_TYPE__COH_TRANS_LOSS:
-            if(settings->options.outputFileName == NULL){
-                matfile     = matOpen("ctl.mat", "w");
-            }else{
-                matfile = matOpen(settings->options.outputFileName, "w");
-            }
-            break;
-            
-        default:
-            fatal("Uh-oh - calcCohAcoustPress(): unknown output type.");
-            break;
-    }
+    matfile = matOpen(settings->options.outputFileName, "w");
+    
 
     pThetas     = mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)settings->source.nThetas, mxREAL);
     if(matfile == NULL || pThetas == NULL)
@@ -538,7 +503,7 @@ void    calcCohAcoustPress(settings_t* settings){
         reallocRayMembers(&ray[i], 0);
     }
     free(ray);
-
+    
     matClose(matfile);
     DEBUG(1,"out\n");
 }

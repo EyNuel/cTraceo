@@ -66,15 +66,8 @@ void calcCohTransLoss(settings_t* settings){
     mxArray*    ptl     = NULL;
     mxArray*    ptl2D       = NULL;
     
-    if(settings->options.outputFileName == NULL){
-        matfile     = matOpen("ctl.mat", "u");
-    }else{
-        matfile = matOpen(settings->options.outputFileName, "u");
-    }
     
-    if(matfile == NULL){
-        fatal("Memory alocation error.");
-    }
+    matfile = matOpen(settings->options.outputFileName, "u");
 
     switch(settings->output.arrayType){
         case ARRAY_TYPE__RECTANGULAR:
