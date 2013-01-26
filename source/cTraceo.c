@@ -17,7 +17,7 @@
  * Written for project SENSOCEAN by:                                                    *
  *          Emanuel Ey                                                                  *
  *          emanuel.ey@gmail.com                                                        *
- *          Copyright (C) 2011                                                          *
+ *          Copyright (C) 2011 - 2013                                                   *
  *          Signal Processing Laboratory                                                *
  *          Universidade do Algarve                                                     *
  *                                                                                      *
@@ -85,7 +85,7 @@ void    printHelp(void){
 "* Written for project SENSOCEAN by:                                           *\n"
 "*          Emanuel Ey                                                         *\n"
 "*          emanuel.ey@gmail.com                                               *\n"
-"*          Copyright (C) 2011, 2012                                           *\n"
+"*          Copyright (C) 2011 - 2013                                          *\n"
 "*          Signal Processing Laboratory                                       *\n"
 "*          Universidade do Algarve                                            *\n"
 "*                                                                             *\n"
