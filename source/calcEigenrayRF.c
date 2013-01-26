@@ -80,11 +80,12 @@ void    calcEigenrayRF(settings_t* settings){
     double**        depths              = NULL;
     ray_t*          ray                 = NULL;
     double*         dz                  = NULL;
+    uint32_t        maxNumEigenrays     = 0;
 
     mxArray*        pThetas             = NULL;
     mxArray*        pHydArrayR          = NULL;
     mxArray*        pHydArrayZ          = NULL;
-    mxArray*        pnEigenRays         = NULL;
+    mxArray*        mxMaxNumEigenrays   = NULL;
     mxArray*        mxTheta             = NULL;
     mxArray*        mxR                 = NULL;
     mxArray*        mxZ                 = NULL;
@@ -466,20 +467,19 @@ void    calcEigenrayRF(settings_t* settings){
                         mxSetFieldByNumber( eigenrays[i][j].mxEigenrayStruct, (MWINDEX)i, 11, mxRefrac_z);
                     }
                     eigenrays[i][j].nEigenrays += 1;
+                    maxNumEigenrays = max(eigenrays[i][j].nEigenrays, maxNumEigenrays);
                 }
             }
             DEBUG(3, "nFoundEigenRays: %u\n", (uint32_t)nFoundEigenRays);
         }
     }
-
-    ///Write number of eigenrays to matfile:
-    pnEigenRays = mxCreateDoubleMatrix((MWSIZE)1,(MWSIZE)1,mxREAL);
-    junkDouble = (double)nFoundEigenRays;
-    copyDoubleToMxArray( &junkDouble, pnEigenRays, 1);
-    matPutVariable(settings->options.matfile, "nEigenrays", pnEigenRays);
-    mxDestroyArray(pnEigenRays);
-    DEBUG(3, "nFoundEigenRays: %u\n", (uint32_t)nFoundEigenRays);
-
+    
+    //write "maximum number of eigenrays at any of the hydrophones
+    mxMaxNumEigenrays = mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)1, mxREAL);
+    copyUInt32ToMxArray(&maxNumEigenrays, mxMaxNumEigenrays, 1);
+    matPutVariable(settings->options.matfile, "maxNumEigenrays", mxMaxNumEigenrays);
+    mxDestroyArray(mxMaxNumEigenrays);
+    
     ///Write Eigenrays to matfile:
     //copy arrival data to mxAllEigenraysStruct:
     mxAllEigenraysStruct = mxCreateStructMatrix((MWSIZE)settings->output.nArrayZ,   //number of rows
@@ -525,7 +525,9 @@ void    calcEigenrayRF(settings_t* settings){
 
     ///Write Eigenrays to matfile:
     matPutVariable(settings->options.matfile, "eigenrays", mxAllEigenraysStruct);
+    
 
+    
     //Free memory
     mxDestroyArray(mxAllEigenraysStruct);
     free(dz);
