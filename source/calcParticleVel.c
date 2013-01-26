@@ -61,8 +61,6 @@ void calcParticleVel(settings_t*);
 void calcParticleVel(settings_t* settings){
     DEBUG(1, "\tin\n");
     
-    MATFile*            matfile = NULL;
-    mxArray*            pTitle  = NULL;
     mxArray*            pu2D;
     mxArray*            pw2D;
     uintptr_t           i, j, k;
@@ -73,18 +71,7 @@ void calcParticleVel(settings_t* settings){
     complex double      junkComplex, dP_dRi, dP_dZi;
     complex double**    dP_dR2D = NULL;
     complex double**    dP_dZ2D = NULL;
-
-    //open the correct matfile for output:
-    matfile = matOpen(settings->options.outputFileName, "u");
     
-    
-    //write title to matfile:
-    pTitle = mxCreateString("TRACEO: Coherent Acoustic Pressure");
-    if(pTitle == NULL){
-        fatal("Memory alocation error.");
-    }
-    matPutVariable(matfile, "caseTitle", pTitle);
-    mxDestroyArray(pTitle);
     
     //get dr, dz:
     dr = settings->output.dr;
@@ -216,7 +203,7 @@ void calcParticleVel(settings_t* settings){
                 fatal("Memory alocation error.");
             }
             copyComplexToMxArray2D_transposed(dP_dR2D, pu2D, dimZ, dimR);
-            matPutVariable(matfile, "u", pu2D);
+            matPutVariable(settings->options.matfile, "u", pu2D);
             mxDestroyArray(pu2D);
             
             /// write the W-component to the mat-file:
@@ -225,7 +212,7 @@ void calcParticleVel(settings_t* settings){
                 fatal("Memory alocation error.");
             }
             copyComplexToMxArray2D_transposed(dP_dZ2D, pw2D, dimZ, dimR);
-            matPutVariable(matfile, "w", pw2D);
+            matPutVariable(settings->options.matfile, "w", pw2D);
             mxDestroyArray(pw2D);
             break;
             
@@ -239,7 +226,7 @@ void calcParticleVel(settings_t* settings){
                 fatal("Memory alocation error.");
             }
             copyComplexToMxArray2D(dP_dR2D, pu2D, dimZ, dimR);
-            matPutVariable(matfile, "u", pu2D);
+            matPutVariable(settings->options.matfile, "u", pu2D);
             mxDestroyArray(pu2D);
             
             /// write the W-component to the mat-file:
@@ -248,14 +235,12 @@ void calcParticleVel(settings_t* settings){
                 fatal("Memory alocation error.");
             }
             copyComplexToMxArray2D(dP_dZ2D, pw2D, dimZ, dimR);
-            matPutVariable(matfile, "w", pw2D);
+            matPutVariable(settings->options.matfile, "w", pw2D);
             mxDestroyArray(pw2D);
             break;
     }
     
     //free memory
-    matClose(matfile);
-    
     for(i=0; i<dimR; i++){
         free(settings->output.pressure_H[i]);
         free(settings->output.pressure_V[i]);

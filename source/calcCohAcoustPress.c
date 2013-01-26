@@ -62,9 +62,7 @@ void    calcCohAcoustPress(settings_t*);
 
 void    calcCohAcoustPress(settings_t* settings){
     DEBUG(1,"in\n");
-    MATFile*            matfile = NULL;
     mxArray*            pThetas = NULL;
-    mxArray*            pTitle  = NULL;
     mxArray*            pHydArrayR  = NULL;
     mxArray*            pHydArrayZ  = NULL;
     mxArray*            p   = NULL;
@@ -118,12 +116,8 @@ void    calcCohAcoustPress(settings_t* settings){
             break;
     }
 
-    //open the corresponding output file:
-    matfile = matOpen(settings->options.outputFileName, "w");
-    
-
     pThetas     = mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)settings->source.nThetas, mxREAL);
-    if(matfile == NULL || pThetas == NULL)
+    if(pThetas == NULL)
         fatal("Memory alocation error.");
 
     //copy angles in cArray to mxArray:
@@ -131,17 +125,9 @@ void    calcCohAcoustPress(settings_t* settings){
                         mxGetPr(pThetas),
                         settings->source.nThetas);
     //move mxArray to file and free memory:
-    matPutVariable(matfile, "thetas", pThetas);
+    matPutVariable(settings->options.matfile, "thetas", pThetas);
     mxDestroyArray(pThetas);
-
-    //write title to matfile:
-    pTitle = mxCreateString("TRACEO: Coherent Acoustic Pressure");
-    if(pTitle == NULL){
-        fatal("Memory alocation error.");
-    }
-    matPutVariable(matfile, "caseTitle", pTitle);
-    mxDestroyArray(pTitle);
-
+    
     //write hydrophone array ranges to file:
     pHydArrayR  = mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)settings->output.nArrayR, mxREAL);
     if(pHydArrayR == NULL){
@@ -151,7 +137,7 @@ void    calcCohAcoustPress(settings_t* settings){
                         mxGetPr(pHydArrayR),
                         (uintptr_t)settings->output.nArrayR);
     //move mxArray to file and free memory:
-    matPutVariable(matfile, "arrayR", pHydArrayR);
+    matPutVariable(settings->options.matfile, "arrayR", pHydArrayR);
     mxDestroyArray(pHydArrayR);
 
 
@@ -164,7 +150,7 @@ void    calcCohAcoustPress(settings_t* settings){
                         mxGetPr(pHydArrayZ),
                         (uintptr_t)settings->output.nArrayZ);
     //move mxArray to file and free memory:
-    matPutVariable(matfile, "arrayZ", pHydArrayZ);
+    matPutVariable(settings->options.matfile, "arrayZ", pHydArrayZ);
     mxDestroyArray(pHydArrayZ);
 
 
@@ -491,7 +477,7 @@ void    calcCohAcoustPress(settings_t* settings){
         }
 
         //write mxArray to matfile:
-        matPutVariable(matfile, "p", p);
+        matPutVariable(settings->options.matfile, "p", p);
         mxDestroyArray(p);
     }
 
@@ -503,7 +489,5 @@ void    calcCohAcoustPress(settings_t* settings){
         reallocRayMembers(&ray[i], 0);
     }
     free(ray);
-    
-    matClose(matfile);
     DEBUG(1,"out\n");
 }

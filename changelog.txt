@@ -29,6 +29,9 @@
    incorrectly interpolated at a hydrophone's position. 
 
  # Solved a bug which could cause a log file to be incorrectly named.
+ 
+ # Solved a bug which prevented the case title to be correclty written
+   to the output file.
    
  # Several minor and "behind the scenes" code improvements.
    

@@ -58,13 +58,11 @@ void    calcRayCoords(settings_t*);
 void    calcRayCoords(settings_t* settings){
     DEBUG(1,"in\n");
     
-    MATFile*        matfile     = NULL;
     mxArray*        mxTheta     = NULL;
     mxArray*        mxR         = NULL;
     mxArray*        mxZ         = NULL;
     
     mxArray*        mxThetas    = NULL;
-    mxArray*        mxTitle     = NULL;
     mxArray*        mxRayStruct = NULL;
     const char*     fieldNames[]= { "theta",
                                     "r",
@@ -73,28 +71,16 @@ void    calcRayCoords(settings_t* settings){
     ray_t*      ray     = NULL;
     uintptr_t   i;
     
-    
-    //open matfile for output
-    matfile = matOpen(settings->options.outputFileName, "w");
-    
-    
+        
     //write launching angles to file
-    mxThetas        = mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)settings->source.nThetas, mxREAL);
-    if(matfile == NULL || mxThetas == NULL)
+    mxThetas    = mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)settings->source.nThetas, mxREAL);
+    if(mxThetas == NULL)
         fatal("Memory alocation error.");
     //copy cArray to mxArray:
     copyDoubleToMxArray(    settings->source.thetas, mxThetas, settings->source.nThetas);
     //move mxArray to file:
-    matPutVariable(matfile, "thetas", mxThetas);
+    matPutVariable(settings->options.matfile, "thetas", mxThetas);
     mxDestroyArray(mxThetas);
-    
-    
-    //write title to matfile:
-    mxTitle = mxCreateString("TRACEO: Ray COordinates");
-    if(mxTitle == NULL)
-        fatal("Memory alocation error.");
-    matPutVariable(matfile, "caseTitle", mxTitle);
-    mxDestroyArray(mxTitle);
     
     
     //create mxStructArray:
@@ -158,10 +144,11 @@ void    calcRayCoords(settings_t* settings){
     }//for(i=0; i<settings->source.nThetas; i++)
     
     /// Write all ray information to matfile:
-    matPutVariable(matfile, "rays", mxRayStruct);
+    matPutVariable(settings->options.matfile, "rays", mxRayStruct);
     
     /// Finish up
-    matClose(matfile);
+    mxDestroyArray(mxRayStruct);
+    
     free(ray);
     DEBUG(1,"out\n");
 }

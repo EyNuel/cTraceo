@@ -299,7 +299,62 @@ int main(int argc, char **argv){
         printSettings(settings);
         DEBUG(2, "Returned from printSettings()\n");
     }
+    
+    //determine output file's name:
+    if(settings->options.outputFileName != NULL){
+        //user has manually defined the output file's name -no need to do anything.
+        
+    }else{
+        settings->options.outputFileName = mallocChar(8);
+        
+        switch(settings->output.calcType){
+            case CALC_TYPE__RAY_COORDS:
+                strcpy( settings->options.outputFileName, "rco.mat");
+                break;
 
+            case CALC_TYPE__ALL_RAY_INFO:
+                strcpy( settings->options.outputFileName, "ari.mat");
+                break;
+                
+            case CALC_TYPE__EIGENRAYS_PROXIMITY:
+                strcpy( settings->options.outputFileName, "eig.mat");
+                break;
+                
+            case CALC_TYPE__EIGENRAYS_REG_FALSI:
+                strcpy( settings->options.outputFileName, "eig.mat");
+                break;
+                
+            case CALC_TYPE__AMP_DELAY_PROXIMITY:
+                strcpy( settings->options.outputFileName, "aad.mat");
+                break;
+                
+            case CALC_TYPE__AMP_DELAY_REG_FALSI:
+                strcpy( settings->options.outputFileName, "aad.mat");
+                break;
+                
+            case CALC_TYPE__COH_ACOUS_PRESS:
+                strcpy( settings->options.outputFileName, "cpr.mat");
+                break;
+                
+            case CALC_TYPE__COH_TRANS_LOSS:
+                strcpy( settings->options.outputFileName, "ctl.mat");
+                break;
+                
+            case CALC_TYPE__PART_VEL:
+                strcpy( settings->options.outputFileName, "pvl.mat");
+                break;
+                
+            case CALC_TYPE__COH_ACOUS_PRESS_PART_VEL:
+                strcpy( settings->options.outputFileName, "pav.mat");
+                break;
+                
+            default:
+                fatal("Unknown output option.\nAborting...");
+                break;
+        }
+    }
+    
+    //write program options to log file
     if(settings->options.writeLogFile){
         //open the log file and write the header:
         settings->options.logFile= openFile(strcat(settings->options.logFileName,".log"), "w");
@@ -314,127 +369,73 @@ int main(int argc, char **argv){
         LOG("%s\n", line);
     }
     
+    //open the output file and write case name:
+    settings->options.matfile = matOpen(settings->options.outputFileName, "w");
+    if(settings->options.matfile == NULL)
+        fatal("Memory alocation error: could not open output file.");
+    
+    {
+        mxArray*  mxTitle      = NULL;
+        mxTitle = mxCreateString(settings->options.caseTitle);
+        if(mxTitle == NULL)
+            fatal("Memory alocation error.");
+        
+        matPutVariable(settings->options.matfile, "caseTitle", mxTitle);
+        mxDestroyArray(mxTitle);
+    }
+    
+    
     //run the computation
     switch(settings->output.calcType){
         case CALC_TYPE__RAY_COORDS:
-            if(settings->options.outputFileName == NULL){
-                settings->options.outputFileName = mallocChar(8);
-                strcpy( settings->options.outputFileName, "rco.mat");
-            }
-            LOG(    "Output file name: %s\n", settings->options.outputFileName);
             printf( "Calculating ray coordinates [RCO].\n");
-            LOG(    "Calculating ray coordinates [RCO]\n");
-            
             calcRayCoords(settings);
             break;
-
-        case CALC_TYPE__ALL_RAY_INFO:
-            if(settings->options.outputFileName == NULL){
-                settings->options.outputFileName = mallocChar(8);
-                strcpy( settings->options.outputFileName, "ari.mat");
-            }
-            LOG(    "Output file name: %s\n", settings->options.outputFileName);
-            printf( "Calculating all ray information [ARI].\n");
-            LOG(    "Calculating all ray information [ARI]\n");
             
+        case CALC_TYPE__ALL_RAY_INFO:
+            printf( "Calculating all ray information [ARI].\n");
             calcAllRayInfo(settings);
             break;
             
         case CALC_TYPE__EIGENRAYS_PROXIMITY:
-            if(settings->options.outputFileName == NULL){
-                settings->options.outputFileName = mallocChar(8);
-                strcpy( settings->options.outputFileName, "eig.mat");
-            }
-            LOG(    "Output file name: %s\n", settings->options.outputFileName);
             printf( "Calculating eigenrays by proximity method [EPR].\n");
-            LOG(    "Calculating eigenrays by proximity method [EPR].\n");
-            
             calcEigenrayPr(settings);
             break;
             
         case CALC_TYPE__EIGENRAYS_REG_FALSI:
-            if(settings->options.outputFileName == NULL){
-                settings->options.outputFileName = mallocChar(8);
-                strcpy( settings->options.outputFileName, "eig.mat");
-            }
-            LOG(    "Output file name: %s\n", settings->options.outputFileName);
             printf( "Calculating eigenrays by Regula Falsi Method [ERF].\n");
-            LOG(    "Calculating  eigenrays by Regula Falsi Method [ERF].\n");
-            
             calcEigenrayRF(settings);
             break;
             
         case CALC_TYPE__AMP_DELAY_PROXIMITY:
-            if(settings->options.outputFileName == NULL){
-                settings->options.outputFileName = mallocChar(8);
-                strcpy( settings->options.outputFileName, "aad.mat");
-            }
-            LOG(    "Output file name: %s\n", settings->options.outputFileName);
             printf( "Calculating amplitudes and delays by Proximity Method [ADP].\n");
-            LOG(    "Calculating amplitudes and delays by Proximity Method [ADP].\n");
-            
             calcAmpDelPr(settings);
             break;
             
         case CALC_TYPE__AMP_DELAY_REG_FALSI:
-            if(settings->options.outputFileName == NULL){
-                settings->options.outputFileName = mallocChar(8);
-                strcpy( settings->options.outputFileName, "aad.mat");
-            }
-            LOG(    "Output file name: %s\n", settings->options.outputFileName);
             printf( "Calculating amplitudes and delays by Regula Falsi Method [ADR].\n");
-            LOG(    "Calculating amplitudes and delays by Regula Falsi Method [ADR].\n");
-            
             calcAmpDelRF(settings);
             break;
             
         case CALC_TYPE__COH_ACOUS_PRESS:
-            if(settings->options.outputFileName == NULL){
-                settings->options.outputFileName = mallocChar(8);
-                strcpy( settings->options.outputFileName, "cpr.mat");
-            }
-            LOG(    "Output file name: %s\n", settings->options.outputFileName);
             printf( "Calculating coherent acoustic pressure [CPR].\n");
-            LOG(    "Calculating coherent acoustic pressure [CPR].\n");
-            
             calcCohAcoustPress(settings);
             break;
             
         case CALC_TYPE__COH_TRANS_LOSS:
-            if(settings->options.outputFileName == NULL){
-                settings->options.outputFileName = mallocChar(8);
-                strcpy( settings->options.outputFileName, "ctl.mat");
-            }
-            LOG(    "Output file name: %s\n", settings->options.outputFileName);
             printf( "Calculating coherent transmission loss [CTL].\n");
-            LOG(    "Calculating coherent transmission loss [CTL].\n");
-            
             calcCohAcoustPress(settings);
             calcCohTransLoss(settings);
             break;
             
         case CALC_TYPE__PART_VEL:
-            if(settings->options.outputFileName == NULL){
-                settings->options.outputFileName = mallocChar(8);
-                strcpy( settings->options.outputFileName, "pvl.mat");
-            }
-            LOG(    "Output file name: %s\n", settings->options.outputFileName);
             printf( "Calculating particle velocity [PVL].\n");
-            LOG(    "Calculating particle velocity [PVL].\n");
-            
             calcCohAcoustPress(settings);
             calcParticleVel(settings);
             break;
             
         case CALC_TYPE__COH_ACOUS_PRESS_PART_VEL:
-            if(settings->options.outputFileName == NULL){
-                settings->options.outputFileName = mallocChar(8);
-                strcpy( settings->options.outputFileName, "pav.mat");
-            }
-            LOG(    "Output file name: %s\n", settings->options.outputFileName);
             printf( "Calculating coherent acoustic pressure and particle velocity [PAV].\n");
-            LOG(    "Calculating coherent acoustic pressure and particle velocity [PAV].\n");
-            
             calcCohAcoustPress(settings);
             calcParticleVel(settings);
             break;
@@ -482,6 +483,9 @@ int main(int argc, char **argv){
     //finish up the log:
     LOG("%s\n", line);
     LOG("Done.\n");
+    
+    // close output file:
+    matClose(settings->options.matfile);
 
     //get elapsed time:
     tEnd = (double)clock()/CLOCKS_PER_SEC;    

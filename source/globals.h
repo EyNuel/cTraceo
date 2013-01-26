@@ -333,6 +333,7 @@ typedef struct options{
     char*           inFileName;
     FILE*           inFile;                 //file pointer to the input file's name
     char*           outputFileName;
+    FILE*           matfile;                //a file pointer to the output matfile
     bool            writeLogFile;           //command line switch
     char*           logFileName;            //contains name of log file
     FILE*           logFile;                //file pointer to the log file
