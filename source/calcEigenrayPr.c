@@ -71,10 +71,12 @@ void    calcEigenrayPr(settings_t* settings){
     float          dz;
     uintptr_t       nRet, iHyd = 0;
     uintptr_t       iRet[51];
+    uint32_t        maxNumEigenrays = 0;
 
     mxArray*        pThetas             = NULL;
     mxArray*        pHydArrayR          = NULL;
     mxArray*        pHydArrayZ          = NULL;
+    mxArray*        mxMaxNumEigenrays   = NULL;
     mxArray*        mxTheta             = NULL;
     mxArray*        mxR                 = NULL;
     mxArray*        mxZ                 = NULL;
@@ -305,6 +307,7 @@ void    calcEigenrayPr(settings_t* settings){
                                 }
 
                                 eigenrays[j][jj].nEigenrays += 1;
+                                maxNumEigenrays = max(eigenrays[j][jj].nEigenrays, maxNumEigenrays);
                             }// if (dz settings->output.miss)
                         }// for(jj=1; jj<=settings->output.nArrayZ; jj++)
 
@@ -399,6 +402,7 @@ void    calcEigenrayPr(settings_t* settings){
                                     }
 
                                     eigenrays[j][jj].nEigenrays += 1;
+                                    maxNumEigenrays = max(eigenrays[j][jj].nEigenrays, maxNumEigenrays);
                                 }
                             }
                         }
@@ -411,7 +415,12 @@ void    calcEigenrayPr(settings_t* settings){
             }
         }//if (ctheta > 1.0e-7)
     }//for(i=0; i<settings->source.nThetas; i++)
-
+    
+    //write "maximum number of eigenrays at any of the hydrophones
+    mxMaxNumEigenrays = mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)1, mxREAL);
+    copyUInt32ToMxArray(&maxNumEigenrays, mxMaxNumEigenrays, 1);
+    matPutVariable(settings->options.matfile, "maxNumEigenrays", mxMaxNumEigenrays);
+    
     //copy arrival data to mxAllEigenraysStruct:
     mxAllEigenraysStruct = mxCreateStructMatrix((MWSIZE)settings->output.nArrayZ,   //number of rows
                                                 (MWSIZE)settings->output.nArrayR,   //number of columns
@@ -457,7 +466,7 @@ void    calcEigenrayPr(settings_t* settings){
 
     ///Write Eigenrays to matfile:
     matPutVariable(settings->options.matfile, "eigenrays", mxAllEigenraysStruct);
-
+    
     //free memory
     mxDestroyArray(mxEigenrayStruct);
     reallocRayMembers(ray, 0);
