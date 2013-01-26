@@ -81,9 +81,7 @@ void calcAmpDelRF(settings_t* settings){
     ray_t*          ray                 = NULL;
     float*         dz                  = NULL;
     
-    MATFile*        matfile             = NULL;
     mxArray*        pThetas             = NULL;
-    mxArray*        pTitle              = NULL;
     mxArray*        pHydArrayR          = NULL;
     mxArray*        pHydArrayZ          = NULL;
     mxArray*        pSourceZ            = NULL;
@@ -133,28 +131,15 @@ void calcAmpDelRF(settings_t* settings){
     }
     
     #if 1
-    //Open matfile for output:
-    matfile = matOpen(settings->options.outputFileName, "w");
-    
-    
     //write ray launching angles to matfile:
     pThetas     = mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)settings->source.nThetas, mxREAL);
-    if(matfile == NULL || pThetas == NULL){
+    if(pThetas == NULL){
         fatal("Memory alocation error.");
     }
     //copy angles in cArray to mxArray:
     copyFloatToMxArray(    settings->source.thetas, pThetas , settings->source.nThetas);
-    matPutVariable(matfile, "thetas", pThetas);
+    matPutVariable(settings->options.matfile, "thetas", pThetas);
     mxDestroyArray(pThetas);
-    
-    
-    //write title to matfile:
-    pTitle = mxCreateString("TRACEO: EIGenrays (by Regula Falsi)");
-    if(pTitle == NULL){
-        fatal("Memory alocation error.");
-    }
-    matPutVariable(matfile, "caseTitle", pTitle);
-    mxDestroyArray(pTitle);
     
     
     //write hydrophone array ranges to file:
@@ -163,7 +148,7 @@ void calcAmpDelRF(settings_t* settings){
         fatal("Memory alocation error.");
     }
     copyFloatToMxArray(    settings->output.arrayR, pHydArrayR, (uintptr_t)settings->output.nArrayR);
-    matPutVariable(matfile, "arrayR", pHydArrayR);
+    matPutVariable(settings->options.matfile, "arrayR", pHydArrayR);
     mxDestroyArray(pHydArrayR);
     
     
@@ -173,7 +158,7 @@ void calcAmpDelRF(settings_t* settings){
         fatal("Memory alocation error.");
     }
     copyFloatToMxArray(    settings->output.arrayZ, pHydArrayZ, (uintptr_t)settings->output.nArrayZ);
-    matPutVariable(matfile, "arrayZ", pHydArrayZ);
+    matPutVariable(settings->options.matfile, "arrayZ", pHydArrayZ);
     mxDestroyArray(pHydArrayZ);
     
     
@@ -183,7 +168,7 @@ void calcAmpDelRF(settings_t* settings){
         fatal("Memory alocation error.");
     }
     copyFloatToMxArray(&settings->source.zx, pSourceZ, 1);
-    matPutVariable(matfile, "sourceZ", pSourceZ);
+    matPutVariable(settings->options.matfile, "sourceZ", pSourceZ);
     mxDestroyArray(pSourceZ);
     
     
@@ -485,7 +470,7 @@ void calcAmpDelRF(settings_t* settings){
     //write "maximum number of arrivals at any single hydrophone" to matfile:
     mxNumArrivals = mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)1, mxREAL);
     copyFloatToMxArray(&maxNumArrivals, mxNumArrivals, 1);
-    matPutVariable(matfile, "maxNumArrivals", mxNumArrivals);
+    matPutVariable(settings->options.matfile, "maxNumArrivals", mxNumArrivals);
     
     
     //copy arrival data to mxAadStruct:
@@ -532,12 +517,10 @@ void calcAmpDelRF(settings_t* settings){
     
     
     ///Write Eigenrays to matfile:
-    matPutVariable(matfile, "arrivals", mxAadStruct);
+    matPutVariable(settings->options.matfile, "arrivals", mxAadStruct);
     
     //Free memory
-    matClose(matfile);
     mxDestroyArray(mxAadStruct);
-    
     reallocRayMembers(tempRay, 0);
     free(tempRay);
     free(dz);

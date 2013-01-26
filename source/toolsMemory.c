@@ -432,6 +432,7 @@ settings_t*         mallocSettings(void){
     settings->options.caseTitle             = mallocChar((uintptr_t)(MAX_LINE_LEN + 1));
     settings->options.inFileName            = mallocChar(256);
     settings->options.outputFileName        = NULL;
+    settings->options.matfile               = NULL;
     settings->options.killBackscatteredRays = false;
     settings->options.writeHeader           = true;
     settings->options.writeLogFile          = true;

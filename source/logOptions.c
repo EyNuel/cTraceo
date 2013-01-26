@@ -60,6 +60,53 @@ void logOptions(settings_t* settings){
     if(settings->options.outputFileName != NULL){
         LOG("Option '--outputFileName' enabled; writing results to %s\n", settings->options.outputFileName);
     }
+    
+    //write the chosen output option to the log file:
+    switch(settings->output.calcType){
+        case CALC_TYPE__RAY_COORDS:
+            LOG(    "Calculating ray coordinates [RCO]\n");
+            break;
+            
+        case CALC_TYPE__ALL_RAY_INFO:
+            LOG(    "Calculating all ray information [ARI]\n");
+            break;
+            
+        case CALC_TYPE__EIGENRAYS_PROXIMITY:
+            LOG(    "Calculating eigenrays by proximity method [EPR].\n");
+            break;
+            
+        case CALC_TYPE__EIGENRAYS_REG_FALSI:
+            LOG(    "Calculating  eigenrays by Regula Falsi Method [ERF].\n");
+            break;
+            
+        case CALC_TYPE__AMP_DELAY_PROXIMITY:
+            LOG(    "Calculating amplitudes and delays by Proximity Method [ADP].\n");
+            break;
+            
+        case CALC_TYPE__AMP_DELAY_REG_FALSI:
+            LOG(    "Calculating amplitudes and delays by Regula Falsi Method [ADR].\n");
+            break;
+            
+        case CALC_TYPE__COH_ACOUS_PRESS:
+            LOG(    "Calculating coherent acoustic pressure [CPR].\n");
+            break;
+            
+        case CALC_TYPE__COH_TRANS_LOSS:
+            LOG(    "Calculating coherent transmission loss [CTL].\n");
+            break;
+            
+        case CALC_TYPE__PART_VEL:
+            LOG(    "Calculating particle velocity [PVL].\n");
+            break;
+            
+        case CALC_TYPE__COH_ACOUS_PRESS_PART_VEL:
+            LOG(    "Calculating coherent acoustic pressure and particle velocity [PAV].\n");
+            break;
+            
+        default:
+            fatal("Unknown output option.\nAborting...");
+            break;
+    }
 }
     
     

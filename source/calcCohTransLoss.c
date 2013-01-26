@@ -60,14 +60,11 @@ void calcCohTransLoss(settings_t*);
 
 void calcCohTransLoss(settings_t* settings){
     uint32_t    i, j, dim;
-    float*     tl      = NULL;
-    float**    tl2D    = NULL;
-    MATFile*    matfile = NULL;
+    float*      tl      = NULL;
+    float**     tl2D    = NULL;
     mxArray*    ptl     = NULL;
-    mxArray*    ptl2D       = NULL;
+    mxArray*    ptl2D   = NULL;
     
-    
-    matfile = matOpen(settings->options.outputFileName, "u");
 
     switch(settings->output.arrayType){
         case ARRAY_TYPE__RECTANGULAR:
@@ -90,7 +87,7 @@ void calcCohTransLoss(settings_t* settings){
                 fatal("Memory alocation error.");
             }
             copyFloatToMxArray2D_transposed(tl2D, ptl2D, settings->output.nArrayZ, settings->output.nArrayR);
-            matPutVariable(matfile,"tl",ptl2D);
+            matPutVariable(settings->options.matfile,"tl",ptl2D);
             mxDestroyArray(ptl2D);
 
             freeFloat2D(tl2D, settings->output.nArrayR);
@@ -110,7 +107,7 @@ void calcCohTransLoss(settings_t* settings){
                 fatal("Memory alocation error.");
             }
             copyFloatToMxArray(tl, ptl, dim);
-            matPutVariable(matfile,"tl",ptl);
+            matPutVariable(settings->options.matfile,"tl",ptl);
             mxDestroyArray(ptl);
 
             free(tl);

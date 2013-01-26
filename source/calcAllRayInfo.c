@@ -58,9 +58,7 @@ void    calcAllRayInfo(settings_t*);
 
 void    calcAllRayInfo(settings_t* settings){
     DEBUG(1,"in\n");
-    MATFile*            matfile     = NULL;
     mxArray*            pThetas     = NULL;
-    mxArray*            pTitle      = NULL;
     mxArray*            mxTheta     = NULL;
     mxArray*            mxR         = NULL;
     mxArray*            mxZ         = NULL;
@@ -92,28 +90,16 @@ void    calcAllRayInfo(settings_t* settings){
     uintptr_t           i;
     
     
-    //open matfile for output
-    matfile = matOpen(settings->options.outputFileName, "w");
-    
     //write launching angles to file
     pThetas     = mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)settings->source.nThetas, mxREAL);
-    if(matfile == NULL || pThetas == NULL){
+    if(pThetas == NULL){
         fatal("Memory alocation error.");
     }
     //copy angles in cArray to mxArray:
     copyFloatToMxArray(    settings->source.thetas, pThetas, settings->source.nThetas);
     //move mxArray to file and free memory:
-    matPutVariable(matfile, "thetas", pThetas);
+    matPutVariable(settings->options.matfile, "thetas", pThetas);
     mxDestroyArray(pThetas);
-    
-    
-    //write title to matfile:
-    pTitle = mxCreateString("TRACEO: All Ray Information");
-    if(pTitle == NULL){
-        fatal("Memory alocation error.");
-    }
-    matPutVariable(matfile, "caseTitle", pTitle);
-    mxDestroyArray(pTitle);
     
     
     //create mxStructArray:
@@ -217,10 +203,10 @@ void    calcAllRayInfo(settings_t* settings){
     }
 
     /// Write all ray information to matfile:
-    matPutVariable(matfile, "rays", mxRayStruct);
+    matPutVariable(settings->options.matfile, "rays", mxRayStruct);
     
     /// Finish up
-    matClose(matfile);
     mxDestroyArray(mxRayStruct);
+    free(ray);
     DEBUG(1,"out\n");
 }

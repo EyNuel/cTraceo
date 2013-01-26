@@ -81,9 +81,7 @@ void    calcEigenrayRF(settings_t* settings){
     ray_t*          ray                 = NULL;
     float*         dz                  = NULL;
 
-    MATFile*        matfile             = NULL;
     mxArray*        pThetas             = NULL;
-    mxArray*        pTitle              = NULL;
     mxArray*        pHydArrayR          = NULL;
     mxArray*        pHydArrayZ          = NULL;
     mxArray*        pnEigenRays         = NULL;
@@ -138,28 +136,15 @@ void    calcEigenrayRF(settings_t* settings){
     }
 
     #if 1
-    //Open matfile for output:
-    matfile = matOpen(settings->options.outputFileName, "w");
-
-
     //write ray launching angles to matfile:
     pThetas     = mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)settings->source.nThetas, mxREAL);
-    if(matfile == NULL || pThetas == NULL){
+    if(pThetas == NULL){
         fatal("Memory alocation error.");
     }
     //copy angles in cArray to mxArray:
     copyFloatToMxArray(    settings->source.thetas, pThetas , settings->source.nThetas);
-    matPutVariable(matfile, "thetas", pThetas);
+    matPutVariable(settings->options.matfile, "thetas", pThetas);
     mxDestroyArray(pThetas);
-
-
-    //write title to matfile:
-    pTitle = mxCreateString("TRACEO: EIGenrays (by Regula Falsi)");
-    if(pTitle == NULL){
-        fatal("Memory alocation error.");
-    }
-    matPutVariable(matfile, "caseTitle", pTitle);
-    mxDestroyArray(pTitle);
 
 
     //write hydrophone array ranges to file:
@@ -168,7 +153,7 @@ void    calcEigenrayRF(settings_t* settings){
         fatal("Memory alocation error.");
     }
     copyFloatToMxArray( settings->output.arrayR, pHydArrayR, (uintptr_t)settings->output.nArrayR);
-    matPutVariable(matfile, "rarray", pHydArrayR);
+    matPutVariable(settings->options.matfile, "rarray", pHydArrayR);
     mxDestroyArray(pHydArrayR);
 
 
@@ -178,7 +163,7 @@ void    calcEigenrayRF(settings_t* settings){
         fatal("Memory alocation error.");
     }
     copyFloatToMxArray( settings->output.arrayZ, pHydArrayZ, (uintptr_t)settings->output.nArrayZ);
-    matPutVariable(matfile, "zarray", pHydArrayZ);
+    matPutVariable(settings->options.matfile, "zarray", pHydArrayZ);
     mxDestroyArray(pHydArrayZ);
 
 
@@ -491,7 +476,7 @@ void    calcEigenrayRF(settings_t* settings){
     pnEigenRays = mxCreateDoubleMatrix((MWSIZE)1,(MWSIZE)1,mxREAL);
     junkfloat = (float)nFoundEigenRays;
     copyFloatToMxArray( &junkfloat, pnEigenRays, 1);
-    matPutVariable(matfile, "nEigenrays", pnEigenRays);
+    matPutVariable(settings->options.matfile, "nEigenrays", pnEigenRays);
     mxDestroyArray(pnEigenRays);
     DEBUG(3, "nFoundEigenRays: %u\n", (uint32_t)nFoundEigenRays);
 
@@ -539,10 +524,9 @@ void    calcEigenrayRF(settings_t* settings){
     }
 
     ///Write Eigenrays to matfile:
-    matPutVariable(matfile, "eigenrays", mxAllEigenraysStruct);
+    matPutVariable(settings->options.matfile, "eigenrays", mxAllEigenraysStruct);
 
     //Free memory
-    matClose(matfile);
     mxDestroyArray(mxAllEigenraysStruct);
     free(dz);
     DEBUG(1,"out\n");
