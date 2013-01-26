@@ -60,8 +60,8 @@ void    calcSSP(settings_t* settings){
     MATFile*        matfile     = NULL;
     mxArray*        mxSSPZ      = NULL;
     mxArray*        mxSSPC      = NULL;
-    double          *depths = NULL;
-    double          *c = NULL;
+    double*         depths      = NULL;
+    double*         c           = NULL;
     uintptr_t       i;
     uintptr_t       nPoints = settings->options.nSSPPoints;
     
@@ -90,10 +90,13 @@ void    calcSSP(settings_t* settings){
     }
     
     //open matfile for output
-    matfile     = matOpen("ssp.mat", "w");
+    matfile     = matOpen(settings->options.sspFileName, "w");
+    if(matfile == NULL){
+        fatal("Failed to open output file for storing interpolated sound speed profile.");
+    }
     
     mxSSPZ        = mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)nPoints, mxREAL);
-    if(matfile == NULL || mxSSPZ == NULL)
+    if(mxSSPZ == NULL)
         fatal("Memory alocation error.");
     //copy cArray to mxArray:
     copyDoubleToMxArray(depths, mxSSPZ, nPoints);

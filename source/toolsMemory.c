@@ -360,6 +360,7 @@ settings_t*         mallocSettings(void){
     settings->options.logFileName           = mallocChar(256);
     settings->options.saveSSP               = false;
     settings->options.nSSPPoints            = 128;      //random value
+    settings->options.sspFileName           = NULL;
     
     return(settings);
 }
