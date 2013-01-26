@@ -199,7 +199,7 @@ help:	#
 		@echo " Written for project SENSOCEAN by:                                             "
 		@echo "          Emanuel Ey                                                           "
 		@echo "          emanuel.ey@gmail.com                                                 "
-		@echo "          Copyright (C) 2011, 2012                                             "
+		@echo "          Copyright (C) 2011 - 2013                                            "
 		@echo "          Signal Processing Laboratory                                         "
 		@echo "          Universidade do Algarve                                              "
 		@echo "                                                                               "
