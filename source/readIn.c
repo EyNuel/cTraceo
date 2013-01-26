@@ -72,10 +72,10 @@ void    readIn(settings_t* settings){
     /************************************************************************
      *  Read the title:                                                     *
      ***********************************************************************/
-    junkChar = fgets(settings->cTitle, MAX_LINE_LEN+1, inFile);
+    junkChar = fgets(settings->options.caseTitle, MAX_LINE_LEN+1, inFile);
     (void)junkChar;
-
-
+    
+    
     /************************************************************************
      *  Read and validate the source info:                                  *
      ***********************************************************************/

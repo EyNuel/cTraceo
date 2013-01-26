@@ -307,7 +307,7 @@ int main(int argc, char **argv){
         LOG("\n");
         
         LOG("Input file: %s\n", settings->options.inFileName);
-        LOG("Title: %s\n", settings->cTitle);
+        LOG("Title: %s\n", settings->options.caseTitle);
         LOG("%s\n", line);
         
         logOptions(settings);

@@ -326,6 +326,7 @@ typedef struct output{
 #define ARRAY_TYPE__LINEAR          40  //"LRY"
 
 typedef struct options{
+    char*           caseTitle;
     bool            killBackscatteredRays;  //command line switch 
     uint32_t        nBackscatteredRays;     //a counter for the number of rays truncated due to the --killBackscatteredRays switch
     bool            writeHeader;            //command line switch
@@ -343,7 +344,6 @@ typedef struct settings{
     /*
      * Contains all input information
      */
-    char*           cTitle;
     source_t        source;
     interface_t     altimetry;
     soundSpeed_t    soundSpeed;

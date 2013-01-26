@@ -335,7 +335,6 @@ settings_t*         mallocSettings(void){
         fatal("Memory allocation error.\n");
     }
     
-    settings->cTitle = mallocChar((uintptr_t)(MAX_LINE_LEN + 1));
     settings->source.thetas = NULL; //memory will be properly allocated in "readin.c"
     
     settings->altimetry.r = NULL;
@@ -350,6 +349,7 @@ settings_t*         mallocSettings(void){
     settings->output.arrayZ = NULL;
     
     //default values for options:
+    settings->options.caseTitle             = mallocChar((uintptr_t)(MAX_LINE_LEN + 1));
     settings->options.inFileName            = mallocChar(256);
     settings->options.outputFileName        = NULL;
     settings->options.killBackscatteredRays = false;
@@ -387,8 +387,8 @@ void                freeSettings(settings_t* settings){
     if(settings != NULL){
         
         //free title:
-        if(settings->cTitle != NULL){
-            free(settings->cTitle);
+        if(settings->options.caseTitle != NULL){
+            free(settings->options.caseTitle);
         }
         
         //free source:
@@ -523,7 +523,7 @@ void                printSettings(settings_t*   settings){
     DEBUG(1, "in\n");
     uint32_t    i;
     
-    printf("cTitle: \t\t\t%s", settings->cTitle);   //assuming a \n at the end of cTitle
+    printf("caseTitle: \t\t\t%s", settings->options.caseTitle);   //assuming a \n at the end of cTitle
     printf("\nsource.ds: \t\t\t%12.5lf\t[m]\n",     settings->source.ds);
     printf("source.rx: \t\t\t%12.5lf\t[m]\n",       settings->source.rx);
     printf("source.zx: \t\t\t%12.5lf\t[m]\n",       settings->source.zx);
