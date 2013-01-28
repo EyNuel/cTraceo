@@ -33,7 +33,7 @@
  ******************************************************** ************************/
 //NOTE: VERSION has to be 20 chars wide so that the header and help texts are printed correctly
 //              "----5---10---15---20"
-#define VERSION "1.3 SP Beta         "
+#define VERSION VERSION_LONG    //this is defined in file 'source/version'
 //NOTE: HEADER is made up of consecutive strings, each 79 chars long:
 #define HEADER  "* =========================================================================== *\n""*          The cTraceo Acoustic Raytracing Model, Version "VERSION"*\n""* --------------------------------------------------------------------------- *\n""*  Released under the Creative Commons Attribution-NonCommercial-ShareAlike   *\n""*  3.0 Unported License ( http://creativecommons.org/licenses/by-nc-sa/3.0/ ) *\n""*         Copyright (C) 2011 - 2013 Emanuel Ey <emanuel.ey@gmail.com>         *\n""*        Copyright (C) 2010 Orlando Camargo Rodriguez <orodrig@ualg.pt>       *\n""*     SiPLab, Universidade do Algarve, Portugal <www.siplab.fct.ualg.pt>      *\n""* =========================================================================== *\n\n"
 
