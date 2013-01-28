@@ -89,7 +89,7 @@
  * Some utilities                                                               *
  ********************************************************************************/
 
-//For some reason the C99 standard dropped the definition of PI, so we're defining it manually:
+//For some reason the C99 standard dropped the definitions of PI and Log10(e), so we're defining them manually:
 #ifndef M_PI
 #define M_PI 3.14159265358979323846264338327
 #endif
@@ -105,9 +105,6 @@
 
 #define TOP     0
 #define BOTTOM  2
-
-#define LINUX   1
-#define WINDOWS 2
 
 //function macro used for showing debugging information:
 #if VERBOSE == 1

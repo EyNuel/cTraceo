@@ -850,8 +850,9 @@ void    solveEikonalEq(settings_t* settings, ray_t* ray){
 
         ray->boundaryTg[i+1].r  = tauB.r;
         ray->boundaryTg[i+1].z  = tauB.z;
-
-        if (jRefl == 1){    //TODO huh?!
+        
+        //if there is a reflection on the next coord, do a phase shift:
+        if (jRefl == 1){
             ray->phase[i+1] = ray->phase[i] - atan2( cimag(reflCoeff), creal(reflCoeff) );
         }else{
             ray->phase[i+1] = ray->phase[i];
@@ -958,6 +959,7 @@ void    solveEikonalEq(settings_t* settings, ray_t* ray){
     /* Search for refraction points (refraction angles are zero!), rMin, rMax and twisting(returning) of rays:  */
     //NOTE: We are assuming (safely) that there can't be more refraction points than the ray has coordinates,
     //      so we can skip memory bounds-checking.
+    //TODO: in the opencl version, this for-loop has been moved to solveDynamicEq():
     ray->nRefrac = 0;
     for(i=1; i<ray->nCoords-2; i++){
         ray->rMin = min( ray->rMin, ray->r[i] );
