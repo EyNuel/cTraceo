@@ -4,265 +4,147 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <title>cTraceo by EyNuel</title>
-
     <link rel="stylesheet" href="stylesheets/styles.css">
     <link rel="stylesheet" href="stylesheets/pygment_trac.css">
-    <script src="javascripts/scale.fix.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="javascripts/main.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
   </head>
   <body>
-    <div class="wrapper">
+
       <header>
         <h1>cTraceo</h1>
         <p>The cTraceo Underwater Acoustic Raytracing Model</p>
-        <p class="view"><a href="https://github.com/EyNuel/cTraceo">View the Project on GitHub <small>EyNuel/cTraceo</small></a></p>
-        <ul>
-          <li><a href="https://github.com/EyNuel/cTraceo/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/EyNuel/cTraceo/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/EyNuel/cTraceo">View On <strong>GitHub</strong></a></li>
-        </ul>
       </header>
+
+      <div id="banner">
+        <span id="logo"></span>
+
+        <a href="https://github.com/EyNuel/cTraceo" class="button fork"><strong>View On GitHub</strong></a>
+        <div class="downloads">
+          <span>Downloads:</span>
+          <ul>
+            <li><a href="https://github.com/EyNuel/cTraceo/zipball/master" class="button">ZIP</a></li>
+            <li><a href="https://github.com/EyNuel/cTraceo/tarball/master" class="button">TAR</a></li>
+          </ul>
+        </div>
+      </div><!-- end banner -->
+
+    <div class="wrapper">
+      <nav>
+        <ul></ul>
+      </nav>
       <section>
-        <h2>Contents:</h2>
+        <h2>Introduction</h2>
+
+<p>The cTraceo Acoustic Raytracing Model is a propagation model for use in underwater acoustics and was developed at the <a href="http://www.siplab.fct.ualg.pt/">Signal Processing Laboratory</a> of the <a href="http://www.ualg.pt/">University of the Algarve</a>. cTraceo is a Gaussian beam tracing model for 2D waveguides written in C.<br>
+See the features section below and take a look at our <a href="https://github.com/EyNuel/cTraceo/wiki/Getting-Started">Getting Started</a> guide before proceeding to the <a href="https://github.com/EyNuel/cTraceo/downloads">downloads</a> section. You may also want to take a look at the <a href="https://github.com/EyNuel/cTraceo/wiki/Troubleshooting">Troubleshooting page</a>.  </p>
+
+<p>Should you have any questions, suggestions or feedback, please don't hesitate in <a href="https://github.com/EyNuel/cTraceo/wiki/Contact">contacting us</a>.</p>
+
+<hr><h2>Features</h2>
 
 <ul>
-<li>Features</li>
-<li>Software Requirements</li>
-<li>Makefile Configuration</li>
-<li>Compilation &amp; Installation</li>
-<li>Matlab Configuration &amp; Examples</li>
-<li>License Notes.</li>
-</ul><h2>Features:</h2>
+<li><p>Range dependent altimetry/bathymetry including range dependent elastic properties (Compressional and shear wave speeds, density, as well as compressional and shear attenuation);</p></li>
+<li><p>Range dependent sound speed fields;</p></li>
+<li><p>Support for user-defined smooth objects within waveguide (like rocks, marine mammals, submarines);</p></li>
+<li><p>Full suppport for backscattering (from altimetry/bathymetry or objects);</p></li>
+<li><p>Allows free positioning of acoustic source and receivers (altimetry/bathymetry as well as objects and receivers may be positioned behind the source for modelling complex waveguides);</p></li>
+<li><p>Support for horizontal, vertical, rectangular and arbitrarily shaped receiver arrays (allows modelling unusual array shapes, multiple arrays as well as array distortions);</p></li>
+<li><p>Output options: ray trajectories and amplitudes, eigenray search (with user-definable proximity threshhold), arrival patterns, acoustic pressure, coherent transmission loss, as well as particle velocity components (for modelling vector sensors).</p></li>
+<li><p>Outputs are written to .mat files (does not require Matlab(R) for compilation/usage)</p></li>
+<li><p>Cross Platform: runs on both Windows and Linux, and has been tested on an ARM embedded system.</p></li>
+</ul><hr><h2>Software Requirements</h2>
 
-<p># Range dependent altimetry/bathymetry including range dependent
-  elastic properties (Compressional and shear wave speeds,
-  density, as well as compressional and shear attenuation);</p>
+<p>Compiled binaries of cTraceo for Windows and Linux are available in the <a href="https://github.com/EyNuel/cTraceo/downloads">downloads</a> section. Alternatively you can download the source code and compile it yourself.</p>
 
-<p># Range dependent sound speed fields;</p>
+<h3>Compiler Support</h3>
 
-<p># Support for user-defined smooth objects within waveguide
-   (like rocks, marine mammals, submarines);</p>
-
-<p># Full suppport for backscattering (from altimetry/bathymetry
-   or objects);</p>
-
-<p># Allows free positioning of acoustic source and receivers
-   (altimetry/bathymetry as well as objects and receivers may be
-   positioned behind the source for modelling complex waveguides);</p>
-
-<p># Support for horizontal, vertical, rectangular and arbitrarily
-   shaped receiver arrays (allows modelling unusual array shapes,
-   multiple arrays as well as array distortions);</p>
-
-<p># Output options: ray trajectories and amplitudes, eigenray
-   search (with user-definable proximity threshhold), arrival
-   patterns, acoustic pressure, coherent transmission loss, as
-   well as particle velocity components (for modelling vector
-   sensors).</p>
-
-<p># Outputs are written to .mat files (does not require Matlab(R)
-   for compilation/usage)</p>
-
-<h2>Software Requirements</h2>
-
-<h1>Matlab (Optional)</h1>
-
-<p>This software generates Matlab .mat-files as output, and
-  provides 2 methods for writing these files.
-  1 - Linking with Matlab(R) libraries during compilation.
-  2 - Using a set of internal functions.
-  Option 2 is now the recommended method and is enabled by default.
-  Although it is still possible to fall back to option 1 this
-  requires some extra configuration, is only supported on Linux
-  and requires a Matlab(R) License to be available.</p>
-
-<h1>Compiler Support</h1>
-
-<p>cTraceo requires a C Compiler compatible with the ISO C99
-  Standard. This is mostly due to the need for complex
-  (Imaginary) Math.</p>
+<p>cTraceo requires a C Compiler compatible with the ISO C99 Standard. This is mostly due to the need for complex (Imaginary) Math:</p>
 
 <ul>
-<li><p>The GNU C Compiler
-GCC fully supports the ISO C99 standard as of version 4.5.
-The 4.3.x and 4.4.x versions partially implement the C99
-standard and although warnings related to imaginary math may
-be generated, the code is compiled successfully.
-Successfully tested with versions 4.4.4 and 4.4.5 on Linux as
-well as with version 4.5.3 on Windows (using Cygwin)</p></li>
-<li><p>Clang - LLVM C Language Frontend
-The Clang compiler is the compiler used for development of the
-cTraceo Model.
+<li><p>The GNU C Compiler<br>
+GCC fully supports the ISO C99 standard as of version 4.5. The 4.3.x and 4.4.x versions partially implement the C99 standard and although warnings related to imaginary math may be generated, the code is compiled successfully.<br>
+Successfully tested with versions 4.4.4 and 4.4.5 on Linux as well as with version 4.5.3 on Windows (using Cygwin)</p></li>
+<li><p>Clang - LLVM C Language Frontend<br>
+The Clang compiler is the compiler used for development of the cTraceo Model.<br>
 Successfully tested with versions 2.8 and 2.9 on Linux.</p></li>
-<li><p>MS Visual Studio
-No version of Microsoft's Visual Studio C Compiler supports 
-the ISO C99 Standard, so compilation should not be possible.
+<li><p>MS Visual Studio<br>
+No version of Microsoft's Visual Studio C Compiler supports the ISO C99 Standard, so compilation should not be possible.<br>
 Not tested.</p></li>
-</ul><h2>Makefile Configuration</h2>
+</ul><h3>Matfile output</h3>
 
-<p>To compile this model the user may have to adapt the included
-   makefile to match the target system.
-   Although the options in the Makefile are mostly self-
-   -explanatory, a brief overview will be presented here:</p>
+<p>This software generates Matlab .mat-files as output, and provides 2 methods for writing these files:<br>
+1. Linking with Matlab(R) libraries during compilation.<br>
+2. Using a set of internal functions.  </p>
 
-<h1>The "CC" variable</h1>
+<p>Option 2 is now the recommended method and is enabled by default. Although it is still possible to fall back to option 1 this requires some extra configuration, is only supported on Linux and requires a Matlab(R) License to be available.</p>
 
-<p>Defines which command to invoke for compilation.</p>
+<hr><h2>Compilation and Installation</h2>
 
-<h1>The "OS" Variable:</h1>
+<h3>Linux</h3>
 
-<p>Defines for which operating system to compile.</p>
+<p>Just run:</p>
 
-<h1>The "ARCH" variable</h1>
-
-<p>This is used to define whether to compile for 32 bit or 64 bit
-  systems.</p>
-
-<h1>The "USE_MATLAB" variable</h1>
-
-<p>When compiling cTraceo on Linux it is possible to choose between
-  using Matlab or the internal functions to write the result files.
-  If in doubt, leave at "0". Note that linking with matlab is only
-  supported in linux.</p>
-
-<h1>The "MATLAB_DIR" variable</h1>
-
-<p>This variable should contain the base directory of the 
-  system's Matlab(R) installation. This is needed when linking with 
-  Matlab for writing .mat files, and is only possible on Linux.</p>
-
-<h1>The "MATLAB_VERSION" variable</h1>
-
-<p>As different versions of Matlab require different variable
-  types for calling library functions, this option is required 
-  for selecting the appropriate types.</p>
-
-<h2>Compilation and Installation</h2>
-
-<p># Linux
-   After the options descibed in "Makefile Configuration" have
-   been defined, just run:</p>
-
-<p>$&gt; make</p>
-
-<p>This will compile the model and place a binary named "ctraceo"
-   in the "bin/" subdirectory.</p>
-
-<p># Windows
-   To compile cTraceo on windows, several steps are required:</p>
-
-<pre><code>* Download and install Cygwin from www.cygwin.com.
-  Cygwin provides basic linux build tools (like 'make') for windows.
-  When installing Cygwin packages, select the following packages:
-    "devel &gt; gcc4"
-    "devel &gt; make"
-  Several other packages will be installed for dependencies.
-
-* Add "c:/cygwin/bin" to your system's PATH environment variable.
-
-* Open Cygwin. A command line will appear.
-  This command line provides an interface similar to Linux, and
-  allows for easy compilation of the model.
-  In Cygwin, navigate to location which contains cTraceo's source
-  code; this will look similar to:
-    $&gt; cd /cygdrive/c/Users/username/Documents/models/cTraceo
-
-* Run:
-    $&gt; make
-  If all goes well, this will produce an executable called
-  "ctraceo.exe" in the "bin/" subdirectory which can now be
-  used like any other windows executable.
+<pre><code>$&gt; make
 </code></pre>
 
-<h2>Matlab Configuration &amp; Example Cases</h2>
+<p>This will compile the model and place a binary named "ctraceo" in the "bin/" subdirectory.</p>
 
-<p>Several example cases are contained in the "examples/"
-   subdirectory. These examples depend on matlab functions
-   contained in the "M-Files/" subdirectory and as such this
-   folder should be added to the matlab path.</p>
+<h3>Windows</h3>
 
-<p>Within the provided example files the model is invoked by
-   calling the command "ctraceo", and thus the "bin/" folder 
-   containing the compiled cTraceo binary should be on the
-   system's PATH.</p>
+<p>To compile cTraceo on windows, several steps are required:  </p>
 
-<h2>License Notes</h2>
+<ol>
+<li><p>Download and install Cygwin from <a href="http://www.cygwin.com">www.cygwin.com</a>.
+Cygwin provides basic linux build tools (like 'make') for windows.<br>
+When installing Cygwin packages, select the following packages:<br>
+"devel &gt; gcc4"<br>
+"devel &gt; make"<br>
+Several other packages will be installed for dependencies.</p></li>
+<li><p>Add "c:/cygwin/bin" to your system's PATH environment variable.  </p></li>
+<li><p>Open Cygwin. A command line will appear. This command line provides an interface similar to Linux, and allows for easy compilation of the model.<br>
+In Cygwin, navigate to location which contains cTraceo's source code; this will look similar to:<br>
+$&gt; cd /cygdrive/c/Users/username/Documents/models/cTraceo</p></li>
+<li><p>Run:<br>
+$&gt; make  </p></li>
+</ol><p>If all goes well, this will produce an executable called "ctraceo.exe" in the "bin/" subdirectory which can now be used like any other windows executable.</p>
 
-<p>The cTraceo Raytracing Model is released under the Creative
-   Commons Attribution-NonCommercial-ShareAlike 3.0 Unported
-   (CC BY-NC-SA 3.0) 
-   <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/">http://creativecommons.org/licenses/by-nc-sa/3.0/</a></p>
+<hr><h2>Matlab Configuration &amp; Example Cases</h2>
 
-<p>Below, a short, "human readable" version of the software license
-is shown. Read the attached "license.txt" file for the full text</p>
+<p>Several example cases are contained in the "examples/" subdirectory. These examples depend on matlab functions contained in the "M-Files/" subdirectory and as such this folder should be added to the matlab path.  </p>
 
-<h2>of the license.</h2>
+<p>Within the provided example files the model is invoked by calling the command "ctraceo", and thus the "bin/" folder containing the compiled cTraceo binary should be on the system's PATH.</p>
 
-<p>In Short:
-You are free:
-    to Share — to copy, distribute and transmit the work
-    to Remix — to adapt the work </p>
+<hr><h2>License Notes</h2>
 
-<p>Under the following conditions:
-    Attribution   — You must attribute The cTraceo Raytracing
-                    Model to SiPLAB (with link to
-                    <a href="http://www.siplab.fct.ualg.pt/">http://www.siplab.fct.ualg.pt/</a>)
-    Noncommercial — You may not use this work for commercial 
-                    purposes. 
-    Share Alike   — If you alter, transform, or build upon this
-                    work, you may distribute the resulting work
-                    only under the same or similar license to
-                    this one. </p>
+<p>The cTraceo Raytracing Model is released under the Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported (CC BY-NC-SA 3.0).<br><a href="http://creativecommons.org/licenses/by-nc-sa/3.0/">http://creativecommons.org/licenses/by-nc-sa/3.0/</a></p>
 
-<p>With the understanding that:
-    Waiver        — Any of the above conditions can be waived if
-                    you get permission from the copyright holder.
-    Public Domain — Where the work or any of its elements is in
-                    the public domain under applicable law, that
-                    status is in no way affected by the license.
-    Other Rights  — In no way are any of the following rights
-                    affected by the license:
-                    # Your fair dealing or fair use rights, or
-                      other applicable copyright exceptions and
-                      limitations;
-                    # The author's moral rights;
-                    # Rights other persons may have either in
-                      the work itself or in how the work is used,
-                      such as publicity or privacy rights.
-    Notice        — For any reuse or distribution, you must make
-                    clear to others the license terms of this
-                    work. The best way to do this is with a link to:
-                    <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/">http://creativecommons.org/licenses/by-nc-sa/3.0/</a></p>
+<hr><h2>Contact</h2>
 
-<h2>NOTE:    cTraceo is research code under active development The code may contain bugs and updates are possible in the future.</h2>
+<p>cTraceo was written for project SENSOCEAN by:<br>
+Emanuel Ey <a href="mailto:emanuel.ey@gmail.com">emanuel.ey@gmail.com</a><br>
+Copyright (C) 2011 - 2013<br><a href="http://www.siplab.fct.ualg.pt/">Signal Processing Laboratory</a><br><a href="http://www.ualg.pt/">University of the Algarve</a>  </p>
 
-<h2>cTraceo was written for project SENSOCEAN by:</h2>
+<p>cTraceo is derived from the FORTRAN 77 TRACEO code, written by:<br>
+Orlando Camargo Rodriguez <a href="mailto:orodrig@ualg.pt">orodrig@ualg.pt</a><br>
+Copyright (C) 2010<br>
+Physics Department  </p>
 
-<p>Emanuel Ey
-<a href="mailto:emanuel.ey@gmail.com">emanuel.ey@gmail.com</a>
-Copyright (C) 2011 - 2012
-Signal Processing Laboratory
-Universidade do Algarve</p>
+<p><a href="http://www.siplab.fct.ualg.pt/">Signal Processing Laboratory</a><br><a href="http://www.ualg.pt/">University of the Algarve</a>  </p>
 
-<h2>cTraceo is derived from the FORTRAN 77 TRACEO code, written by:</h2>
-
-<p>Orlando Camargo Rodriguez:
-Copyright (C) 2010
-Orlando Camargo Rodriguez
-<a href="mailto:orodrig@ualg.pt">orodrig@ualg.pt</a>
-Universidade do Algarve
-Physics Department
-Signal Processing Laboratory</p>
+<p>NOTE: 
+cTraceo is research code under active development The code may contain bugs and updates are possible in the future.</p>
       </section>
+      <footer>
+        <p>Project maintained by <a href="https://github.com/EyNuel">EyNuel</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="http://twitter.com/#!/michigangraham">mattgraham</a></small></p>
+      </footer>
     </div>
-    <footer>
-      <p>Project maintained by <a href="https://github.com/EyNuel">EyNuel</a></p>
-      <p>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></p>
-    </footer>
     <!--[if !IE]><script>fixScale(document);</script><![endif]-->
     
   </body>
