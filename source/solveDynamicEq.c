@@ -173,7 +173,9 @@ void    solveDynamicEq(settings_t* settings, ray_t* ray){
         }else{
             fatal("Solving dynamic equations: iRefl neither 1 nor 0!\nAborting...");
         }
-
+        
+        //Q: is this completely redundant?! can't seem to find anywhere where "caustc" is actually used..
+        //A: actually, the value of caustc is used when calculating acoustic pressure at a hydrophone in "getRayPressure()".
         prod = ray->q[i] * ray->q[i+1];
         if ( (prod <= 0) && (ray->q[i] != 0)){
             ray->caustc[i+1] = ray->caustc[i] + M_PI/2.0;
