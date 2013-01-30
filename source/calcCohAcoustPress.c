@@ -452,17 +452,18 @@ void    calcCohAcoustPress(settings_t* settings){
                 }
             }
         }
-        //create mxArray
-        p = mxCreateDoubleMatrix((MWSIZE)dimZ, (MWSIZE)dimR, mxCOMPLEX);
 
-        //verify if memory allocation was successfull:
-        if( p == NULL){
-            fatal("Memory alocation error.");
-        }
 
         //copy pressure to mxArray:
         switch( settings->output.arrayType){
             case ARRAY_TYPE__LINEAR:
+                //Note that the output for a linear hydrophone array is a vector (1*n as opposed to m*n for other hydrophone array types)
+                p = mxCreateDoubleMatrix((MWSIZE)dimZ, (MWSIZE)1, mxCOMPLEX);   
+                if( p == NULL){ fatal("Memory alocation error.");}
+                
+                copyComplexFloatToMxArray2D(settings->output.pressure2D, p, dimZ, 1);
+                break;
+                
                 /*
                 copyComplexToPtr(settings->output.pressure1D, p, dimZ);
                 break;
@@ -471,6 +472,12 @@ void    calcCohAcoustPress(settings_t* settings){
             case ARRAY_TYPE__VERTICAL:
             case ARRAY_TYPE__HORIZONTAL:
             case ARRAY_TYPE__RECTANGULAR:
+                //create mxArray
+                p = mxCreateDoubleMatrix((MWSIZE)dimZ, (MWSIZE)dimR, mxCOMPLEX);
+                //verify if memory allocation was successfull:
+                if( p == NULL){
+                    fatal("Memory alocation error.");
+                }
                 //Note: the output for rectangular arrays has to be transposed.
                 copyComplexFloatToMxArray2D_transposed(settings->output.pressure2D, p, dimZ, dimR);
                 break;
