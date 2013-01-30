@@ -4,6 +4,9 @@
  * A raytracing subroutine for cylindrical simmetry. Calculates a ray's trajectory.     *
  *                                                                                      *
  * ------------------------------------------------------------------------------------ *
+ * Website:                                                                             *
+ *          https://github.com/EyNuel/cTraceo/wiki                                      *
+ *                                                                                      *
  * License: This file is part of the cTraceo Raytracing Model and is released under the *
  *          Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License  *
  *          http://creativecommons.org/licenses/by-nc-sa/3.0/                           *
@@ -14,7 +17,7 @@
  * Written for project SENSOCEAN by:                                                    *
  *          Emanuel Ey                                                                  *
  *          emanuel.ey@gmail.com                                                        *
- *          Copyright (C) 2011                                                          *
+ *          Copyright (C) 2011 - 2013                                                   *
  *          Signal Processing Laboratory                                                *
  *          Universidade do Algarve                                                     *
  *                                                                                      *
@@ -62,6 +65,9 @@
 void    solveEikonalEq(settings_t*, ray_t*);
 
 void    solveEikonalEq(settings_t* settings, ray_t* ray){
+    
+    assert(settings->source.rx > settings->source.rbox1);   //this used to cause a segfault due to bug #13
+    
     DEBUG(5,"in. theta: %lf\n", ray->theta);
     
     double          cx, ci, cc, sigmaI, sigmaR, sigmaZ, cri, czi, crri, czzi, crzi;
@@ -88,7 +94,7 @@ void    solveEikonalEq(settings_t* settings, ray_t* ray){
     double          thetaRefl;
     point_t         pointA, pointB, pointIsect;
     double          rho1, rho2, cp2, cs2, ap, as, lambda, tempDouble = 0;
-    double          dr, dz, dIc;
+    double          dr, dz, dTau, dIc;
     double          prod;
     uintptr_t       initialMemorySize;
     uint32_t        nObjCoords; //"noj"
@@ -216,6 +222,12 @@ void    solveEikonalEq(settings_t* settings, ray_t* ray){
             pointB.z = yNew[1];
             
             DEBUG(7, "Ray above surface? \n");
+            /**
+             * NOTE:
+             * cTraceo uses a vertically inverted coordinate system.
+             * This means that z=0 will be at (or near) the water surface,
+             * while z<0 will be _above_ and z>0 will be _below_ water.
+             */
             if (zi <= altInterpolatedZ){
                 DEBUG(5,"ray above surface.\n");
                 //determine the coordinates of the ray-boundary intersection:
@@ -370,7 +382,15 @@ void    solveEikonalEq(settings_t* settings, ray_t* ray){
                     ray->iKill = true;
                 }
             //  end of "ray above surface?"
-            }else if (zi >= batInterpolatedZ){  //  Ray below bottom?
+            }
+            
+            /**
+             * NOTE:
+             * cTraceo uses an inverted coordinate system.
+             * This means that z=0 will be at (or near) the water surface,
+             * while z<0 will be _above_ and z>0 will be _below_ water.
+             */
+            else if (zi >= batInterpolatedZ){  //  Ray below bottom?
                 DEBUG(5,"ray below bottom.\n");
                 DEBUG(8,"ri: %lf, zi: %lf\n", ri, zi);
                 rayBoundaryIntersection(&(settings->batimetry), &pointA, &pointB, &pointIsect);
@@ -833,8 +853,9 @@ void    solveEikonalEq(settings_t* settings, ray_t* ray){
 
         ray->boundaryTg[i+1].r  = tauB.r;
         ray->boundaryTg[i+1].z  = tauB.z;
-
-        if (jRefl == 1){    //TODO huh?!
+        
+        //if there is a reflection on the next coord, do a phase shift:
+        if (jRefl == 1){
             ray->phase[i+1] = ray->phase[i] - atan2( cimag(reflCoeff), creal(reflCoeff) );
         }else{
             ray->phase[i+1] = ray->phase[i];
@@ -852,6 +873,7 @@ void    solveEikonalEq(settings_t* settings, ray_t* ray){
             yOld[j] = yNew[j];
             fOld[j] = fNew[j];
         }
+        
         //next step:
         i++;
         
@@ -903,15 +925,18 @@ void    solveEikonalEq(settings_t* settings, ray_t* ray){
     ray->nRefl = sRefl + bRefl + oRefl;
     
     //Cut the ray at box exit:
-    dr  = ray->r[ray->nCoords -1] - ray->r[ray->nCoords-2];
-    dz  = ray->z[ray->nCoords -1] - ray->z[ray->nCoords-2];
-    dIc = ray->ic[ray->nCoords-1] - ray->ic[ray->nCoords-2];
+    dr  = ray->r[  ray->nCoords -1] - ray->r[  ray->nCoords-2];
+    dz  = ray->z[  ray->nCoords -1] - ray->z[  ray->nCoords-2];
+    dIc = ray->ic[ ray->nCoords -1] - ray->ic[ ray->nCoords-2];
+    dTau= ray->tau[ray->nCoords -1] - ray->tau[ray->nCoords-2];
+    
 
     if (ray->r[ray->nCoords-1] > settings->source.rbox2){
         //ray has exited rangebox at right edge
-        ray->z[ray->nCoords-1]  = ray->z[ray->nCoords-2] + (settings->source.rbox2 - ray->r[ray->nCoords-2])* dz/dr;
-        ray->ic[ray->nCoords-1] = ray->ic[ray->nCoords-2] + (settings->source.rbox2 - ray->r[ray->nCoords-2])* dIc/dr;
-        ray->r[ray->nCoords-1]  = settings->source.rbox2;
+        ray->z[  ray->nCoords-1] = ray->z[  ray->nCoords-2] + (settings->source.rbox2 - ray->r[ray->nCoords-2])* dz/dr;
+        ray->ic[ ray->nCoords-1] = ray->ic[ ray->nCoords-2] + (settings->source.rbox2 - ray->r[ray->nCoords-2])* dIc/dr;
+        ray->tau[ray->nCoords-1] = ray->tau[ray->nCoords-2] + (settings->source.rbox2 - ray->r[ray->nCoords-2])* dTau/dr;
+        ray->r[  ray->nCoords-1] = settings->source.rbox2;
         
         //adjust memory size of the ray (we don't need more memory than nCoords)
         //TODO remove memmory reallocation -performance!
@@ -937,6 +962,7 @@ void    solveEikonalEq(settings_t* settings, ray_t* ray){
     /* Search for refraction points (refraction angles are zero!), rMin, rMax and twisting(returning) of rays:  */
     //NOTE: We are assuming (safely) that there can't be more refraction points than the ray has coordinates,
     //      so we can skip memory bounds-checking.
+    //TODO: in the opencl version, this for-loop has been moved to solveDynamicEq():
     ray->nRefrac = 0;
     for(i=1; i<ray->nCoords-2; i++){
         ray->rMin = min( ray->rMin, ray->r[i] );
@@ -949,9 +975,18 @@ void    solveEikonalEq(settings_t* settings, ray_t* ray){
             ray->nRefrac++;
         }
         
+        
         prod = ( ray->r[i+1]-ray->r[i] )*( ray->r[i]-ray->r[i-1] );
         if ( prod < 0 ){
             ray->iReturn = true;
+            //if backscattering is disabled, cut the ray here and skip the remaining coords:
+            if(settings->options.killBackscatteredRays){
+                DEBUG(3, "Truncated a backscattered ray.\n");
+                ray->nCoords = i+1;
+                ray->iReturn = false;   //as we're truncating the ray, we don't need to mark it as 'returning'
+                settings->options.nBackscatteredRays += 1;
+                break;
+            }
         }
     }
     

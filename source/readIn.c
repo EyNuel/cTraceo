@@ -4,6 +4,9 @@
  * read the waveguide input file.                                                       *
  *                                                                                      *
  * ------------------------------------------------------------------------------------ *
+ * Website:                                                                             *
+ *          https://github.com/EyNuel/cTraceo/wiki                                      *
+ *                                                                                      *
  * License: This file is part of the cTraceo Raytracing Model and is released under the *
  *          Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License  *
  *          http://creativecommons.org/licenses/by-nc-sa/3.0/                           *
@@ -14,7 +17,7 @@
  * Written for project SENSOCEAN by:                                                    *
  *          Emanuel Ey                                                                  *
  *          emanuel.ey@gmail.com                                                        *
- *          Copyright (C) 2011                                                          *
+ *          Copyright (C) 2011 - 2013                                                   *
  *          Signal Processing Laboratory                                                *
  *          Universidade do Algarve                                                     *
  *                                                                                      *
@@ -48,10 +51,10 @@
 #include <math.h>
 
 //prototype:
-void    readIn(settings_t* settings, FILE* inFile);
+void    readIn(settings_t* settings);
 
 //actual function declaration:
-void    readIn(settings_t* settings, FILE* inFile){
+void    readIn(settings_t* settings){
 
     uint32_t    i,j;
     double      dTheta;
@@ -63,15 +66,16 @@ void    readIn(settings_t* settings, FILE* inFile){
     char*       tempString;
     int32_t     tempInt;
     char*       junkChar;
+    FILE*       inFile = settings->options.inFile;
     
 
     /************************************************************************
      *  Read the title:                                                     *
      ***********************************************************************/
-    junkChar = fgets(settings->cTitle, MAX_LINE_LEN+1, inFile);
+    junkChar = fgets(settings->options.caseTitle, MAX_LINE_LEN+1, inFile);
     (void)junkChar;
-
-
+    
+    
     /************************************************************************
      *  Read and validate the source info:                                  *
      ***********************************************************************/
@@ -151,7 +155,15 @@ void    readIn(settings_t* settings, FILE* inFile){
     }
     if( (settings->source.rx < settings->source.rbox1) ||
         (settings->source.rx > settings->source.rbox2)){
-        fatal(  "Input file: Source: initial range is outside the range box!\nAborting...");
+        fatal(  "Input file: The source's range coordinate is outside the range box!\nAborting...");
+    }
+    if (settings->source.rx == settings->source.rbox1){
+        printf("WARNING: source's range coordinate is equal to range box boundary.\n");
+        printf("         Range box has been automatically resized to include the\n");
+        printf("         source position.\n");
+        printf("         Adjust range box (rBox) to include the source position to\n");
+        printf("         avoid this warning in the future.\n\n");
+        settings->source.rbox1 -= 0.1;
     }
     
     
@@ -195,7 +207,7 @@ void    readIn(settings_t* settings, FILE* inFile){
     }
     free(tempString);
 
-    /* surfaceInterpolation;    //formerly "aitype" */
+    /* surface Interpolation;    //formerly "aitype" */
     tempString = readStringN(inFile,6);
     if(strcmp(tempString,"'FL'\n") == 0){
         settings->altimetry.surfaceInterpolation    = SURFACE_INTERPOLATION__FLAT;
@@ -207,7 +219,8 @@ void    readIn(settings_t* settings, FILE* inFile){
         settings->altimetry.surfaceInterpolation    = SURFACE_INTERPOLATION__2P;
         
     }else if(strcmp(tempString,"'3P'\n") == 0){
-        settings->altimetry.surfaceInterpolation    = SURFACE_INTERPOLATION__3P;
+        printf("WARNING: The selected surface interpolation method (parabolic/3P) is no longer supported - using cubic/4P interpolation instead.\n");
+        settings->altimetry.surfaceInterpolation    = SURFACE_INTERPOLATION__4P;
         
     }else if(strcmp(tempString,"'4P'\n") == 0){
         settings->altimetry.surfaceInterpolation    = SURFACE_INTERPOLATION__4P;
@@ -438,7 +451,8 @@ void    readIn(settings_t* settings, FILE* inFile){
             settings->objects.surfaceInterpolation  = SURFACE_INTERPOLATION__2P;
             
         }else if(strcmp(tempString,"'3P'\n") == 0){
-            settings->objects.surfaceInterpolation  = SURFACE_INTERPOLATION__3P;
+            printf("WARNING: The selected object surface interpolation method (parabolic/3P) is no longer supported - using cubic/4P interpolation instead.\n");
+            settings->objects.surfaceInterpolation  = SURFACE_INTERPOLATION__4P;
             
         }else if(strcmp(tempString,"'4P'\n") == 0){
             settings->objects.surfaceInterpolation  = SURFACE_INTERPOLATION__4P;
@@ -559,7 +573,7 @@ void    readIn(settings_t* settings, FILE* inFile){
     }
     free(tempString);
 
-    /* surfaceInterpolation;    //formerly "aitype" */
+    /* bottom Interpolation;    //formerly "aitype" */
     tempString = readStringN(inFile,6);
     if(strcmp(tempString,"'FL'\n") == 0){
         settings->batimetry.surfaceInterpolation    = SURFACE_INTERPOLATION__FLAT;
@@ -571,7 +585,8 @@ void    readIn(settings_t* settings, FILE* inFile){
         settings->batimetry.surfaceInterpolation    = SURFACE_INTERPOLATION__2P;
         
     }else if(strcmp(tempString,"'3P'\n") == 0){
-        settings->batimetry.surfaceInterpolation    = SURFACE_INTERPOLATION__3P;
+        printf("WARNING: The selected bottom interpolation method (parabolic/3P) is no longer supported - using cubic/4P interpolation instead.\n");
+        settings->batimetry.surfaceInterpolation    = SURFACE_INTERPOLATION__4P;
         
     }else if(strcmp(tempString,"'4P'\n") == 0){
         settings->batimetry.surfaceInterpolation    = SURFACE_INTERPOLATION__4P;

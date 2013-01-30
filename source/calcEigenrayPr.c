@@ -4,6 +4,9 @@
  *  Calculates eigenrays using proximity method.                                        *
  *                                                                                      *
  * ------------------------------------------------------------------------------------ *
+ * Website:                                                                             *
+ *          https://github.com/EyNuel/cTraceo/wiki                                      *
+ *                                                                                      *
  * License: This file is part of the cTraceo Raytracing Model and is released under the *
  *          Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License  *
  *          http://creativecommons.org/licenses/by-nc-sa/3.0/                           *
@@ -14,7 +17,7 @@
  * Written for project SENSOCEAN by:                                                    *
  *          Emanuel Ey                                                                  *
  *          emanuel.ey@gmail.com                                                        *
- *          Copyright (C) 2011                                                          *
+ *          Copyright (C) 2011 - 2013                                                   *
  *          Signal Processing Laboratory                                                *
  *          Universidade do Algarve                                                     *
  *                                                                                      *
@@ -68,12 +71,12 @@ void    calcEigenrayPr(settings_t* settings){
     double          dz;
     uintptr_t       nRet, iHyd = 0;
     uintptr_t       iRet[51];
+    uint32_t        maxNumEigenrays = 0;
 
-    MATFile*        matfile             = NULL;
     mxArray*        pThetas             = NULL;
-    mxArray*        pTitle              = NULL;
     mxArray*        pHydArrayR          = NULL;
     mxArray*        pHydArrayZ          = NULL;
+    mxArray*        mxMaxNumEigenrays   = NULL;
     mxArray*        mxTheta             = NULL;
     mxArray*        mxR                 = NULL;
     mxArray*        mxZ                 = NULL;
@@ -126,31 +129,18 @@ void    calcEigenrayPr(settings_t* settings){
             DEBUG(1, "Done.\n");
         }
     }
-
+    
     #if 1
-
-    //open matfile for output
-    matfile     = matOpen("eig.mat", "w");
-
     //write launching angles to file
     pThetas     = mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)settings->source.nThetas, mxREAL);
-    if(matfile == NULL || pThetas == NULL){
+    if(pThetas == NULL){
         fatal("Memory alocation error.");
     }
     //copy angles in cArray to mxArray:
     copyDoubleToMxArray(settings->source.thetas, pThetas, settings->source.nThetas);
     //move mxArray to file and free memory:
-    matPutVariable(matfile, "thetas", pThetas);
+    matPutVariable(settings->options.matfile, "thetas", pThetas);
     mxDestroyArray(pThetas);
-
-
-    //write title to matfile:
-    pTitle = mxCreateString("TRACEO: EIGenrays (by proximity)");
-    if(pTitle == NULL){
-        fatal("Memory alocation error.");
-    }
-    matPutVariable(matfile, "caseTitle", pTitle);
-    mxDestroyArray(pTitle);
 
 
     //write hydrophone array ranges to file:
@@ -159,7 +149,7 @@ void    calcEigenrayPr(settings_t* settings){
         fatal("Memory alocation error.");
     }
     copyDoubleToMxArray(    settings->output.arrayR, pHydArrayR, (uintptr_t)settings->output.nArrayR);
-    matPutVariable(matfile, "rarray", pHydArrayR);
+    matPutVariable(settings->options.matfile, "rarray", pHydArrayR);
     mxDestroyArray(pHydArrayR);
 
 
@@ -169,7 +159,7 @@ void    calcEigenrayPr(settings_t* settings){
         fatal("Memory alocation error.");
     }
     copyDoubleToMxArray(    settings->output.arrayZ, pHydArrayZ, (uintptr_t)settings->output.nArrayZ);
-    matPutVariable(matfile, "zarray", pHydArrayZ);
+    matPutVariable(settings->options.matfile, "zarray", pHydArrayZ);
     mxDestroyArray(pHydArrayZ);
 
 
@@ -317,6 +307,7 @@ void    calcEigenrayPr(settings_t* settings){
                                 }
 
                                 eigenrays[j][jj].nEigenrays += 1;
+                                maxNumEigenrays = max(eigenrays[j][jj].nEigenrays, maxNumEigenrays);
                             }// if (dz settings->output.miss)
                         }// for(jj=1; jj<=settings->output.nArrayZ; jj++)
 
@@ -411,6 +402,7 @@ void    calcEigenrayPr(settings_t* settings){
                                     }
 
                                     eigenrays[j][jj].nEigenrays += 1;
+                                    maxNumEigenrays = max(eigenrays[j][jj].nEigenrays, maxNumEigenrays);
                                 }
                             }
                         }
@@ -423,7 +415,12 @@ void    calcEigenrayPr(settings_t* settings){
             }
         }//if (ctheta > 1.0e-7)
     }//for(i=0; i<settings->source.nThetas; i++)
-
+    
+    //write "maximum number of eigenrays at any of the hydrophones
+    mxMaxNumEigenrays = mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)1, mxREAL);
+    copyUInt32ToMxArray(&maxNumEigenrays, mxMaxNumEigenrays, 1);
+    matPutVariable(settings->options.matfile, "maxNumEigenrays", mxMaxNumEigenrays);
+    
     //copy arrival data to mxAllEigenraysStruct:
     mxAllEigenraysStruct = mxCreateStructMatrix((MWSIZE)settings->output.nArrayZ,   //number of rows
                                                 (MWSIZE)settings->output.nArrayR,   //number of columns
@@ -468,11 +465,10 @@ void    calcEigenrayPr(settings_t* settings){
     }
 
     ///Write Eigenrays to matfile:
-    matPutVariable(matfile, "eigenrays", mxAllEigenraysStruct);
-
-    matClose(matfile);
+    matPutVariable(settings->options.matfile, "eigenrays", mxAllEigenraysStruct);
+    
+    //free memory
     mxDestroyArray(mxEigenrayStruct);
-
     reallocRayMembers(ray, 0);
     free(ray);
     DEBUG(1,"out\n");

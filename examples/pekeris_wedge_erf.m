@@ -27,7 +27,21 @@ Dmax   =  100;
 
 ray_step = Rmax/1000; 
 
-zs = 25; rs = 0; thetamax = 10; np2 = 1001; la = linspace(-thetamax,thetamax,np2);
+zs = 25; rs = 0;
+
+thetamax = 10;  
+%NOTE: higher aperture values will result in an error of the type:
+%
+%   'Eigenray search by Regula Falsi detected a returning ray at angle 0.523599.'
+%   'Returning eigenrays can only be determined by Proximity.'
+%
+%   this is because the Regula Falsi method only works correctly when no
+%   returning (ie, backscattered) rays are present.
+%   for more info check the wiki's troubleshooting section:
+%       https://github.com/EyNuel/cTraceo/wiki/Troubleshooting
+%
+
+np2 = 1001; la = linspace(-thetamax,thetamax,np2);
 
 source_data.ds       = ray_step;
 source_data.position = [rs zs];

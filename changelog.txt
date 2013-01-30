@@ -1,4 +1,44 @@
 ################################################################
+## Version 1.3 ##
+## Features/Changes:
+ # Implemented an option to truncate backscattered rays. This option is
+   activated by passing the command line switch '--killBackscatteredRays'.
+   The number of backscattered rays is saved in the resulting .mat
+   file as 'nBackscatteredRays'. This option can result in significant
+   performance improvements when large amounts of backscattered rays
+   are present in the waveguide.
+   
+ # Output file names can now be specified manually. This is done by 
+   passing the command line option '--outputFileName <name>'.
+  
+ # Added command line switch '--noHeader' which causes cTraceo to
+   write less output when being run. Usefull to reduce the amount
+   of redunt clutter when running many cases at the same time.
+   
+ # Added missing command line switch '--version' which causes cTraceo
+   to output it's version number.
+   
+ # cTraceo's command line switches are no longer case-sensitive
+   so that passing '--noLog' or '--nolog' is now the same.
+   
+ # Improved logging output.
+ 
+ 
+## Bugfixes:
+ # Fixed bug #19 which caused ray travel time "tau" to be 
+   incorrectly interpolated at a hydrophone's position. 
+
+ # Solved a bug which could cause a log file to be incorrectly named.
+ 
+ # Solved a bug which prevented the case title to be correclty written
+   to the output file.
+   
+ # Fixed bug #13 which caused a segfault to occurr when the source was
+   placed on the range box boundary.
+   
+ # Several minor and "behind the scenes" code improvements.
+   
+################################################################
 ## Version 1.2 ##
 ## Features/Changes:
  # Added a command line option to store the interpolated sound
@@ -6,7 +46,7 @@
    Passing '-s #' or '--ssp #' will generate an #-point interpolated
    SSP and store it in the file 'ssp.mat'.
    
- # Added a command line option to not write a log file to disk ('--nolog')
+ # Added a command line option to not write a log file to disk ('--noLog')
  
  # Made file access errors more verbose. The user can now clearly
    see which file caused the error.

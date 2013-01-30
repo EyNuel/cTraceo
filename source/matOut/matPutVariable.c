@@ -29,12 +29,10 @@ uintptr_t matPutVariable(MATFile* outfile, const char* arrayName, mxArray* inArr
 uintptr_t matPutVariable(MATFile* outfile, const char* arrayName, mxArray* inArray){
 	/*
 	 * Writes an mxArray to a matfile;
-	 * TODO add support for structures.
 	 * TODO actually verify successfull write instead of siomply returning 0
 	 */
 	
 	calcArraySize(inArray);
-	//printf("After calcArraySize: inArray->nBytes = %lu \n", inArray->nBytes);
 	
 	if (inArray->isStruct == false){
 		//assume that if it isn't struct, its a matrix

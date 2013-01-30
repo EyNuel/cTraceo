@@ -4,6 +4,9 @@
  *  Calculates Coherent Transmission Loss.                                              *
  *                                                                                      *
  * ------------------------------------------------------------------------------------ *
+ * Website:                                                                             *
+ *          https://github.com/EyNuel/cTraceo/wiki                                      *
+ *                                                                                      *
  * License: This file is part of the cTraceo Raytracing Model and is released under the *
  *          Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License  *
  *          http://creativecommons.org/licenses/by-nc-sa/3.0/                           *
@@ -14,7 +17,7 @@
  * Written for project SENSOCEAN by:                                                    *
  *          Emanuel Ey                                                                  *
  *          emanuel.ey@gmail.com                                                        *
- *          Copyright (C) 2011                                                          *
+ *          Copyright (C) 2011 - 2013                                                   *
  *          Signal Processing Laboratory                                                *
  *          Universidade do Algarve                                                     *
  *                                                                                      *
@@ -59,14 +62,9 @@ void calcCohTransLoss(settings_t* settings){
     uint32_t    i, j, dim;
     double*     tl      = NULL;
     double**    tl2D    = NULL;
-    MATFile*    matfile = NULL;
     mxArray*    ptl     = NULL;
-    mxArray*    ptl2D       = NULL;
-
-    matfile     = matOpen("ctl.mat", "u");
-    if(matfile == NULL){
-        fatal("Memory alocation error.");
-    }
+    mxArray*    ptl2D   = NULL;
+    
 
     switch(settings->output.arrayType){
         case ARRAY_TYPE__RECTANGULAR:
@@ -89,7 +87,7 @@ void calcCohTransLoss(settings_t* settings){
                 fatal("Memory alocation error.");
             }
             copyDoubleToPtr2D_transposed(tl2D, ptl2D, settings->output.nArrayZ, settings->output.nArrayR);
-            matPutVariable(matfile,"tl",ptl2D);
+            matPutVariable(settings->options.matfile,"tl",ptl2D);
             mxDestroyArray(ptl2D);
 
             freeDouble2D(tl2D, settings->output.nArrayR);
@@ -109,7 +107,7 @@ void calcCohTransLoss(settings_t* settings){
                 fatal("Memory alocation error.");
             }
             copyDoubleToPtr(tl, mxGetPr(ptl), dim);
-            matPutVariable(matfile,"tl",ptl);
+            matPutVariable(settings->options.matfile,"tl",ptl);
             mxDestroyArray(ptl);
 
             free(tl);

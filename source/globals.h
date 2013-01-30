@@ -3,6 +3,9 @@
  *  Defines data structures, constants and macros needed by cTraceo.                    *
  *                                                                                      *
  * ------------------------------------------------------------------------------------ *
+ * Website:                                                                             *
+ *          https://github.com/EyNuel/cTraceo/wiki                                      *
+ *                                                                                      *
  * License: This file is part of the cTraceo Raytracing Model and is released under the *
  *          Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License  *
  *          http://creativecommons.org/licenses/by-nc-sa/3.0/                           *
@@ -13,7 +16,7 @@
  * Written for project SENSOCEAN by:                                                    *
  *          Emanuel Ey                                                                  *
  *          emanuel.ey@gmail.com                                                        *
- *          Copyright (C) 2011                                                          *
+ *          Copyright (C) 2011 - 2013                                                   *
  *          Signal Processing Laboratory                                                *
  *          Universidade do Algarve                                                     *
  *                                                                                      *
@@ -30,9 +33,9 @@
  ******************************************************** ************************/
 //NOTE: VERSION has to be 20 chars wide so that the header and help texts are printed correctly
 //              "----5---10---15---20"
-#define VERSION "1.2                 "
+#define VERSION VERSION_LONG    //this is defined in file 'source/version'
 //NOTE: HEADER is made up of consecutive strings, each 79 chars long:
-#define HEADER  "* =========================================================================== *\n""*          The cTraceo Acoustic Raytracing Model, Version "VERSION"*\n""*  Released under the Creative Commons Attribution-NonCommercial-ShareAlike   *\n""*  3.0 Unported License ( http://creativecommons.org/licenses/by-nc-sa/3.0/ ) *\n""* --------------------------------------------------------------------------- *\n""*         Copyright (C) 2011, 2012 Emanuel Ey <emanuel.ey@gmail.com>          *\n""*        Copyright (C) 2010 Orlando Camargo Rodriguez <orodrig@ualg.pt>       *\n""*     SiPLab, Universidade do Algarve, Portugal <www.siplab.fct.ualg.pt>      *\n""* =========================================================================== *\n\n"
+#define HEADER  "* =========================================================================== *\n""*          The cTraceo Acoustic Raytracing Model, Version "VERSION"*\n""* --------------------------------------------------------------------------- *\n""*  Released under the Creative Commons Attribution-NonCommercial-ShareAlike   *\n""*  3.0 Unported License ( http://creativecommons.org/licenses/by-nc-sa/3.0/ ) *\n""*         Copyright (C) 2011 - 2013 Emanuel Ey <emanuel.ey@gmail.com>         *\n""*        Copyright (C) 2010 Orlando Camargo Rodriguez <orodrig@ualg.pt>       *\n""*     SiPLab, Universidade do Algarve, Portugal <www.siplab.fct.ualg.pt>      *\n""* =========================================================================== *\n\n"
 
 
 
@@ -86,7 +89,7 @@
  * Some utilities                                                               *
  ********************************************************************************/
 
-//For some reason the C99 standard dropped the definition of PI, so we're defining it manually:
+//For some reason the C99 standard dropped the definitions of PI and Log10(e), so we're defining them manually:
 #ifndef M_PI
 #define M_PI 3.14159265358979323846264338327
 #endif
@@ -103,9 +106,6 @@
 #define TOP     0
 #define BOTTOM  2
 
-#define LINUX   1
-#define WINDOWS 2
-
 //function macro used for showing debugging information:
 #if VERBOSE == 1
     #define WHERESTR                "[%s,\tline %d]:\t"
@@ -115,6 +115,9 @@
     //this should be optimized away nicely by the compiler:
     #define DEBUG(level, ...)       {}
 #endif
+
+//function macro used for displaying logging output:
+#define LOG(...)                    if(settings->options.writeLogFile){fprintf(settings->options.logFile, __VA_ARGS__);}
 
 
 /********************************************************************************
@@ -319,18 +322,34 @@ typedef struct output{
 #define ARRAY_TYPE__VERTICAL        39  //"VRY"
 #define ARRAY_TYPE__LINEAR          40  //"LRY"
 
+typedef struct options{
+    char*           caseTitle;
+    bool            killBackscatteredRays;  //command line switch 
+    uint32_t        nBackscatteredRays;     //a counter for the number of rays truncated due to the --killBackscatteredRays switch
+    bool            writeHeader;            //command line switch
+    char*           inFileName;
+    FILE*           inFile;                 //file pointer to the input file's name
+    char*           outputFileName;
+    FILE*           matfile;                //a file pointer to the output matfile
+    bool            writeLogFile;           //command line switch
+    char*           logFileName;            //contains name of log file
+    FILE*           logFile;                //file pointer to the log file
+    bool            saveSSP;                //command line switch
+    uintptr_t       nSSPPoints;             //number of points with which to generate the ssp
+    char*           sspFileName;            //File in which to store the generated ssp
+}options_t;
 
-typedef struct settings {
+typedef struct settings{
     /*
      * Contains all input information
      */
-    char*           cTitle;
     source_t        source;
     interface_t     altimetry;
     soundSpeed_t    soundSpeed;
     objects_t       objects;
     interface_t     batimetry;
     output_t        output;
+    options_t       options;
 }settings_t;
 
 
