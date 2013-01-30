@@ -61,6 +61,10 @@
 void    calcCohAcoustPress(settings_t*);
 
 void    calcCohAcoustPress(settings_t* settings){
+    
+    assert(settings != NULL);
+    assert(settings->options.matfile != NULL);   //output file must be open
+    
     DEBUG(1,"in\n");
     mxArray*            pThetas = NULL;
     mxArray*            pHydArrayR  = NULL;
@@ -84,7 +88,8 @@ void    calcCohAcoustPress(settings_t* settings){
         //indexing variables used to output the pressure2D variable during debugging:
         uintptr_t           rr,zz;
     #endif
-    //get dimensions of hydrophone array:
+    
+    //determine dimensions of hydrophone array:
     switch(settings->output.arrayType){
         case ARRAY_TYPE__HORIZONTAL:
             dimR = settings->output.nArrayR;
@@ -97,6 +102,7 @@ void    calcCohAcoustPress(settings_t* settings){
             break;
 
         case ARRAY_TYPE__LINEAR:
+            assert( settings->output.nArrayR == settings->output.nArrayZ);
             /*  in linear arrays, nArrayR and nArrayZ have to be equal
             *   (this is checked in readIn.c when reading the file).
             *   The pressure components will be written to the rightmost index
