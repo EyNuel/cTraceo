@@ -141,7 +141,7 @@ win32:	dirs
 		@echo "Building cTraceo $(VERSION_SHORT) for Windows x86."
 		@echo " "
 		@echo "---------------------------------"
-		@$(CCW32) $(CFLAGSBASE) -march=i686 -m32 $(DEFS) -D VERBOSE=0 -D WINDOWS -O3 -o bin/ctraceo_$(VERSION_SHORT)_win_x86.exe source/cTraceo.c $(LFLAGS)
+		@$(CCW32) $(CFLAGSBASE) -march=i686 -m32 $(DEFS) -D VERBOSE=0 -D WINDOWS -D NDEBUG -O3 -o bin/ctraceo_$(VERSION_SHORT)_win_x86.exe source/cTraceo.c $(LFLAGS)
 		@echo " "
 		@echo "Please ignore possible 'warning: imaginary constants are a GCC extension [enabled by default]'. This is due to a bug in gcc-mingw which has been solved in version 4.8."
 		@echo " "
@@ -151,7 +151,7 @@ win64:	dirs
 		@echo "Building cTraceo $(VERSION_SHORT) for Windows x86-64."
 		@echo " "
 		@echo "------------------------------------"
-		@$(CCW64) $(CFLAGSBASE) -march=nocona $(DEFS) -D VERBOSE=0 -D WINDOWS -O3 -o bin/ctraceo_$(VERSION_SHORT)_win_x86-64.exe source/cTraceo.c $(LFLAGS)
+		@$(CCW64) $(CFLAGSBASE) -march=nocona $(DEFS) -D VERBOSE=0 -D WINDOWS -D NDEBUG -O3 -o bin/ctraceo_$(VERSION_SHORT)_win_x86-64.exe source/cTraceo.c $(LFLAGS)
 		@echo " "
 		@echo "Please ignore possible 'warning: imaginary constants are a GCC extension [enabled by default]'. This is due to a bug in gcc-mingw which has been solved in version 4.8."
 		@echo " "
@@ -163,14 +163,14 @@ linux32:dirs
 		@echo "Building cTraceo $(VERSION_SHORT) for Linux i686."
 		@echo " "
 		@echo "--------------------------------"
-		@$(CC) $(CFLAGSBASE) -march=i686 -m32 $(DEFS) -D VERBOSE=0 -D OS=LINUX -O3 -o bin/ctraceo_$(VERSION_SHORT)_linux_i686 source/cTraceo.c $(LFLAGS)
+		@$(CC) $(CFLAGSBASE) -march=i686 -m32 $(DEFS) -D VERBOSE=0 -D OS=LINUX -D NDEBUG -O3 -o bin/ctraceo_$(VERSION_SHORT)_linux_i686 source/cTraceo.c $(LFLAGS)
 
 linux64:dirs
 		@echo " "
 		@echo "Building cTraceo $(VERSION_SHORT) for Linux x86-64."
 		@echo " "
 		@echo "----------------------------------"
-		@$(CC) $(CFLAGSBASE) -march=nocona  $(DEFS) -D VERBOSE=0 -D OS=LINUX -O3 -o bin/ctraceo_$(VERSION_SHORT)_linux_x86-64 source/cTraceo.c $(LFLAGS)
+		@$(CC) $(CFLAGSBASE) -march=nocona  $(DEFS) -D VERBOSE=0 -D OS=LINUX -D NDEBUG -O3 -o bin/ctraceo_$(VERSION_SHORT)_linux_x86-64 source/cTraceo.c $(LFLAGS)
 
 pg:		dirs
 		@$(CC) $(CFLAGS) $(DEFS) -D VERBOSE=0 -O3 -pg -o bin/ctraceo source/cTraceo.c $(LFLAGS)
