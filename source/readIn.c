@@ -155,7 +155,15 @@ void    readIn(settings_t* settings){
     }
     if( (settings->source.rx < settings->source.rbox1) ||
         (settings->source.rx > settings->source.rbox2)){
-        fatal(  "Input file: Source: initial range is outside the range box!\nAborting...");
+        fatal(  "Input file: The source's range coordinate is outside the range box!\nAborting...");
+    }
+    if (settings->source.rx == settings->source.rbox1){
+        printf("WARNING: source's range coordinate is equal to range box boundary.\n");
+        printf("         Range box has been automatically resized to include the\n");
+        printf("         source position.\n");
+        printf("         Adjust range box (rBox) to include the source position to\n");
+        printf("         avoid this warning in the future.\n\n");
+        settings->source.rbox1 -= 0.1;
     }
     
     

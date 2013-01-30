@@ -65,6 +65,9 @@
 void    solveEikonalEq(settings_t*, ray_t*);
 
 void    solveEikonalEq(settings_t* settings, ray_t* ray){
+    
+    assert(settings->source.rx > settings->source.rbox1);   //this used to cause a segfault due to bug #13
+    
     DEBUG(5,"in. theta: %lf\n", ray->theta);
     
     double          cx, ci, cc, sigmaI, sigmaR, sigmaZ, cri, czi, crri, czzi, crzi;
