@@ -111,7 +111,7 @@ bottom_data.properties = [1550.0 0.0 2.0 0 0]; % [cp cs rho ap as]
 
 output_data.array_shape = '''LRY''';
 m = 16; ranges = linspace(0,Rmax-1,m);
-n = 16; depths = linspace(0,Dmax-1,n);
+n = 16; depths = linspace(0,Dmax/2-1,n);
 
 output_data.ctype       = '''CPR''';
 output_data.r           = ranges;
@@ -129,11 +129,11 @@ disp('Writing TRACEO waveguide input file...')
 wtraceoinfil('flat.in',case_title,source_data,surface_data,ssp_data,object_data,bottom_data,output_data);
 
 disp('Calling cTraceo...')
-!ctraceo flat 
+!../bin/ctraceo flat 
 
 %% Load and show coherent acoustic pressure:
 disp('Reading the output data...')
-load cpr 
+load cpr
 tl = -20.0*log10( abs(p) ); 
 p_c = p;
 tej = flipud( jet( 256 ) );
@@ -143,6 +143,8 @@ imagesc(arrayR,arrayZ,tl)
 colorbar
 hold on
 plot(rs,zs,'ko',rs,zs,'m*','MarkerSize',16)
+plot(ranges, depths, 'ko')
+
 
 axis ij
 xlabel('Range (m)')
