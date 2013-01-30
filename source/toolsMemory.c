@@ -6,6 +6,9 @@
  *       in use due to random occurences of "bus error".                                *
  *                                                                                      *
  * ------------------------------------------------------------------------------------ *
+ * Website:                                                                             *
+ *          https://github.com/EyNuel/cTraceo/wiki                                      *
+ *                                                                                      *
  * License: This file is part of the cTraceo Raytracing Model and is released under the *
  *          Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License  *
  *          http://creativecommons.org/licenses/by-nc-sa/3.0/                           *
@@ -16,7 +19,7 @@
  * Written for project SENSOCEAN by:                                                    *
  *          Emanuel Ey                                                                  *
  *          emanuel.ey@gmail.com                                                        *
- *          Copyright (C) 2011                                                          *
+ *          Copyright (C) 2011 - 2013                                                   *
  *          Signal Processing Laboratory                                                *
  *          Universidade do Algarve                                                     *
  *                                                                                      *
@@ -331,21 +334,34 @@ settings_t*         mallocSettings(void){
     if(settings == NULL){
         fatal("Memory allocation error.\n");
     }
-
-    settings->cTitle = mallocChar((uintptr_t)(MAX_LINE_LEN + 1));
+    
     settings->source.thetas = NULL; //memory will be properly allocated in "readin.c"
-
+    
     settings->altimetry.r = NULL;
     settings->altimetry.z = NULL;
     //settings->altimetry.surfaceProperties = NULL;
-
+    
     settings->batimetry.r = NULL;
     settings->batimetry.z = NULL;
     //settings->batimetry.surfaceProperties = NULL;
-
+    
     settings->output.arrayR = NULL;
     settings->output.arrayZ = NULL;
-
+    
+    //default values for options:
+    settings->options.caseTitle             = mallocChar((uintptr_t)(MAX_LINE_LEN + 1));
+    settings->options.inFileName            = mallocChar(256);
+    settings->options.outputFileName        = NULL;
+    settings->options.matfile               = NULL;
+    settings->options.killBackscatteredRays = false;
+    settings->options.writeHeader           = true;
+    settings->options.writeLogFile          = true;
+    settings->options.logFile               = NULL;
+    settings->options.logFileName           = mallocChar(256);
+    settings->options.saveSSP               = false;
+    settings->options.nSSPPoints            = 128;      //random value
+    settings->options.sspFileName           = NULL;
+    
     return(settings);
 }
 
@@ -373,8 +389,8 @@ void                freeSettings(settings_t* settings){
     if(settings != NULL){
         
         //free title:
-        if(settings->cTitle != NULL){
-            free(settings->cTitle);
+        if(settings->options.caseTitle != NULL){
+            free(settings->options.caseTitle);
         }
         
         //free source:
@@ -509,7 +525,7 @@ void                printSettings(settings_t*   settings){
     DEBUG(1, "in\n");
     uint32_t    i;
     
-    printf("cTitle: \t\t\t%s", settings->cTitle);   //assuming a \n at the end of cTitle
+    printf("caseTitle: \t\t\t%s", settings->options.caseTitle);   //assuming a \n at the end of cTitle
     printf("\nsource.ds: \t\t\t%12.5lf\t[m]\n",     settings->source.ds);
     printf("source.rx: \t\t\t%12.5lf\t[m]\n",       settings->source.rx);
     printf("source.zx: \t\t\t%12.5lf\t[m]\n",       settings->source.zx);

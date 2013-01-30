@@ -4,6 +4,9 @@
  *  Calculates Amplitudes and Delays using proximity method.                            *
  *                                                                                      *
  * ------------------------------------------------------------------------------------ *
+ * Website:                                                                             *
+ *          https://github.com/EyNuel/cTraceo/wiki                                      *
+ *                                                                                      *
  * License: This file is part of the cTraceo Raytracing Model and is released under the *
  *          Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License  *
  *          http://creativecommons.org/licenses/by-nc-sa/3.0/                           *
@@ -14,7 +17,7 @@
  * Written for project SENSOCEAN by:                                                    *
  *          Emanuel Ey                                                                  *
  *          emanuel.ey@gmail.com                                                        *
- *          Copyright (C) 2011                                                          *
+ *          Copyright (C) 2011 - 2013                                                   *
  *          Signal Processing Laboratory                                                *
  *          Universidade do Algarve                                                     *
  *                                                                                      *
@@ -70,9 +73,7 @@ void calcAmpDelPr(settings_t* settings){
     uintptr_t       iRet[51];
     ray_t*          ray                 = NULL;
 
-    MATFile*        matfile             = NULL;
     mxArray*        pThetas             = NULL;
-    mxArray*        pTitle              = NULL;
     mxArray*        pHydArrayR          = NULL;
     mxArray*        pHydArrayZ          = NULL;
     mxArray*        pSourceZ            = NULL;
@@ -122,37 +123,25 @@ void calcAmpDelPr(settings_t* settings){
     }
 
     #if 1
-    //open matfile for output
-    matfile     = matOpen("aad.mat", "w");
-
     //write launching angles to file
     pThetas     = mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)settings->source.nThetas, mxREAL);
-    if(matfile == NULL || pThetas == NULL){
+    if(pThetas == NULL){
         fatal("Memory alocation error.");
     }
     //copy angles in cArray to mxArray:
     copyDoubleToMxArray(settings->source.thetas, pThetas, settings->source.nThetas);
     //move mxArray to file and free memory:
-    matPutVariable(matfile, "thetas", pThetas);
+    matPutVariable(settings->options.matfile, "thetas", pThetas);
     mxDestroyArray(pThetas);
-
-
-    //write title to matfile:
-    pTitle = mxCreateString("TRACEO: EIGenrays (by proximity)");
-    if(pTitle == NULL){
-        fatal("Memory alocation error.");
-    }
-    matPutVariable(matfile, "caseTitle", pTitle);
-    mxDestroyArray(pTitle);
-
-
+    
+    
     //write hydrophone array ranges to file:
     pHydArrayR          = mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)settings->output.nArrayR, mxREAL);
     if(pHydArrayR == NULL){
         fatal("Memory alocation error.");
     }
     copyDoubleToMxArray(    settings->output.arrayR, pHydArrayR, (uintptr_t)settings->output.nArrayR);
-    matPutVariable(matfile, "arrayR", pHydArrayR);
+    matPutVariable(settings->options.matfile, "arrayR", pHydArrayR);
     mxDestroyArray(pHydArrayR);
 
 
@@ -162,7 +151,7 @@ void calcAmpDelPr(settings_t* settings){
         fatal("Memory alocation error.");
     }
     copyDoubleToMxArray(    settings->output.arrayZ, pHydArrayZ, (uintptr_t)settings->output.nArrayZ);
-    matPutVariable(matfile, "arrayZ", pHydArrayZ);
+    matPutVariable(settings->options.matfile, "arrayZ", pHydArrayZ);
     mxDestroyArray(pHydArrayZ);
 
 
@@ -172,7 +161,7 @@ void calcAmpDelPr(settings_t* settings){
         fatal("Memory alocation error.");
     }
     copyDoubleToMxArray(&settings->source.zx, pSourceZ, 1);
-    matPutVariable(matfile, "sourceZ", pSourceZ);
+    matPutVariable(settings->options.matfile, "sourceZ", pSourceZ);
     mxDestroyArray(pSourceZ);
 
 
@@ -360,7 +349,7 @@ void calcAmpDelPr(settings_t* settings){
     //write "maximum number of arrivals at any single hydrophone" to matfile:
     mxNumArrivals = mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)1, mxREAL);
     copyDoubleToMxArray(&maxNumArrivals, mxNumArrivals, 1);
-    matPutVariable(matfile, "maxNumArrivals", mxNumArrivals);
+    matPutVariable(settings->options.matfile, "maxNumArrivals", mxNumArrivals);
 
 
     //copy arrival data to mxAadStruct:
@@ -407,11 +396,10 @@ void calcAmpDelPr(settings_t* settings){
 
 
     ///Write Eigenrays to matfile:
-    matPutVariable(matfile, "arrivals", mxAadStruct);
-
-    matClose(matfile);
+    matPutVariable(settings->options.matfile, "arrivals", mxAadStruct);
+    
+    //free memory
     mxDestroyArray(mxAadStruct);
-
     reallocRayMembers(ray, 0);
     free(ray);
     DEBUG(1,"out\n");

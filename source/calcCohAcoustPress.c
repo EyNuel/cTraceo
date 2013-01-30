@@ -4,6 +4,9 @@
  *  Calculates Coherent Acoustic Pressure.                                              *
  *                                                                                      *
  * ------------------------------------------------------------------------------------ *
+ * Website:                                                                             *
+ *          https://github.com/EyNuel/cTraceo/wiki                                      *
+ *                                                                                      *
  * License: This file is part of the cTraceo Raytracing Model and is released under the *
  *          Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License  *
  *          http://creativecommons.org/licenses/by-nc-sa/3.0/                           *
@@ -14,7 +17,7 @@
  * Written for project SENSOCEAN by:                                                    *
  *          Emanuel Ey                                                                  *
  *          emanuel.ey@gmail.com                                                        *
- *          Copyright (C) 2011                                                          *
+ *          Copyright (C) 2011 - 2013                                                   *
  *          Signal Processing Laboratory                                                *
  *          Universidade do Algarve                                                     *
  *                                                                                      *
@@ -58,10 +61,12 @@
 void    calcCohAcoustPress(settings_t*);
 
 void    calcCohAcoustPress(settings_t* settings){
+    
+    assert(settings != NULL);
+    assert(settings->options.matfile != NULL);   //output file must be open
+    
     DEBUG(1,"in\n");
-    MATFile*            matfile = NULL;
     mxArray*            pThetas = NULL;
-    mxArray*            pTitle  = NULL;
     mxArray*            pHydArrayR  = NULL;
     mxArray*            pHydArrayZ  = NULL;
     mxArray*            p   = NULL;
@@ -79,11 +84,13 @@ void    calcCohAcoustPress(settings_t* settings){
     uintptr_t           nRet;
     uintptr_t           iRet[51];
     double              dr, dz; //used for star pressure contributions (for particle velocity)
+    
     #if VERBOSE
         //indexing variables used to output the pressure2D variable during debugging:
         uintptr_t           rr,zz;
     #endif
-    //get dimensions of hydrophone array:
+    
+    //determine dimensions of hydrophone array:
     switch(settings->output.arrayType){
         case ARRAY_TYPE__HORIZONTAL:
             dimR = settings->output.nArrayR;
@@ -96,6 +103,7 @@ void    calcCohAcoustPress(settings_t* settings){
             break;
 
         case ARRAY_TYPE__LINEAR:
+            assert( settings->output.nArrayR == settings->output.nArrayZ);
             /*  in linear arrays, nArrayR and nArrayZ have to be equal
             *   (this is checked in readIn.c when reading the file).
             *   The pressure components will be written to the rightmost index
@@ -115,27 +123,8 @@ void    calcCohAcoustPress(settings_t* settings){
             break;
     }
 
-    //open the corresponding output file:
-    switch(settings->output.calcType){
-        case CALC_TYPE__COH_ACOUS_PRESS:
-            matfile     = matOpen("cpr.mat", "w");
-            break;
-        case CALC_TYPE__PART_VEL:
-            matfile     = matOpen("pvl.mat", "w");
-            break;
-        case CALC_TYPE__COH_ACOUS_PRESS_PART_VEL:
-            matfile     = matOpen("pav.mat", "w");
-            break;
-        case CALC_TYPE__COH_TRANS_LOSS:
-            matfile     = matOpen("ctl.mat", "w");
-            break;
-        default:
-            fatal("Uh-oh - calcCohAcoustPress(): unknown output type.");
-            break;
-    }
-
     pThetas     = mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)settings->source.nThetas, mxREAL);
-    if(matfile == NULL || pThetas == NULL)
+    if(pThetas == NULL)
         fatal("Memory alocation error.");
 
     //copy angles in cArray to mxArray:
@@ -143,17 +132,9 @@ void    calcCohAcoustPress(settings_t* settings){
                         mxGetPr(pThetas),
                         settings->source.nThetas);
     //move mxArray to file and free memory:
-    matPutVariable(matfile, "thetas", pThetas);
+    matPutVariable(settings->options.matfile, "thetas", pThetas);
     mxDestroyArray(pThetas);
-
-    //write title to matfile:
-    pTitle = mxCreateString("TRACEO: Coherent Acoustic Pressure");
-    if(pTitle == NULL){
-        fatal("Memory alocation error.");
-    }
-    matPutVariable(matfile, "caseTitle", pTitle);
-    mxDestroyArray(pTitle);
-
+    
     //write hydrophone array ranges to file:
     pHydArrayR  = mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)settings->output.nArrayR, mxREAL);
     if(pHydArrayR == NULL){
@@ -163,7 +144,7 @@ void    calcCohAcoustPress(settings_t* settings){
                         mxGetPr(pHydArrayR),
                         (uintptr_t)settings->output.nArrayR);
     //move mxArray to file and free memory:
-    matPutVariable(matfile, "arrayR", pHydArrayR);
+    matPutVariable(settings->options.matfile, "arrayR", pHydArrayR);
     mxDestroyArray(pHydArrayR);
 
 
@@ -176,7 +157,7 @@ void    calcCohAcoustPress(settings_t* settings){
                         mxGetPr(pHydArrayZ),
                         (uintptr_t)settings->output.nArrayZ);
     //move mxArray to file and free memory:
-    matPutVariable(matfile, "arrayZ", pHydArrayZ);
+    matPutVariable(settings->options.matfile, "arrayZ", pHydArrayZ);
     mxDestroyArray(pHydArrayZ);
 
 
@@ -478,17 +459,18 @@ void    calcCohAcoustPress(settings_t* settings){
                 }
             }
         }
-        //create mxArray
-        p = mxCreateDoubleMatrix((MWSIZE)dimZ, (MWSIZE)dimR, mxCOMPLEX);
 
-        //verify if memory allocation was successfull:
-        if( p == NULL){
-            fatal("Memory alocation error.");
-        }
 
         //copy pressure to mxArray:
         switch( settings->output.arrayType){
             case ARRAY_TYPE__LINEAR:
+                //Note that the output for a linear hydrophone array is a vector (1*n as opposed to m*n for other hydrophone array types)
+                p = mxCreateDoubleMatrix((MWSIZE)dimZ, (MWSIZE)1, mxCOMPLEX);   
+                if( p == NULL){ fatal("Memory alocation error.");}
+                
+                copyComplexToMxArray2D(settings->output.pressure2D, p, dimZ, 1);
+                break;
+                
                 /*
                 copyComplexToPtr(settings->output.pressure1D, p, dimZ);
                 break;
@@ -497,13 +479,19 @@ void    calcCohAcoustPress(settings_t* settings){
             case ARRAY_TYPE__VERTICAL:
             case ARRAY_TYPE__HORIZONTAL:
             case ARRAY_TYPE__RECTANGULAR:
+                //create mxArray
+                p = mxCreateDoubleMatrix((MWSIZE)dimZ, (MWSIZE)dimR, mxCOMPLEX);
+                //verify if memory allocation was successfull:
+                if( p == NULL){
+                    fatal("Memory alocation error.");
+                }
                 //Note: the output for rectangular arrays has to be transposed.
                 copyComplexToMxArray2D_transposed(settings->output.pressure2D, p, dimZ, dimR);
                 break;
         }
 
         //write mxArray to matfile:
-        matPutVariable(matfile, "p", p);
+        matPutVariable(settings->options.matfile, "p", p);
         mxDestroyArray(p);
     }
 
@@ -515,7 +503,5 @@ void    calcCohAcoustPress(settings_t* settings){
         reallocRayMembers(&ray[i], 0);
     }
     free(ray);
-
-    matClose(matfile);
     DEBUG(1,"out\n");
 }

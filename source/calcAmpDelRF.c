@@ -4,6 +4,9 @@
  *  Calculates Amplitudes and arrivals using Regula Falsi method.                       *
  *                                                                                      *
  * ------------------------------------------------------------------------------------ *
+ * Website:                                                                             *
+ *          https://github.com/EyNuel/cTraceo/wiki                                      *
+ *                                                                                      *
  * License: This file is part of the cTraceo Raytracing Model and is released under the *
  *          Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License  *
  *          http://creativecommons.org/licenses/by-nc-sa/3.0/                           *
@@ -14,7 +17,7 @@
  * Written for project SENSOCEAN by:                                                    *
  *          Emanuel Ey                                                                  *
  *          emanuel.ey@gmail.com                                                        *
- *          Copyright (C) 2011                                                          *
+ *          Copyright (C) 2011 - 2013                                                   *
  *          Signal Processing Laboratory                                                *
  *          Universidade do Algarve                                                     *
  *                                                                                      *
@@ -78,9 +81,7 @@ void calcAmpDelRF(settings_t* settings){
     ray_t*          ray                 = NULL;
     double*         dz                  = NULL;
     
-    MATFile*        matfile             = NULL;
     mxArray*        pThetas             = NULL;
-    mxArray*        pTitle              = NULL;
     mxArray*        pHydArrayR          = NULL;
     mxArray*        pHydArrayZ          = NULL;
     mxArray*        pSourceZ            = NULL;
@@ -130,28 +131,15 @@ void calcAmpDelRF(settings_t* settings){
     }
     
     #if 1
-    //Open matfile for output:
-    matfile     = matOpen("aad.mat", "w");
-    
-    
     //write ray launching angles to matfile:
     pThetas     = mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)settings->source.nThetas, mxREAL);
-    if(matfile == NULL || pThetas == NULL){
+    if(pThetas == NULL){
         fatal("Memory alocation error.");
     }
     //copy angles in cArray to mxArray:
     copyDoubleToMxArray(    settings->source.thetas, pThetas , settings->source.nThetas);
-    matPutVariable(matfile, "thetas", pThetas);
+    matPutVariable(settings->options.matfile, "thetas", pThetas);
     mxDestroyArray(pThetas);
-    
-    
-    //write title to matfile:
-    pTitle = mxCreateString("TRACEO: EIGenrays (by Regula Falsi)");
-    if(pTitle == NULL){
-        fatal("Memory alocation error.");
-    }
-    matPutVariable(matfile, "caseTitle", pTitle);
-    mxDestroyArray(pTitle);
     
     
     //write hydrophone array ranges to file:
@@ -160,7 +148,7 @@ void calcAmpDelRF(settings_t* settings){
         fatal("Memory alocation error.");
     }
     copyDoubleToMxArray(    settings->output.arrayR, pHydArrayR, (uintptr_t)settings->output.nArrayR);
-    matPutVariable(matfile, "arrayR", pHydArrayR);
+    matPutVariable(settings->options.matfile, "arrayR", pHydArrayR);
     mxDestroyArray(pHydArrayR);
     
     
@@ -170,7 +158,7 @@ void calcAmpDelRF(settings_t* settings){
         fatal("Memory alocation error.");
     }
     copyDoubleToMxArray(    settings->output.arrayZ, pHydArrayZ, (uintptr_t)settings->output.nArrayZ);
-    matPutVariable(matfile, "arrayZ", pHydArrayZ);
+    matPutVariable(settings->options.matfile, "arrayZ", pHydArrayZ);
     mxDestroyArray(pHydArrayZ);
     
     
@@ -180,7 +168,7 @@ void calcAmpDelRF(settings_t* settings){
         fatal("Memory alocation error.");
     }
     copyDoubleToMxArray(&settings->source.zx, pSourceZ, 1);
-    matPutVariable(matfile, "sourceZ", pSourceZ);
+    matPutVariable(settings->options.matfile, "sourceZ", pSourceZ);
     mxDestroyArray(pSourceZ);
     
     
@@ -482,7 +470,7 @@ void calcAmpDelRF(settings_t* settings){
     //write "maximum number of arrivals at any single hydrophone" to matfile:
     mxNumArrivals = mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)1, mxREAL);
     copyDoubleToMxArray(&maxNumArrivals, mxNumArrivals, 1);
-    matPutVariable(matfile, "maxNumArrivals", mxNumArrivals);
+    matPutVariable(settings->options.matfile, "maxNumArrivals", mxNumArrivals);
     
     
     //copy arrival data to mxAadStruct:
@@ -529,12 +517,10 @@ void calcAmpDelRF(settings_t* settings){
     
     
     ///Write Eigenrays to matfile:
-    matPutVariable(matfile, "arrivals", mxAadStruct);
+    matPutVariable(settings->options.matfile, "arrivals", mxAadStruct);
     
     //Free memory
-    matClose(matfile);
     mxDestroyArray(mxAadStruct);
-    
     reallocRayMembers(tempRay, 0);
     free(tempRay);
     free(dz);

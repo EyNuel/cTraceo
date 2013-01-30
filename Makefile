@@ -14,7 +14,6 @@ CC  := gcc
 ##Compiler commands for cross-compiling from linux ia64 to windows:
 CCW32 := i686-w64-mingw32-gcc
 CCW64 := x86_64-w64-mingw32-gcc
-CCW64 := x86_64-w64-mingw32-gcc
 
 ## Set Current Operating system:
 ## Allowable values are: WINDOWS, LINUX
@@ -101,11 +100,18 @@ endif
 LINK 		:= $(CC) $(LFLAGS) -o 
 COMPLINK 	:= $(CC) $(CFLAGS) $(LFLAGS) -o $@
 
+## Create a variable containing all definitions to be passed to compiler
+include source/version
+DEFS := -D VERSION_LONG=$(VERSION_LONG)
+DEFS := $(DEFS) -D VERSION_SHORT=$(VERSION_SHORT)
+DEFS := $(DEFS) -D USE_MATLAB=$(USE_MATLAB)
+DEFS := $(DEFS) -D OS=$(OS)
+
 ## A list of all non-source files that are part of the distribution.
-AUXFILES := Makefile manual.pdf readme.txt license.txt changelog.txt examples/sletvik_transect.mat bin/ctraceo_linux_i686 bin/ctraceo_linux_x86-64 bin/ctraceo_win_x86-64.exe bin/ctraceo_win_x86.exe
+AUXFILES := Makefile cTraceo_User_Manual.pdf readme.txt license.txt changelog.txt examples/sletvik_transect.mat bin/ctraceo_$(VERSION_SHORT)_linux_i686 bin/ctraceo_$(VERSION_SHORT)_linux_x86-64 bin/ctraceo_$(VERSION_SHORT)_win_x86-64.exe bin/ctraceo_$(VERSION_SHORT)_win_x86.exe
 
 ## A list of directories that belong to the project
-PROJDIRS := M-Files examples source source/matOut
+PROJDIRS := M-Files examples source source/matOut doc bin
 
 ## Recursively create a list of files that are inside the project
 SRCFILES := $(shell find $(PROJDIRS) -mindepth 0 -maxdepth 1 -name "*.c")
@@ -118,39 +124,62 @@ PDFFILES := $(shell find $(PROJDIRS) -mindepth 1 -maxdepth 1 -name "*.pdf")
 ALLFILES := $(SRCFILES) $(HDRFILES) $(AUXFILES) $(MFILES) $(PDFFILES)
 
 ## Disable checking for files with the folowing names:
-.PHONY: all todo cTraceo.exe discuss 32b pg dist
+.PHONY: all todo cTraceo.exe discuss 32b pg dist doc
 
+# ======================================================================
 ## Build targets:
 all:	dirs
 		@echo " "
-		@echo "Building cTraceo with standard options -run 'make help' for more information."
+		@echo "Building cTraceo $(VERSION_SHORT) with standard options -run 'make help' for more information."
 		@echo " "
-		@$(CC) $(CFLAGS) -D VERBOSE=0 -D USE_MATLAB=$(USE_MATLAB) -D OS=$(OS) -D MATLAB_VERSION=$(MATLAB_VERSION) -O3 -o bin/ctraceo source/cTraceo.c $(LFLAGS)
+		@$(CC) $(CFLAGS) $(DEFS) -D VERBOSE=0 -O3 -o bin/ctraceo source/cTraceo.c $(LFLAGS)
 
 win:	win32 win64
 
 win32:	dirs
-		@$(CCW32) $(CFLAGSBASE) -march=i686 -m32 -D VERBOSE=0 -D USE_MATLAB=0 -D OS=WINDOWS -D MATLAB_VERSION=$(MATLAB_VERSION) -O3 -o bin/ctraceo_win_x86.exe source/cTraceo.c $(LFLAGS)
+		@echo " "
+		@echo "Building cTraceo $(VERSION_SHORT) for Windows x86."
+		@echo " "
+		@echo "---------------------------------"
+		@$(CCW32) $(CFLAGSBASE) -march=i686 -m32 $(DEFS) -D VERBOSE=0 -D WINDOWS -D NDEBUG -O3 -o bin/ctraceo_$(VERSION_SHORT)_win_x86.exe source/cTraceo.c $(LFLAGS)
+		@echo " "
+		@echo "Please ignore possible 'warning: imaginary constants are a GCC extension [enabled by default]'. This is due to a bug in gcc-mingw which has been solved in version 4.8."
+		@echo " "
 
 win64:	dirs
-		@$(CCW64) $(CFLAGSBASE) -march=nocona -D VERBOSE=0 -D USE_MATLAB=0 -D OS=WINDOWS -D MATLAB_VERSION=$(MATLAB_VERSION) -O3 -o bin/ctraceo_win_x86-64.exe source/cTraceo.c $(LFLAGS)
+		@echo " "
+		@echo "Building cTraceo $(VERSION_SHORT) for Windows x86-64."
+		@echo " "
+		@echo "------------------------------------"
+		@$(CCW64) $(CFLAGSBASE) -march=nocona $(DEFS) -D VERBOSE=0 -D WINDOWS -D NDEBUG -O3 -o bin/ctraceo_$(VERSION_SHORT)_win_x86-64.exe source/cTraceo.c $(LFLAGS)
+		@echo " "
+		@echo "Please ignore possible 'warning: imaginary constants are a GCC extension [enabled by default]'. This is due to a bug in gcc-mingw which has been solved in version 4.8."
+		@echo " "
 
 linux:	linux32 linux64
 
 linux32:dirs
-		@$(CC) $(CFLAGSBASE) -march=i686 -m32 -D VERBOSE=0 -D USE_MATLAB=0 -D OS=LINUX -D MATLAB_VERSION=$(MATLAB_VERSION) -O3 -o bin/ctraceo_linux_i686 source/cTraceo.c $(LFLAGS)
+		@echo " "
+		@echo "Building cTraceo $(VERSION_SHORT) for Linux i686."
+		@echo " "
+		@echo "--------------------------------"
+		@$(CC) $(CFLAGSBASE) -march=i686 -m32 $(DEFS) -D VERBOSE=0 -D OS=LINUX -D NDEBUG -O3 -o bin/ctraceo_$(VERSION_SHORT)_linux_i686 source/cTraceo.c $(LFLAGS)
 
 linux64:dirs
-		@$(CC) $(CFLAGSBASE) -march=nocona -D VERBOSE=0 -D USE_MATLAB=0 -D OS=LINUX -D MATLAB_VERSION=$(MATLAB_VERSION) -O3 -o bin/ctraceo_linux_x86-64 source/cTraceo.c $(LFLAGS)
+		@echo " "
+		@echo "Building cTraceo $(VERSION_SHORT) for Linux x86-64."
+		@echo " "
+		@echo "----------------------------------"
+		@$(CC) $(CFLAGSBASE) -march=nocona  $(DEFS) -D VERBOSE=0 -D OS=LINUX -D NDEBUG -O3 -o bin/ctraceo_$(VERSION_SHORT)_linux_x86-64 source/cTraceo.c $(LFLAGS)
 
 pg:		dirs
-		@$(CC) $(CFLAGS) -D VERBOSE=0 -D USE_MATLAB=$(USE_MATLAB) -D OS=$(OS) -D MATLAB_VERSION=$(MATLAB_VERSION) -O3 -pg -o bin/ctraceo source/cTraceo.c $(LFLAGS)
+		@$(CC) $(CFLAGS) $(DEFS) -D VERBOSE=0 -O3 -pg -o bin/ctraceo source/cTraceo.c $(LFLAGS)
 
 debug:	dirs
-		@$(CC) $(CFLAGS) -D VERBOSE=0 -D USE_MATLAB=$(USE_MATLAB) -D OS=$(OS) -D MATLAB_VERSION=$(MATLAB_VERSION) -O0 -g -o bin/ctraceo source/cTraceo.c $(LFLAGS)
+		@$(CC) $(CFLAGS) $(DEFS) -D VERBOSE=0 -O0 -g -o bin/ctraceo source/cTraceo.c $(LFLAGS)
 		
 verbose:dirs
-		@$(CC) $(CFLAGS) -D VERBOSE=1 -D USE_MATLAB=$(USE_MATLAB) -D OS=$(OS) -D MATLAB_VERSION=$(MATLAB_VERSION) -O0 -g -o bin/ctraceo source/cTraceo.c $(LFLAGS)
+		@$(CC) $(CFLAGS) $(DEFS) -D VERBOSE=1 -O0 -g -o bin/ctraceo source/cTraceo.c $(LFLAGS)
 
 todo:	#list todos from all files
 		@for file in $(ALLFILES); do fgrep -H -e TODO $$file; done; true
@@ -159,8 +188,11 @@ discuss:#list discussion points from all files
 		@for file in $(ALLFILES); do fgrep -H -e DISCUSS $$file; done; true
 		
 dist:	dirs win linux
+		@echo " "
+		@echo "Making cTraceo $(VERSION_SHORT) distribution package."
+		@echo "----------------------------"
 		@if [ ! -d "packages" ]; then mkdir packages; fi
-		@tar -czf ./packages/cTraceo.tgz $(ALLFILES)
+		@tar -czf ./packages/cTraceo_$(VERSION_SHORT).tgz $(ALLFILES)
 		
 dirs:	#creates 'bin/' directory if it doesn't exist
 		@if [ ! -d "bin" ]; then mkdir bin; fi
@@ -168,8 +200,11 @@ dirs:	#creates 'bin/' directory if it doesn't exist
 help:	#
 		@echo " ============================================================================= "
 		@echo "                    The cTraceo Acoustic Raytracing Model.                     "
+		@echo "           The cTraceo Acoustic Raytracing Model, Version $(VERSION_LONG) "
 		@echo "                                                                               "
 		@echo " ----------------------------------------------------------------------------- "
+		@echo " Website: https://github.com/EyNuel/cTraceo/wiki                               "
+		@echo "                                                                               "
 		@echo " License: The cTraceo Acoustic Raytracing Model is released under the Creative "
 		@echo "          Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License    "
 		@echo "          (http://creativecommons.org/licenses/by-nc-sa/3.0/ )                 "
@@ -181,7 +216,7 @@ help:	#
 		@echo " Written for project SENSOCEAN by:                                             "
 		@echo "          Emanuel Ey                                                           "
 		@echo "          emanuel.ey@gmail.com                                                 "
-		@echo "          Copyright (C) 2011                                                   "
+		@echo "          Copyright (C) 2011 - 2013                                            "
 		@echo "          Signal Processing Laboratory                                         "
 		@echo "          Universidade do Algarve                                              "
 		@echo "                                                                               "
@@ -218,7 +253,8 @@ help:	#
 		@echo "                                                                               "
 		@echo " ============================================================================= "
 		
-
+doc:	#
+		doxygen Doxyfile
 
 
 

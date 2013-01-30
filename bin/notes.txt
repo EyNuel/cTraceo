@@ -1,0 +1,4 @@
+
+NOTE:
+Compiled binaries of previous cTraceo versions are included on purpose.
+This is usefull when it is necessary to EXACTLY reproduce previously modeled results.

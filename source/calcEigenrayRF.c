@@ -6,6 +6,9 @@
  *  for cases where there are no returning rays.                                        *
  *                                                                                      *
  * ------------------------------------------------------------------------------------ *
+ * Website:                                                                             *
+ *          https://github.com/EyNuel/cTraceo/wiki                                      *
+ *                                                                                      *
  * License: This file is part of the cTraceo Raytracing Model and is released under the *
  *          Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License  *
  *          http://creativecommons.org/licenses/by-nc-sa/3.0/                           *
@@ -16,7 +19,7 @@
  * Written for project SENSOCEAN by:                                                    *
  *          Emanuel Ey                                                                  *
  *          emanuel.ey@gmail.com                                                        *
- *          Copyright (C) 2011                                                          *
+ *          Copyright (C) 2011 - 2013                                                   *
  *          Signal Processing Laboratory                                                *
  *          Universidade do Algarve                                                     *
  *                                                                                      *
@@ -77,13 +80,12 @@ void    calcEigenrayRF(settings_t* settings){
     double**        depths              = NULL;
     ray_t*          ray                 = NULL;
     double*         dz                  = NULL;
+    uint32_t        maxNumEigenrays     = 0;
 
-    MATFile*        matfile             = NULL;
     mxArray*        pThetas             = NULL;
-    mxArray*        pTitle              = NULL;
     mxArray*        pHydArrayR          = NULL;
     mxArray*        pHydArrayZ          = NULL;
-    mxArray*        pnEigenRays         = NULL;
+    mxArray*        mxMaxNumEigenrays   = NULL;
     mxArray*        mxTheta             = NULL;
     mxArray*        mxR                 = NULL;
     mxArray*        mxZ                 = NULL;
@@ -135,28 +137,15 @@ void    calcEigenrayRF(settings_t* settings){
     }
 
     #if 1
-    //Open matfile for output:
-    matfile     = matOpen("eig.mat", "w");
-
-
     //write ray launching angles to matfile:
     pThetas     = mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)settings->source.nThetas, mxREAL);
-    if(matfile == NULL || pThetas == NULL){
+    if(pThetas == NULL){
         fatal("Memory alocation error.");
     }
     //copy angles in cArray to mxArray:
     copyDoubleToMxArray(    settings->source.thetas, pThetas , settings->source.nThetas);
-    matPutVariable(matfile, "thetas", pThetas);
+    matPutVariable(settings->options.matfile, "thetas", pThetas);
     mxDestroyArray(pThetas);
-
-
-    //write title to matfile:
-    pTitle = mxCreateString("TRACEO: EIGenrays (by Regula Falsi)");
-    if(pTitle == NULL){
-        fatal("Memory alocation error.");
-    }
-    matPutVariable(matfile, "caseTitle", pTitle);
-    mxDestroyArray(pTitle);
 
 
     //write hydrophone array ranges to file:
@@ -165,7 +154,7 @@ void    calcEigenrayRF(settings_t* settings){
         fatal("Memory alocation error.");
     }
     copyDoubleToMxArray( settings->output.arrayR, pHydArrayR, (uintptr_t)settings->output.nArrayR);
-    matPutVariable(matfile, "rarray", pHydArrayR);
+    matPutVariable(settings->options.matfile, "rarray", pHydArrayR);
     mxDestroyArray(pHydArrayR);
 
 
@@ -175,7 +164,7 @@ void    calcEigenrayRF(settings_t* settings){
         fatal("Memory alocation error.");
     }
     copyDoubleToMxArray( settings->output.arrayZ, pHydArrayZ, (uintptr_t)settings->output.nArrayZ);
-    matPutVariable(matfile, "zarray", pHydArrayZ);
+    matPutVariable(settings->options.matfile, "zarray", pHydArrayZ);
     mxDestroyArray(pHydArrayZ);
 
 
@@ -478,20 +467,19 @@ void    calcEigenrayRF(settings_t* settings){
                         mxSetFieldByNumber( eigenrays[i][j].mxEigenrayStruct, (MWINDEX)i, 11, mxRefrac_z);
                     }
                     eigenrays[i][j].nEigenrays += 1;
+                    maxNumEigenrays = max(eigenrays[i][j].nEigenrays, maxNumEigenrays);
                 }
             }
             DEBUG(3, "nFoundEigenRays: %u\n", (uint32_t)nFoundEigenRays);
         }
     }
-
-    ///Write number of eigenrays to matfile:
-    pnEigenRays = mxCreateDoubleMatrix((MWSIZE)1,(MWSIZE)1,mxREAL);
-    junkDouble = (double)nFoundEigenRays;
-    copyDoubleToMxArray( &junkDouble, pnEigenRays, 1);
-    matPutVariable(matfile, "nEigenrays", pnEigenRays);
-    mxDestroyArray(pnEigenRays);
-    DEBUG(3, "nFoundEigenRays: %u\n", (uint32_t)nFoundEigenRays);
-
+    
+    //write "maximum number of eigenrays at any of the hydrophones
+    mxMaxNumEigenrays = mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)1, mxREAL);
+    copyUInt32ToMxArray(&maxNumEigenrays, mxMaxNumEigenrays, 1);
+    matPutVariable(settings->options.matfile, "maxNumEigenrays", mxMaxNumEigenrays);
+    mxDestroyArray(mxMaxNumEigenrays);
+    
     ///Write Eigenrays to matfile:
     //copy arrival data to mxAllEigenraysStruct:
     mxAllEigenraysStruct = mxCreateStructMatrix((MWSIZE)settings->output.nArrayZ,   //number of rows
@@ -536,10 +524,11 @@ void    calcEigenrayRF(settings_t* settings){
     }
 
     ///Write Eigenrays to matfile:
-    matPutVariable(matfile, "eigenrays", mxAllEigenraysStruct);
+    matPutVariable(settings->options.matfile, "eigenrays", mxAllEigenraysStruct);
+    
 
+    
     //Free memory
-    matClose(matfile);
     mxDestroyArray(mxAllEigenraysStruct);
     free(dz);
     DEBUG(1,"out\n");

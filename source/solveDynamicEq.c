@@ -6,6 +6,9 @@
  * calling solveEikonal.c                                                               *
  *                                                                                      *
  * ------------------------------------------------------------------------------------ *
+ * Website:                                                                             *
+ *          https://github.com/EyNuel/cTraceo/wiki                                      *
+ *                                                                                      *
  * License: This file is part of the cTraceo Raytracing Model and is released under the *
  *          Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License  *
  *          http://creativecommons.org/licenses/by-nc-sa/3.0/                           *
@@ -16,7 +19,7 @@
  * Written for project SENSOCEAN by:                                                    *
  *          Emanuel Ey                                                                  *
  *          emanuel.ey@gmail.com                                                        *
- *          Copyright (C) 2011                                                          *
+ *          Copyright (C) 2011 - 2013                                                   *
  *          Signal Processing Laboratory                                                *
  *          Universidade do Algarve                                                     *
  *                                                                                      *
@@ -165,7 +168,9 @@ void    solveDynamicEq(settings_t* settings, ray_t* ray){
         }else{
             fatal("Solving dynamic equations: iRefl neither 1 nor 0!\nAborting...");
         }
-
+        
+        //Q: is this completely redundant?! can't seem to find anywhere where "caustc" is actually used..
+        //A: actually, the value of caustc is used when calculating acoustic pressure at a hydrophone in "getRayPressure()".
         prod = ray->q[i] * ray->q[i+1];
         if ( (prod <= 0) && (ray->q[i] != 0)){
             ray->caustc[i+1] = ray->caustc[i] + M_PI/2.0;

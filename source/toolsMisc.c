@@ -3,6 +3,9 @@
  * Collection of miscelaneous utility functions.                                        *
  *                                                                                      *
  * ------------------------------------------------------------------------------------ *
+ * Website:                                                                             *
+ *          https://github.com/EyNuel/cTraceo/wiki                                      *
+ *                                                                                      *
  * License: This file is part of the cTraceo Raytracing Model and is released under the *
  *          Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License  *
  *          http://creativecommons.org/licenses/by-nc-sa/3.0/                           *
@@ -13,7 +16,7 @@
  * Written for project SENSOCEAN by:                                                    *
  *          Emanuel Ey                                                                  *
  *          emanuel.ey@gmail.com                                                        *
- *          Copyright (C) 2011                                                          *
+ *          Copyright (C) 2011 - 2013                                                   *
  *          Signal Processing Laboratory                                                *
  *          Universidade do Algarve                                                     *
  *                                                                                      *
@@ -21,6 +24,7 @@
 
 #pragma once
 #include    <string.h>
+#include    <ctype.h>   //for tolower()
 #ifndef WINDOWS
     #include    <sys/time.h>        //for struct time_t
     #include    <sys/resource.h>    //for getrusage()
@@ -37,6 +41,7 @@ double      min(double, double);
 double      max(double, double);
 void        fatal(const char*);
 void        printCpuTime(FILE*);
+char*       stringToLower(char* str);
 
 
 ///Functions:
@@ -77,6 +82,7 @@ void        fatal(const char* message){
     exit(EXIT_FAILURE);
 }
 
+#if 0
 void        printCpuTime(FILE* stream){
     /*
      * prints total cpu time used by process.
@@ -92,4 +98,16 @@ void        printCpuTime(FILE* stream){
         fprintf(stream, "%ld.%06ld seconds user CPU time,\n", usage.ru_utime.tv_sec, usage.ru_utime.tv_usec);
         fprintf(stream, "%ld.%06ld seconds system CPU time used.\n", usage.ru_stime.tv_sec, usage.ru_stime.tv_usec);
     #endif
+}
+#endif
+
+char*   stringToLower(char* str){
+    /*
+     * Converts a string to lowercase. assumes string is properly NULL-terminated.
+     */
+    for(uintptr_t i = 0; str[i]; i++){
+      str[i] = tolower(str[i]);
+    }
+    
+    return str;
 }

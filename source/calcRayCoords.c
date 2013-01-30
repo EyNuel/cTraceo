@@ -4,6 +4,9 @@
  *  Uses solveEikonalEq for raytracing and writes ray coordinates to .mat file.         *
  *                                                                                      *
  * ------------------------------------------------------------------------------------ *
+ * Website:                                                                             *
+ *          https://github.com/EyNuel/cTraceo/wiki                                      *
+ *                                                                                      *
  * License: This file is part of the cTraceo Raytracing Model and is released under the *
  *          Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License  *
  *          http://creativecommons.org/licenses/by-nc-sa/3.0/                           *
@@ -14,7 +17,7 @@
  * Written for project SENSOCEAN by:                                                    *
  *          Emanuel Ey                                                                  *
  *          emanuel.ey@gmail.com                                                        *
- *          Copyright (C) 2011                                                          *
+ *          Copyright (C) 2011 - 2013                                                   *
  *          Signal Processing Laboratory                                                *
  *          Universidade do Algarve                                                     *
  *                                                                                      *
@@ -55,13 +58,11 @@ void    calcRayCoords(settings_t*);
 void    calcRayCoords(settings_t* settings){
     DEBUG(1,"in\n");
     
-    MATFile*        matfile     = NULL;
     mxArray*        mxTheta     = NULL;
     mxArray*        mxR         = NULL;
     mxArray*        mxZ         = NULL;
     
     mxArray*        mxThetas    = NULL;
-    mxArray*        mxTitle     = NULL;
     mxArray*        mxRayStruct = NULL;
     const char*     fieldNames[]= { "theta",
                                     "r",
@@ -70,29 +71,16 @@ void    calcRayCoords(settings_t* settings){
     ray_t*      ray     = NULL;
     uintptr_t   i;
     
-    
-    
-    //open matfile for output
-    matfile     = matOpen("rco.mat", "w");
-    
-    
+        
     //write launching angles to file
-    mxThetas        = mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)settings->source.nThetas, mxREAL);
-    if(matfile == NULL || mxThetas == NULL)
+    mxThetas    = mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)settings->source.nThetas, mxREAL);
+    if(mxThetas == NULL)
         fatal("Memory alocation error.");
     //copy cArray to mxArray:
     copyDoubleToMxArray(    settings->source.thetas, mxThetas, settings->source.nThetas);
     //move mxArray to file:
-    matPutVariable(matfile, "thetas", mxThetas);
+    matPutVariable(settings->options.matfile, "thetas", mxThetas);
     mxDestroyArray(mxThetas);
-    
-    
-    //write title to matfile:
-    mxTitle = mxCreateString("TRACEO: Ray COordinates");
-    if(mxTitle == NULL)
-        fatal("Memory alocation error.");
-    matPutVariable(matfile, "caseTitle", mxTitle);
-    mxDestroyArray(mxTitle);
     
     
     //create mxStructArray:
@@ -156,10 +144,11 @@ void    calcRayCoords(settings_t* settings){
     }//for(i=0; i<settings->source.nThetas; i++)
     
     /// Write all ray information to matfile:
-    matPutVariable(matfile, "rays", mxRayStruct);
+    matPutVariable(settings->options.matfile, "rays", mxRayStruct);
     
     /// Finish up
-    matClose(matfile);
+    mxDestroyArray(mxRayStruct);
+    
     free(ray);
     DEBUG(1,"out\n");
 }
