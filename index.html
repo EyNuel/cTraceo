@@ -46,10 +46,10 @@ The cTraceo Acoustic Raytracing Model is a 2D propagation model based on Gaussia
 underwater acoustics and was developed at the <a href="http://www.siplab.fct.ualg.pt/">Signal Processing Laboratory</a>
 of the <a href="http://www.ualg.pt/">University of the Algarve</a>.<br>
 
-Technically, cTraceo is based on the [TRACEO](http://www.siplab.fct.ualg.pt/models.shtml) model written in Fortran 77.  
+Technically, cTraceo was written in C and is based on Orlando Rodríguez' 
+<a href="http://www.siplab.fct.ualg.pt/models.shtml">TRACEO</a> model written in Fortran 77.  
 The cTraceo model is a completely re-engineered version of it's Fortran predecessor and features 3-4x higher
 performance, reduced memory usage of up to 3 orders of magnitude as well as better usability and portability.<br>
-
 
 Should you have any questions, suggestions or feedback, please don't hesitate in
 <a href="http://eynuel.github.com/cTraceo/#contact">contacting us</a>.
@@ -143,15 +143,23 @@ Alternatively you can download the source code and compile it yourself.</p>
 
 <h3>Compiler Support</h3>
 
-<p>cTraceo requires a C Compiler compatible with the ISO C99 Standard. This is mostly due to the need for complex (Imaginary) Math:</p>
+<p>
+cTraceo requires a C Compiler compatible with the ISO C99 Standard. 
+This is mostly due to the need for complex Math, which is not officially supported in older C standards.
+<br>
+<br>
+Some notes on well known compilers:
+</p>
 
 <ul>
 <li><p>The GNU C Compiler<br>
 GCC fully supports the ISO C99 standard as of version 4.5. The 4.3.x and 4.4.x versions partially implement the C99 standard and although warnings related to imaginary math may be generated, the code is compiled successfully.<br>
 Successfully tested with versions 4.4.4 and 4.4.5 on Linux as well as with version 4.5.3 on Windows (using Cygwin)</p></li>
+
 <li><p>Clang - LLVM C Language Frontend<br>
 The Clang compiler is the compiler used for development of the cTraceo Model.<br>
 Successfully tested with versions 2.8 and 2.9 on Linux.</p></li>
+
 <li><p>MS Visual Studio<br>
 No version of Microsoft's Visual Studio C Compiler supports the ISO C99 Standard, so compilation should not be possible.<br>
 Not tested.</p></li>
