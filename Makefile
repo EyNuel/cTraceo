@@ -8,8 +8,8 @@
 ## ================================================================
 
 ## Choose a compiler command:
-CC  := gcc
-#~ CC := clang
+#~ CC  := gcc
+CC := clang
 
 ##Compiler commands for cross-compiling from linux ia64 to windows:
 CCW32 := i686-w64-mingw32-gcc
@@ -108,7 +108,7 @@ DEFS := $(DEFS) -D USE_MATLAB=$(USE_MATLAB)
 DEFS := $(DEFS) -D OS=$(OS)
 
 ## A list of all non-source files that are part of the distribution.
-AUXFILES := Makefile cTraceo_User_Manual.pdf readme.txt license.txt changelog.txt examples/sletvik_transect.mat bin/ctraceo_$(VERSION_SHORT)_linux_i686 bin/ctraceo_$(VERSION_SHORT)_linux_x86-64 bin/ctraceo_$(VERSION_SHORT)_win_x86-64.exe bin/ctraceo_$(VERSION_SHORT)_win_x86.exe
+AUXFILES := Makefile cTraceo_User_Manual.pdf readme.txt license.txt changelog.txt examples/sletvik_transect.mat bin/ctraceo_$(VERSION_SHORT)_linux_i686 bin/ctraceo_$(VERSION_SHORT)_linux_x86-64 bin/ctraceo_$(VERSION_SHORT)_win_x86-64.exe bin/ctraceo_$(VERSION_SHORT)_win_x86.exe source/version
 
 ## A list of directories that belong to the project
 PROJDIRS := M-Files examples source source/matOut doc bin
@@ -193,6 +193,7 @@ dist:	dirs win linux
 		@echo "----------------------------"
 		@if [ ! -d "packages" ]; then mkdir packages; fi
 		@tar -czf ./packages/cTraceo_$(VERSION_SHORT).tgz $(ALLFILES)
+		@echo "Done."
 		
 dirs:	#creates 'bin/' directory if it doesn't exist
 		@if [ ! -d "bin" ]; then mkdir bin; fi
