@@ -63,13 +63,14 @@ void    calcEigenrayRF(settings_t*);
 
 void    calcEigenrayRF(settings_t* settings){
     DEBUG(1,"in\n");
-    float          thetai, ctheta;
-    uintptr_t       i, j, k, l, nRays, iHyd = 0;
+    float           thetai, ctheta;
+    uintptr_t       iRay, iArrayR, iArrayZ, l, iHyd = 0;     //iterator variables
+    uintptr_t       nRays;   //a counter for the number of found eigenrays
     uintptr_t       nPossibleEigenRays, nFoundEigenRays = 0;
-    float          zRay, zHyd, rHyd;
-    float          junkfloat;
+    float           zRay, zHyd, rHyd;
+    float           junkFloat;
     uint32_t        nTrial;
-    float          theta0, f0;
+    float           theta0, f0;
     //used for root-finding in actual Regula-Falsi Method:
     float          fl, fr, prod;
     float*         thetaL              = NULL;
@@ -123,14 +124,14 @@ void    calcEigenrayRF(settings_t* settings){
      * actual arrival information before it is written to a matlab structure at the end of the file.
      */
     //initialize to 0
-    for (i=0; i<settings->output.nArrayR; i++){
-        for (j=0; j<settings->output.nArrayZ; j++){
-            eigenrays[i][j].nEigenrays = 0;
-            eigenrays[i][j].mxEigenrayStruct = mxCreateStructMatrix(    (MWSIZE)settings->source.nThetas,       //number of rows
-                                                                        (MWSIZE)1,                              //number of columns
-                                                                        12,                                     //number of fields in each element
-                                                                        eigenrayFieldNames);                        //list of field names
-            if( eigenrays[i][j].mxEigenrayStruct == NULL ){
+    for (iArrayR=0; iArrayR<settings->output.nArrayR; iArrayR++){
+        for (iArrayZ=0; iArrayZ<settings->output.nArrayZ; iArrayZ++){
+            eigenrays[iArrayR][iArrayZ].nEigenrays = 0;
+            eigenrays[iArrayR][iArrayZ].mxEigenrayStruct = mxCreateStructMatrix((MWSIZE)settings->source.nThetas,       //number of rows
+                                                                                (MWSIZE)1,                              //number of columns
+                                                                                12,                                     //number of fields in each element
+                                                                                eigenrayFieldNames);                        //list of field names
+            if( eigenrays[iArrayR][iArrayZ].mxEigenrayStruct == NULL ){
                 fatal("Memory Alocation error.");
             }
         }
@@ -179,46 +180,46 @@ void    calcEigenrayRF(settings_t* settings){
     thetas = mallocFloat(settings->source.nThetas);
     depths = mallocFloat2D(settings->source.nThetas, settings->output.nArrayR);
     DEBUG(2,"Calculting preliminary rays:\n");
-    nRays = 0;
+    nRays = 0;      //a counter for the number of found eigenrays
 
-    for(i=0; i<settings->source.nThetas; i++){
+    for(iRay=0; iRay<settings->source.nThetas; iRay++){
         DEBUG(3, "--\n\t\tRay Launching angle: %lf\n", settings->source.thetas[i]);
-        thetai = -settings->source.thetas[i]*M_PI/180.0;
-        ray[i].theta = thetai;
+        thetai = -settings->source.thetas[iRay]*M_PI/180.0;
+        ray[iRay].theta = thetai;
         ctheta = fabs( cos( thetai ) );
 
         //  Trace a ray as long as it is neither 90 nor -90:
         if (ctheta > 1.0e-7){
             thetas[nRays] = thetai;
             DEBUG(3, "thetas[%u]: %e\n", (uint32_t)nRays, thetas[nRays]);
-            solveEikonalEq(settings, &ray[i]);
-            solveDynamicEq(settings, &ray[i]);
+            solveEikonalEq(settings, &ray[iRay]);
+            solveDynamicEq(settings, &ray[iRay]);
 
-            if (ray[i].iReturn == true){
-                printf("Eigenray search by Regula Falsi detected a returning ray at angle %lf.\n", thetas[i]);
+            if (ray[iRay].iReturn == true){
+                printf("Eigenray search by Regula Falsi detected a returning ray at angle %lf.\n", thetas[iRay]);
                 fatal("Returning eigenrays can only be determined by Proximity.\nAborting");
             }
 
             //Ray calculted; now fill the matrix of depths:
-            for(j=0; j<settings->output.nArrayR; j++){
-                rHyd = settings->output.arrayR[j];
+            for(iArrayR=0; iArrayR<settings->output.nArrayR; iArrayR++){
+                rHyd = settings->output.arrayR[iArrayR];
 
                 //check if the hydrophone range coord is whithin range of the ray
-                if ( (rHyd >= ray[i].rMin) && (rHyd <= ray[i].rMax)){
+                if ( (rHyd >= ray[iRay].rMin) && (rHyd <= ray[iRay].rMax)){
 
                     //find bracketing coords:
-                    bracket( ray[i].nCoords, ray[i].r, rHyd, &iHyd);
+                    bracket( ray[iRay].nCoords, ray[iRay].r, rHyd, &iHyd);
 
                     //interpolate the ray depth at the range coord of hydrophone
-                    intLinear1D(&ray[i].r[iHyd], &ray[i].z[iHyd], rHyd, &zRay, &junkfloat);
-                    depths[nRays][j] = zRay;
-                    DEBUG(3,"rHyd: %lf; rMin: %lf; rMax: %lf\n", rHyd, ray[i].rMin, ray[i].rMax);
-                    DEBUG(3,"nCoords: %u, rHyd: %lf; iHyd: %u, zRay: %lf\n", (uint32_t)ray[i].nCoords, rHyd, (uint32_t)iHyd, zRay);
+                    intLinear1D(&ray[iRay].r[iHyd], &ray[iRay].z[iHyd], rHyd, &zRay, &junkFloat);
+                    depths[nRays][iArrayR] = zRay;
+                    DEBUG(3,"rHyd: %lf; rMin: %lf; rMax: %lf\n", rHyd, ray[iRay].rMin, ray[iRay].rMax);
+                    DEBUG(3,"nCoords: %u, rHyd: %lf; iHyd: %u, zRay: %lf\n", (uint32_t)ray[iRay].nCoords, rHyd, (uint32_t)iHyd, zRay);
                 }else{
-                    depths[nRays][j] = NAN;
+                    depths[nRays][iArrayR] = NAN;
                 }
             }
-            reallocRayMembers(&ray[i],0);
+            reallocRayMembers(&ray[iRay],0);
             nRays++;
         }
     }
@@ -237,17 +238,17 @@ void    calcEigenrayRF(settings_t* settings){
     thetaR =    mallocFloat(nRays);
 
     //  iterate over....
-    for (i=0; i<settings->output.nArrayR; i++){
-        rHyd = settings->output.arrayR[i];
+    for (iArrayR=0; iArrayR<settings->output.nArrayR; iArrayR++){
+        rHyd = settings->output.arrayR[iArrayR];
         //  ...the entire hydrophone array:
-        for(j=0; j<settings->output.nArrayZ; j++){
-            zHyd = settings->output.arrayZ[j];
-            DEBUG(3, "i: %u; j: %u; rHyd:%lf, zHyd:%lf\n",(uint32_t)i, (uint32_t)j, rHyd, zHyd );
+        for(iArrayZ=0; iArrayZ<settings->output.nArrayZ; iArrayZ++){
+            zHyd = settings->output.arrayZ[iArrayZ];
+            DEBUG(3, "iArrayR: %u; iArrayZ: %u; rHyd:%lf, zHyd:%lf\n",(uint32_t)iArrayR, (uint32_t)iArrayZ, rHyd, zHyd );
 
             //for each ray calculate the difference between the hydrophone and ray depths:
-            for(k=0; k<nRays; k++){
-                dz[k] = zHyd - depths[k][i];
-                DEBUG(3,"dz[%u]= %lf\n", (uint32_t)k, dz[k]);
+            for(iRay=0; iRay<nRays; iRay++){
+                dz[iRay] = zHyd - depths[iRay][iArrayR];
+                DEBUG(3,"dz[%u]= %lf\n", (uint32_t)iRay, dz[iRay]);
             }
 
             /** By looking at sign variations (or zero values) of dz[]:
@@ -256,29 +257,29 @@ void    calcEigenrayRF(settings_t* settings){
              *          (which implies that there may be an intermediate launching angle that corresponds to an eigenray.
              */
             nPossibleEigenRays = 0;
-            for(k=0; k<nRays-1; k++){
-                fl = dz[k];
-                fr = dz[k+1];
+            for(iRay=0; iRay<nRays-1; iRay++){
+                fl = dz[iRay];
+                fr = dz[iRay+1];
                 prod = fl*fr;
-                DEBUG(3, "k: %u; thetaL: %e; thetaR: %e\n", (uint32_t)k, thetaL[k], thetaR[k]);
+                DEBUG(3, "k: %u; thetaL: %e; thetaR: %e\n", (uint32_t)iRay, thetaL[iRay], thetaR[iRay]);
 
-                if( isnan_d(depths[k][i]) == false  &&
-                    isnan_d(depths[k+1][i]) == false    ){
+                if( isnan_d(depths[iRay][iArrayR]) == false  &&
+                    isnan_d(depths[iRay+1][iArrayR]) == false    ){
                     DEBUG(3, "Not a NAN\n");
 
                     if( (fl == 0.0) && (fr != 0.0)){
-                        thetaL[nPossibleEigenRays] = thetas[k];
-                        thetaR[nPossibleEigenRays] = thetas[k+1];
+                        thetaL[nPossibleEigenRays] = thetas[iRay];
+                        thetaR[nPossibleEigenRays] = thetas[iRay+1];
                         nPossibleEigenRays++;
 
                     }else if(   (fr == 0.0) && (fl != 0.0)){
-                        thetaL[nPossibleEigenRays] = thetas[k];
-                        thetaR[nPossibleEigenRays] = thetas[k+1];
+                        thetaL[nPossibleEigenRays] = thetas[iRay];
+                        thetaR[nPossibleEigenRays] = thetas[iRay+1];
                         nPossibleEigenRays++;
 
                     }else if(prod < 0.0){
-                        thetaL[nPossibleEigenRays] = thetas[k];
-                        thetaR[nPossibleEigenRays] = thetas[k+1];
+                        thetaL[nPossibleEigenRays] = thetas[iRay];
+                        thetaR[nPossibleEigenRays] = thetas[iRay+1];
                         nPossibleEigenRays++;
 
                     }
@@ -374,7 +375,7 @@ void    calcEigenrayRF(settings_t* settings){
                         reallocRayMembers(tempRay, 0);
                         DEBUG(3, "zHyd: %e; miss: %e, nTrial: %u, f0: %e\n", zHyd, settings->output.miss, (uint32_t)nTrial, f0);
 
-                        //check if the new rays is close enough to the hydrophone to be considered and eigenray:
+                        //check if the new ray is close enough to the hydrophone to be considered and eigenray:
                         if (fabs(f0) < settings->output.miss){
                             DEBUG(3, "Found eigenray by applying Regula-Falsi.\n");
                             success = true;
@@ -425,14 +426,14 @@ void    calcEigenrayRF(settings_t* settings){
                     copyComplexFloatToMxArray(tempRay->amp,      mxAmp,  tempRay->nCoords);
 
                     //copy mxArrays to mxRayStruct
-                    mxSetFieldByNumber( eigenrays[i][j].mxEigenrayStruct,               //pointer to the mxStruct
-                                        (MWINDEX)eigenrays[i][j].nEigenrays,            //index of the element (number of ray)
+                    mxSetFieldByNumber( eigenrays[iArrayR][iArrayZ].mxEigenrayStruct,               //pointer to the mxStruct
+                                        (MWINDEX)eigenrays[iArrayR][iArrayZ].nEigenrays,            //index of the element (number of ray)
                                         0,                                              //position of the field (in this case, field 0 is "r"
                                         mxTheta);                                       //the mxArray we want to copy into the mxStruct
-                    mxSetFieldByNumber( eigenrays[i][j].mxEigenrayStruct, (MWINDEX)eigenrays[i][j].nEigenrays, 1, mxR);
-                    mxSetFieldByNumber( eigenrays[i][j].mxEigenrayStruct, (MWINDEX)eigenrays[i][j].nEigenrays, 2, mxZ);
-                    mxSetFieldByNumber( eigenrays[i][j].mxEigenrayStruct, (MWINDEX)eigenrays[i][j].nEigenrays, 3, mxTau);
-                    mxSetFieldByNumber( eigenrays[i][j].mxEigenrayStruct, (MWINDEX)eigenrays[i][j].nEigenrays, 4, mxAmp);
+                    mxSetFieldByNumber( eigenrays[iArrayR][iArrayZ].mxEigenrayStruct, (MWINDEX)eigenrays[iArrayR][iArrayZ].nEigenrays, 1, mxR);
+                    mxSetFieldByNumber( eigenrays[iArrayR][iArrayZ].mxEigenrayStruct, (MWINDEX)eigenrays[iArrayR][iArrayZ].nEigenrays, 2, mxZ);
+                    mxSetFieldByNumber( eigenrays[iArrayR][iArrayZ].mxEigenrayStruct, (MWINDEX)eigenrays[iArrayR][iArrayZ].nEigenrays, 3, mxTau);
+                    mxSetFieldByNumber( eigenrays[iArrayR][iArrayZ].mxEigenrayStruct, (MWINDEX)eigenrays[iArrayR][iArrayZ].nEigenrays, 4, mxAmp);
                     ///ray has been saved to mxStructArray
 
                     ///now lets save some aditional ray information:
@@ -448,11 +449,11 @@ void    calcEigenrayRF(settings_t* settings){
                     copyUInt32ToMxArray(    &tempRay->oRefl,    nObjRefl,   1);
                     copyUInt32ToMxArray(    &tempRay->nRefrac,  nRefrac,    1);
 
-                    mxSetFieldByNumber( eigenrays[i][j].mxEigenrayStruct, (MWINDEX)i, 5, iReturns);
-                    mxSetFieldByNumber( eigenrays[i][j].mxEigenrayStruct, (MWINDEX)i, 6, nSurRefl);
-                    mxSetFieldByNumber( eigenrays[i][j].mxEigenrayStruct, (MWINDEX)i, 7, nBotRefl);
-                    mxSetFieldByNumber( eigenrays[i][j].mxEigenrayStruct, (MWINDEX)i, 8, nObjRefl);
-                    mxSetFieldByNumber( eigenrays[i][j].mxEigenrayStruct, (MWINDEX)i, 9, nRefrac);
+                    mxSetFieldByNumber( eigenrays[iArrayR][iArrayZ].mxEigenrayStruct, (MWINDEX)eigenrays[iArrayR][iArrayZ].nEigenrays, 5, iReturns);
+                    mxSetFieldByNumber( eigenrays[iArrayR][iArrayZ].mxEigenrayStruct, (MWINDEX)eigenrays[iArrayR][iArrayZ].nEigenrays, 6, nSurRefl);
+                    mxSetFieldByNumber( eigenrays[iArrayR][iArrayZ].mxEigenrayStruct, (MWINDEX)eigenrays[iArrayR][iArrayZ].nEigenrays, 7, nBotRefl);
+                    mxSetFieldByNumber( eigenrays[iArrayR][iArrayZ].mxEigenrayStruct, (MWINDEX)eigenrays[iArrayR][iArrayZ].nEigenrays, 8, nObjRefl);
+                    mxSetFieldByNumber( eigenrays[iArrayR][iArrayZ].mxEigenrayStruct, (MWINDEX)eigenrays[iArrayR][iArrayZ].nEigenrays, 9, nRefrac);
                     ///aditional information has been saved
 
                     ///save refraction coordinates to structure:
@@ -463,17 +464,19 @@ void    calcEigenrayRF(settings_t* settings){
                         copyFloatToMxArray(tempRay->rRefrac,   mxRefrac_r, tempRay->nRefrac);
                         copyFloatToMxArray(tempRay->zRefrac,   mxRefrac_z, tempRay->nRefrac);
 
-                        mxSetFieldByNumber( eigenrays[i][j].mxEigenrayStruct, (MWINDEX)i, 10, mxRefrac_r);
-                        mxSetFieldByNumber( eigenrays[i][j].mxEigenrayStruct, (MWINDEX)i, 11, mxRefrac_z);
+                        mxSetFieldByNumber( eigenrays[iArrayR][iArrayZ].mxEigenrayStruct, (MWINDEX)eigenrays[iArrayR][iArrayZ].nEigenrays, 10, mxRefrac_r);
+                        mxSetFieldByNumber( eigenrays[iArrayR][iArrayZ].mxEigenrayStruct, (MWINDEX)eigenrays[iArrayR][iArrayZ].nEigenrays, 11, mxRefrac_z);
                     }
-                    eigenrays[i][j].nEigenrays += 1;
-                    maxNumEigenrays = max(eigenrays[i][j].nEigenrays, maxNumEigenrays);
+                    eigenrays[iArrayR][iArrayZ].nEigenrays += 1;
+                    maxNumEigenrays = max(eigenrays[iArrayR][iArrayZ].nEigenrays, maxNumEigenrays);
                 }
             }
             DEBUG(3, "nFoundEigenRays: %u\n", (uint32_t)nFoundEigenRays);
         }
     }
     
+    
+
     //write "maximum number of eigenrays at any of the hydrophones
     mxMaxNumEigenrays = mxCreateDoubleMatrix((MWSIZE)1, (MWSIZE)1, mxREAL);
     copyUInt32ToMxArray(&maxNumEigenrays, mxMaxNumEigenrays, 1);
@@ -489,18 +492,18 @@ void    calcEigenrayRF(settings_t* settings){
     if( mxAllEigenraysStruct == NULL ){
         fatal("Memory Alocation error.");
     }
-    for (i=0; i<settings->output.nArrayR; i++){
-        for (j=0; j<settings->output.nArrayZ; j++){
+    for (iArrayR=0; iArrayR<settings->output.nArrayR; iArrayR++){
+        for (iArrayZ=0; iArrayZ<settings->output.nArrayZ; iArrayZ++){
             mxNumEigenrays  = mxCreateDoubleMatrix((MWSIZE)1,   (MWSIZE)1,  mxREAL);
             mxRHyd          = mxCreateDoubleMatrix((MWSIZE)1,   (MWSIZE)1,  mxREAL);
             mxZHyd          = mxCreateDoubleMatrix((MWSIZE)1,   (MWSIZE)1,  mxREAL);
 
-            copyFloatToMxArray(&eigenrays[i][j].nEigenrays,    mxNumEigenrays,1);
-            copyFloatToMxArray(&settings->output.arrayR[i],    mxRHyd,1);
-            copyFloatToMxArray(&settings->output.arrayZ[j],    mxZHyd,1);
+            copyFloatToMxArray(&eigenrays[iArrayR][iArrayZ].nEigenrays,mxNumEigenrays,1);
+            copyFloatToMxArray(&settings->output.arrayR[iArrayR],      mxRHyd,1);
+            copyFloatToMxArray(&settings->output.arrayZ[iArrayZ],      mxZHyd,1);
 
-            idx[0] = (MWINDEX)j;
-            idx[1] = (MWINDEX)i;
+            idx[0] = (MWINDEX)iArrayZ;
+            idx[1] = (MWINDEX)iArrayR;
             mxSetFieldByNumber( mxAllEigenraysStruct,                                   //pointer to the mxStruct
                                 mxCalcSingleSubscript(mxAllEigenraysStruct, 2, idx),    //index of the element
                                 0,                                                      //position of the field (in this case, field 0 is "theta"
@@ -519,7 +522,7 @@ void    calcEigenrayRF(settings_t* settings){
             mxSetFieldByNumber( mxAllEigenraysStruct,                                   //pointer to the mxStruct
                                 mxCalcSingleSubscript(mxAllEigenraysStruct, 2, idx),    //index of the element
                                 3,                                                      //position of the field (in this case, field 0 is "theta"
-                                eigenrays[i][j].mxEigenrayStruct);                      //the mxArray we want to copy into the mxStruct
+                                eigenrays[iArrayR][iArrayZ].mxEigenrayStruct);                //the mxArray we want to copy into the mxStruct
         }
     }
 
