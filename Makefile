@@ -80,7 +80,7 @@ LFLAGS := -lm
 ## Matlab output:
 ifeq ($(USE_MATLAB),1)
 	CFLAGS := $(CFLAGS) -I $(MATLAB_DIR)extern/include 
-	LFLAGS := $(LFLAGS) -leng -lmat -lmex -lut -Wl,
+	LFLAGS := $(LFLAGS) -leng -lmat -lmex -lmx -lut -Wl,
 
 	## Generate path to matlab libraries according to configuration:
 	ifeq ($(ARCH),32b)
