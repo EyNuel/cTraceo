@@ -182,6 +182,15 @@ void    solveDynamicEq(settings_t* settings, ray_t* ray){
     //Amplitude calculation:
     DEBUG(10, "amp[10]:%lf, cxc:%lf, cnn:%e\n", cabs(ray->amp[10]), cxc, cnn);
     for(i=1; i<ray->nCoords; i++){
+        /*
+         * NOTE:
+         *  ap_aq cooresponds to the content of the square root of eq 2.13 of the cTraceo v1.0 manual.
+         *  You may notice that here we multiply by a factor of "ray->c[0]*cos(ray->theta)", which is not present in the manual.
+         *  This is due to the fact that the initial values of the auxiliary variable p, used for computing q, are defined
+         *  adimensionally in the code, while in the theory they are defined as a fucntion of 1/c and the launching angle theta
+         *  (see page 17 of the Fortran TRACEO manual). To compensate for this, we need to multiply the amplitude by c*cos(theta)
+         *  to reach an expression equivalent to the one in the theoretical background.
+         */
         ap_aq       = (complex double)( ray->c[0] * cos(ray->theta) * ray->c[i] / ( ray->ic[i] * ray->q[i] ));
         DEBUG(7, "i:%u, ap_aq:%e, c: %lf, ic:%lf, q:%e\n", (uint32_t)i, (double)cabs(ap_aq), ray->c[i], ray->ic[i], ray->q[i]);
         ray->amp[i] = csqrt( ap_aq ) * ray->decay[i] * exp( -alpha * ray->s[i] );
