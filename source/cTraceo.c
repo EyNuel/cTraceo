@@ -479,7 +479,7 @@ int main(int argc, char **argv){
         
         mxArray*        mxNBackscatteredRays    = NULL;
         
-        DEBUG(0, "nBackscatteredRays_d: %lf\n", settings->options.nBackscatteredRays);
+        DEBUG(0, "nBackscatteredRays_d: %u\n", settings->options.nBackscatteredRays);
         DEBUG(0, "output file name: %s\n", settings->options.outputFileName);
         
         //write launching angles to file
