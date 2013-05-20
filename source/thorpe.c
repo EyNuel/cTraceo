@@ -35,7 +35,7 @@
  *          freq:   Frequency.                                                          *
  *                                                                                      *
  * Outputs:                                                                             *
- *          alpha:  Thorpe attenuation in dB/m.                                         *
+ *          alpha:  Thorpe attenuation in Np/m.                                         *
  *                                                                                      *
  * Return Value:                                                                        *
  *          None                                                                        *
@@ -48,6 +48,6 @@ void    thorpe(double freq, double* alpha){
     double      fxf;
 
     fxf     = pow( (freq/1000 ), 2);
-    *alpha  = 0.0033 +0.11 * fxf / (1 +fxf ) + 44 * fxf / (4100 +fxf) +0.0003 * fxf;
-    *alpha  = *alpha/8685.8896;
+    *alpha  = 0.0033 +0.11 * fxf / (1 +fxf ) + 44 * fxf / (4100 +fxf) +0.0003 * fxf;    //result is in dB/km
+    *alpha  = *alpha/8685.8896;                                                         //convert to Np/m
 }
