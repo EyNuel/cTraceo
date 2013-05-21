@@ -316,7 +316,7 @@ void    calcEigenrayRF(settings_t* settings){
             tempRay = makeRay(1);
             nFoundEigenRays = 0;
             for(l=0; l<nPossibleEigenRays; l++){        //Note that if nPossibleEigenRays = 0 this loop will not be executed:
-                settings->source.rbox2 = rHyd + 1;  //TODO: change this to "rbox2 = rHyd + ds" and verify results.
+                settings->source.rbox2 = rHyd + 1.1*settings->source.ds;  //TODO: change this to "rbox2 = rHyd + ds" and verify results.
                 DEBUG(3,"l: %u\n", (uint32_t)l);
 
                 //Determine "left" ray's depth at rHyd:
@@ -357,8 +357,7 @@ void    calcEigenrayRF(settings_t* settings){
                         nTrial++;
 
                         if (nTrial > 21){
-                            //printf("(rHyd,zHyd)= %e, %e\n", rHyd, zHyd);
-                            //printf("Eigenray search failure, skipping to next case...\n");
+                            DEBUG(3, "(rHyd,zHyd)= %e, %e : Eigenray search failure, skipping to next case...\n" rHyd, zHyd);
                             break;
                         }
 
@@ -409,21 +408,22 @@ void    calcEigenrayRF(settings_t* settings){
 
                     ///prepare to save ray to mxStructArray:
                     //create mxArrays:
-                    mxTheta = mxCreateDoubleMatrix((MWSIZE)1,   (MWSIZE)1,                  mxREAL);
-                    mxR     = mxCreateDoubleMatrix((MWSIZE)1,   (MWSIZE)(tempRay->nCoords), mxREAL);
-                    mxZ     = mxCreateDoubleMatrix((MWSIZE)1,   (MWSIZE)(tempRay->nCoords), mxREAL);
-                    mxTau   = mxCreateDoubleMatrix((MWSIZE)1,   (MWSIZE)(tempRay->nCoords), mxREAL);
-                    mxAmp   = mxCreateDoubleMatrix((MWSIZE)1,   (MWSIZE)(tempRay->nCoords), mxCOMPLEX);
+                    //NOTE: on line 319 we resize the rangeBox to make sure we compute valid ray amplitude for the last ray coordinate (which means integrating the ray to a point beyond the hydrophone, so here we copy on e coordinate less than has actually been computed)
+                    mxTheta = mxCreateDoubleMatrix((MWSIZE)1,   (MWSIZE)1,                    mxREAL);
+                    mxR     = mxCreateDoubleMatrix((MWSIZE)1,   (MWSIZE)(tempRay->nCoords-1), mxREAL);
+                    mxZ     = mxCreateDoubleMatrix((MWSIZE)1,   (MWSIZE)(tempRay->nCoords-1), mxREAL);
+                    mxTau   = mxCreateDoubleMatrix((MWSIZE)1,   (MWSIZE)(tempRay->nCoords-1), mxREAL);
+                    mxAmp   = mxCreateDoubleMatrix((MWSIZE)1,   (MWSIZE)(tempRay->nCoords-1), mxCOMPLEX);
                     if( mxTheta == NULL || mxR == NULL || mxZ == NULL || mxTau == NULL || mxAmp == NULL){
                         fatal("Memory alocation error.");
                     }
 
                     //copy data to mxArrays:
                     copyDoubleToMxArray(&tempRay[0].theta,  mxTheta,1);
-                    copyDoubleToMxArray(tempRay->r,         mxR,    tempRay->nCoords);
-                    copyDoubleToMxArray(tempRay->z,         mxZ,    tempRay->nCoords);
-                    copyDoubleToMxArray(tempRay->tau,       mxTau,  tempRay->nCoords);
-                    copyComplexToMxArray(tempRay->amp,      mxAmp,  tempRay->nCoords);
+                    copyDoubleToMxArray(tempRay->r,         mxR,    tempRay->nCoords-1);
+                    copyDoubleToMxArray(tempRay->z,         mxZ,    tempRay->nCoords-1);
+                    copyDoubleToMxArray(tempRay->tau,       mxTau,  tempRay->nCoords-1);
+                    copyComplexToMxArray(tempRay->amp,      mxAmp,  tempRay->nCoords-1);
 
                     //copy mxArrays to mxRayStruct
                     mxSetFieldByNumber( eigenrays[iArrayR][iArrayZ].mxEigenrayStruct,               //pointer to the mxStruct

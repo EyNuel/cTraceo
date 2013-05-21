@@ -81,7 +81,7 @@ void    solveDynamicEq(settings_t* settings, ray_t* ray){
     uintptr_t       i;
 
     //Define initial conditions:
-    ray->p[0]       = 1;
+    ray->p[0]       = 1;        //Note: according to theory in manual, p[0] should be: cos(theta)/c[0]. See related note on line 185
     ray->q[0]       = 0;
     ray->caustc[0]  = 0;
     ibdry           = 1;
