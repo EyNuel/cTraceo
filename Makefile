@@ -8,8 +8,8 @@
 ## ================================================================
 
 ## Choose a compiler command:
-#~ CC  := gcc
-CC := clang
+CC  := gcc
+#~ CC := clang
 
 ##Compiler commands for cross-compiling from linux ia64 to windows:
 CCW32 := i686-w64-mingw32-gcc
@@ -107,22 +107,6 @@ DEFS := $(DEFS) -D VERSION_SHORT=$(VERSION_SHORT)
 DEFS := $(DEFS) -D USE_MATLAB=$(USE_MATLAB)
 DEFS := $(DEFS) -D OS=$(OS)
 
-## A list of all non-source files that are part of the distribution.
-AUXFILES := Makefile cTraceo_User_Manual.pdf readme.txt license.txt changelog.txt examples/sletvik_transect.mat bin/ctraceo_$(VERSION_SHORT)_linux_i686 bin/ctraceo_$(VERSION_SHORT)_linux_x86-64 bin/ctraceo_$(VERSION_SHORT)_win_x86-64.exe bin/ctraceo_$(VERSION_SHORT)_win_x86.exe source/version
-
-## A list of directories that belong to the project
-PROJDIRS := M-Files examples source source/matOut doc bin
-
-## Recursively create a list of files that are inside the project
-SRCFILES := $(shell find $(PROJDIRS) -mindepth 0 -maxdepth 1 -name "*.c")
-HDRFILES := $(shell find $(PROJDIRS) -mindepth 0 -maxdepth 1 -name "*.h")
-OBJFILES := $(patsubst %.c,%.o,$(SRCFILES))
-MFILES   := $(shell find $(PROJDIRS) -mindepth 1 -maxdepth 1 -name "*.m")
-PDFFILES := $(shell find $(PROJDIRS) -mindepth 1 -maxdepth 1 -name "*.pdf")
-
-## A list of all files that should end up in a distribution tarball
-ALLFILES := $(SRCFILES) $(HDRFILES) $(AUXFILES) $(MFILES) $(PDFFILES)
-
 ## Disable checking for files with the folowing names:
 .PHONY: all todo cTraceo.exe discuss 32b pg dist doc
 
@@ -187,7 +171,7 @@ todo:	#list todos from all files
 discuss:#list discussion points from all files
 		@for file in $(ALLFILES); do fgrep -H -e DISCUSS $$file; done; true
 		
-dist:	dirs win linux
+dist:	dirs fileList win linux
 		@echo " "
 		@echo "Making cTraceo $(VERSION_SHORT) distribution package."
 		@echo "----------------------------"
@@ -195,8 +179,9 @@ dist:	dirs win linux
 		@tar -czf ./packages/cTraceo_$(VERSION_SHORT).tgz $(ALLFILES)
 		@echo "Done."
 		
-dirs:	#creates 'bin/' directory if it doesn't exist
+dirs:	#creates 'bin/' and 'doc/' directories if they don't exist
 		@if [ ! -d "bin" ]; then mkdir bin; fi
+		@if [ ! -d "doc" ]; then mkdir doc; fi
 		
 help:	#
 		@echo " ============================================================================= "
@@ -254,10 +239,28 @@ help:	#
 		@echo "                                                                               "
 		@echo " ============================================================================= "
 		
-doc:	#
+doc:	dirs
 		doxygen Doxyfile
 
+clean:	#clears doc directory
+		@if [ -d "doc" ]; then rm -r doc; fi
+		
+fileList:	dirs #make a list of all files to include in dist package
+## A list of all non-source files that are part of the distribution.
+AUXFILES := Makefile cTraceo_User_Manual.pdf readme.txt license.txt changelog.txt examples/sletvik_transect.mat bin/ctraceo_$(VERSION_SHORT)_linux_i686 bin/ctraceo_$(VERSION_SHORT)_linux_x86-64 bin/ctraceo_$(VERSION_SHORT)_win_x86-64.exe bin/ctraceo_$(VERSION_SHORT)_win_x86.exe source/version
 
+## A list of directories that belong to the project
+PROJDIRS := M-Files examples source source/matOut doc bin
+
+## Recursively create a list of files that are inside the project
+SRCFILES := $(shell find $(PROJDIRS) -mindepth 0 -maxdepth 1 -name "*.c")
+HDRFILES := $(shell find $(PROJDIRS) -mindepth 0 -maxdepth 1 -name "*.h")
+OBJFILES := $(patsubst %.c,%.o,$(SRCFILES))
+MFILES   := $(shell find $(PROJDIRS) -mindepth 1 -maxdepth 1 -name "*.m")
+PDFFILES := $(shell find $(PROJDIRS) -mindepth 1 -maxdepth 1 -name "*.pdf")
+
+## A list of all files that should end up in a distribution tarball
+ALLFILES := $(SRCFILES) $(HDRFILES) $(AUXFILES) $(MFILES) $(PDFFILES)
 
 
 
