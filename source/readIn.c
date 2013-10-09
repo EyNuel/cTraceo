@@ -132,7 +132,7 @@ void    readIn(settings_t* settings){
     
     }else{
         //method b:
-        DEBUG(3, "reading launching angles according to method a.\n");
+        DEBUG(3, "reading launching angles according to method b.\n");
         
         //read dTheta from the beginning of the 2nd line:
         dTheta = readDouble(inFile);
