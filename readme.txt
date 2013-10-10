@@ -39,7 +39,7 @@
 ################################################################
 ## Contents:
  * Features
- * Software Requirements
+ * Software Requirements for compilation
  * Makefile Configuration
  * Compilation & Installation
  * Matlab Configuration & Examples
@@ -78,7 +78,33 @@
    for compilation/usage)
 
 ################################################################
-## Software Requirements
+## Software Requirements for compilation
+   
+   Note that compilation of the cTraceo model is optional.
+   If you are not comfortable with compiling code, use one of the
+   pre-compiled versions provided in the distribution package.
+
+# Compiler Support
+  Compiling cTraceo requires a C Compiler compatible with the ISO C99
+  Standard. This is mostly due to the need for complex (Imaginary) Math.
+  
+ * The GNU C Compiler
+   GCC fully supports the ISO C99 standard as of version 4.5.
+   The 4.3.x and 4.4.x versions partially implement the C99
+   standard and although warnings related to imaginary math may
+   be generated, the code is compiled successfully.
+   Successfully tested with versions 4.4.4, 4.4.5, 4.6.3 on Linux as
+   well as with version 4.5.3 on Windows (using Cygwin)
+  
+ * Clang - LLVM C Language Frontend
+   The Clang compiler is the compiler used for development of the
+   cTraceo Model.
+   Successfully tested with versions 2.8, 2.9, 3.0 on Linux.
+  
+ * MS Visual Studio
+   No version of Microsoft's Visual Studio C Compiler supports 
+   the ISO C99 Standard, so compilation should not be possible.
+   Not tested.
 
 # Matlab (Optional)
   This software generates Matlab .mat-files as output, and
@@ -86,42 +112,17 @@
   1 - Linking with Matlab(R) libraries during compilation.
   2 - Using a set of internal functions.
   Option 2 is now the recommended method and is enabled by default.
-  Although it is still possible to fall back to option 1 this
+  Although it is still possible to fall back to option 1, this
   requires some extra configuration, is only supported on Linux
   and requires a Matlab(R) License to be available.
   
-
-# Compiler Support
-  cTraceo requires a C Compiler compatible with the ISO C99
-  Standard. This is mostly due to the need for complex
-  (Imaginary) Math.
-  
- * The GNU C Compiler
-   GCC fully supports the ISO C99 standard as of version 4.5.
-   The 4.3.x and 4.4.x versions partially implement the C99
-   standard and although warnings related to imaginary math may
-   be generated, the code is compiled successfully.
-   Successfully tested with versions 4.4.4 and 4.4.5 on Linux as
-   well as with version 4.5.3 on Windows (using Cygwin)
-  
- * Clang - LLVM C Language Frontend
-   The Clang compiler is the compiler used for development of the
-   cTraceo Model.
-   Successfully tested with versions 2.8 and 2.9 on Linux.
-  
- * MS Visual Studio
-   No version of Microsoft's Visual Studio C Compiler supports 
-   the ISO C99 Standard, so compilation should not be possible.
-   Not tested.
-
-
-
 ################################################################
 ## Makefile Configuration
+   
    To compile this model the user may have to adapt the included
    makefile to match the target system.
-   Although the options in the Makefile are mostly self-
-   -explanatory, a brief overview will be presented here:
+   Although the options in the Makefile are mostly self-explanatory,
+   a brief overview will be presented here:
 
 # The "CC" variable
   Defines which command to invoke for compilation.
@@ -152,7 +153,10 @@
 
 ################################################################
 ## Compilation and Installation
-
+   
+   Remember that compiling the code is not mandatory.
+   Pre-compiled binaries are provided in the distribution package.
+   
  # Linux
    After the options descibed in "Makefile Configuration" have
    been defined, just run:
@@ -187,7 +191,10 @@
       "ctraceo.exe" in the "bin/" subdirectory which can now be
       used like any other windows executable.
     
-   
+ # Cross-compiling
+   Compiling the windows version on linux requires the mingw32-gcc,
+   mingw-w64 and libc6-dev-i386 packages to be installed.
+ 
 ################################################################
 ## Matlab Configuration & Example Cases
    Several example cases are contained in the "examples/"
