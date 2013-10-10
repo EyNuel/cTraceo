@@ -1,4 +1,28 @@
 ################################################################
+## Version 1.4 ##
+## Features/Changes:
+ # When creating a distribution package, all binaries are now statically
+   linked to ensure that users can run them without compilation.
+   Previous version have also been recompiled in this manner.
+  
+  
+## Bugfixes:
+ # Fixed bug #28 which caused refrection point coordinates to be stored
+   incorrectly when using ERF output option.
+   Thanks to Ronan Le Bras for reporting this issue.
+   
+ # Fixed bug #29 which caused ray amplitude values to be NaN when
+   computing arrivals by Regula Falsi (ADR).
+   Thanks to Ronan Le Bras for reporting this issue.
+ 
+ # Fixed makefile's option for linking with matlab.
+  
+ # Undocumented input option '-' was added to the help.
+ 
+ # Several minor bugfixes along with code and documentation
+   improvements.
+ 
+################################################################
 ## Version 1.3 ##
 ## Features/Changes:
  # Implemented an option to truncate backscattered rays. This option is
