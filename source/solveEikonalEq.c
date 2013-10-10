@@ -46,6 +46,7 @@
  ****************************************************************************************/
 
 #pragma  once
+#include <assert.h>
 #include "globals.h"
 #include "tools.h"
 #include <complex.h>

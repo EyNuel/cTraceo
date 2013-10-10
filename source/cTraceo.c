@@ -35,7 +35,6 @@
  *          (TODO)
  ****************************************************************************************/
 
-#include <assert.h>
 #include <stdio.h>
 #include "globals.h"
 #include "readIn.c"
