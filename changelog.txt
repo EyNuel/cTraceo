@@ -13,7 +13,7 @@
   
  # Added command line switch '--noHeader' which causes cTraceo to
    write less output when being run. Usefull to reduce the amount
-   of redunt clutter when running many cases at the same time.
+   of reduntant clutter when running many cases at the same time.
    
  # Added missing command line switch '--version' which causes cTraceo
    to output it's version number.
@@ -25,13 +25,13 @@
  
  
 ## Bugfixes:
- # Fixed bug #19 which caused ray travel time "tau" to be 
+ # Fixed bug #19 which caused ray travel time "tau" to be slightly
    incorrectly interpolated at a hydrophone's position. 
 
  # Solved a bug which could cause a log file to be incorrectly named.
  
- # Solved a bug which prevented the case title to be correclty written
-   to the output file.
+ # Solved a bug which prevented the case title from being correclty
+   written to the output file.
    
  # Fixed bug #13 which caused a segfault to occurr when the source was
    placed on the range box boundary.

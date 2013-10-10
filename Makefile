@@ -229,6 +229,8 @@ help:	#
 		@echo "               Note that depending on the verbosity level defined in           "
 		@echo "               'globals.h', the model may become _extremely_ slow.             "
 		@echo "                                                                               "
+		@echo "     doc:      Generates code documentation. Requires Doxygen to be installed. "
+		@echo "                                                                               "
 		@echo "     todo:     Prints a list of TODO's found in the source code.               "
 		@echo "                                                                               "
 		@echo "     dist:     Compiles and statically links all binaries for Windows/Linux    "
