@@ -13,13 +13,13 @@
 ##          http://creativecommons.org/licenses/by-nc-sa/3.0/ ##
 ##                                                            ##
 ## NOTE:    cTraceo is research code under active development.##
-##          The code may contain bugs and updates are possible##
-##          in the future.                                    ##
+##          The code may contain bugs and future changes are  ##
+##          probable.                                         ##
 ##                                                            ##  
 ## Written for project SENSOCEAN by:                          ##  
 ##          Emanuel Ey                                        ##  
 ##          emanuel.ey@gmail.com                              ##  
-##          Copyright (C) 2011, 2012                          ##  
+##          Copyright (C) 2011 - 2013                         ##  
 ##          Signal Processing Laboratory                      ##  
 ##          Universidade do Algarve                           ##  
 ##                                                            ##  

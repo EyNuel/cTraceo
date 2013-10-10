@@ -11,7 +11,7 @@
  *          http://creativecommons.org/licenses/by-nc-sa/3.0/                           *
  *                                                                                      *
  * NOTE:    cTraceo is research code under active development.                          *
- *          The code may contain bugs and updates are possible in the future.           *
+ *          The code may contain bugs and future changes are probable.                  *
  *                                                                                      *
  * Written for project SENSOCEAN by:                                                    *
  *          Emanuel Ey                                                                  *
