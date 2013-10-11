@@ -32,5 +32,7 @@ testing/
 *.shd
 *.ssp
 
-#ignore "bughunt/" subdirectory
+#ignore subdirectories
 bughunt/*
+doc/*
+dependencies/*

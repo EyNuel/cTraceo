@@ -46,7 +46,6 @@
 #include "calcCohTransLoss.c"
 #include "calcParticleVel.c"
 #include <sys/time.h>       //for struct timeval
-#include <sys/resource.h>   //for getrusage()
 #include <string.h>
 
 void    printHelp(void);
@@ -58,7 +57,7 @@ void    printHelp(void){
      */
     printf("\n"
 "* =========================================================================== *\n"
-"*          The cTraceo Acoustic Raytracing Model, Version "VERSION"*\n"
+"*          The cTraceo Acoustic Raytracing Model, Version "VERSION_LONG"*\n"
 "*                                                                             *\n"
 "* --------------------------------------------------------------------------- *\n"
 "* License: The cTraceo Acoustic Raytracing Model is released under the        *\n"
