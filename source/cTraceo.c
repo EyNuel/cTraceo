@@ -46,7 +46,6 @@
 #include "calcCohTransLoss.c"
 #include "calcParticleVel.c"
 #include <sys/time.h>       //for struct timeval
-#include <sys/resource.h>   //for getrusage()
 #include <string.h>
 
 void    printHelp(void);

@@ -22,7 +22,9 @@
 #pragma once
 #include    <string.h>
 #include    <sys/time.h>        //for struct time_t
-#include    <sys/resource.h>    //for getrusage()
+#if defined(__linux__) || defined(__gnu_linux__)
+    #include    <sys/resource.h>    //for getrusage()
+#endif
 #include    "globals.h"
 #include    <stdbool.h>
 #include    <stdlib.h>
@@ -79,9 +81,11 @@ void        printCpuTime(FILE* stream){
     /*
      * prints total cpu time used by process.
      */
-    struct rusage   usage;
-    
-    getrusage(RUSAGE_SELF, &usage);
-    fprintf(stream, "%ld.%06ld seconds user CPU time,\n", usage.ru_utime.tv_sec, usage.ru_utime.tv_usec);
-    fprintf(stream, "%ld.%06ld seconds system CPU time used.\n", usage.ru_stime.tv_sec, usage.ru_stime.tv_usec);
+    #if defined(__linux__) || defined(__gnu_linux__)
+        struct rusage   usage;
+        
+        getrusage(RUSAGE_SELF, &usage);
+        fprintf(stream, "%ld.%06ld seconds user CPU time,\n", usage.ru_utime.tv_sec, usage.ru_utime.tv_usec);
+        fprintf(stream, "%ld.%06ld seconds system CPU time used.\n", usage.ru_stime.tv_sec, usage.ru_stime.tv_usec);
+    #endif
 }
