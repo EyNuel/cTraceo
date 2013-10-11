@@ -86,6 +86,14 @@
  * Some utilities                                                               *
  ********************************************************************************/
 
+//For some reason the C99 standard dropped the definitions of PI and Log10(e), so we're defining them manually:
+#ifndef M_PI
+#define M_PI 3.14159265358979323846264338327
+#endif
+#ifndef M_LOG10E
+#define M_LOG10E 0.43429448190325182765
+#endif
+
 //the following 5 lines are used to simplify access to star pressure elements (for particle velocity)
 #define LEFT    0
 #define CENTER  1
