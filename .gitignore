@@ -7,6 +7,7 @@
 #!foo.html
 # Ignore objects and archives.
 *.tgz
+*.bin
 
 #Ignore matlab output files:
 *.mat
@@ -29,10 +30,7 @@ testing/
 *.shd
 *.ssp
 
-#ignore "bughunt/" subdirectory
+#ignore subdirectories
 bughunt/*
-
-#ignore the "doc/" subdirectory (the user is expected to generate the documentation locally)
-doc
-dependencies
-
+doc/*
+dependencies/*

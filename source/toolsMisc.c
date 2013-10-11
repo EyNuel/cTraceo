@@ -25,7 +25,7 @@
 #pragma once
 #include    <string.h>
 #include    <ctype.h>   //for tolower()
-#ifndef WINDOWS
+#if defined(__linux__) || defined(__gnu_linux__)
     #include    <sys/time.h>        //for struct time_t
     #include    <sys/resource.h>    //for getrusage()
 #endif

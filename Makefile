@@ -15,10 +15,6 @@ CC  := gcc
 CCW32 := i686-w64-mingw32-gcc
 CCW64 := x86_64-w64-mingw32-gcc
 
-## Set Current Operating system:
-## Allowable values are: WINDOWS, LINUX
-OS  := LINUX
-
 ## The architecture for which you are compiling:
 ## Allowable options are: 64b, 32b
 ARCH := 64b
@@ -80,7 +76,7 @@ LFLAGS := -lm
 ## Matlab output:
 ifeq ($(USE_MATLAB),1)
 	CFLAGS := $(CFLAGS) -I $(MATLAB_DIR)extern/include 
-	LFLAGS := $(LFLAGS) -leng -lmat -lmex -lut -Wl,
+	LFLAGS := $(LFLAGS) -leng -lmat -lmex -lmx -lut -Wl,
 
 	## Generate path to matlab libraries according to configuration:
 	ifeq ($(ARCH),32b)
@@ -105,23 +101,6 @@ include source/version
 DEFS := -D VERSION_LONG=$(VERSION_LONG)
 DEFS := $(DEFS) -D VERSION_SHORT=$(VERSION_SHORT)
 DEFS := $(DEFS) -D USE_MATLAB=$(USE_MATLAB)
-DEFS := $(DEFS) -D OS=$(OS)
-
-## A list of all non-source files that are part of the distribution.
-AUXFILES := Makefile cTraceo_User_Manual.pdf readme.txt license.txt changelog.txt examples/sletvik_transect.mat bin/ctraceo_$(VERSION_SHORT)_linux_i686 bin/ctraceo_$(VERSION_SHORT)_linux_x86-64 bin/ctraceo_$(VERSION_SHORT)_win_x86-64.exe bin/ctraceo_$(VERSION_SHORT)_win_x86.exe
-
-## A list of directories that belong to the project
-PROJDIRS := M-Files examples source source/matOut doc bin
-
-## Recursively create a list of files that are inside the project
-SRCFILES := $(shell find $(PROJDIRS) -mindepth 0 -maxdepth 1 -name "*.c")
-HDRFILES := $(shell find $(PROJDIRS) -mindepth 0 -maxdepth 1 -name "*.h")
-OBJFILES := $(patsubst %.c,%.o,$(SRCFILES))
-MFILES   := $(shell find $(PROJDIRS) -mindepth 1 -maxdepth 1 -name "*.m")
-PDFFILES := $(shell find $(PROJDIRS) -mindepth 1 -maxdepth 1 -name "*.pdf")
-
-## A list of all files that should end up in a distribution tarball
-ALLFILES := $(SRCFILES) $(HDRFILES) $(AUXFILES) $(MFILES) $(PDFFILES)
 
 ## Disable checking for files with the folowing names:
 .PHONY: all todo cTraceo.exe discuss 32b pg dist doc
@@ -141,7 +120,7 @@ win32:	dirs
 		@echo "Building cTraceo $(VERSION_SHORT) for Windows x86."
 		@echo " "
 		@echo "---------------------------------"
-		@$(CCW32) $(CFLAGSBASE) -march=i686 -m32 $(DEFS) -D VERBOSE=0 -D WINDOWS -D NDEBUG -O3 -o bin/ctraceo_$(VERSION_SHORT)_win_x86.exe source/cTraceo.c $(LFLAGS)
+		@$(CCW32) $(CFLAGSBASE) -march=i686 -m32 $(DEFS) -D VERBOSE=0 -D NDEBUG -O3 -o bin/ctraceo_$(VERSION_SHORT)_win_x86.exe source/cTraceo.c $(LFLAGS) -static
 		@echo " "
 		@echo "Please ignore possible 'warning: imaginary constants are a GCC extension [enabled by default]'. This is due to a bug in gcc-mingw which has been solved in version 4.8."
 		@echo " "
@@ -151,7 +130,7 @@ win64:	dirs
 		@echo "Building cTraceo $(VERSION_SHORT) for Windows x86-64."
 		@echo " "
 		@echo "------------------------------------"
-		@$(CCW64) $(CFLAGSBASE) -march=nocona $(DEFS) -D VERBOSE=0 -D WINDOWS -D NDEBUG -O3 -o bin/ctraceo_$(VERSION_SHORT)_win_x86-64.exe source/cTraceo.c $(LFLAGS)
+		@$(CCW64) $(CFLAGSBASE) -march=nocona $(DEFS) -D VERBOSE=0 -D NDEBUG -O3 -o bin/ctraceo_$(VERSION_SHORT)_win_x86-64.exe source/cTraceo.c $(LFLAGS) -static
 		@echo " "
 		@echo "Please ignore possible 'warning: imaginary constants are a GCC extension [enabled by default]'. This is due to a bug in gcc-mingw which has been solved in version 4.8."
 		@echo " "
@@ -163,14 +142,14 @@ linux32:dirs
 		@echo "Building cTraceo $(VERSION_SHORT) for Linux i686."
 		@echo " "
 		@echo "--------------------------------"
-		@$(CC) $(CFLAGSBASE) -march=i686 -m32 $(DEFS) -D VERBOSE=0 -D OS=LINUX -D NDEBUG -O3 -o bin/ctraceo_$(VERSION_SHORT)_linux_i686 source/cTraceo.c $(LFLAGS)
+		@$(CC) $(CFLAGSBASE) -march=i686 -m32 $(DEFS) -D VERBOSE=0 -D NDEBUG -O3 -o bin/ctraceo_$(VERSION_SHORT)_linux_i686 source/cTraceo.c $(LFLAGS) -static
 
 linux64:dirs
 		@echo " "
 		@echo "Building cTraceo $(VERSION_SHORT) for Linux x86-64."
 		@echo " "
 		@echo "----------------------------------"
-		@$(CC) $(CFLAGSBASE) -march=nocona  $(DEFS) -D VERBOSE=0 -D OS=LINUX -D NDEBUG -O3 -o bin/ctraceo_$(VERSION_SHORT)_linux_x86-64 source/cTraceo.c $(LFLAGS)
+		@$(CC) $(CFLAGSBASE) -march=nocona  $(DEFS) -D VERBOSE=0 -D NDEBUG -O3 -o bin/ctraceo_$(VERSION_SHORT)_linux_x86-64 source/cTraceo.c $(LFLAGS) -static
 
 pg:		dirs
 		@$(CC) $(CFLAGS) $(DEFS) -D VERBOSE=0 -O3 -pg -o bin/ctraceo source/cTraceo.c $(LFLAGS)
@@ -187,15 +166,17 @@ todo:	#list todos from all files
 discuss:#list discussion points from all files
 		@for file in $(ALLFILES); do fgrep -H -e DISCUSS $$file; done; true
 		
-dist:	dirs win linux
+dist:	dirs fileList win linux
 		@echo " "
 		@echo "Making cTraceo $(VERSION_SHORT) distribution package."
 		@echo "----------------------------"
 		@if [ ! -d "packages" ]; then mkdir packages; fi
 		@tar -czf ./packages/cTraceo_$(VERSION_SHORT).tgz $(ALLFILES)
+		@echo "Done."
 		
-dirs:	#creates 'bin/' directory if it doesn't exist
+dirs:	#creates 'bin/' and 'doc/' directories if they don't exist
 		@if [ ! -d "bin" ]; then mkdir bin; fi
+		@if [ ! -d "doc" ]; then mkdir doc; fi
 		
 help:	#
 		@echo " ============================================================================= "
@@ -243,20 +224,40 @@ help:	#
 		@echo "               Note that depending on the verbosity level defined in           "
 		@echo "               'globals.h', the model may become _extremely_ slow.             "
 		@echo "                                                                               "
+		@echo "     doc:      Generates code documentation. Requires Doxygen to be installed. "
+		@echo "                                                                               "
 		@echo "     todo:     Prints a list of TODO's found in the source code.               "
 		@echo "                                                                               "
-		@echo "     dist:     Compiles all binaries for Windows/Linux 32/64bit, and bundles   "
-		@echo "               them in a nice tarball along with the source code, examples     "
-		@echo "               and Manual.                                                     "
+		@echo "     dist:     Compiles and statically links all binaries for Windows/Linux    "
+		@echo "               in 32 and 64bit flavors, and bundles them in a nice tarball     "
+		@echo "               along with the source code, examples and Manual.                "
 		@echo "                                                                               "
 		@echo "     help:     Prints this help.                                               "
 		@echo "                                                                               "
 		@echo " ============================================================================= "
 		
-doc:	#
+doc:	dirs
 		doxygen Doxyfile
 
+clean:	#clears doc directory
+		@if [ -d "doc" ]; then rm -r doc; fi
+		
+fileList:	dirs #make a list of all files to include in dist package
+## A list of all non-source files that are part of the distribution.
+AUXFILES := Makefile cTraceo_User_Manual.pdf readme.txt license.txt changelog.txt examples/sletvik_transect.mat bin/ctraceo_$(VERSION_SHORT)_linux_i686 bin/ctraceo_$(VERSION_SHORT)_linux_x86-64 bin/ctraceo_$(VERSION_SHORT)_win_x86-64.exe bin/ctraceo_$(VERSION_SHORT)_win_x86.exe source/version
 
+## A list of directories that belong to the project
+PROJDIRS := M-Files examples source source/matOut doc bin
+
+## Recursively create a list of files that are inside the project
+SRCFILES := $(shell find $(PROJDIRS) -mindepth 0 -maxdepth 1 -name "*.c")
+HDRFILES := $(shell find $(PROJDIRS) -mindepth 0 -maxdepth 1 -name "*.h")
+OBJFILES := $(patsubst %.c,%.o,$(SRCFILES))
+MFILES   := $(shell find $(PROJDIRS) -mindepth 1 -maxdepth 1 -name "*.m")
+PDFFILES := $(shell find $(PROJDIRS) -mindepth 1 -maxdepth 1 -name "*.pdf")
+
+## A list of all files that should end up in a distribution tarball
+ALLFILES := $(SRCFILES) $(HDRFILES) $(AUXFILES) $(MFILES) $(PDFFILES)
 
 
 

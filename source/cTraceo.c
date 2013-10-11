@@ -70,7 +70,7 @@ void    printHelp(void){
      */
     printf("\n"
 "* =========================================================================== *\n"
-"*          The cTraceo Acoustic Raytracing Model, Version "VERSION"*\n"                //NOTE: version string is defined in globals.h
+"*          The cTraceo Acoustic Raytracing Model, Version "VERSION_LONG"*\n"                //NOTE: version string is defined in globals.h
 "*                                                                             *\n"
 "* --------------------------------------------------------------------------- *\n"
 "* Website:                                                                    *\n"

@@ -2,3 +2,10 @@
 NOTE:
 Compiled binaries of previous cTraceo versions are included on purpose.
 This is usefull when it is necessary to EXACTLY reproduce previously modeled results.
+
+Also note that the third version number refers to minor fixes which do
+change the model's output. In other words, version 1.0 produces output
+which is identical to that of versions 1.0.1 and 1.0.2.
+
+Changes of the third version number  will generally refer to 
+changes in the documentation or makefile.
