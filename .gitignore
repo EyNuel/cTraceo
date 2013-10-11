@@ -6,7 +6,6 @@
 # except foo.html which is maintained by hand.
 #!foo.html
 # Ignore objects and archives.
-bin/
 *.tgz
 *.bin
 *.exe
