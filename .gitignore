@@ -8,7 +8,6 @@
 # Ignore objects and archives.
 *.tgz
 *.bin
-*.exe
 
 #Ignore matlab output files:
 *.mat
