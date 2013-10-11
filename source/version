@@ -1,0 +1,12 @@
+
+# This file is included by the main makefile and contains the version strings
+# which will be passed to the compiler
+
+# For naming compiled binaries and distribution packages:
+# (must not contains spaces and be otherwise filename-safe)
+VERSION_SHORT:=1.2.1
+
+# For inclusion in compiled binaries:
+# (must be safe for inclusion in C strings and be EXACTLY 20 chars long)
+# lenght:       '----5---10---15---20'
+VERSION_LONG:="\"1.2.1               \""

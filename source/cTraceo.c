@@ -47,7 +47,6 @@
 #include "calcParticleVel.c"
 #include "calcSSP.c"
 #include <sys/time.h>       //for struct timeval
-#include <sys/resource.h>   //for getrusage()
 #include <string.h>
 #include <stdbool.h>
 

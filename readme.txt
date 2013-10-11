@@ -122,9 +122,6 @@
 
 # The "CC" variable
   Defines which command to invoke for compilation.
-  
-# The "OS" Variable:
-  Defines for which operating system to compile.
 
 # The "ARCH" variable
   This is used to define whether to compile for 32 bit or 64 bit
