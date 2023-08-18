@@ -283,17 +283,17 @@ void    solveEikonalEq(settings_t* settings, ray_t* ray){
                                                 &lambda,
                                                 &(settings->source.freqx),
                                                 &(settings->altimetry.surfaceAttenUnits),
-                                                &tempfloat
+                                                &tempFloat
                                             );
-                                ap      = tempfloat;
+                                ap      = tempFloat;
                                 lambda  = cs2 / settings->source.freqx;
                                 convertUnits(   &as,
                                                 &lambda,
                                                 &(settings->source.freqx),
                                                 &(settings->altimetry.surfaceAttenUnits),
-                                                &tempfloat
+                                                &tempFloat
                                             );
-                                as      = tempfloat;
+                                as      = tempFloat;
                                 boundaryReflectionCoeff(&rho1, &rho2, &ci, &cp2, &cs2, &ap, &as, &thetaRefl, &reflCoeff);
                                 break;
                             
@@ -345,11 +345,11 @@ void    solveEikonalEq(settings_t* settings, ray_t* ray){
                                                                 &junkVector
                                                             );
                                 lambda = cp2/settings->source.freqx;
-                                convertUnits(&ap, &lambda, &settings->source.freqx, &settings->altimetry.surfaceAttenUnits, &tempfloat);
-                                ap = tempfloat;
+                                convertUnits(&ap, &lambda, &settings->source.freqx, &settings->altimetry.surfaceAttenUnits, &tempFloat);
+                                ap = tempFloat;
                                 lambda = cs2/settings->source.freqx;
-                                convertUnits(&as, &lambda, &settings->source.freqx, &settings->altimetry.surfaceAttenUnits, &tempfloat);
-                                as = tempfloat;
+                                convertUnits(&as, &lambda, &settings->source.freqx, &settings->altimetry.surfaceAttenUnits, &tempFloat);
+                                as = tempFloat;
                                 boundaryReflectionCoeff(&rho1, &rho2, &ci, &cp2, &cs2, &ap, &as, &thetaRefl, &reflCoeff);
                                 break;
                             default:
@@ -434,17 +434,17 @@ void    solveEikonalEq(settings_t* settings, ray_t* ray){
                                                 &lambda,
                                                 &(settings->source.freqx),
                                                 &(settings->batimetry.surfaceAttenUnits),
-                                                &tempfloat
+                                                &tempFloat
                                             );
-                                ap      = tempfloat;
+                                ap      = tempFloat;
                                 lambda  = cs2 / settings->source.freqx;
                                 convertUnits(   &as,
                                                 &lambda,
                                                 &(settings->source.freqx),
                                                 &(settings->batimetry.surfaceAttenUnits),
-                                                &tempfloat
+                                                &tempFloat
                                             );
-                                as      = tempfloat;
+                                as      = tempFloat;
                                 boundaryReflectionCoeff(&rho1, &rho2, &ci, &cp2, &cs2, &ap, &as, &thetaRefl, &reflCoeff);
                                 break;
                             
@@ -496,11 +496,11 @@ void    solveEikonalEq(settings_t* settings, ray_t* ray){
                                                                 &junkVector
                                                             );
                                 lambda = cp2/settings->source.freqx;
-                                convertUnits(&ap, &lambda, &settings->source.freqx, &settings->batimetry.surfaceAttenUnits, &tempfloat);
-                                ap = tempfloat;
+                                convertUnits(&ap, &lambda, &settings->source.freqx, &settings->batimetry.surfaceAttenUnits, &tempFloat);
+                                ap = tempFloat;
                                 lambda = cs2/settings->source.freqx;
-                                convertUnits(&as, &lambda, &settings->source.freqx, &settings->batimetry.surfaceAttenUnits, &tempfloat);
-                                as = tempfloat;
+                                convertUnits(&as, &lambda, &settings->source.freqx, &settings->batimetry.surfaceAttenUnits, &tempFloat);
+                                as = tempFloat;
                                 boundaryReflectionCoeff(&rho1, &rho2, &ci, &cp2, &cs2, &ap, &as, &thetaRefl, &reflCoeff);
                                 break;
                             default:
@@ -756,17 +756,17 @@ void    solveEikonalEq(settings_t* settings, ray_t* ray){
                                                 &lambda,
                                                 &(settings->source.freqx),
                                                 &(settings->objects.object[j].surfaceAttenUnits),
-                                                &tempfloat
+                                                &tempFloat
                                             );
-                                ap      = tempfloat;
+                                ap      = tempFloat;
                                 lambda  = cs2 / settings->source.freqx;
                                 convertUnits(   &as,
                                                 &lambda,
                                                 &(settings->source.freqx),
                                                 &(settings->objects.object[j].surfaceAttenUnits),
-                                                &tempfloat
+                                                &tempFloat
                                             );
-                                as      = tempfloat;
+                                as      = tempFloat;
                                 DEBUG(6, "Calculating reflection coefficient...\n");
                                 boundaryReflectionCoeff(&rho1, &rho2, &ci, &cp2, &cs2, &ap, &as, &thetaRefl, &reflCoeff);
                                 DEBUG(6, "Reflection coefficient calculated\n");
